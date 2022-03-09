@@ -1,0 +1,149 @@
+"use strict";
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
+var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
+    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
+        if (ar || !(i in from)) {
+            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+            ar[i] = from[i];
+        }
+    }
+    return to.concat(ar || Array.prototype.slice.call(from));
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.renderJSXNodes = void 0;
+var directives_1 = require("./directives");
+var src_generator_1 = require("./src-generator");
+function renderJSXNodes(file, directives, handlers, children, styles, parentSymbolBindings, root) {
+    if (root === void 0) { root = true; }
+    return function () {
+        var _this = this;
+        if (children.length == 0)
+            return;
+        if (root)
+            this.emit('(', src_generator_1.INDENT, src_generator_1.NL);
+        var needsFragment = root && children.length > 1;
+        file.import(file.qwikModule, 'h');
+        if (needsFragment) {
+            file.import(file.qwikModule, 'Fragment');
+            this.jsxBeginFragment(file.import(file.qwikModule, 'Fragment'));
+        }
+        children.forEach(function (child) {
+            if (isEmptyTextNode(child))
+                return;
+            if (isTextNode(child)) {
+                if (child.bindings._text !== undefined) {
+                    _this.jsxTextBinding(child.bindings._text);
+                }
+                else {
+                    _this.isJSX
+                        ? _this.emit(child.properties._text)
+                        : _this.jsxTextBinding((0, src_generator_1.quote)(child.properties._text));
+                }
+            }
+            else {
+                var childName = child.name;
+                var directive = directives_1.DIRECTIVES[childName];
+                if (typeof directive == 'function') {
+                    _this.emit(directive(child, function () {
+                        return renderJSXNodes(file, directives, handlers, child.children, styles, {}, false).call(_this);
+                    }));
+                }
+                else {
+                    if (typeof directive == 'string') {
+                        directives.set(childName, directive);
+                        if (file.module !== 'med') {
+                            file.import('./med.js', childName);
+                        }
+                    }
+                    if (isSymbol(childName)) {
+                        // TODO(misko): We are hard coding './med.js' which is not right.
+                        file.import('./med.js', childName);
+                        var exportedChildName = file.exports.get(childName);
+                        if (exportedChildName) {
+                            childName = exportedChildName;
+                        }
+                    }
+                    var props = child.properties;
+                    var css = child.bindings.css;
+                    if (css) {
+                        props = __assign({}, props);
+                        props.class = addClass(styles.get(css).CLASS_NAME, props.class);
+                    }
+                    var symbolBindings = {};
+                    var bindings = rewriteHandlers(file, handlers, child.bindings, symbolBindings);
+                    _this.jsxBegin(childName, props, __assign(__assign({}, bindings), parentSymbolBindings));
+                    renderJSXNodes(file, directives, handlers, child.children, styles, symbolBindings, false).call(_this);
+                    _this.jsxEnd(childName);
+                }
+            }
+        });
+        if (needsFragment) {
+            this.jsxEndFragment();
+        }
+        if (root)
+            this.emit(src_generator_1.UNINDENT, ')');
+    };
+}
+exports.renderJSXNodes = renderJSXNodes;
+function isSymbol(name) {
+    return name.charAt(0) == name.charAt(0).toUpperCase();
+}
+function addClass(className, existingClass) {
+    return __spreadArray([className], (existingClass ? existingClass.split(' ') : []), true).join(' ');
+}
+function isEmptyTextNode(child) {
+    var _a;
+    return ((_a = child.properties._text) === null || _a === void 0 ? void 0 : _a.trim()) == '';
+}
+function isTextNode(child) {
+    return (child.properties._text !== undefined || child.bindings._text !== undefined);
+}
+/**
+ * Rewrites bindings:
+ * - Remove `css`
+ * - Rewrites event handles
+ * - Extracts symbol bindings.
+ *
+ * @param file
+ * @param handlers
+ * @param bindings
+ * @param symbolBindings Options record which will receive the symbol bindings
+ * @returns
+ */
+function rewriteHandlers(file, handlers, bindings, symbolBindings) {
+    var outBindings = {};
+    for (var key in bindings) {
+        if (Object.prototype.hasOwnProperty.call(bindings, key)) {
+            var binding = bindings[key];
+            var handlerBlock = void 0;
+            if (binding != null) {
+                if (key == 'css') {
+                    continue;
+                }
+                else if ((handlerBlock = handlers.get(binding))) {
+                    key = "on:".concat(key.substring(2).toLowerCase());
+                    binding = (0, src_generator_1.invoke)(file.import(file.qwikModule, 'qrl'), [
+                        (0, src_generator_1.quote)(file.qrlPrefix + 'high.js'),
+                        (0, src_generator_1.quote)(handlerBlock),
+                        '[__props__, __state__]',
+                    ]);
+                }
+                else if (symbolBindings && key.startsWith('symbol.data.')) {
+                    symbolBindings[(0, src_generator_1.lastProperty)(key)] = binding;
+                }
+                outBindings[key] = binding;
+            }
+        }
+    }
+    return outBindings;
+}

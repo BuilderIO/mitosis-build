@@ -1,0 +1,142 @@
+"use strict";
+var __makeTemplateObject = (this && this.__makeTemplateObject) || function (cooked, raw) {
+    if (Object.defineProperty) { Object.defineProperty(cooked, "raw", { value: raw }); } else { cooked.raw = raw; }
+    return cooked;
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.componentToTemplate = void 0;
+var standalone_1 = require("prettier/standalone");
+var collect_styles_1 = require("../helpers/collect-styles");
+var fast_clone_1 = require("../helpers/fast-clone");
+var jsx_1 = require("../parsers/jsx");
+var plugins_1 = require("../modules/plugins");
+var dedent_1 = __importDefault(require("dedent"));
+var get_state_object_string_1 = require("../helpers/get-state-object-string");
+var mappers = {
+    Fragment: function (json, options) {
+        return "<div>".concat(json.children
+            .map(function (item) { return blockToTemplate(item, options); })
+            .join('\n'), "</div>");
+    },
+};
+// TODO: spread support
+var blockToTemplate = function (json, options) {
+    if (options === void 0) { options = {}; }
+    if (mappers[json.name]) {
+        return mappers[json.name](json, options);
+    }
+    if (json.properties._text) {
+        return json.properties._text;
+    }
+    if (json.bindings._text) {
+        return "${".concat(json.bindings._text, "}");
+    }
+    var str = '';
+    if (json.name === 'For') {
+        str += "${".concat(json.bindings.each, "?.map(").concat(json.properties._forName, " => `");
+        if (json.children) {
+            str += json.children
+                .map(function (item) { return blockToTemplate(item, options); })
+                .join('\n');
+        }
+        str += '`).join("")}';
+    }
+    else if (json.name === 'Show') {
+        str += "${!(".concat(json.bindings.when, ") ? '' : `");
+        if (json.children) {
+            str += json.children
+                .map(function (item) { return blockToTemplate(item, options); })
+                .join('\n');
+        }
+        str += '`}';
+    }
+    else {
+        str += "<".concat(json.name, " ");
+        // TODO: JS iteration or with helper
+        // if (json.bindings._spread === '_spread') {
+        //   str += `
+        //       {% for _attr in ${json.bindings._spread} %}
+        //         {{ _attr[0] }}="{{ _attr[1] }}"
+        //       {% endfor %}
+        //     `;
+        // }
+        for (var key in json.properties) {
+            var value = json.properties[key];
+            str += " ".concat(key, "=\"").concat(value, "\" ");
+        }
+        for (var key in json.bindings) {
+            if (key === '_spread' || key === 'ref' || key === 'css') {
+                continue;
+            }
+            var value = json.bindings[key];
+            // TODO: proper babel transform to replace. Util for this
+            var useValue = value;
+            if (key.startsWith('on')) {
+                // Do nothing
+            }
+            else {
+                str += " ".concat(key, "=\"${").concat(useValue, "}\" ");
+            }
+        }
+        if (jsx_1.selfClosingTags.has(json.name)) {
+            return str + ' />';
+        }
+        str += '>';
+        if (json.children) {
+            str += json.children
+                .map(function (item) { return blockToTemplate(item, options); })
+                .join('\n');
+        }
+        str += "</".concat(json.name, ">");
+    }
+    return str;
+};
+// TODO: add JS support similar to componentToHtml()
+var componentToTemplate = function (options) {
+    if (options === void 0) { options = {}; }
+    return function (_a) {
+        var component = _a.component;
+        var json = (0, fast_clone_1.fastClone)(component);
+        if (options.plugins) {
+            json = (0, plugins_1.runPreJsonPlugins)(json, options.plugins);
+        }
+        var css = (0, collect_styles_1.collectCss)(json);
+        if (options.plugins) {
+            json = (0, plugins_1.runPostJsonPlugins)(json, options.plugins);
+        }
+        var str = json.children.map(function (item) { return blockToTemplate(item); }).join('\n');
+        if (css.trim().length) {
+            str += "<style>".concat(css, "</style>");
+        }
+        str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    export default function template(props) {\n      let state = ", "\n\n      return `", "`\n    }\n  \n  "], ["\n    export default function template(props) {\n      let state = ", "\n\n      return \\`", "\\`\n    }\n  \n  "])), (0, get_state_object_string_1.getStateObjectStringFromComponent)(json), str.replace(/\s+/g, ' '));
+        if (options.plugins) {
+            str = (0, plugins_1.runPreCodePlugins)(str, options.plugins);
+        }
+        if (options.prettier !== false) {
+            try {
+                str = (0, standalone_1.format)(str, {
+                    parser: 'typescript',
+                    htmlWhitespaceSensitivity: 'ignore',
+                    plugins: [
+                        // To support running in browsers
+                        require('prettier/parser-typescript'),
+                        require('prettier/parser-postcss'),
+                        require('prettier/parser-babel'),
+                    ],
+                });
+            }
+            catch (err) {
+                console.warn('Could not prettify', { string: str }, err);
+            }
+        }
+        if (options.plugins) {
+            str = (0, plugins_1.runPostCodePlugins)(str, options.plugins);
+        }
+        return str;
+    };
+};
+exports.componentToTemplate = componentToTemplate;
+var templateObject_1;
