@@ -24,6 +24,7 @@ var minify_1 = require("../generators/minify");
  * Mutates the data tree directly.
  */
 function ensureAllSymbolsHaveIds(content) {
+    var counter = 0;
     var ids = new Set();
     (0, traverse_1.forEach)(content, function (el) {
         var _a, _b, _c;
@@ -42,7 +43,7 @@ function ensureAllSymbolsHaveIds(content) {
                 if (id) {
                     if (ids.has(id)) {
                         if ((_c = (_b = el.component) === null || _b === void 0 ? void 0 : _b.options) === null || _c === void 0 ? void 0 : _c.symbol) {
-                            var id_1 = generateId();
+                            var id_1 = '_' + pad(counter++);
                             el.component.options.symbol.entry = id_1;
                             if (el.component.options.symbol.content) {
                                 el.component.options.symbol.content.id = id_1;
@@ -153,13 +154,6 @@ function addIfMissing(array, value) {
 function isString(value) {
     return typeof value == 'string';
 }
-function generateId() {
-    return (
-    // TODO(misko): For now I have removed the data as I think it is overkill
-    // and makes the output unnecessarily big.
-    // new Date().getTime().toString(36) +
-    Math.round(Math.random() * Number.MAX_SAFE_INTEGER).toString(36));
-}
 function toHash(obj) {
     return hashCode(JSON.stringify(obj));
 }
@@ -173,5 +167,10 @@ function hashCode(text) {
         hash |= 0; // Convert to 32bit integer
     }
     return Number(Math.abs(hash)).toString(36);
+}
+function pad(value) {
+    var padding = '000000';
+    var result = padding + String(value);
+    return result.substring(result.length - padding.length);
 }
 var templateObject_1;
