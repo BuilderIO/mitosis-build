@@ -43,7 +43,7 @@ function ensureAllSymbolsHaveIds(content) {
                 if (id) {
                     if (ids.has(id)) {
                         if ((_c = (_b = el.component) === null || _b === void 0 ? void 0 : _b.options) === null || _c === void 0 ? void 0 : _c.symbol) {
-                            var id_1 = '_' + pad(counter++);
+                            var id_1 = pad(counter++);
                             el.component.options.symbol.entry = id_1;
                             if (el.component.options.symbol.content) {
                                 el.component.options.symbol.content.id = id_1;
