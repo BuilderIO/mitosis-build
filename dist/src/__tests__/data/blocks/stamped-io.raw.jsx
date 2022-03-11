@@ -33,7 +33,7 @@ function SmileReviews(props) {
         </button>
       </mitosis_1.Show>
       <mitosis_1.For each={state.reviews}>
-        {function (review) { return (<div $name="Review" key={review.id} css={{
+        {function (review, index) { return (<div $name="Review" key={review.id} css={{
                 margin: '10px',
                 padding: '10px',
                 background: 'white',
@@ -43,6 +43,7 @@ function SmileReviews(props) {
             }}>
             <img css={{ height: '30px', width: '30px', marginRight: '10px' }} src={review.avatar}/>
             <div>
+              <div>N: {index}</div>
               <div>{review.author}</div>
               <div>{review.reviewMessage}</div>
             </div>

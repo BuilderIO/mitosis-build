@@ -246,7 +246,7 @@ function FormComponent(props) {
     return (<form validate={props.validate} ref={formRef} action={!props.sendWithJs && props.action} method={props.method} name={props.name} onSubmit={function (event) { return state.onSubmit(event); }} {...props.attributes}>
       <mitosis_1.Show when={props.builderBlock && props.builderBlock.children}>
         <mitosis_1.For each={(_a = props.builderBlock) === null || _a === void 0 ? void 0 : _a.children}>
-          {function (block) { return <_fake_1.BuilderBlock key={block.id} block={block}/>; }}
+          {function (block, index) { return (<_fake_1.BuilderBlock key={block.id} block={block} index={index}/>); }}
         </mitosis_1.For>
       </mitosis_1.Show>
 

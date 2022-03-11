@@ -60,7 +60,7 @@ var NODE_MAPPERS = {
     },
     For: function (json, options) {
         var wrap = wrapInFragment(json);
-        return "{".concat(processBinding(json.bindings.each, options), "?.map(").concat(json.properties._forName, " => (\n      ").concat(wrap ? '<>' : '').concat(json.children
+        return "{".concat(processBinding(json.bindings.each, options), "?.map((").concat(json.properties._forName, ", index) => (\n      ").concat(wrap ? '<>' : '').concat(json.children
             .filter(filter_empty_text_nodes_1.filterEmptyTextNodes)
             .map(function (item) { return (0, exports.blockToReact)(item, options); })
             .join('\n')).concat(wrap ? '</>' : '', "\n    ))}");
