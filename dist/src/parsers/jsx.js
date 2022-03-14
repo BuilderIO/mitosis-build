@@ -614,6 +614,7 @@ function parseJsx(jsx, options) {
     var output = babel.transform(jsx, {
         configFile: false,
         babelrc: false,
+        comments: false,
         presets: [[tsPreset, { isTSX: true, allExtensions: true }]],
         plugins: [
             jsxPlugin,

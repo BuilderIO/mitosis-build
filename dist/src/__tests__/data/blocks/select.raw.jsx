@@ -7,7 +7,9 @@ function SelectComponent(props) {
             ? props.defaultValue
             : 'default-key'} defaultValue={props.defaultValue} name={props.name}>
       <mitosis_1.For each={props.options}>
-        {function (option) { return (<option value={option.value}>{option.name || option.value}</option>); }}
+        {function (option, index) { return (<option value={option.value} data-index={index}>
+            {option.name || option.value}
+          </option>); }}
       </mitosis_1.For>
     </select>);
 }

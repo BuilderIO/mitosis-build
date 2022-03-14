@@ -24,7 +24,7 @@ export declare class File {
     constructor(filename: string, options: SrcBuilderOptions, qwikModule: string, qrlPrefix: string);
     import(module: string, symbol: string): Symbol;
     toQrlChunk(): string;
-    exportConst(name: string, value?: any): void;
+    exportConst(name: string, value?: any, locallyVisible?: boolean): void;
     toString(): string;
 }
 export declare class SrcBuilder {
@@ -41,7 +41,7 @@ export declare class SrcBuilder {
     emit(...values: any[]): this;
     private push;
     emitList(values: any[], sep?: string): this;
-    const(name: string, value?: any, exprt?: boolean, locallyVisible?: boolean): this;
+    const(name: string, value?: any, export_?: boolean, locallyVisible?: boolean): this;
     type(def: string): this;
     typeParameters(typeParameters: string[] | undefined): void;
     jsxBegin(symbol: Symbol | string, props: Record<string, any>, bindings: Record<string, any>): void;

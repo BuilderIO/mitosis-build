@@ -33,8 +33,8 @@ function Column(props) {
             },
         }}>
       <mitosis_1.For each={props.columns}>
-        {function (column) { return (<div class="builder-column" css={{ flexGrow: '1' }}>
-            {column.content}
+        {function (column, index) { return (<div class="builder-column" css={{ flexGrow: '1' }}>
+            {column.content} {index}
           </div>); }}
       </mitosis_1.For>
     </div>);

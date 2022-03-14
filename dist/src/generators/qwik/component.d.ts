@@ -17,6 +17,5 @@ export declare function addComponent(fileSet: FileSet, component: MitosisCompone
     isRoot?: boolean;
     shareStyles?: boolean;
 }): void;
-export declare function renderStateConst(file: File, isMount?: boolean): any;
 export declare function renderUseLexicalScope(file: File): (this: SrcBuilder) => SrcBuilder;
 export declare function addCommonStyles(fileSet: FileSet): void;
