@@ -43,11 +43,12 @@ var File = /** @class */ (function () {
     File.prototype.toQrlChunk = function () {
         return quote(this.qrlPrefix + this.module + '.js');
     };
-    File.prototype.exportConst = function (name, value) {
+    File.prototype.exportConst = function (name, value, locallyVisible) {
+        if (locallyVisible === void 0) { locallyVisible = false; }
         if (this.exports.has(name))
             return;
         this.exports.set(name, this.src.isModule ? name : 'exports.' + name);
-        this.src.const(name, value, true);
+        this.src.const(name, value, true, locallyVisible);
     };
     File.prototype.toString = function () {
         var _this = this;
@@ -190,10 +191,10 @@ var SrcBuilder = /** @class */ (function () {
         }
         return this;
     };
-    SrcBuilder.prototype.const = function (name, value, exprt, locallyVisible) {
-        if (exprt === void 0) { exprt = false; }
+    SrcBuilder.prototype.const = function (name, value, export_, locallyVisible) {
+        if (export_ === void 0) { export_ = false; }
         if (locallyVisible === void 0) { locallyVisible = false; }
-        if (exprt) {
+        if (export_) {
             this.emit(this.isModule
                 ? 'export const '
                 : (locallyVisible ? 'const ' + name + '=' : '') + 'exports.');

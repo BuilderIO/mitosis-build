@@ -61,20 +61,20 @@ function addComponent(fileSet, component, opts) {
     var useStyles = function () { return null; };
     if (_opts.shareStyles) {
         if (_opts.isRoot) {
-            var symbolName_1 = componentName + '_styles';
-            getCommonStyles(fileSet).symbolName = symbolName_1;
-            useStyles = generateStyles(componentFile, onRenderFile, symbolName_1, false);
+            var symbolName = componentName + '_styles';
+            getCommonStyles(fileSet).symbolName = symbolName;
+            useStyles = generateStyles(componentFile, fileSet.low, symbolName, false);
         }
     }
     else {
         if (styles.size) {
-            var symbolName_2 = componentName + '_styles';
-            onRenderFile.exportConst(symbolName_2, (0, styles_1.renderStyles)(styles));
-            useStyles = generateStyles(componentFile, onRenderFile, symbolName_2, true);
+            var symbolName = componentName + '_styles';
+            onRenderFile.exportConst(symbolName, (0, styles_1.renderStyles)(styles));
+            useStyles = generateStyles(componentFile, onRenderFile, symbolName, true);
         }
     }
     addComponentOnMount(componentFile, onRenderFile, componentName, component, useStyles);
-    componentFile.exportConst(componentName, (0, src_generator_1.invoke)(componentFile.import(componentFile.qwikModule, 'component'), [generateQrl(componentFile, componentName + '_onMount')], ['any', 'any']));
+    componentFile.exportConst(componentName, (0, src_generator_1.invoke)(componentFile.import(componentFile.qwikModule, 'componentFromQrl'), [generateQrl(componentFile, componentName + '_onMount')], ['any', 'any']));
     onRenderFile.src.emit(src_generator_1.NL);
     var directives = new Map();
     onRenderFile.exportConst(componentName + '_onRender', (0, src_generator_1.arrowFnBlock)([], [
@@ -85,13 +85,13 @@ function addComponent(fileSet, component, opts) {
     ]));
     directives.forEach(function (code, name) {
         fileSet.med.import(fileSet.med.qwikModule, 'h');
-        fileSet.med.exportConst(name, code);
+        fileSet.med.exportConst(name, code, true);
     });
 }
 exports.addComponent = addComponent;
 function generateStyles(componentFile, styleFile, symbol, scoped) {
     return function () {
-        this.emit((0, src_generator_1.invoke)(componentFile.import(componentFile.qwikModule, scoped ? 'withScopedStyles' : 'useStyles'), [generateQrl(styleFile, symbol)]));
+        this.emit((0, src_generator_1.invoke)(componentFile.import(componentFile.qwikModule, scoped ? 'withScopedStylesFromQrl' : 'useStylesFromQrl'), [generateQrl(styleFile, symbol)]));
     };
 }
 function renderUseLexicalScope(file) {
