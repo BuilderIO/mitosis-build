@@ -3,8 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.processHttpRequests = void 0;
 function processHttpRequests(json) {
     var _a, _b;
-    var httpRequests = (_a = json.meta
-        .useMetadata) === null || _a === void 0 ? void 0 : _a.httpRequests;
+    var httpRequests = (_a = json.meta.useMetadata) === null || _a === void 0 ? void 0 : _a.httpRequests;
     var onMount = ((_b = json.hooks.onMount) === null || _b === void 0 ? void 0 : _b.code) ? json.hooks.onMount : { code: '' };
     if (httpRequests) {
         for (var key in httpRequests) {

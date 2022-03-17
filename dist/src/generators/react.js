@@ -406,8 +406,7 @@ var _componentToReact = function (json, options, isSubComponent) {
         ? "import { useMutable } from 'react-solid-state';"
         : '', stateType === 'mobx' && hasState
         ? "import { useLocalObservable } from 'mobx-react-lite';"
-        : '', (0, render_imports_1.renderPreComponent)(json), isSubComponent ? '' : 'export default ', json.name ||
-        'MyComponent', hasState
+        : '', (0, render_imports_1.renderPreComponent)(json), isSubComponent ? '' : 'export default ', json.name || 'MyComponent', hasState
         ? stateType === 'mobx'
             ? "const state = useLocalObservable(() => (".concat((0, get_state_object_string_1.getStateObjectStringFromComponent)(json), "));")
             : stateType === 'useState'

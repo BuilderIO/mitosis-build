@@ -114,42 +114,44 @@ function processForKeys(json, _options) {
         }
     });
 }
-var stringifyBinding = function (node) { return function (_a) {
-    var key = _a[0], value = _a[1];
-    if (key === '_spread') {
-        return '';
-    }
-    else if (key === 'class') {
-        return " :class=\"_classStringToObject(".concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(value, {
-            replaceWith: 'this.',
-        }), ")\" ");
-        // TODO: support dynamic classes as objects somehow like Vue requires
-        // https://vuejs.org/v2/guide/class-and-style.html
-    }
-    else {
-        // TODO: proper babel transform to replace. Util for this
-        var useValue = (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(value);
-        if (key.startsWith('on')) {
-            var event_1 = key.replace('on', '').toLowerCase();
-            if (event_1 === 'change' && node.name === 'input') {
-                event_1 = 'input';
-            }
-            // TODO: proper babel transform to replace. Util for this
-            return " @".concat(event_1, "=\"").concat((0, remove_surrounding_block_1.removeSurroundingBlock)(useValue
-                // TODO: proper reference parse and replacing
-                .replace(/event\./g, '$event.')), "\" ");
+var stringifyBinding = function (node) {
+    return function (_a) {
+        var key = _a[0], value = _a[1];
+        if (key === '_spread') {
+            return '';
         }
-        else if (key === 'ref') {
-            return " ref=\"".concat(useValue, "\" ");
-        }
-        else if (BINDING_MAPPERS[key]) {
-            return " ".concat(BINDING_MAPPERS[key], "=\"").concat(useValue, "\" ");
+        else if (key === 'class') {
+            return " :class=\"_classStringToObject(".concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(value, {
+                replaceWith: 'this.',
+            }), ")\" ");
+            // TODO: support dynamic classes as objects somehow like Vue requires
+            // https://vuejs.org/v2/guide/class-and-style.html
         }
         else {
-            return " :".concat(key, "=\"").concat(useValue, "\" ");
+            // TODO: proper babel transform to replace. Util for this
+            var useValue = (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(value);
+            if (key.startsWith('on')) {
+                var event_1 = key.replace('on', '').toLowerCase();
+                if (event_1 === 'change' && node.name === 'input') {
+                    event_1 = 'input';
+                }
+                // TODO: proper babel transform to replace. Util for this
+                return " @".concat(event_1, "=\"").concat((0, remove_surrounding_block_1.removeSurroundingBlock)(useValue
+                    // TODO: proper reference parse and replacing
+                    .replace(/event\./g, '$event.')), "\" ");
+            }
+            else if (key === 'ref') {
+                return " ref=\"".concat(useValue, "\" ");
+            }
+            else if (BINDING_MAPPERS[key]) {
+                return " ".concat(BINDING_MAPPERS[key], "=\"").concat(useValue, "\" ");
+            }
+            else {
+                return " :".concat(key, "=\"").concat(useValue, "\" ");
+            }
         }
-    }
-}; };
+    };
+};
 var blockToVue = function (node, options) {
     var nodeMapper = NODE_MAPPERS[node.name];
     if (nodeMapper) {
