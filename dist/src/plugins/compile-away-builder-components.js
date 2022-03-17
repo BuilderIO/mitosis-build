@@ -176,7 +176,9 @@ exports.components = {
                     alignSelf: 'stretch',
                     flexGrow: '1',
                     boxSizing: 'border-box',
-                    maxWidth: "".concat((node.bindings.maxWidth && Number(node.bindings.maxWidth)) || 1200, "px"),
+                    maxWidth: "".concat((node.bindings.maxWidth &&
+                        Number(node.bindings.maxWidth)) ||
+                        1200, "px"),
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'stretch',

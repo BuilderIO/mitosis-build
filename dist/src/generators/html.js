@@ -133,7 +133,8 @@ var blockToHtml = function (json, options) {
     }
     if (json.bindings._text) {
         addOnChangeJs(elId, options, "el.innerText = ".concat(json.bindings._text, ";"));
-        return "<span data-name=\"".concat(elId, "\"><!-- ").concat(json.bindings._text.replace(/getContext\(el, "([^"]+)"\)/g, '$1'), " --></span>");
+        return "<span data-name=\"".concat(elId, "\"><!-- ").concat(json.bindings
+            ._text.replace(/getContext\(el, "([^"]+)"\)/g, '$1'), " --></span>");
     }
     var str = '';
     if (json.name === 'For') {

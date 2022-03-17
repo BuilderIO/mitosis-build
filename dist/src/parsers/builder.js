@@ -328,7 +328,8 @@ var componentMappers = __assign(__assign({ Symbol: function (block, options) {
             _a[options.preserveTextBlocks ? 'innerHTML' : '_text'] = wrapBindingIfNeeded(blockBindings['component.options.text'], options),
             _a);
         var innerProperties = (_b = {},
-            _b[options.preserveTextBlocks ? 'innerHTML' : '_text'] = block.component.options.text,
+            _b[options.preserveTextBlocks ? 'innerHTML' : '_text'] = block.component
+                .options.text,
             _b);
         if (options.preserveTextBlocks) {
             return (0, create_mitosis_node_1.createMitosisNode)({
@@ -659,7 +660,10 @@ function extractSymbols(json) {
         subComponents: subComponents,
     };
 }
-var createBuilderElement = function (options) { return (__assign({ '@type': '@builder.io/sdk:Element', id: 'builder-' + Math.random().toString(36).split('.')[1] }, options)); };
+var createBuilderElement = function (options) { return (__assign({ '@type': '@builder.io/sdk:Element', id: 'builder-' +
+        Math.random()
+            .toString(36)
+            .split('.')[1] }, options)); };
 exports.createBuilderElement = createBuilderElement;
 var isBuilderElement = function (el) { var _a; return ((_a = el) === null || _a === void 0 ? void 0 : _a['@type']) === '@builder.io/sdk:Element'; };
 exports.isBuilderElement = isBuilderElement;

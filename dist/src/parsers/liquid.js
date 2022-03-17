@@ -326,7 +326,11 @@ function blockToLiquid(json, options) {
         console.warn("Could not find component: ".concat(block.component.name));
     }
     var collectionName = block.repeat &&
-        (0, lodash_1.last)((block.repeat.collection || '').trim().split('(')[0].trim().split('.'));
+        (0, lodash_1.last)((block.repeat.collection || '')
+            .trim()
+            .split('(')[0]
+            .trim()
+            .split('.'));
     if (collectionName) {
         collectionName = convertBinding(collectionName, options);
     }
@@ -334,7 +338,8 @@ function blockToLiquid(json, options) {
         block.repeat &&
         block.repeat.collection &&
         (0, liquid_1.isValidLiquidBinding)(block.repeat.collection)
-        ? "{% for ".concat(block.repeat.itemName || collectionName + '_item', " in ").concat(convertBinding(block.repeat.collection, options), " %}")
+        ? "{% for ".concat(block.repeat.itemName ||
+            collectionName + '_item', " in ").concat(convertBinding(block.repeat.collection, options), " %}")
         : '', "\n    ").concat(!options.static && bindings.hide
         ? "{% unless  ".concat(!(0, liquid_1.isValidLiquidBinding)(bindings.hide)
             ? 'false'
@@ -371,14 +376,17 @@ function blockCss(block, options) {
                 Object.keys(self.responsiveStyles[size_2]).length) {
                 // TODO: this will not work as expected for a couple things that are handled specially,
                 // e.g. width
-                css += "\n@media only screen and (max-width: ".concat(sizes[size_2].max, "px) { \n").concat(options.emailMode ? '.' : '.builder-block.').concat(self.id + (options.emailMode ? '-subject' : ''), " {").concat((0, map_to_css_1.mapToCss)(self.responsiveStyles[size_2], 4, options.emailMode), " } }");
+                css += "\n@media only screen and (max-width: ".concat(sizes[size_2].max, "px) { \n").concat(options.emailMode ? '.' : '.builder-block.').concat(self.id +
+                    (options.emailMode ? '-subject' : ''), " {").concat((0, map_to_css_1.mapToCss)(self.responsiveStyles[size_2], 4, options.emailMode), " } }");
             }
         }
     }
     return css;
 }
 function humanCase(str) {
-    return (0, lodash_1.capitalize)((0, lodash_1.kebabCase)(str).replace(/[- ]+/g, ' ').trim());
+    return (0, lodash_1.capitalize)((0, lodash_1.kebabCase)(str)
+        .replace(/[- ]+/g, ' ')
+        .trim());
 }
 exports.humanCase = humanCase;
 var setupCache = require('axios-cache-adapter/dist/cache.node.js').setupCache;
@@ -917,8 +925,7 @@ var parsedLiquidToHtml = function (templates, options) { return __awaiter(void 0
                             themeSettings.current.sections[path] = {};
                         }
                         sectionSettingsState = Object.assign({}, defaultSchemaObject_1, themeSettings.current.sections[path].settings);
-                        themeSettings.current.sections[path].settings =
-                            sectionSettingsState;
+                        themeSettings.current.sections[path].settings = sectionSettingsState;
                         if (!(options.importSections === false)) return [3 /*break*/, 57];
                         html += serializeBlock(__assign(__assign({ layerName: "".concat(humanCase(path.replace('-template', '')), " section"), component: {
                                 name: 'Shopify:SectionRef',
