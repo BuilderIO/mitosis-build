@@ -35,6 +35,21 @@ var plugins_1 = require("../modules/plugins");
 var is_children_1 = __importDefault(require("../helpers/is-children"));
 var strip_meta_properties_1 = require("../helpers/strip-meta-properties");
 var remove_surrounding_block_1 = require("../helpers/remove-surrounding-block");
+var ATTRIBUTE_KEY_EXCEPTIONS_MAP = {
+    class: 'className',
+};
+var updateKeyIfException = function (key) {
+    var _a;
+    return (_a = ATTRIBUTE_KEY_EXCEPTIONS_MAP[key]) !== null && _a !== void 0 ? _a : key;
+};
+var needsSetAttribute = function (key) {
+    return [key.includes('-')].some(Boolean);
+};
+var generateSetElementAttributeCode = function (key, useValue) {
+    return needsSetAttribute(key)
+        ? ";el.setAttribute(\"".concat(key, "\", ").concat(useValue, ");")
+        : ";el.".concat(updateKeyIfException(key), " = ").concat(useValue);
+};
 var addUpdateAfterSet = function (json, options) {
     (0, traverse_1.default)(json).forEach(function (item) {
         if ((0, is_mitosis_node_1.isMitosisNode)(item)) {
@@ -203,10 +218,7 @@ var blockToHtml = function (json, options) {
                     addOnChangeJs(elId, options, ";Object.assign(el.style, ".concat(useValue, ");"));
                 }
                 else {
-                    var useAttribute = key.includes('-');
-                    addOnChangeJs(elId, options, useAttribute
-                        ? ";el.setAttribute(".concat(key, ", ").concat(useValue, ");")
-                        : ";el.".concat(key, " = ").concat(useValue));
+                    addOnChangeJs(elId, options, generateSetElementAttributeCode(key, useValue));
                 }
             }
         }
