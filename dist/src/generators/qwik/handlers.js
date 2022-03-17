@@ -55,10 +55,13 @@ function renderHandlers(file, componentName, children) {
 }
 exports.renderHandlers = renderHandlers;
 function renderHandler(file, symbol, code) {
+    var body = [wrapWithUse(file, code)];
+    var shouldRenderStateRestore = code.indexOf('state') !== -1;
+    if (shouldRenderStateRestore) {
+        body.unshift((0, component_1.renderUseLexicalScope)(file));
+    }
     file.exportConst(symbol, function () {
-        this.emit([
-            (0, src_generator_1.arrowFnBlock)([], [(0, component_1.renderUseLexicalScope)(file), wrapWithUse(file, code)]),
-        ]);
+        this.emit([(0, src_generator_1.arrowFnBlock)([], body)]);
     });
     file.src.emit(src_generator_1.NL);
 }
