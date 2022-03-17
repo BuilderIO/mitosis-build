@@ -8,9 +8,7 @@ function SmileReviews(props) {
     });
     // TODO: allow async function here
     (0, mitosis_1.onMount)(function () {
-        fetch("https://stamped.io/api/widget/reviews?storeUrl=builder-io.myshopify.com&apiKey=".concat(props.apiKey ||
-            'pubkey-8bbDq7W6w4sB3OWeM1HUy2s47702hM', "&productId=").concat(props.productId ||
-            '2410511106127'))
+        fetch("https://stamped.io/api/widget/reviews?storeUrl=builder-io.myshopify.com&apiKey=".concat(props.apiKey || 'pubkey-8bbDq7W6w4sB3OWeM1HUy2s47702hM', "&productId=").concat(props.productId || '2410511106127'))
             .then(function (res) { return res.json(); })
             .then(function (data) {
             state.reviews = data.data;

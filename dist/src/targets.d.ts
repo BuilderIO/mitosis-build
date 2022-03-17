@@ -1,6 +1,6 @@
 export declare const targets: {
     angular: (options?: import("./generators/angular").ToAngularOptions) => import(".").Transpiler;
-    builder: (options?: import("./generators/builder").ToBuilderOptions) => ({ component, }: import(".").TranspilerArgs) => {
+    builder: (options?: import("./generators/builder").ToBuilderOptions) => ({ component }: import(".").TranspilerArgs) => {
         data: {
             httpRequests: any;
             jsCode: string;
