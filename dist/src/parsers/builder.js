@@ -114,8 +114,7 @@ var getStyleStringFromBlock = function (block, options) {
         for (var key in block.bindings) {
             if (key.includes('style') && key.includes('.')) {
                 var styleProperty = key.split('.')[1];
-                styleBindings[styleProperty] =
-                    ((_b = (_a = block.code) === null || _a === void 0 ? void 0 : _a.bindings) === null || _b === void 0 ? void 0 : _b[key]) || block.bindings[key];
+                styleBindings[styleProperty] = convertExportDefaultToReturn(((_b = (_a = block.code) === null || _a === void 0 ? void 0 : _a.bindings) === null || _b === void 0 ? void 0 : _b[key]) || block.bindings[key]);
             }
         }
     }
@@ -612,7 +611,8 @@ function convertExportDefaultToReturn(code) {
     for (var i = 0; i < body.length; i++) {
         var statement = body[i];
         if (types.isExportDefaultDeclaration(statement)) {
-            if (types.isCallExpression(statement.declaration)) {
+            if (types.isCallExpression(statement.declaration) ||
+                types.isExpression(statement.declaration)) {
                 newBody[i] = types.returnStatement(statement.declaration);
             }
         }

@@ -96,7 +96,7 @@ function generateStyles(componentFile, styleFile, symbol, scoped) {
 }
 function renderUseLexicalScope(file) {
     return function () {
-        return this.emit('const state', src_generator_1.WS, '=', src_generator_1.WS, file.import(file.qwikModule, 'useLexicalScope').name, '()[0];');
+        return this.emit('const state', src_generator_1.WS, '=', src_generator_1.WS, file.import(file.qwikModule, 'useLexicalScope').name, '()[0]');
     };
 }
 exports.renderUseLexicalScope = renderUseLexicalScope;

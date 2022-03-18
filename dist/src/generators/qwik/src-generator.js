@@ -422,7 +422,8 @@ function isWhitespace(ch) {
  * it is not 100% but a good enough approximation
  */
 function isStatement(code) {
-    if (code.startsWith('(')) {
+    code = code.trim();
+    if (code.startsWith('(') || code.startsWith('{') || code.endsWith('}')) {
         // Code starting with `(` is most likely and IFF and hence is an expression.
         return false;
     }
