@@ -42,8 +42,7 @@ function Image(props) {
         var isBuilderIoImage = !!(image || '').match(/builder\.io/);
         var imgProps = {
             src: props.image,
-            style: "object-fit:".concat(props.backgroundSize ||
-                'cover', ";object-position:").concat(props.backgroundPosition || 'center', ";") +
+            style: "object-fit:".concat(props.backgroundSize || 'cover', ";object-position:").concat(props.backgroundPosition || 'center', ";") +
                 (props.aspectRatio
                     ? 'position:absolute;height:100%;width:100%;top:0;left:0'
                     : ''),
@@ -74,8 +73,7 @@ function Image(props) {
             !(props.fitContent && props.children && props.children.length)) {
             var sizingDiv = h('div', {
                 class: 'builder-image-sizer',
-                style: "width:100%;padding-top:".concat((props.aspectRatio || 1) *
-                    100, "%;pointer-events:none;font-size:0"),
+                style: "width:100%;padding-top:".concat((props.aspectRatio || 1) * 100, "%;pointer-events:none;font-size:0"),
             });
             jsx.push(sizingDiv);
         }

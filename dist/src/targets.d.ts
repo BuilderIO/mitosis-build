@@ -1,6 +1,6 @@
 export declare const targets: {
     angular: (options?: import("./generators/angular").ToAngularOptions) => import(".").Transpiler;
-    builder: (options?: import("./generators/builder").ToBuilderOptions) => ({ component, }: import(".").TranspilerArgs) => {
+    builder: (options?: import("./generators/builder").ToBuilderOptions) => ({ component }: import(".").TranspilerArgs) => {
         data: {
             httpRequests: any;
             jsCode: string;
@@ -18,6 +18,7 @@ export declare const targets: {
     svelte: (options?: import("./generators/svelte").ToSvelteOptions) => import(".").Transpiler;
     swift: (options?: import("./generators/swift-ui").ToSwiftOptions) => import(".").Transpiler;
     template: (options?: import("./generators/template").ToTemplateOptions) => import(".").Transpiler;
+    webcomponent: (options?: import("./generators/html").ToHtmlOptions) => import(".").Transpiler;
     vue: (options?: import("./generators/vue").ToVueOptions) => ({ component, path }: import(".").TranspilerArgs & {
         path: string;
     }) => string;

@@ -4,19 +4,18 @@ var mitosis_1 = require("@builder.io/mitosis");
 function SmileReviews(props) {
     var state = (0, mitosis_1.useState)({
         reviews: [],
+        name: 'test',
         showReviewPrompt: false,
     });
     // TODO: allow async function here
     (0, mitosis_1.onMount)(function () {
-        fetch("https://stamped.io/api/widget/reviews?storeUrl=builder-io.myshopify.com&apiKey=".concat(props.apiKey ||
-            'pubkey-8bbDq7W6w4sB3OWeM1HUy2s47702hM', "&productId=").concat(props.productId ||
-            '2410511106127'))
+        fetch("https://stamped.io/api/widget/reviews?storeUrl=builder-io.myshopify.com&apiKey=".concat(props.apiKey || 'pubkey-8bbDq7W6w4sB3OWeM1HUy2s47702hM', "&productId=").concat(props.productId || '2410511106127'))
             .then(function (res) { return res.json(); })
             .then(function (data) {
             state.reviews = data.data;
         });
     });
-    return (<div>
+    return (<div data-user={state.name}>
       <button onClick={function () { return (state.showReviewPrompt = true); }}>
         Write a review
       </button>
@@ -42,7 +41,7 @@ function SmileReviews(props) {
                 boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)',
             }}>
             <img css={{ height: '30px', width: '30px', marginRight: '10px' }} src={review.avatar}/>
-            <div>
+            <div class={state.showReviewPrompt ? 'bg-primary' : 'bg-secondary'}>
               <div>N: {index}</div>
               <div>{review.author}</div>
               <div>{review.reviewMessage}</div>

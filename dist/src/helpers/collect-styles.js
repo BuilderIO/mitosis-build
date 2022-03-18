@@ -106,8 +106,7 @@ var collectStyles = function (json, options) {
                 var stylesHash = (0, object_hash_1.default)(value);
                 if (componentHashes[componentName] === stylesHash) {
                     var className_1 = "".concat(componentName).concat(options.prefix ? "-".concat(options.prefix) : '');
-                    item.properties[classProperty] = "".concat(item.properties[classProperty] ||
-                        '', " ").concat(className_1)
+                    item.properties[classProperty] = "".concat(item.properties[classProperty] || '', " ").concat(className_1)
                         .trim()
                         .replace(/\s{2,}/g, ' ');
                     return;
@@ -118,8 +117,7 @@ var collectStyles = function (json, options) {
                 var index = (componentIndexes[componentName] =
                     (componentIndexes[componentName] || 0) + 1);
                 var className = "".concat(componentName).concat(options.prefix ? "-".concat(options.prefix) : '').concat(index === 1 ? '' : "-".concat(index));
-                item.properties[classProperty] = "".concat(item.properties[classProperty] ||
-                    '', " ").concat(className)
+                item.properties[classProperty] = "".concat(item.properties[classProperty] || '', " ").concat(className)
                     .trim()
                     .replace(/\s{2,}/g, ' ');
                 styleMap[className] = value;

@@ -26,5 +26,6 @@ exports.targets = {
     svelte: svelte_1.componentToSvelte,
     swift: swift_ui_1.componentToSwift,
     template: template_1.componentToTemplate,
+    webcomponent: html_1.componentToCustomElement,
     vue: vue_1.componentToVue,
 };
