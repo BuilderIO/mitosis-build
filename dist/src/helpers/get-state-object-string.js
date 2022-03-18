@@ -19,38 +19,36 @@ var json5_1 = __importDefault(require("json5"));
 var function_literal_prefix_1 = require("../constants/function-literal-prefix");
 var method_literal_prefix_1 = require("../constants/method-literal-prefix");
 var patterns_1 = require("./patterns");
-var convertStateMemberToString = function (options) {
-    return function (_a) {
-        var key = _a[0], value = _a[1];
-        var valueMapper = options.valueMapper || (function (val) { return val; });
-        var keyValueDelimiter = options.format === 'object' ? ':' : '=';
-        var keyPrefix = options.keyPrefix || '';
-        if (typeof value === 'string') {
-            if (value.startsWith(function_literal_prefix_1.functionLiteralPrefix)) {
-                if (options.functions === false) {
-                    return undefined;
-                }
-                var functionValue = value.replace(function_literal_prefix_1.functionLiteralPrefix, '');
-                return "".concat(keyPrefix, " ").concat(key, " ").concat(keyValueDelimiter, " ").concat(valueMapper(functionValue, 'function'));
+var convertStateMemberToString = function (options) { return function (_a) {
+    var key = _a[0], value = _a[1];
+    var valueMapper = options.valueMapper || (function (val) { return val; });
+    var keyValueDelimiter = options.format === 'object' ? ':' : '=';
+    var keyPrefix = options.keyPrefix || '';
+    if (typeof value === 'string') {
+        if (value.startsWith(function_literal_prefix_1.functionLiteralPrefix)) {
+            if (options.functions === false) {
+                return undefined;
             }
-            else if (value.startsWith(method_literal_prefix_1.methodLiteralPrefix)) {
-                var methodValue = value.replace(method_literal_prefix_1.methodLiteralPrefix, '');
-                var isGet = Boolean(methodValue.match(patterns_1.GETTER));
-                if (isGet && options.getters === false) {
-                    return undefined;
-                }
-                if (!isGet && options.functions === false) {
-                    return undefined;
-                }
-                return "".concat(keyPrefix, " ").concat(valueMapper(methodValue, isGet ? 'getter' : 'function'));
+            var functionValue = value.replace(function_literal_prefix_1.functionLiteralPrefix, '');
+            return "".concat(keyPrefix, " ").concat(key, " ").concat(keyValueDelimiter, " ").concat(valueMapper(functionValue, 'function'));
+        }
+        else if (value.startsWith(method_literal_prefix_1.methodLiteralPrefix)) {
+            var methodValue = value.replace(method_literal_prefix_1.methodLiteralPrefix, '');
+            var isGet = Boolean(methodValue.match(patterns_1.GETTER));
+            if (isGet && options.getters === false) {
+                return undefined;
             }
+            if (!isGet && options.functions === false) {
+                return undefined;
+            }
+            return "".concat(keyPrefix, " ").concat(valueMapper(methodValue, isGet ? 'getter' : 'function'));
         }
-        if (options.data === false) {
-            return undefined;
-        }
-        return "".concat(keyPrefix, " ").concat(key).concat(keyValueDelimiter, " ").concat(valueMapper(json5_1.default.stringify(value), 'data'));
-    };
-};
+    }
+    if (options.data === false) {
+        return undefined;
+    }
+    return "".concat(keyPrefix, " ").concat(key).concat(keyValueDelimiter, " ").concat(valueMapper(json5_1.default.stringify(value), 'data'));
+}; };
 var getMemberObjectString = function (object, options) {
     if (options === void 0) { options = {}; }
     var format = options.format || 'object';

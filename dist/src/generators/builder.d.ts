@@ -8,7 +8,7 @@ declare type InternalOptions = {
     skipMapper?: boolean;
 };
 export declare const blockToBuilder: (json: MitosisNode, options?: ToBuilderOptions, _internalOptions?: InternalOptions) => BuilderElement;
-export declare const componentToBuilder: (options?: ToBuilderOptions) => ({ component }: TranspilerArgs) => {
+export declare const componentToBuilder: (options?: ToBuilderOptions) => ({ component, }: TranspilerArgs) => {
     data: {
         httpRequests: any;
         jsCode: string;

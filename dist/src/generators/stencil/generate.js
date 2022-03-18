@@ -23,6 +23,7 @@ var strip_state_and_props_refs_1 = require("../../helpers/strip-state-and-props-
 var filter_empty_text_nodes_1 = require("../../helpers/filter-empty-text-nodes");
 var dash_case_1 = require("../../helpers/dash-case");
 var collect_styles_1 = require("../../helpers/collect-styles");
+var indent_1 = require("../../helpers/indent");
 var blockToStencil = function (json, options) {
     if (options === void 0) { options = {}; }
     if (json.properties._text) {
@@ -125,7 +126,19 @@ var componentToStencil = function (options) {
             getters: true,
             valueMapper: function (code) { return processBinding(code); },
         });
-        var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    ", "\n\n    import { Component, Prop, h, State, Fragment } from '@stencil/core';\n\n    @Component({\n      tag: '", "',\n    })\n    export default class ", " {\n    \n      ", "\n\n        ", "\n        ", "\n      \n        ", "\n    \n      render() {\n        return <>\n        \n          ", "\n\n          <style>{`", "`}</style>\n        </>\n      }\n    }\n  "], ["\n    ", "\n\n    import { Component, Prop, h, State, Fragment } from '@stencil/core';\n\n    @Component({\n      tag: '"
+        var wrap = json.children.length !== 1;
+        if (options.prettier !== false) {
+            try {
+                css = (0, standalone_1.format)(css, {
+                    parser: 'css',
+                    plugins: [require('prettier/parser-postcss')],
+                });
+            }
+            catch (err) {
+                console.warn('Could not format css', err);
+            }
+        }
+        var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    ", "\n\n    import { Component, Prop, h, State, Fragment } from '@stencil/core';\n\n    @Component({\n      tag: '", "',\n      ", "\n    })\n    export default class ", " {\n    \n      ", "\n\n        ", "\n        ", "\n      \n        ", "\n    \n      render() {\n        return (", "\n        \n          ", "\n\n        ", ")\n      }\n    }\n  "], ["\n    ", "\n\n    import { Component, Prop, h, State, Fragment } from '@stencil/core';\n\n    @Component({\n      tag: '"
             /**
              * You can set the tagName in your Mitosis component as
              *
@@ -135,7 +148,7 @@ var componentToStencil = function (options) {
              *
              *    export default function ...
              */
-            , "',\n    })\n    export default class ", " {\n    \n      ", "\n\n        ", "\n        ", "\n      \n        ", "\n    \n      render() {\n        return <>\n        \n          ", "\n\n          <style>{\\`", "\\`}</style>\n        </>\n      }\n    }\n  "])), (0, render_imports_1.renderPreComponent)(json), 
+            , "',\n      ", "\n    })\n    export default class ", " {\n    \n      ", "\n\n        ", "\n        ", "\n      \n        ", "\n    \n      render() {\n        return (", "\n        \n          ", "\n\n        ", ")\n      }\n    }\n  "])), (0, render_imports_1.renderPreComponent)(json), 
         /**
          * You can set the tagName in your Mitosis component as
          *
@@ -145,13 +158,15 @@ var componentToStencil = function (options) {
          *
          *    export default function ...
          */
-        ((_b = json.meta.metadataHook) === null || _b === void 0 ? void 0 : _b.tagName) || (0, dash_case_1.dashCase)(json.name), json.name, Array.from(props)
+        ((_b = json.meta.metadataHook) === null || _b === void 0 ? void 0 : _b.tagName) || (0, dash_case_1.dashCase)(json.name), css.length
+            ? "styles: `\n        ".concat((0, indent_1.indent)(css, 8), "`,")
+            : '', json.name, Array.from(props)
             .map(function (item) { return "@Prop() ".concat(item, ": any"); })
             .join('\n'), dataString, methodsString, !((_c = json.hooks.onMount) === null || _c === void 0 ? void 0 : _c.code)
             ? ''
-            : "componentDidLoad() { ".concat(processBinding(json.hooks.onMount.code), " }"), json.children
+            : "componentDidLoad() { ".concat(processBinding(json.hooks.onMount.code), " }"), wrap ? '<>' : '', json.children
             .map(function (item) { return blockToStencil(item, options); })
-            .join('\n'), css);
+            .join('\n'), wrap ? '</>' : '');
         if (options.plugins) {
             str = (0, plugins_1.runPreCodePlugins)(str, options.plugins);
         }

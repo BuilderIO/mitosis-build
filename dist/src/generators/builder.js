@@ -109,7 +109,10 @@ var componentMappers = __assign(__assign({}, (!builder_1.symbolBlocksAsChildren
         }, options);
     } });
 var el = function (options, toBuilderOptions) { return (__assign(__assign({ '@type': '@builder.io/sdk:Element' }, (toBuilderOptions.includeIds && {
-    id: 'builder-' + Math.random().toString(36).split('.')[1],
+    id: 'builder-' +
+        Math.random()
+            .toString(36)
+            .split('.')[1],
 })), options)); };
 function tryFormat(code) {
     var str = code;

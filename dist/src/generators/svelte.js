@@ -177,9 +177,7 @@ var componentToSvelte = function (options) {
             format: 'variables',
             keyPrefix: '$: ',
             valueMapper: function (code) {
-                return (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(code
-                    .replace(/^get ([a-zA-Z_\$0-9]+)/, '$1 = ')
-                    .replace(/\)/, ') => '), {
+                return (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(code.replace(/^get ([a-zA-Z_\$0-9]+)/, '$1 = ').replace(/\)/, ') => '), {
                     includeState: useOptions.stateType === 'variables',
                 });
             },
