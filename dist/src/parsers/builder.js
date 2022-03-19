@@ -114,8 +114,7 @@ var getStyleStringFromBlock = function (block, options) {
         for (var key in block.bindings) {
             if (key.includes('style') && key.includes('.')) {
                 var styleProperty = key.split('.')[1];
-                styleBindings[styleProperty] =
-                    ((_b = (_a = block.code) === null || _a === void 0 ? void 0 : _a.bindings) === null || _b === void 0 ? void 0 : _b[key]) || block.bindings[key];
+                styleBindings[styleProperty] = convertExportDefaultToReturn(((_b = (_a = block.code) === null || _a === void 0 ? void 0 : _a.bindings) === null || _b === void 0 ? void 0 : _b[key]) || block.bindings[key]);
             }
         }
     }
@@ -206,7 +205,7 @@ var wrapBinding = function (value) {
     if (!(value.includes(';') || value.match(/(^|\s|;)return[^a-z0-9A-Z]/))) {
         return value;
     }
-    return "(() => {\n    try { ".concat(value, " }\n    catch (err) {\n      console.warn('Builder code error', err);\n    }\n  })()");
+    return "(() => {\n    try { ".concat(isExpression(value) ? 'return ' : '').concat(value, " }\n    catch (err) {\n      console.warn('Builder code error', err);\n    }\n  })()");
 };
 var getBlockBindings = function (block, options) {
     var obj = __assign(__assign({}, getBlockNonActionBindings(block, options)), getBlockActionsAsBindings(block, options));
@@ -553,15 +552,7 @@ var getHooks = function (content) {
 function extractStateHook(code) {
     var types = babel.types;
     var state = {};
-    var ast = babel.parse(code, {
-        presets: [[tsPreset, { isTSX: true, allExtensions: true }]],
-        plugins: [[decorators, { legacy: true }], jsxPlugin],
-    });
-    var body = types.isFile(ast)
-        ? ast.program.body
-        : types.isProgram(ast)
-            ? ast.body
-            : [];
+    var body = parseCode(code);
     var newBody = body.slice();
     for (var i = 0; i < body.length; i++) {
         var statement = body[i];
@@ -599,20 +590,13 @@ function extractStateHook(code) {
 exports.extractStateHook = extractStateHook;
 function convertExportDefaultToReturn(code) {
     var types = babel.types;
-    var ast = babel.parse(code, {
-        presets: [[tsPreset, { isTSX: true, allExtensions: true }]],
-        plugins: [[decorators, { legacy: true }], jsxPlugin],
-    });
-    var body = types.isFile(ast)
-        ? ast.program.body
-        : types.isProgram(ast)
-            ? ast.body
-            : [];
+    var body = parseCode(code);
     var newBody = body.slice();
     for (var i = 0; i < body.length; i++) {
         var statement = body[i];
         if (types.isExportDefaultDeclaration(statement)) {
-            if (types.isCallExpression(statement.declaration)) {
+            if (types.isCallExpression(statement.declaration) ||
+                types.isExpression(statement.declaration)) {
                 newBody[i] = types.returnStatement(statement.declaration);
             }
         }
@@ -620,6 +604,32 @@ function convertExportDefaultToReturn(code) {
     return (0, generator_1.default)(types.program(newBody)).code || '';
 }
 exports.convertExportDefaultToReturn = convertExportDefaultToReturn;
+function parseCode(code) {
+    var ast = babel.parse(code, {
+        presets: [[tsPreset, { isTSX: true, allExtensions: true }]],
+        plugins: [[decorators, { legacy: true }], jsxPlugin],
+    });
+    var body = babel.types.isFile(ast)
+        ? ast.program.body
+        : babel.types.isProgram(ast)
+            ? ast.body
+            : [];
+    return body;
+}
+/**
+ * Returns `true` if the `code` is a valid expression. (vs a statement)
+ */
+function isExpression(code) {
+    try {
+        var body = parseCode(code);
+        return (body.length == 1 &&
+            (babel.types.isExpression(body[0]) ||
+                babel.types.isExpressionStatement(body[0])));
+    }
+    catch (e) {
+        return false;
+    }
+}
 // TODO: maybe this should be part of the builder -> Mitosis part
 function extractSymbols(json) {
     var _a, _b, _c, _d;

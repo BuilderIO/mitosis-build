@@ -99,6 +99,12 @@ function CoreButton(props) {
         target: props.openInNewTab ? '_blank' : '_self',
         class: props.class,
     };
+    for (var key in props) {
+        if (Object.prototype.hasOwnProperty.call(props, key) &&
+            key.startsWith('on:')) {
+            hProps[key] = props[key];
+        }
+    }
     return h(hasLink ? 'a' : props.tagName$ || 'span', hProps);
 }
 exports.CoreButton = CoreButton;
