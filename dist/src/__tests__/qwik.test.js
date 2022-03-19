@@ -262,6 +262,22 @@ describe('qwik', function () {
             });
         }); });
     });
+    test('bindings', function () {
+        // https://builder.io/content/5d5a2d612df542978577d83c0aefad1e
+        // https://cdn.builder.io/api/v2/content/page/5d5a2d612df542978577d83c0aefad1e?apiKey=23dfd7cef1104af59f281d58ec525923
+        var content = require('./qwik.test.bindings.json');
+        var state = {};
+        expect(state).toMatchSnapshot();
+        var fileSet = (0, index_1.createFileSet)({ output: 'cjs', jsx: false });
+        var component = (0, builder_1.builderContentToMitosisComponent)(content, {
+            includeBuilderExtras: true,
+            preserveTextBlocks: true,
+        });
+        (0, compile_away_builder_components_1.compileAwayBuilderComponentsFromTree)(component, compile_away_builder_components_1.components);
+        (0, index_1.addComponent)(fileSet, component);
+        debugOutput(fileSet);
+        expect(toObj(fileSet)).toMatchSnapshot();
+    });
     describe('helper functions', function () {
         describe('isStatement', function () {
             test('is an expression', function () {
