@@ -1,11 +1,19 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var mitosis_1 = require("@builder.io/mitosis");
+var lodash_1 = require("lodash");
+var lodash_2 = require("lodash");
 function SmileReviews(props) {
     var state = (0, mitosis_1.useState)({
         reviews: [],
         name: 'test',
         showReviewPrompt: false,
+        kebabCaseValue: function () {
+            return (0, lodash_1.kebabCase)('testThat');
+        },
+        snakeCaseValue: function () {
+            return (0, lodash_2.snakeCase)('testThis');
+        },
     });
     // TODO: allow async function here
     (0, mitosis_1.onMount)(function () {
