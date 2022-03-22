@@ -35,6 +35,7 @@ var plugins_1 = require("../modules/plugins");
 var is_children_1 = __importDefault(require("../helpers/is-children"));
 var strip_meta_properties_1 = require("../helpers/strip-meta-properties");
 var remove_surrounding_block_1 = require("../helpers/remove-surrounding-block");
+var render_imports_1 = require("../helpers/render-imports");
 var ATTRIBUTE_KEY_EXCEPTIONS_MAP = {
     class: 'className',
 };
@@ -405,7 +406,7 @@ var componentToCustomElement = function (options) {
         var kebabName = component.name
             .replace(/([a-z])([A-Z])/g, '$1-$2')
             .toLowerCase();
-        var str = "\n      /**\n       * Usage:\n       * \n       *  <".concat(kebabName, "></").concat(kebabName, ">\n       * \n       */\n      class ").concat(component.name, " extends HTMLElement {\n        constructor() {\n          super();\n\n          const self = this;\n          this.state = ").concat((0, get_state_object_string_1.getStateObjectStringFromComponent)(json, {
+        var str = "\n      ".concat((0, render_imports_1.renderPreComponent)(json), "\n      /**\n       * Usage:\n       * \n       *  <").concat(kebabName, "></").concat(kebabName, ">\n       * \n       */\n      class ").concat(component.name, " extends HTMLElement {\n        constructor() {\n          super();\n\n          const self = this;\n          this.state = ").concat((0, get_state_object_string_1.getStateObjectStringFromComponent)(json, {
             valueMapper: function (value) {
                 return (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(addUpdateAfterSetInCode(value, useOptions, 'self.update'), {
                     includeProps: false,

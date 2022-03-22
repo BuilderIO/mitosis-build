@@ -396,7 +396,7 @@ function arrowFnValue(args, expression) {
 exports.arrowFnValue = arrowFnValue;
 function iif(code) {
     return function () {
-        code && this.emit('(()', exports.WS, '=>', exports.WS, '{', exports.WS, exports.NL, code, exports.NL, '}', ')()');
+        code && this.emit('(()', exports.WS, '=>', exports.WS, '{', exports.WS, exports.NL, code, exports.NL, '}', ')();');
     };
 }
 exports.iif = iif;

@@ -10,6 +10,15 @@ var __assign = (this && this.__assign) || function () {
     };
     return __assign.apply(this, arguments);
 };
+var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
+    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
+        if (ar || !(i in from)) {
+            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+            ar[i] = from[i];
+        }
+    }
+    return to.concat(ar || Array.prototype.slice.call(from));
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.addCommonStyles = exports.renderUseLexicalScope = exports.addComponent = exports.createFileSet = void 0;
 var compile_away_builder_components_1 = require("../../plugins/compile-away-builder-components");
@@ -109,11 +118,27 @@ function addCommonStyles(fileSet) {
 }
 exports.addCommonStyles = addCommonStyles;
 function addComponentOnMount(componentFile, onRenderFile, componentName, component, useStyles) {
+    var inputInitializer = [];
+    if (component.inputs) {
+        component.inputs.forEach(function (input) {
+            inputInitializer.push('if', src_generator_1.WS, '(state.', input.name, src_generator_1.WS, '===', src_generator_1.WS, 'undefined)', src_generator_1.WS, 'state.', input.name, src_generator_1.WS, '=', src_generator_1.WS, JSON.stringify(input.defaultValue), ';', src_generator_1.NL);
+        });
+    }
     componentFile.exportConst(componentName + '_onMount', function () {
         var _this = this;
         this.emit((0, src_generator_1.arrowFnValue)(['state'], function () {
             var _a;
-            return _this.emit('{', (0, src_generator_1.iif)((_a = component.hooks.onMount) === null || _a === void 0 ? void 0 : _a.code), ';', useStyles, src_generator_1.NL, 'return ', generateQrl(onRenderFile, componentName + '_onRender', ['state']), ';', src_generator_1.UNINDENT, src_generator_1.NL, '}');
+            return _this.emit.apply(_this, __spreadArray(__spreadArray(['{',
+                src_generator_1.NL,
+                src_generator_1.INDENT], inputInitializer, false), [(0, src_generator_1.iif)((_a = component.hooks.onMount) === null || _a === void 0 ? void 0 : _a.code),
+                useStyles,
+                src_generator_1.NL,
+                'return ',
+                generateQrl(onRenderFile, componentName + '_onRender', ['state']),
+                ';',
+                src_generator_1.UNINDENT,
+                src_generator_1.NL,
+                '}'], false));
         }));
     });
 }

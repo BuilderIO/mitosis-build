@@ -278,6 +278,19 @@ describe('qwik', function () {
         debugOutput(fileSet);
         expect(toObj(fileSet)).toMatchSnapshot();
     });
+    test('component inputs', function () {
+        var content = require('./qwik.test.component-inputs.json');
+        var state = {};
+        expect(state).toMatchSnapshot();
+        var fileSet = (0, index_1.createFileSet)({ output: 'cjs', jsx: true });
+        var component = (0, builder_1.builderContentToMitosisComponent)(content, {
+            includeBuilderExtras: true,
+            preserveTextBlocks: true,
+        });
+        (0, index_1.addComponent)(fileSet, component);
+        debugOutput(fileSet);
+        expect(toObj(fileSet)).toMatchSnapshot();
+    });
     describe('helper functions', function () {
         describe('isStatement', function () {
             test('is an expression', function () {
