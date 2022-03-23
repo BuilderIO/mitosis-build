@@ -35,6 +35,10 @@ declare type extendedHook = {
     code: string;
     deps?: string;
 };
+export declare type MitosisComponentInput = {
+    name: string;
+    defaultValue: any;
+};
 export declare type MitosisComponent = {
     '@type': '@builder.io/mitosis/component';
     name: string;
@@ -42,6 +46,7 @@ export declare type MitosisComponent = {
     meta: JSONObject & {
         metadataHook?: JSONObject;
     };
+    inputs: MitosisComponentInput[];
     state: JSONObject;
     context: {
         get: {

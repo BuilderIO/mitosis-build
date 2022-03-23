@@ -674,7 +674,7 @@ exports.createBuilderElement = createBuilderElement;
 var isBuilderElement = function (el) { var _a; return ((_a = el) === null || _a === void 0 ? void 0 : _a['@type']) === '@builder.io/sdk:Element'; };
 exports.isBuilderElement = isBuilderElement;
 var builderContentPartToMitosisComponent = function (builderContent, options) {
-    var _a, _b, _c, _d, _e, _f;
+    var _a, _b, _c, _d, _e, _f, _g, _h;
     if (options === void 0) { options = {}; }
     builderContent = (0, fast_clone_1.fastClone)(builderContent);
     (0, traverse_1.default)(builderContent).forEach(function (elem) {
@@ -703,7 +703,7 @@ var builderContentPartToMitosisComponent = function (builderContent, options) {
             }
         }
     });
-    var _g = extractStateHook(((_a = builderContent === null || builderContent === void 0 ? void 0 : builderContent.data) === null || _a === void 0 ? void 0 : _a.tsCode) || ((_b = builderContent === null || builderContent === void 0 ? void 0 : builderContent.data) === null || _b === void 0 ? void 0 : _b.jsCode) || ''), state = _g.state, code = _g.code;
+    var _j = extractStateHook(((_a = builderContent === null || builderContent === void 0 ? void 0 : builderContent.data) === null || _a === void 0 ? void 0 : _a.tsCode) || ((_b = builderContent === null || builderContent === void 0 ? void 0 : builderContent.data) === null || _b === void 0 ? void 0 : _b.jsCode) || ''), state = _j.state, code = _j.code;
     var customCode = convertExportDefaultToReturn(code);
     var parsed = getHooks(builderContent);
     var componentJson = (0, create_mitosis_component_1.createMitosisComponent)({
@@ -712,12 +712,16 @@ var builderContentPartToMitosisComponent = function (builderContent, options) {
                 httpRequests: (_c = builderContent.data) === null || _c === void 0 ? void 0 : _c.httpRequests,
             },
         },
-        state: (parsed === null || parsed === void 0 ? void 0 : parsed.state) || __assign(__assign({}, state), (_d = builderContent.data) === null || _d === void 0 ? void 0 : _d.state),
-        hooks: __assign({}, ((((_e = parsed === null || parsed === void 0 ? void 0 : parsed.hooks.onMount) === null || _e === void 0 ? void 0 : _e.code) ||
+        inputs: (_e = (_d = builderContent.data) === null || _d === void 0 ? void 0 : _d.inputs) === null || _e === void 0 ? void 0 : _e.map(function (input) { return ({
+            name: input.name,
+            defaultValue: input.defaultValue,
+        }); }),
+        state: (parsed === null || parsed === void 0 ? void 0 : parsed.state) || __assign(__assign({}, state), (_f = builderContent.data) === null || _f === void 0 ? void 0 : _f.state),
+        hooks: __assign({}, ((((_g = parsed === null || parsed === void 0 ? void 0 : parsed.hooks.onMount) === null || _g === void 0 ? void 0 : _g.code) ||
             (customCode && { code: customCode })) && {
             onMount: (parsed === null || parsed === void 0 ? void 0 : parsed.hooks.onMount) || { code: customCode },
         })),
-        children: (((_f = builderContent.data) === null || _f === void 0 ? void 0 : _f.blocks) || [])
+        children: (((_h = builderContent.data) === null || _h === void 0 ? void 0 : _h.blocks) || [])
             .filter(function (item) {
             var _a, _b;
             if ((_b = (_a = item.properties) === null || _a === void 0 ? void 0 : _a.src) === null || _b === void 0 ? void 0 : _b.includes('/api/v1/pixel')) {

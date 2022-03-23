@@ -37,6 +37,7 @@ export declare const builderContentToMitosisComponent: (builderContent: BuilderC
         meta: import("../types/json").JSONObject & {
             metadataHook?: import("../types/json").JSONObject | undefined;
         };
+        inputs: import("..").MitosisComponentInput[];
         state: import("../types/json").JSONObject;
         context: {
             get: {
@@ -87,6 +88,7 @@ export declare const builderContentToMitosisComponent: (builderContent: BuilderC
     meta: import("../types/json").JSONObject & {
         metadataHook?: import("../types/json").JSONObject | undefined;
     };
+    inputs: import("..").MitosisComponentInput[];
     state: import("../types/json").JSONObject;
     context: {
         get: {
