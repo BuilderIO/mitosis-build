@@ -35,6 +35,7 @@ export declare const builderContentToMitosisComponent: (builderContent: BuilderC
         '@type': "@builder.io/mitosis/component";
         imports: import("..").MitosisImport[];
         meta: import("../types/json").JSONObject & {
+            useMetadata?: import("../types/json").JSONObject | undefined;
             metadataHook?: import("../types/json").JSONObject | undefined;
         };
         inputs: import("..").MitosisComponentInput[];
@@ -86,6 +87,7 @@ export declare const builderContentToMitosisComponent: (builderContent: BuilderC
     name: string;
     imports: import("..").MitosisImport[];
     meta: import("../types/json").JSONObject & {
+        useMetadata?: import("../types/json").JSONObject | undefined;
         metadataHook?: import("../types/json").JSONObject | undefined;
     };
     inputs: import("..").MitosisComponentInput[];
