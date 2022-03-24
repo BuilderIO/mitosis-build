@@ -219,8 +219,8 @@ var componentFunctionToJson = function (node, context) {
                                 var depsCode = secondArg ? (0, generator_1.default)(secondArg).code : '';
                                 hooks.onUpdate = {
                                     code: code,
+                                    deps: depsCode,
                                 };
-                                hooks.onUpdate.deps = depsCode;
                             }
                         }
                     }

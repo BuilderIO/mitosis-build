@@ -17,13 +17,13 @@ var useState = function (obj) { return obj; };
 exports.useState = useState;
 var useRef = function () { return null; };
 exports.useRef = useRef;
-var useContext = function (key) { return null; };
+var useContext = function (key) {
+    return null;
+};
 exports.useContext = useContext;
 var createContext = function (value) { return null; };
 exports.createContext = createContext;
-var setContext = function (key, value) {
-    return null;
-};
+var setContext = function (key, value) { };
 exports.setContext = setContext;
 var onMount = function (fn) { return null; };
 exports.onMount = onMount;

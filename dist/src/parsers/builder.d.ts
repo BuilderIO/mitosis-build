@@ -55,30 +55,12 @@ export declare const builderContentToMitosisComponent: (builderContent: BuilderC
             };
         };
         hooks: {
-            init?: {
-                code: string;
-                deps?: string | undefined;
-            } | undefined;
-            onMount?: {
-                code: string;
-                deps?: string | undefined;
-            } | undefined;
-            onUnMount?: {
-                code: string;
-                deps?: string | undefined;
-            } | undefined;
-            preComponent?: {
-                code: string;
-                deps?: string | undefined;
-            } | undefined;
-            postComponent?: {
-                code: string;
-                deps?: string | undefined;
-            } | undefined;
-            onUpdate?: {
-                code: string;
-                deps?: string | undefined;
-            } | undefined;
+            init?: import("..").extendedHook | undefined;
+            onMount?: import("..").extendedHook | undefined;
+            onUnMount?: import("..").extendedHook | undefined;
+            preComponent?: import("..").extendedHook | undefined;
+            postComponent?: import("..").extendedHook | undefined;
+            onUpdate?: import("..").extendedHook | undefined;
         };
         children: MitosisNode[];
         subComponents: import("..").MitosisComponent[];
@@ -107,30 +89,12 @@ export declare const builderContentToMitosisComponent: (builderContent: BuilderC
         };
     };
     hooks: {
-        init?: {
-            code: string;
-            deps?: string | undefined;
-        } | undefined;
-        onMount?: {
-            code: string;
-            deps?: string | undefined;
-        } | undefined;
-        onUnMount?: {
-            code: string;
-            deps?: string | undefined;
-        } | undefined;
-        preComponent?: {
-            code: string;
-            deps?: string | undefined;
-        } | undefined;
-        postComponent?: {
-            code: string;
-            deps?: string | undefined;
-        } | undefined;
-        onUpdate?: {
-            code: string;
-            deps?: string | undefined;
-        } | undefined;
+        init?: import("..").extendedHook | undefined;
+        onMount?: import("..").extendedHook | undefined;
+        onUnMount?: import("..").extendedHook | undefined;
+        preComponent?: import("..").extendedHook | undefined;
+        postComponent?: import("..").extendedHook | undefined;
+        onUpdate?: import("..").extendedHook | undefined;
     };
     children: MitosisNode[];
 };

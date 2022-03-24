@@ -19,7 +19,7 @@ export declare const targets: {
     swift: (options?: import("./generators/swift-ui").ToSwiftOptions) => import(".").Transpiler;
     template: (options?: import("./generators/template").ToTemplateOptions) => import(".").Transpiler;
     webcomponent: (options?: import("./generators/html").ToHtmlOptions) => import(".").Transpiler;
-    vue: (options?: import("./generators/vue").ToVueOptions) => ({ component, path }: import(".").TranspilerArgs & {
+    vue: (userOptions?: import("./generators/vue").ToVueOptions) => ({ component, path }: import(".").TranspilerArgs & {
         path: string;
     }) => string;
 };

@@ -31,7 +31,7 @@ declare type ContextInfo = {
     name: string;
     path: string;
 };
-declare type extendedHook = {
+export declare type extendedHook = {
     code: string;
     deps?: string;
 };

@@ -3,6 +3,37 @@ var __makeTemplateObject = (this && this.__makeTemplateObject) || function (cook
     if (Object.defineProperty) { Object.defineProperty(cooked, "raw", { value: raw }); } else { cooked.raw = raw; }
     return cooked;
 };
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
+var __rest = (this && this.__rest) || function (s, e) {
+    var t = {};
+    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+        t[p] = s[p];
+    if (s != null && typeof Object.getOwnPropertySymbols === "function")
+        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+                t[p[i]] = s[p[i]];
+        }
+    return t;
+};
+var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
+    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
+        if (ar || !(i in from)) {
+            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+            ar[i] = from[i];
+        }
+    }
+    return to.concat(ar || Array.prototype.slice.call(from));
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -31,9 +62,11 @@ var filter_empty_text_nodes_1 = require("../helpers/filter-empty-text-nodes");
 var json5_1 = __importDefault(require("json5"));
 var process_http_requests_1 = require("../helpers/process-http-requests");
 var patterns_1 = require("../helpers/patterns");
+var method_literal_prefix_1 = require("../constants/method-literal-prefix");
 function getContextNames(json) {
     return Object.keys(json.context.get);
 }
+var ON_UPDATE_HOOK_NAME = 'onUpdateHook';
 // TODO: migrate all stripStateAndPropsRefs to use this here
 // to properly replace context refs
 function processBinding(code, _options, json) {
@@ -218,13 +251,43 @@ function getContextProvideString(component, options) {
     str += '}';
     return str;
 }
-var componentToVue = function (options) {
-    if (options === void 0) { options = {}; }
+/**
+ * This plugin handle `onUpdate` code that watches depdendencies.
+ * We need to apply this workaround to be able to watch specific dependencies in Vue 2: https://stackoverflow.com/a/45853349
+ *
+ * We add a `computed` property for the dependencies, and a matching `watch` function for the `onUpdate` code
+ */
+var onUpdatePlugin = function (options) { return ({
+    json: {
+        post: function (component) {
+            var _a;
+            if ((_a = component.hooks.onUpdate) === null || _a === void 0 ? void 0 : _a.deps) {
+                // TO-DO: once we allow multiple `onUpdate` hooks per file, we will need to iterate over them and suffix with `_${index}`.
+                component.state[ON_UPDATE_HOOK_NAME] = "".concat(method_literal_prefix_1.methodLiteralPrefix, "get ").concat(ON_UPDATE_HOOK_NAME, "() {\n        return `").concat(component.hooks.onUpdate.deps
+                    .slice(1, -1)
+                    .split(',')
+                    .map(function (dep) { return "${".concat(dep.trim(), "}"); })
+                    .join('|'), "`\n      }");
+            }
+        },
+    },
+}); };
+var BASE_OPTIONS = {
+    plugins: [onUpdatePlugin],
+};
+var mergeOptions = function (_a, _b) {
+    var _c = _a.plugins, pluginsA = _c === void 0 ? [] : _c, a = __rest(_a, ["plugins"]);
+    var _d = _b.plugins, pluginsB = _d === void 0 ? [] : _d, b = __rest(_b, ["plugins"]);
+    return (__assign(__assign(__assign({}, a), b), { plugins: __spreadArray(__spreadArray([], pluginsA, true), pluginsB, true) }));
+};
+var componentToVue = function (userOptions) {
+    if (userOptions === void 0) { userOptions = {}; }
     // hack while we migrate all other transpilers to receive/handle path
     // TO-DO: use `Transpiler` once possible
     return function (_a) {
         var _b, _c, _d, _e, _f, _g;
         var component = _a.component, path = _a.path;
+        var options = mergeOptions(BASE_OPTIONS, userOptions);
         // Make a copy we can safely mutate, similar to babel's toolchain can be used
         component = (0, fast_clone_1.fastClone)(component);
         (0, process_http_requests_1.processHttpRequests)(component);
@@ -310,7 +373,11 @@ var componentToVue = function (options) {
             : '', ((_g = component.hooks.onMount) === null || _g === void 0 ? void 0 : _g.code)
             ? "mounted() {\n                ".concat(processBinding(component.hooks.onMount.code, options, component), "\n              },")
             : '', component.hooks.onUpdate
-            ? "updated() {\n                ".concat(processBinding(component.hooks.onUpdate.code, options, component), "\n              },")
+            ? !component.hooks.onUpdate.deps
+                ? // if we do not have dependencies, then we use `updated()` which re-runs on every render.
+                    "updated() {\n                  ".concat(processBinding(component.hooks.onUpdate.code, options, component), "\n                },")
+                : // if we have dependencies, then we `watch` a computed property that combines the dependencies.
+                    "watch: {\n                  ".concat(ON_UPDATE_HOOK_NAME, "() {\n                    ").concat(processBinding(component.hooks.onUpdate.code, options, component), "\n                  }\n                },")
             : '', component.hooks.onUnMount
             ? "unmounted() {\n                ".concat(processBinding(component.hooks.onUnMount.code, options, component), "\n              },")
             : '', getterString.length < 4
