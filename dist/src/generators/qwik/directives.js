@@ -11,25 +11,23 @@ exports.DIRECTIVES = {
     Show: function (node, blockFn) {
         return function () {
             var expr = node.bindings.when;
-            this.isJSX && this.emit('{', src_generator_1.WS);
-            this.emit(expr, src_generator_1.WS, '?', src_generator_1.INDENT, src_generator_1.NL);
+            this.isJSX && this.emit('{');
+            this.emit(expr, '?');
             blockFn();
-            this.emit(':', src_generator_1.WS, 'null', src_generator_1.UNINDENT, src_generator_1.NL);
-            this.isJSX && this.emit('}', src_generator_1.NL);
+            this.emit(':null');
+            this.isJSX && this.emit('}');
         };
     },
     For: function (node, blockFn) {
         return function () {
             var expr = node.bindings.each;
-            this.isJSX && this.emit('{', src_generator_1.WS);
-            this.emit('(', expr, src_generator_1.WS, '||', src_generator_1.WS, '[])');
-            this.emit('.map(', '(function(__value__)', src_generator_1.WS, '{', src_generator_1.INDENT, src_generator_1.NL);
-            this.emit('var state', src_generator_1.WS, '=', src_generator_1.WS, 'Object.assign({},', src_generator_1.WS, 'this,', src_generator_1.WS, '{', (0, src_generator_1.iteratorProperty)(expr), ':', src_generator_1.WS, '__value__', src_generator_1.WS, '==', src_generator_1.WS, 'null', src_generator_1.WS, '?', src_generator_1.WS, '{}', src_generator_1.WS, ':', src_generator_1.WS, '__value__', '});', src_generator_1.NL);
-            this.emit('return', src_generator_1.WS, '(');
+            this.isJSX && this.emit('{');
+            this.emit('(', expr, '||[]).map(', '(function(__value__){');
+            this.emit('var state=Object.assign({},this,{', (0, src_generator_1.iteratorProperty)(expr), ':__value__==null?{}:__value__});');
+            this.emit('return(');
             blockFn();
-            this.emit(')', ';', src_generator_1.UNINDENT, src_generator_1.NL);
-            this.emit('}', ').bind(state))', src_generator_1.NL);
-            this.isJSX && this.emit('}', src_generator_1.NL);
+            this.emit(');}).bind(state))');
+            this.isJSX && this.emit('}');
         };
     },
     Image: (0, minify_1.minify)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["", ""], ["", ""])), Image),
@@ -101,7 +99,8 @@ function CoreButton(props) {
     };
     for (var key in props) {
         if (Object.prototype.hasOwnProperty.call(props, key) &&
-            key.startsWith('on:')) {
+            key.startsWith('on') &&
+            key.endsWith('Qrl')) {
             hProps[key] = props[key];
         }
     }

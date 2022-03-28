@@ -1,11 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.iteratorProperty = exports.lastProperty = exports.isStatement = exports.iif = exports.arrowFnValue = exports.arrowFnBlock = exports.invoke = exports.quote = exports.Block = exports.Imports = exports.Symbol = exports.SrcBuilder = exports.File = exports.UNINDENT = exports.INDENT = exports.NL = exports.RS = exports.WS = void 0;
-exports.WS = String.fromCharCode(29);
-exports.RS = ' ';
-exports.NL = '\n';
-exports.INDENT = String.fromCharCode(16);
-exports.UNINDENT = String.fromCharCode(17);
+exports.iteratorProperty = exports.lastProperty = exports.isStatement = exports.iif = exports.arrowFnValue = exports.arrowFnBlock = exports.invoke = exports.quote = exports.Block = exports.Imports = exports.Symbol = exports.SrcBuilder = exports.File = void 0;
+var standalone_1 = require("prettier/standalone");
 var File = /** @class */ (function () {
     function File(filename, options, qwikModule, qrlPrefix) {
         this.imports = new Imports();
@@ -62,8 +58,21 @@ var File = /** @class */ (function () {
                 srcImports.import(module, symbols);
             }
         });
-        srcImports.emit(exports.NL);
-        return srcImports.toString() + this.src.toString();
+        var source = srcImports.toString() + this.src.toString();
+        if (this.options.isPretty) {
+            source = (0, standalone_1.format)(source, {
+                parser: 'typescript',
+                plugins: [
+                    // To support running in browsers
+                    require('prettier/parser-typescript'),
+                    require('prettier/parser-postcss'),
+                    require('prettier/parser-html'),
+                    require('prettier/parser-babel'),
+                ],
+                htmlWhitespaceSensitivity: 'ignore',
+            });
+        }
+        return source;
     };
     return File;
 }());
@@ -76,10 +85,6 @@ var spaces = [''];
 var SrcBuilder = /** @class */ (function () {
     function SrcBuilder(options) {
         this.buf = [];
-        this.wasLastNL = false;
-        this.nestingDepth = 0;
-        this.offset = 0;
-        this.isPretty = options.isPretty;
         this.isTypeScript = options.isTypeScript;
         this.isModule = options.isModule;
         this.isJSX = options.isJSX;
@@ -87,7 +92,7 @@ var SrcBuilder = /** @class */ (function () {
     SrcBuilder.prototype.import = function (module, symbols) {
         var _this = this;
         if (this.isModule) {
-            this.emit('import', exports.WS, '{', exports.WS, symbols, exports.WS, '}', exports.WS, 'from', exports.WS, quote(module), ';', exports.NL);
+            this.emit('import{', symbols, '}from', quote(module), ';');
         }
         else {
             symbols.forEach(function (symbol) {
@@ -96,7 +101,6 @@ var SrcBuilder = /** @class */ (function () {
                 });
             });
         }
-        this.emit(exports.NL);
         return this;
     };
     SrcBuilder.prototype.emit = function () {
@@ -128,18 +132,18 @@ var SrcBuilder = /** @class */ (function () {
                 this.emitList(value);
             }
             else if (typeof value == 'object') {
-                this.emit('{', exports.NL, exports.INDENT);
+                this.emit('{');
                 var separator = false;
                 for (var key in value) {
                     if (Object.prototype.hasOwnProperty.call(value, key)) {
                         if (separator) {
-                            this.emit(',', exports.NL);
+                            this.emit(',');
                         }
-                        this.emit(possiblyQuotePropertyName(key)).emit(':', exports.WS, value[key]);
+                        this.emit(possiblyQuotePropertyName(key)).emit(':', value[key]);
                         separator = true;
                     }
                 }
-                this.emit(exports.NL, exports.UNINDENT, '}');
+                this.emit('}');
             }
             else {
                 throw new Error('Unexpected value: ' + value);
@@ -148,35 +152,19 @@ var SrcBuilder = /** @class */ (function () {
         return this;
     };
     SrcBuilder.prototype.push = function (value) {
-        if (value == exports.UNINDENT) {
-            this.nestingDepth--;
-        }
-        else if (value == exports.INDENT) {
-            this.nestingDepth++;
-        }
-        else {
-            if (value == ')' || value == ':' || value == ']' || value == '}') {
-                // clear last ',';
-                var index = this.buf.length - 1;
-                var ch = '';
-                while (index > 1 && isWhitespace((ch = this.buf[index]))) {
-                    index--;
-                }
-                if (ch == ',') {
-                    this.buf[index] = '';
-                }
-            }
-            if (this.isPretty && this.wasLastNL) {
-                while (spaces.length <= this.nestingDepth) {
-                    spaces.push(spaces[spaces.length - 1] + '  ');
-                }
-                this.buf.push(spaces[this.nestingDepth]);
-            }
-            this.wasLastNL = value === exports.NL;
-            if (this.isPretty || (value !== exports.WS && value !== exports.NL)) {
-                this.buf.push(value == exports.WS ? ' ' : value);
+        if (value.startsWith(')') ||
+            value.startsWith(':') ||
+            value.startsWith(']') ||
+            value.startsWith('}')) {
+            // clear last ',';
+            var index = this.buf.length - 1;
+            var ch = this.buf[index];
+            if (ch.endsWith(',')) {
+                ch = ch.substring(0, ch.length - 1);
+                this.buf[index] = ch;
             }
         }
+        this.buf.push(value);
     };
     SrcBuilder.prototype.emitList = function (values, sep) {
         if (sep === void 0) { sep = ','; }
@@ -184,7 +172,7 @@ var SrcBuilder = /** @class */ (function () {
         for (var _i = 0, values_1 = values; _i < values_1.length; _i++) {
             var value = values_1[_i];
             if (separator) {
-                this.emit(sep, sep == ';' ? exports.NL : exports.WS);
+                this.emit(sep);
             }
             this.emit(value);
             separator = true;
@@ -204,9 +192,9 @@ var SrcBuilder = /** @class */ (function () {
         }
         this.emit(name);
         if (value !== undefined) {
-            this.emit(exports.WS, '=', exports.WS, value);
+            this.emit('=', value);
         }
-        this.emit(';', exports.NL);
+        this.emit(';');
         return this;
     };
     SrcBuilder.prototype.type = function (def) {
@@ -229,23 +217,18 @@ var SrcBuilder = /** @class */ (function () {
             this.emit('<' + symbol);
         }
         else {
-            this.emit('h', '(', exports.INDENT, exports.NL, literalTagName(symbol), ',', exports.NL, '{', exports.NL, exports.INDENT);
+            this.emit('h(', literalTagName(symbol), ',{');
         }
-        var first = true;
         for (var key in props) {
             if (Object.prototype.hasOwnProperty.call(props, key) &&
                 !ignoreKey(key) &&
                 !Object.prototype.hasOwnProperty.call(bindings, key)) {
-                if (first) {
-                    first = false;
-                    this.isJSX && this.emit(exports.RS, exports.INDENT, exports.INDENT);
-                }
-                else {
-                    this.isJSX ? this.emit(exports.NL) : this.emit(',', exports.NL);
-                }
-                this.isJSX ? this.emit(key) : this.emit(possiblyQuotePropertyName(key));
-                this.isJSX ? this.emit('=') : this.emit(':', exports.WS);
+                this.isJSX
+                    ? this.emit(' ', key)
+                    : this.emit(possiblyQuotePropertyName(key));
+                this.isJSX ? this.emit('=') : this.emit(':');
                 this.emit(quote(props[key]));
+                !this.isJSX && this.emit(',');
             }
         }
         for (var rawKey in bindings) {
@@ -253,15 +236,10 @@ var SrcBuilder = /** @class */ (function () {
                 !ignoreKey(rawKey)) {
                 var binding = bindings[rawKey];
                 var key = lastProperty(rawKey);
-                if (first) {
-                    first = false;
-                    this.isJSX && this.emit(exports.RS, exports.INDENT, exports.INDENT);
-                }
-                else {
-                    this.isJSX ? this.emit(exports.NL) : this.emit(',', exports.NL);
-                }
-                this.isJSX ? this.emit(key) : this.emit(possiblyQuotePropertyName(key));
-                this.isJSX ? this.emit('={') : this.emit(':', exports.WS);
+                this.isJSX
+                    ? this.emit(' ', key)
+                    : this.emit(possiblyQuotePropertyName(key));
+                this.isJSX ? this.emit('={') : this.emit(':');
                 if (binding === props[key]) {
                     // HACK: workaround for the fact that sometimes the `bindings` have string literals
                     // We assume that when the binding content equals prop content.
@@ -271,49 +249,46 @@ var SrcBuilder = /** @class */ (function () {
                     binding = iif(binding);
                 }
                 this.emit(binding);
-                this.isJSX ? this.emit('}') : this.emit();
+                this.isJSX ? this.emit('}') : this.emit(',');
             }
         }
-        if (!first) {
-            this.isJSX && this.emit(exports.UNINDENT, exports.UNINDENT);
-        }
         if (this.isJSX) {
-            this.emit('>', exports.INDENT, exports.NL);
+            this.emit('>');
         }
         else {
-            this.emit(exports.NL, exports.UNINDENT, '}', ',', exports.NL);
+            this.emit('},');
         }
     };
     SrcBuilder.prototype.jsxEnd = function (symbol) {
         if (this.isJSX) {
-            this.emit(exports.UNINDENT, '</', symbol, '>', exports.NL);
+            this.emit('</', symbol, '>');
         }
         else {
-            this.emit(exports.UNINDENT, ')', ',', exports.NL);
+            this.emit('),');
         }
     };
     SrcBuilder.prototype.jsxBeginFragment = function (symbol) {
         if (this.isJSX) {
-            this.emit('<>', exports.INDENT, exports.NL);
+            this.emit('<>');
         }
         else {
-            this.emit('h', '(', symbol.name, ',', exports.WS, 'null', ',', exports.INDENT, exports.NL);
+            this.emit('h(', symbol.name, ',null,');
         }
     };
     SrcBuilder.prototype.jsxEndFragment = function () {
         if (this.isJSX) {
-            this.emit(exports.UNINDENT, exports.NL, '</>');
+            this.emit('</>');
         }
         else {
-            this.emit(exports.UNINDENT, ')', exports.NL);
+            this.emit(')');
         }
     };
     SrcBuilder.prototype.jsxTextBinding = function (exp) {
         if (this.isJSX) {
-            this.emit('{', exp, '}', exports.NL);
+            this.emit('{', exp, '}');
         }
         else {
-            this.emit(exp, exports.NL);
+            this.emit(exp);
         }
     };
     SrcBuilder.prototype.toString = function () {
@@ -381,22 +356,19 @@ function invoke(symbol, args, typeParameters) {
 exports.invoke = invoke;
 function arrowFnBlock(args, statements) {
     return function () {
-        this.emit('(', args, ')', exports.WS, '=>', exports.WS);
-        this.emit('{', exports.INDENT, exports.NL)
-            .emitList(statements, ';')
-            .emit(exports.UNINDENT, exports.NL, '}');
+        this.emit('(', args, ')=>{').emitList(statements, ';').emit('}');
     };
 }
 exports.arrowFnBlock = arrowFnBlock;
 function arrowFnValue(args, expression) {
     return function () {
-        this.emit('(', args, ')', exports.WS, '=>', exports.WS, expression);
+        this.emit('(', args, ')=>', expression);
     };
 }
 exports.arrowFnValue = arrowFnValue;
 function iif(code) {
     return function () {
-        code && this.emit('(()', exports.WS, '=>', exports.WS, '{', exports.WS, exports.NL, code, exports.NL, '}', ')();');
+        code && this.emit('(()=>{', code, '})();');
     };
 }
 exports.iif = iif;
@@ -408,9 +380,6 @@ function literalTagName(symbol) {
         return quote(symbol);
     }
     return symbol;
-}
-function isWhitespace(ch) {
-    return ch == '' || ch == exports.RS || ch == exports.NL;
 }
 /**
  * Returns `true` if the code is a statement (rather than expression).
