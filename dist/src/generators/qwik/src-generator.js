@@ -155,7 +155,8 @@ var SrcBuilder = /** @class */ (function () {
         if (value.startsWith(')') ||
             value.startsWith(':') ||
             value.startsWith(']') ||
-            value.startsWith('}')) {
+            value.startsWith('}') ||
+            value.startsWith('?')) {
             // clear last ',' or ';';
             var index = this.buf.length - 1;
             var ch = this.buf[index];
