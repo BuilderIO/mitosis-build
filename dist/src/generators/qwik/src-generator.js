@@ -156,10 +156,10 @@ var SrcBuilder = /** @class */ (function () {
             value.startsWith(':') ||
             value.startsWith(']') ||
             value.startsWith('}')) {
-            // clear last ',';
+            // clear last ',' or ';';
             var index = this.buf.length - 1;
             var ch = this.buf[index];
-            if (ch.endsWith(',')) {
+            if (ch.endsWith(',') || ch.endsWith(';')) {
                 ch = ch.substring(0, ch.length - 1);
                 this.buf[index] = ch;
             }
@@ -384,7 +384,7 @@ function arrowFnValue(args, expression) {
 exports.arrowFnValue = arrowFnValue;
 function iif(code) {
     return function () {
-        code && this.emit('(()=>{', code, '})()');
+        code && this.emit('(()=>{', code, '})();');
     };
 }
 exports.iif = iif;
