@@ -31,7 +31,7 @@ declare type ContextInfo = {
     name: string;
     path: string;
 };
-declare type extendedHook = {
+export declare type extendedHook = {
     code: string;
     deps?: string;
 };
@@ -44,6 +44,7 @@ export declare type MitosisComponent = {
     name: string;
     imports: MitosisImport[];
     meta: JSONObject & {
+        useMetadata?: JSONObject;
         metadataHook?: JSONObject;
     };
     inputs: MitosisComponentInput[];

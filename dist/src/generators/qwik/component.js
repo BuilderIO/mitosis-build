@@ -83,8 +83,7 @@ function addComponent(fileSet, component, opts) {
         }
     }
     addComponentOnMount(componentFile, onRenderFile, componentName, component, useStyles);
-    componentFile.exportConst(componentName, (0, src_generator_1.invoke)(componentFile.import(componentFile.qwikModule, 'componentFromQrl'), [generateQrl(componentFile, componentName + '_onMount')], ['any', 'any']));
-    onRenderFile.src.emit(src_generator_1.NL);
+    componentFile.exportConst(componentName, (0, src_generator_1.invoke)(componentFile.import(componentFile.qwikModule, 'componentQrl'), [generateQrl(componentFile, componentName + '_onMount')], ['any', 'any']));
     var directives = new Map();
     onRenderFile.exportConst(componentName + '_onRender', (0, src_generator_1.arrowFnBlock)([], [
         renderUseLexicalScope(onRenderFile),
@@ -100,12 +99,12 @@ function addComponent(fileSet, component, opts) {
 exports.addComponent = addComponent;
 function generateStyles(componentFile, styleFile, symbol, scoped) {
     return function () {
-        this.emit((0, src_generator_1.invoke)(componentFile.import(componentFile.qwikModule, scoped ? 'withScopedStylesFromQrl' : 'useStylesFromQrl'), [generateQrl(styleFile, symbol)]));
+        this.emit((0, src_generator_1.invoke)(componentFile.import(componentFile.qwikModule, scoped ? 'withScopedStylesQrl' : 'useStylesQrl'), [generateQrl(styleFile, symbol)]), ';');
     };
 }
 function renderUseLexicalScope(file) {
     return function () {
-        return this.emit('const state', src_generator_1.WS, '=', src_generator_1.WS, file.import(file.qwikModule, 'useLexicalScope').name, '()[0]');
+        return this.emit('const state=', file.import(file.qwikModule, 'useLexicalScope').name, '()[0]');
     };
 }
 exports.renderUseLexicalScope = renderUseLexicalScope;
@@ -121,24 +120,19 @@ function addComponentOnMount(componentFile, onRenderFile, componentName, compone
     var inputInitializer = [];
     if (component.inputs) {
         component.inputs.forEach(function (input) {
-            inputInitializer.push('if', src_generator_1.WS, '(state.', input.name, src_generator_1.WS, '===', src_generator_1.WS, 'undefined)', src_generator_1.WS, 'state.', input.name, src_generator_1.WS, '=', src_generator_1.WS, JSON.stringify(input.defaultValue), ';', src_generator_1.NL);
+            input.defaultValue !== undefined &&
+                inputInitializer.push('if(state.', input.name, '===undefined)state.', input.name, '=', JSON.stringify(input.defaultValue), ';');
         });
     }
     componentFile.exportConst(componentName + '_onMount', function () {
         var _this = this;
         this.emit((0, src_generator_1.arrowFnValue)(['state'], function () {
             var _a;
-            return _this.emit.apply(_this, __spreadArray(__spreadArray(['{',
-                src_generator_1.NL,
-                src_generator_1.INDENT], inputInitializer, false), [(0, src_generator_1.iif)((_a = component.hooks.onMount) === null || _a === void 0 ? void 0 : _a.code),
+            return _this.emit.apply(_this, __spreadArray(__spreadArray(['{'], inputInitializer, false), [(0, src_generator_1.iif)((_a = component.hooks.onMount) === null || _a === void 0 ? void 0 : _a.code),
                 useStyles,
-                src_generator_1.NL,
                 'return ',
                 generateQrl(onRenderFile, componentName + '_onRender', ['state']),
-                ';',
-                src_generator_1.UNINDENT,
-                src_generator_1.NL,
-                '}'], false));
+                ';}'], false));
         }));
     });
 }

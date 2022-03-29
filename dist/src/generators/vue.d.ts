@@ -8,6 +8,6 @@ export interface ToVueOptions extends BaseTranspilerOptions {
     registerComponentPrepend?: string;
 }
 export declare const blockToVue: (node: MitosisNode, options: ToVueOptions) => string;
-export declare const componentToVue: (options?: ToVueOptions) => ({ component, path }: TranspilerArgs & {
+export declare const componentToVue: (userOptions?: ToVueOptions) => ({ component, path }: TranspilerArgs & {
     path: string;
 }) => string;

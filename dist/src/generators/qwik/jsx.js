@@ -30,7 +30,7 @@ function renderJSXNodes(file, directives, handlers, children, styles, parentSymb
         if (children.length == 0)
             return;
         if (root)
-            this.emit('(', src_generator_1.INDENT, src_generator_1.NL);
+            this.emit('(');
         var needsFragment = root && children.length > 1;
         file.import(file.qwikModule, 'h');
         if (needsFragment) {
@@ -61,6 +61,11 @@ function renderJSXNodes(file, directives, handlers, children, styles, parentSymb
                 else {
                     if (typeof directive == 'string') {
                         directives.set(childName, directive);
+                        Array.from(directive.matchAll(/(__[^_]+__)/g)).forEach(function (match) {
+                            var name = match[0];
+                            var code = directives_1.DIRECTIVES[name];
+                            typeof code == 'string' && directives.set(name, code);
+                        });
                         if (file.module !== 'med') {
                             file.import('./med.js', childName);
                         }
@@ -91,7 +96,7 @@ function renderJSXNodes(file, directives, handlers, children, styles, parentSymb
             this.jsxEndFragment();
         }
         if (root)
-            this.emit(src_generator_1.UNINDENT, ')');
+            this.emit(')');
     };
 }
 exports.renderJSXNodes = renderJSXNodes;
@@ -131,7 +136,7 @@ function rewriteHandlers(file, handlers, bindings, symbolBindings) {
                     continue;
                 }
                 else if ((handlerBlock = handlers.get(binding))) {
-                    key = "on:".concat(key.substring(2).toLowerCase());
+                    key = "".concat(key, "Qrl");
                     binding = (0, src_generator_1.invoke)(file.import(file.qwikModule, 'qrl'), [
                         (0, src_generator_1.quote)(file.qrlPrefix + 'high.js'),
                         (0, src_generator_1.quote)(handlerBlock),

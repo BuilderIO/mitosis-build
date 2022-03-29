@@ -26,7 +26,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.renderStyles = exports.collectStyles = void 0;
 var json5_1 = __importDefault(require("json5"));
 var dash_case_1 = require("../../helpers/dash-case");
-var src_generator_1 = require("./src-generator");
 function collectStyles(children, styleMap) {
     var nodes = __spreadArray([], children, true);
     while (nodes.length) {
@@ -55,10 +54,10 @@ function hashCode(text) {
 function renderStyles(styles) {
     return function () {
         var _this = this;
-        this.emit('`', src_generator_1.NL, src_generator_1.INDENT);
+        this.emit('`');
         var mediaStyles = [];
         styles.forEach(function (styles) {
-            _this.emit('.', styles.CLASS_NAME, /*'.🏷️�', WS,*/ '{', src_generator_1.NL, src_generator_1.INDENT);
+            _this.emit('.', styles.CLASS_NAME, /*'.🏷️�', WS,*/ '{');
             for (var key in styles) {
                 if (key !== 'CLASS_NAME' &&
                     Object.prototype.hasOwnProperty.call(styles, key)) {
@@ -67,28 +66,26 @@ function renderStyles(styles) {
                         mediaStyles.push(styles.CLASS_NAME, key, value);
                     }
                     else {
-                        _this.emit((0, dash_case_1.dashCase)(key), ':', src_generator_1.WS, value, ';', src_generator_1.NL);
+                        _this.emit((0, dash_case_1.dashCase)(key), ':', value, ';');
                     }
                 }
             }
-            _this.emit(src_generator_1.UNINDENT, '}', src_generator_1.NL);
+            _this.emit('}');
         });
         while (mediaStyles.length) {
             var className = mediaStyles.shift();
             var mediaKey = mediaStyles.shift();
             var mediaObj = mediaStyles.shift();
-            this.emit(mediaKey, src_generator_1.WS, '{', src_generator_1.INDENT, src_generator_1.NL);
-            this.emit('.', className, /*'.🏷️�', WS,*/ '{', src_generator_1.NL, src_generator_1.INDENT);
+            this.emit(mediaKey, '{.', className, /*'.🏷️�',*/ '{');
             for (var key in mediaObj) {
                 if (Object.prototype.hasOwnProperty.call(mediaObj, key)) {
                     var value = mediaObj[key];
-                    this.emit((0, dash_case_1.dashCase)(key), ':', src_generator_1.WS, value, ';', src_generator_1.NL);
+                    this.emit((0, dash_case_1.dashCase)(key), ':', value, ';');
                 }
             }
-            this.emit(src_generator_1.UNINDENT, '}', src_generator_1.NL);
-            this.emit(src_generator_1.UNINDENT, '}', src_generator_1.NL);
+            this.emit('}}');
         }
-        this.emit(src_generator_1.UNINDENT, '`');
+        this.emit('`');
     };
 }
 exports.renderStyles = renderStyles;
