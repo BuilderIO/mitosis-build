@@ -171,9 +171,11 @@ var componentToStencil = function (options) {
             ? ''
             : "componentDidLoad() { ".concat(processBinding(json.hooks.onMount.code), " }"), !((_d = json.hooks.onUnMount) === null || _d === void 0 ? void 0 : _d.code)
             ? ''
-            : "disconnectedCallback() { ".concat(processBinding(json.hooks.onUnMount.code), " }"), !((_e = json.hooks.onUpdate) === null || _e === void 0 ? void 0 : _e.code)
+            : "disconnectedCallback() { ".concat(processBinding(json.hooks.onUnMount.code), " }"), !((_e = json.hooks.onUpdate) === null || _e === void 0 ? void 0 : _e.length)
             ? ''
-            : "componentDidUpdate() { ".concat(processBinding(json.hooks.onUpdate.code), " }"), wrap ? '<>' : '', json.children
+            : json.hooks.onUpdate.map(function (hook) {
+                return "componentDidUpdate() { ".concat(processBinding(hook.code), " }");
+            }), wrap ? '<>' : '', json.children
             .map(function (item) { return blockToStencil(item, options); })
             .join('\n'), wrap ? '</>' : '');
         if (options.plugins) {

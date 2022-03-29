@@ -29,6 +29,15 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
+var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
+    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
+        if (ar || !(i in from)) {
+            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+            ar[i] = from[i];
+        }
+    }
+    return to.concat(ar || Array.prototype.slice.call(from));
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -217,10 +226,12 @@ var componentFunctionToJson = function (node, context) {
                                 (types.isArrayExpression(secondArg) &&
                                     secondArg.elements.length > 0)) {
                                 var depsCode = secondArg ? (0, generator_1.default)(secondArg).code : '';
-                                hooks.onUpdate = {
-                                    code: code,
-                                    deps: depsCode,
-                                };
+                                hooks.onUpdate = __spreadArray(__spreadArray([], (hooks.onUpdate || []), true), [
+                                    {
+                                        code: code,
+                                        deps: depsCode,
+                                    },
+                                ], false);
                             }
                         }
                     }

@@ -198,7 +198,9 @@ var componentToSvelte = function (options) {
         });
         var hasData = dataString.length > 4;
         var props = Array.from((0, get_props_1.getProps)(json));
-        var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    <script>\n      ", "\n      ", "\n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n    </script>\n\n    ", "\n\n    ", "\n  "], ["\n    <script>\n      ", "\n      ", "\n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n    </script>\n\n    ", "\n\n    ", "\n  "])), !((_b = json.hooks.onMount) === null || _b === void 0 ? void 0 : _b.code) ? '' : "import { onMount } from 'svelte'", !((_c = json.hooks.onUpdate) === null || _c === void 0 ? void 0 : _c.code) ? '' : "import { afterUpdate } from 'svelte'", !((_d = json.hooks.onUnMount) === null || _d === void 0 ? void 0 : _d.code) ? '' : "import { onDestroy } from 'svelte'", (0, render_imports_1.renderPreComponent)(json), !hasData || useOptions.stateType === 'variables'
+        var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    <script>\n      ", "\n      ", "\n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n    </script>\n\n    ", "\n\n    ", "\n  "], ["\n    <script>\n      ", "\n      ", "\n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n    </script>\n\n    ", "\n\n    ", "\n  "])), !((_b = json.hooks.onMount) === null || _b === void 0 ? void 0 : _b.code) ? '' : "import { onMount } from 'svelte'", !((_c = json.hooks.onUpdate) === null || _c === void 0 ? void 0 : _c.length)
+            ? ''
+            : "import { afterUpdate } from 'svelte'", !((_d = json.hooks.onUnMount) === null || _d === void 0 ? void 0 : _d.code) ? '' : "import { onDestroy } from 'svelte'", (0, render_imports_1.renderPreComponent)(json), !hasData || useOptions.stateType === 'variables'
             ? ''
             : "import onChange from 'on-change'", refs
             .concat(props)
@@ -211,11 +213,15 @@ var componentToSvelte = function (options) {
             ? ''
             : "onMount(() => { ".concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(json.hooks.onMount.code, {
                 includeState: useOptions.stateType === 'variables',
-            }), " });"), !((_f = json.hooks.onUpdate) === null || _f === void 0 ? void 0 : _f.code)
+            }), " });"), !((_f = json.hooks.onUpdate) === null || _f === void 0 ? void 0 : _f.length)
             ? ''
-            : "afterUpdate(() => { ".concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(json.hooks.onUpdate.code, {
-                includeState: useOptions.stateType === 'variables',
-            }), " });"), !((_g = json.hooks.onUnMount) === null || _g === void 0 ? void 0 : _g.code)
+            : json.hooks.onUpdate
+                .map(function (hook) {
+                return "afterUpdate(() => { ".concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(hook.code, {
+                    includeState: useOptions.stateType === 'variables',
+                }), " })");
+            })
+                .join(';'), !((_g = json.hooks.onUnMount) === null || _g === void 0 ? void 0 : _g.code)
             ? ''
             : "onDestroy(() => { ".concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(json.hooks.onUnMount.code, {
                 includeState: useOptions.stateType === 'variables',

@@ -387,7 +387,7 @@ var _componentToReact = function (json, options, isSubComponent) {
     }
     if (((_a = json.hooks.onMount) === null || _a === void 0 ? void 0 : _a.code) ||
         ((_b = json.hooks.onUnMount) === null || _b === void 0 ? void 0 : _b.code) ||
-        ((_c = json.hooks.onUpdate) === null || _c === void 0 ? void 0 : _c.code)) {
+        ((_c = json.hooks.onUpdate) === null || _c === void 0 ? void 0 : _c.length)) {
         reactLibImports.add('useEffect');
     }
     var wrap = wrapInFragment(json) || (componentHasStyles && stylesType === 'styled-jsx');
@@ -418,10 +418,12 @@ var _componentToReact = function (json, options, isSubComponent) {
                         : "const state = useLocalProxy(".concat((0, get_state_object_string_1.getStateObjectStringFromComponent)(json), ");")
         : '', getContextString(json, options), getRefsString(json), getInitCode(json, options), ((_d = json.hooks.onMount) === null || _d === void 0 ? void 0 : _d.code)
         ? "useEffect(() => {\n            ".concat(processBinding(updateStateSettersInCode(json.hooks.onMount.code, options), options), "\n          }, [])")
-        : '', ((_e = json.hooks.onUpdate) === null || _e === void 0 ? void 0 : _e.code)
-        ? "useEffect(() => {\n            ".concat(processBinding(updateStateSettersInCode(json.hooks.onUpdate.code, options), options), "\n          }, \n          ").concat(json.hooks.onUpdate.deps
-            ? processBinding(updateStateSettersInCode(json.hooks.onUpdate.deps, options), options)
-            : '', ")")
+        : '', ((_e = json.hooks.onUpdate) === null || _e === void 0 ? void 0 : _e.length)
+        ? json.hooks.onUpdate
+            .map(function (hook) { return "useEffect(() => {\n            ".concat(processBinding(updateStateSettersInCode(hook.code, options), options), "\n          }, \n          ").concat(hook.deps
+            ? processBinding(updateStateSettersInCode(hook.deps, options), options)
+            : '', ")"); })
+            .join(';')
         : '', ((_f = json.hooks.onUnMount) === null || _f === void 0 ? void 0 : _f.code)
         ? "useEffect(() => {\n            return () => {\n              ".concat(processBinding(updateStateSettersInCode(json.hooks.onUnMount.code, options), options), "\n            }\n          }, [])")
         : '', wrap ? '<>' : '', json.children.map(function (item) { return (0, exports.blockToReact)(item, options); }).join('\n'), componentHasStyles && stylesType === 'styled-jsx'

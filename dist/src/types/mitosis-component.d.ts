@@ -66,7 +66,7 @@ export declare type MitosisComponent = {
         onUnMount?: extendedHook;
         preComponent?: extendedHook;
         postComponent?: extendedHook;
-        onUpdate?: extendedHook;
+        onUpdate?: extendedHook[];
     };
     children: MitosisNode[];
     subComponents: MitosisComponent[];

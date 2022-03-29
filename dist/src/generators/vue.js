@@ -67,6 +67,7 @@ function getContextNames(json) {
     return Object.keys(json.context.get);
 }
 var ON_UPDATE_HOOK_NAME = 'onUpdateHook';
+var getOnUpdateHookName = function (index) { return ON_UPDATE_HOOK_NAME + "".concat(index); };
 // TODO: migrate all stripStateAndPropsRefs to use this here
 // to properly replace context refs
 function processBinding(code, _options, json) {
@@ -260,14 +261,13 @@ function getContextProvideString(component, options) {
 var onUpdatePlugin = function (options) { return ({
     json: {
         post: function (component) {
-            var _a;
-            if ((_a = component.hooks.onUpdate) === null || _a === void 0 ? void 0 : _a.deps) {
-                // TO-DO: once we allow multiple `onUpdate` hooks per file, we will need to iterate over them and suffix with `_${index}`.
-                component.state[ON_UPDATE_HOOK_NAME] = "".concat(method_literal_prefix_1.methodLiteralPrefix, "get ").concat(ON_UPDATE_HOOK_NAME, "() {\n        return `").concat(component.hooks.onUpdate.deps
-                    .slice(1, -1)
-                    .split(',')
-                    .map(function (dep) { return "${".concat(dep.trim(), "}"); })
-                    .join('|'), "`\n      }");
+            if (component.hooks.onUpdate) {
+                component.hooks.onUpdate
+                    .filter(function (hook) { var _a; return (_a = hook.deps) === null || _a === void 0 ? void 0 : _a.length; })
+                    .forEach(function (hook, index) {
+                    var _a;
+                    component.state[getOnUpdateHookName(index)] = "".concat(method_literal_prefix_1.methodLiteralPrefix, "get ").concat(getOnUpdateHookName(index), " () {\n            return `").concat((_a = hook.deps) === null || _a === void 0 ? void 0 : _a.slice(1, -1).split(',').map(function (dep) { return "${".concat(dep.trim(), "}"); }).join('|'), "`\n          }");
+                });
             }
         },
     },
@@ -285,7 +285,7 @@ var componentToVue = function (userOptions) {
     // hack while we migrate all other transpilers to receive/handle path
     // TO-DO: use `Transpiler` once possible
     return function (_a) {
-        var _b, _c, _d, _e, _f, _g;
+        var _b, _c, _d, _e, _f, _g, _h, _j;
         var component = _a.component, path = _a.path;
         var options = mergeOptions(BASE_OPTIONS, userOptions);
         // Make a copy we can safely mutate, similar to babel's toolchain can be used
@@ -350,12 +350,14 @@ var componentToVue = function (userOptions) {
             functionsString = functionsString.replace(/}\s*$/, "_classStringToObject(str) {\n        const obj = {};\n        if (typeof str !== 'string') { return obj }\n        const classNames = str.trim().split(/\\s+/); \n        for (const name of classNames) {\n          obj[name] = true;\n        } \n        return obj;\n      }  }");
         }
         var builderRegister = Boolean(options.builderRegister && component.meta.registerComponent);
-        var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    <template>\n      ", "\n    </template>\n    <script>\n      ", "\n      ", "\n\n      export default ", "{\n        ", "\n        ", "\n        ", "\n        ", "\n\n        ", "\n        ", "\n\n        ", "\n        ", "\n        ", "\n\n        ", "\n        ", "\n      }", "\n    </script>\n    ", "\n  "], ["\n    <template>\n      ", "\n    </template>\n    <script>\n      ", "\n      ", "\n\n      export default ", "{\n        ", "\n        ", "\n        ", "\n        ", "\n\n        ", "\n        ", "\n\n        ", "\n        ", "\n        ", "\n\n        ", "\n        ", "\n      }", "\n    </script>\n    ", "\n  "])), template, (0, render_imports_1.renderPreComponent)(component), component.meta.registerComponent
-            ? (_d = options.registerComponentPrepend) !== null && _d !== void 0 ? _d : ''
+        var onUpdateWithDeps = ((_d = component.hooks.onUpdate) === null || _d === void 0 ? void 0 : _d.filter(function (hook) { var _a; return (_a = hook.deps) === null || _a === void 0 ? void 0 : _a.length; })) || [];
+        var onUpdateWithoutDeps = ((_e = component.hooks.onUpdate) === null || _e === void 0 ? void 0 : _e.filter(function (hook) { var _a; return !((_a = hook.deps) === null || _a === void 0 ? void 0 : _a.length); })) || [];
+        var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    <template>\n      ", "\n    </template>\n    <script>\n      ", "\n      ", "\n\n      export default ", "{\n        ", "\n        ", "\n        ", "\n        ", "\n\n        ", "\n        ", "\n\n        ", "\n        ", "\n        ", "\n        ", "\n\n        ", "\n        ", "\n      }", "\n    </script>\n    ", "\n  "], ["\n    <template>\n      ", "\n    </template>\n    <script>\n      ", "\n      ", "\n\n      export default ", "{\n        ", "\n        ", "\n        ", "\n        ", "\n\n        ", "\n        ", "\n\n        ", "\n        ", "\n        ", "\n        ", "\n\n        ", "\n        ", "\n      }", "\n    </script>\n    ", "\n  "])), template, (0, render_imports_1.renderPreComponent)(component), component.meta.registerComponent
+            ? (_f = options.registerComponentPrepend) !== null && _f !== void 0 ? _f : ''
             : '', !builderRegister ? '' : 'registerComponent(', !component.name
             ? ''
-            : "name: '".concat(((_e = options.namePrefix) === null || _e === void 0 ? void 0 : _e.call(options, path))
-                ? ((_f = options.namePrefix) === null || _f === void 0 ? void 0 : _f.call(options, path)) + '-'
+            : "name: '".concat(((_g = options.namePrefix) === null || _g === void 0 ? void 0 : _g.call(options, path))
+                ? ((_h = options.namePrefix) === null || _h === void 0 ? void 0 : _h.call(options, path)) + '-'
                 : '').concat((0, lodash_1.kebabCase)(component.name), "',"), !componentsUsed.length
             ? ''
             : "components: { ".concat(componentsUsed
@@ -370,14 +372,18 @@ var componentToVue = function (userOptions) {
             ? "provide() {\n                const _this = this;\n                return ".concat(getContextProvideString(component, options), "\n              },")
             : '', (0, lodash_1.size)(component.context.get)
             ? "inject: ".concat(getContextInjectString(component, options), ",")
-            : '', ((_g = component.hooks.onMount) === null || _g === void 0 ? void 0 : _g.code)
+            : '', ((_j = component.hooks.onMount) === null || _j === void 0 ? void 0 : _j.code)
             ? "mounted() {\n                ".concat(processBinding(component.hooks.onMount.code, options, component), "\n              },")
-            : '', component.hooks.onUpdate
-            ? !component.hooks.onUpdate.deps
-                ? // if we do not have dependencies, then we use `updated()` which re-runs on every render.
-                    "updated() {\n                  ".concat(processBinding(component.hooks.onUpdate.code, options, component), "\n                },")
-                : // if we have dependencies, then we `watch` a computed property that combines the dependencies.
-                    "watch: {\n                  ".concat(ON_UPDATE_HOOK_NAME, "() {\n                    ").concat(processBinding(component.hooks.onUpdate.code, options, component), "\n                  }\n                },")
+            : '', onUpdateWithoutDeps.length
+            ? "updated() {\n            ".concat(onUpdateWithoutDeps
+                .map(function (hook) { return processBinding(hook.code, options, component); })
+                .join('\n'), "\n          },")
+            : '', onUpdateWithDeps.length
+            ? "watch: {\n            ".concat(onUpdateWithDeps
+                .map(function (hook, index) {
+                return "".concat(getOnUpdateHookName(index), "() {\n                  ").concat(processBinding(hook.code, options, component), "\n                  }\n                ");
+            })
+                .join(','), "\n          },")
             : '', component.hooks.onUnMount
             ? "unmounted() {\n                ".concat(processBinding(component.hooks.onUnMount.code, options, component), "\n              },")
             : '', getterString.length < 4
