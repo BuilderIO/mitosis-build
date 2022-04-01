@@ -35,10 +35,12 @@ exports.DIRECTIVES = {
     __passThroughProps__: (0, minify_1.minify)(templateObject_3 || (templateObject_3 = __makeTemplateObject(["", ""], ["", ""])), __passThroughProps__),
 };
 function Image(props) {
+    var _a;
     var jsx = props.children || [];
     var image = props.image;
     if (image) {
-        var isBuilderIoImage = !!(image || '').match(/builder\.io/);
+        var isBuilderIoImage = !!(image || '').match(/\.builder\.io/);
+        var isPixel = (_a = props.builderBlock) === null || _a === void 0 ? void 0 : _a.id.startsWith('builder-pixel-');
         var imgProps = {
             src: props.image,
             style: "object-fit:".concat(props.backgroundSize || 'cover', ";object-position:").concat(props.backgroundPosition || 'center', ";") +
@@ -47,15 +49,17 @@ function Image(props) {
                     : ''),
             sizes: props.sizes,
             alt: props.altText,
-            loading: props.lazy ? 'lazy' : undefined,
+            role: !props.altText ? 'presentation' : undefined,
+            loading: isPixel ? 'eager' : 'lazy',
             srcset: undefined,
         };
         if (isBuilderIoImage) {
+            image = updateQueryParam(image, 'format', 'webp');
             var srcset = ['100', '200', '400', '800', '1200', '1600', '2000']
+                .concat(props.srcsetSizes ? String(props.srcsetSizes).split(' ') : [])
                 .map(function (size) {
                 return updateQueryParam(image, 'width', size) + ' ' + size + 'w';
             })
-                .concat([image])
                 .join(', ');
             imgProps.srcset = srcset;
             jsx = jsx = [

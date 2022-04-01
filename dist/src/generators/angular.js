@@ -120,6 +120,7 @@ exports.blockToAngular = blockToAngular;
 var componentToAngular = function (options) {
     if (options === void 0) { options = {}; }
     return function (_a) {
+        var _b;
         var component = _a.component;
         // Make a copy we can safely mutate, similar to babel's toolchain
         var json = (0, fast_clone_1.fastClone)(component);
@@ -157,10 +158,12 @@ var componentToAngular = function (options) {
             ? ''
             : "ngOnInit() {\n              ".concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(component.hooks.onMount.code, {
                 replaceWith: 'this.',
-            }), "\n            }"), !component.hooks.onUpdate
+            }), "\n            }"), !((_b = component.hooks.onUpdate) === null || _b === void 0 ? void 0 : _b.length)
             ? ''
-            : "ngAfterContentChecked() {\n              ".concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(component.hooks.onUpdate.code, {
-                replaceWith: 'this.',
+            : "ngAfterContentChecked() {\n              ".concat(component.hooks.onUpdate.map(function (hook) {
+                return (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(hook.code, {
+                    replaceWith: 'this.',
+                });
             }), "\n            }"), !component.hooks.onUnMount
             ? ''
             : "ngOnDestroy() {\n              ".concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(component.hooks.onUnMount.code, {

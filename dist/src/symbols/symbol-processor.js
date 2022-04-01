@@ -76,7 +76,7 @@ function convertBuilderContentToSymbolHierarchy(content, _a) {
         if (cssCode) {
             collectComponentStyles && collectComponentStyles.push((0, minify_1.minify)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["", ""], ["", ""])), cssCode));
         }
-        while (path[0 /* DEPTH */] >= this.path.length) {
+        while (path[0 /* Path.DEPTH */] >= this.path.length) {
             path.shift();
             path.shift();
         }
@@ -92,10 +92,10 @@ function convertBuilderContentToSymbolHierarchy(content, _a) {
                         collectComponentState[id] = state;
                     }
                 }
-                if (path[0 /* DEPTH */] < this.path.length) {
+                if (path[0 /* Path.DEPTH */] < this.path.length) {
                     var id = getIdFromSymbol(el);
                     hierarchy[id] = [];
-                    addIfMissing(hierarchy[path[1 /* ID */]], id);
+                    addIfMissing(hierarchy[path[1 /* Path.ID */]], id);
                     path.unshift(this.path.length, id);
                 }
                 // TODO(misko): This should be `el.content` not `el`

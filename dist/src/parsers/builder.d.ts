@@ -60,7 +60,7 @@ export declare const builderContentToMitosisComponent: (builderContent: BuilderC
             onUnMount?: import("..").extendedHook | undefined;
             preComponent?: import("..").extendedHook | undefined;
             postComponent?: import("..").extendedHook | undefined;
-            onUpdate?: import("..").extendedHook | undefined;
+            onUpdate?: import("..").extendedHook[] | undefined;
         };
         children: MitosisNode[];
         subComponents: import("..").MitosisComponent[];
@@ -94,7 +94,7 @@ export declare const builderContentToMitosisComponent: (builderContent: BuilderC
         onUnMount?: import("..").extendedHook | undefined;
         preComponent?: import("..").extendedHook | undefined;
         postComponent?: import("..").extendedHook | undefined;
-        onUpdate?: import("..").extendedHook | undefined;
+        onUpdate?: import("..").extendedHook[] | undefined;
     };
     children: MitosisNode[];
 };

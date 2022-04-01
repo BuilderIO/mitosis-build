@@ -12,7 +12,11 @@ var __assign = (this && this.__assign) || function () {
 };
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -671,7 +675,9 @@ function extractSymbols(json) {
 }
 var createBuilderElement = function (options) { return (__assign({ '@type': '@builder.io/sdk:Element', id: 'builder-' + Math.random().toString(36).split('.')[1] }, options)); };
 exports.createBuilderElement = createBuilderElement;
-var isBuilderElement = function (el) { var _a; return ((_a = el) === null || _a === void 0 ? void 0 : _a['@type']) === '@builder.io/sdk:Element'; };
+var isBuilderElement = function (el) {
+    return (el === null || el === void 0 ? void 0 : el['@type']) === '@builder.io/sdk:Element';
+};
 exports.isBuilderElement = isBuilderElement;
 var builderContentPartToMitosisComponent = function (builderContent, options) {
     var _a, _b, _c, _d, _e, _f, _g, _h;
