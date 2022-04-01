@@ -61,6 +61,11 @@ function renderJSXNodes(file, directives, handlers, children, styles, parentSymb
                 else {
                     if (typeof directive == 'string') {
                         directives.set(childName, directive);
+                        Array.from(directive.matchAll(/(__[^_]+__)/g)).forEach(function (match) {
+                            var name = match[0];
+                            var code = directives_1.DIRECTIVES[name];
+                            typeof code == 'string' && directives.set(name, code);
+                        });
                         if (file.module !== 'med') {
                             file.import('./med.js', childName);
                         }
@@ -75,13 +80,20 @@ function renderJSXNodes(file, directives, handlers, children, styles, parentSymb
                     }
                     var props = child.properties;
                     var css = child.bindings.css;
+                    var specialBindings = {};
                     if (css) {
                         props = __assign({}, props);
-                        props.class = addClass(styles.get(css).CLASS_NAME, props.class);
+                        var styleProps = styles.get(css);
+                        var imageMaxWidth = childName == 'Image' && styleProps.maxWidth;
+                        if (imageMaxWidth && imageMaxWidth.endsWith('px')) {
+                            // special case for Images. We want to make sure that we include the maxWidth in a srcset
+                            specialBindings.srcsetSizes = Number.parseInt(imageMaxWidth);
+                        }
+                        props.class = addClass(styleProps.CLASS_NAME, props.class);
                     }
                     var symbolBindings = {};
                     var bindings = rewriteHandlers(file, handlers, child.bindings, symbolBindings);
-                    _this.jsxBegin(childName, props, __assign(__assign({}, bindings), parentSymbolBindings));
+                    _this.jsxBegin(childName, props, __assign(__assign(__assign({}, bindings), parentSymbolBindings), specialBindings));
                     renderJSXNodes(file, directives, handlers, child.children, styles, symbolBindings, false).call(_this);
                     _this.jsxEnd(childName);
                 }

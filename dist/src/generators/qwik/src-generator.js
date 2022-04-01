@@ -155,11 +155,12 @@ var SrcBuilder = /** @class */ (function () {
         if (value.startsWith(')') ||
             value.startsWith(':') ||
             value.startsWith(']') ||
-            value.startsWith('}')) {
-            // clear last ',';
+            value.startsWith('}') ||
+            value.startsWith('?')) {
+            // clear last ',' or ';';
             var index = this.buf.length - 1;
             var ch = this.buf[index];
-            if (ch.endsWith(',')) {
+            if (ch.endsWith(',') || ch.endsWith(';')) {
                 ch = ch.substring(0, ch.length - 1);
                 this.buf[index] = ch;
             }
@@ -209,6 +210,7 @@ var SrcBuilder = /** @class */ (function () {
         }
     };
     SrcBuilder.prototype.jsxBegin = function (symbol, props, bindings) {
+        var self = this;
         if (symbol == 'div' && ('href' in props || 'href' in bindings)) {
             // HACK: if we contain href then we are `a` not `div`
             symbol = 'a';
@@ -223,40 +225,55 @@ var SrcBuilder = /** @class */ (function () {
             if (Object.prototype.hasOwnProperty.call(props, key) &&
                 !ignoreKey(key) &&
                 !Object.prototype.hasOwnProperty.call(bindings, key)) {
-                this.isJSX
-                    ? this.emit(' ', key)
-                    : this.emit(possiblyQuotePropertyName(key));
-                this.isJSX ? this.emit('=') : this.emit(':');
-                this.emit(quote(props[key]));
-                !this.isJSX && this.emit(',');
+                emitJsxProp(possiblyQuotePropertyName(key), quote(props[key]));
             }
         }
-        for (var rawKey in bindings) {
+        var _loop_1 = function (rawKey) {
             if (Object.prototype.hasOwnProperty.call(bindings, rawKey) &&
                 !ignoreKey(rawKey)) {
-                var binding = bindings[rawKey];
+                var binding_1 = bindings[rawKey];
                 var key = lastProperty(rawKey);
-                this.isJSX
-                    ? this.emit(' ', key)
-                    : this.emit(possiblyQuotePropertyName(key));
-                this.isJSX ? this.emit('={') : this.emit(':');
-                if (binding === props[key]) {
+                if (binding_1 === props[key]) {
                     // HACK: workaround for the fact that sometimes the `bindings` have string literals
                     // We assume that when the binding content equals prop content.
-                    binding = JSON.stringify(binding);
+                    binding_1 = JSON.stringify(binding_1);
                 }
-                else if (typeof binding == 'string' && isStatement(binding)) {
-                    binding = iif(binding);
+                else if (typeof binding_1 == 'string' && isStatement(binding_1)) {
+                    binding_1 = iif(binding_1);
                 }
-                this.emit(binding);
-                this.isJSX ? this.emit('}') : this.emit(',');
+                if (key === 'hide' || key === 'show') {
+                    var _a = key == 'hide' ? ['"none"', '"inherit"'] : ['"inherit"', '"none"'], truthy_1 = _a[0], falsy_1 = _a[1];
+                    emitJsxProp('style', function () {
+                        this.emit('{display:', binding_1, '?', truthy_1, ':', falsy_1, '}');
+                    });
+                }
+                else {
+                    emitJsxProp(possiblyQuotePropertyName(key), binding_1);
+                }
             }
+        };
+        for (var rawKey in bindings) {
+            _loop_1(rawKey);
         }
         if (this.isJSX) {
             this.emit('>');
         }
         else {
             this.emit('},');
+        }
+        function emitJsxProp(key, value) {
+            if (self.isJSX) {
+                self.emit(' ', key, '=');
+                if (typeof value == 'string' && value.startsWith('"')) {
+                    self.emit(value);
+                }
+                else {
+                    self.emit('{', value, '}');
+                }
+            }
+            else {
+                self.emit(key, ':', value, ',');
+            }
         }
     };
     SrcBuilder.prototype.jsxEnd = function (symbol) {
