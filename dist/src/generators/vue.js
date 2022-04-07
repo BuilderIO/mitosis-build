@@ -266,7 +266,10 @@ var onUpdatePlugin = function (options) { return ({
                     .filter(function (hook) { var _a; return (_a = hook.deps) === null || _a === void 0 ? void 0 : _a.length; })
                     .forEach(function (hook, index) {
                     var _a;
-                    component.state[getOnUpdateHookName(index)] = "".concat(method_literal_prefix_1.methodLiteralPrefix, "get ").concat(getOnUpdateHookName(index), " () {\n            return `").concat((_a = hook.deps) === null || _a === void 0 ? void 0 : _a.slice(1, -1).split(',').map(function (dep) { return "${".concat(dep.trim(), "}"); }).join('|'), "`\n          }");
+                    component.state[getOnUpdateHookName(index)] = "".concat(method_literal_prefix_1.methodLiteralPrefix, "get ").concat(getOnUpdateHookName(index), " () {\n            return {\n              ").concat((_a = hook.deps) === null || _a === void 0 ? void 0 : _a.slice(1, -1).split(',').map(function (dep, k) {
+                        var val = dep.trim();
+                        return "".concat(k, ": ").concat(val);
+                    }).join(','), "\n            }\n          }");
                 });
             }
         },
