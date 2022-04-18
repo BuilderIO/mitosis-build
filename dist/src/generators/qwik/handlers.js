@@ -55,23 +55,25 @@ function renderHandlers(file, componentName, children) {
 }
 exports.renderHandlers = renderHandlers;
 function renderHandler(file, symbol, code) {
+    var body = [wrapWithUse(file, code)];
+    var shouldRenderStateRestore = code.indexOf('state') !== -1;
+    if (shouldRenderStateRestore) {
+        body.unshift((0, component_1.renderUseLexicalScope)(file));
+    }
     file.exportConst(symbol, function () {
-        this.emit([
-            (0, src_generator_1.arrowFnBlock)([], [(0, component_1.renderUseLexicalScope)(file), wrapWithUse(file, code)]),
-        ]);
+        this.emit([(0, src_generator_1.arrowFnBlock)([], body)]);
     });
-    file.src.emit(src_generator_1.NL);
 }
 function wrapWithUse(file, code) {
     var needsEvent = !!code.match(/\bevent\b/);
     if (needsEvent) {
         return function () {
-            this.emit('{', src_generator_1.NL, src_generator_1.INDENT);
+            this.emit('{');
             needsEvent &&
-                this.emit('const event', src_generator_1.WS, '=', src_generator_1.WS, (0, src_generator_1.invoke)(file.import(file.qwikModule, 'useEvent'), []), ';', src_generator_1.NL);
+                this.emit('const event=', (0, src_generator_1.invoke)(file.import(file.qwikModule, 'useEvent'), []), ';');
             var blockContent = stripBlock(code);
             this.emit(blockContent);
-            this.emit(src_generator_1.UNINDENT, src_generator_1.NL, '}');
+            this.emit('}');
         };
     }
     else {

@@ -1,7 +1,11 @@
 "use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -44,10 +48,9 @@ var replaceRefsInString = function (code, refs, mapper) {
     });
 };
 var mapRefs = function (component, mapper) {
-    var _a;
     var refs = Array.from((0, get_refs_1.getRefs)(component));
-    for (var _i = 0, _b = Object.keys(component.state); _i < _b.length; _i++) {
-        var key = _b[_i];
+    for (var _i = 0, _a = Object.keys(component.state); _i < _a.length; _i++) {
+        var key = _a[_i];
         var value = component.state[key];
         if (typeof value === 'string') {
             if (value.startsWith(method_literal_prefix_1.methodLiteralPrefix)) {
@@ -76,11 +79,21 @@ var mapRefs = function (component, mapper) {
             }
         }
     });
-    for (var _c = 0, _d = Object.keys(component.hooks); _c < _d.length; _c++) {
-        var key = _d[_c];
-        var hookCode = (_a = component.hooks[key]) === null || _a === void 0 ? void 0 : _a.code;
-        if (hookCode) {
-            component.hooks[key].code = replaceRefsInString(hookCode, refs, mapper);
+    for (var _b = 0, _c = Object.keys(component.hooks); _b < _c.length; _b++) {
+        var key = _c[_b];
+        var hooks = component.hooks[key];
+        if (Array.isArray(hooks)) {
+            hooks.forEach(function (hook) {
+                if (hook.code) {
+                    hook.code = replaceRefsInString(hook.code, refs, mapper);
+                }
+            });
+        }
+        else {
+            var hookCode = hooks === null || hooks === void 0 ? void 0 : hooks.code;
+            if (hookCode) {
+                hooks.code = replaceRefsInString(hookCode, refs, mapper);
+            }
         }
     }
 };

@@ -4,60 +4,62 @@ var __makeTemplateObject = (this && this.__makeTemplateObject) || function (cook
     return cooked;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CoreButton = exports.Image = exports.DIRECTIVES = void 0;
+exports.CoreButton = exports.__passThroughProps__ = exports.Image = exports.DIRECTIVES = void 0;
 var minify_1 = require("../minify");
 var src_generator_1 = require("./src-generator");
 exports.DIRECTIVES = {
     Show: function (node, blockFn) {
         return function () {
             var expr = node.bindings.when;
-            this.isJSX && this.emit('{', src_generator_1.WS);
-            this.emit(expr, src_generator_1.WS, '?', src_generator_1.INDENT, src_generator_1.NL);
+            this.isJSX && this.emit('{');
+            this.emit(expr, '?');
             blockFn();
-            this.emit(':', src_generator_1.WS, 'null', src_generator_1.UNINDENT, src_generator_1.NL);
-            this.isJSX && this.emit('}', src_generator_1.NL);
+            this.emit(':null');
+            this.isJSX && this.emit('}');
         };
     },
     For: function (node, blockFn) {
         return function () {
             var expr = node.bindings.each;
-            this.isJSX && this.emit('{', src_generator_1.WS);
-            this.emit('(', expr, src_generator_1.WS, '||', src_generator_1.WS, '[])');
-            this.emit('.map(', '(function(__value__)', src_generator_1.WS, '{', src_generator_1.INDENT, src_generator_1.NL);
-            this.emit('var state', src_generator_1.WS, '=', src_generator_1.WS, 'Object.assign({},', src_generator_1.WS, 'this,', src_generator_1.WS, '{', (0, src_generator_1.iteratorProperty)(expr), ':', src_generator_1.WS, '__value__', src_generator_1.WS, '==', src_generator_1.WS, 'null', src_generator_1.WS, '?', src_generator_1.WS, '{}', src_generator_1.WS, ':', src_generator_1.WS, '__value__', '});', src_generator_1.NL);
-            this.emit('return', src_generator_1.WS, '(');
+            this.isJSX && this.emit('{');
+            this.emit('(', expr, '||[]).map(', '(function(__value__){');
+            this.emit('var state=Object.assign({},this,{', (0, src_generator_1.iteratorProperty)(expr), ':__value__==null?{}:__value__});');
+            this.emit('return(');
             blockFn();
-            this.emit(')', ';', src_generator_1.UNINDENT, src_generator_1.NL);
-            this.emit('}', ').bind(state))', src_generator_1.NL);
-            this.isJSX && this.emit('}', src_generator_1.NL);
+            this.emit(');}).bind(state))');
+            this.isJSX && this.emit('}');
         };
     },
     Image: (0, minify_1.minify)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["", ""], ["", ""])), Image),
     CoreButton: (0, minify_1.minify)(templateObject_2 || (templateObject_2 = __makeTemplateObject(["", ""], ["", ""])), CoreButton),
+    __passThroughProps__: (0, minify_1.minify)(templateObject_3 || (templateObject_3 = __makeTemplateObject(["", ""], ["", ""])), __passThroughProps__),
 };
 function Image(props) {
+    var _a;
     var jsx = props.children || [];
     var image = props.image;
     if (image) {
-        var isBuilderIoImage = !!(image || '').match(/builder\.io/);
+        var isBuilderIoImage = !!(image || '').match(/\.builder\.io/);
+        var isPixel = (_a = props.builderBlock) === null || _a === void 0 ? void 0 : _a.id.startsWith('builder-pixel-');
         var imgProps = {
             src: props.image,
-            style: "object-fit:".concat(props.backgroundSize ||
-                'cover', ";object-position:").concat(props.backgroundPosition || 'center', ";") +
+            style: "object-fit:".concat(props.backgroundSize || 'cover', ";object-position:").concat(props.backgroundPosition || 'center', ";") +
                 (props.aspectRatio
                     ? 'position:absolute;height:100%;width:100%;top:0;left:0'
                     : ''),
             sizes: props.sizes,
             alt: props.altText,
-            loading: props.lazy ? 'lazy' : undefined,
+            role: !props.altText ? 'presentation' : undefined,
+            loading: isPixel ? 'eager' : 'lazy',
             srcset: undefined,
         };
         if (isBuilderIoImage) {
+            image = updateQueryParam(image, 'format', 'webp');
             var srcset = ['100', '200', '400', '800', '1200', '1600', '2000']
+                .concat(props.srcsetSizes ? String(props.srcsetSizes).split(' ') : [])
                 .map(function (size) {
                 return updateQueryParam(image, 'width', size) + ' ' + size + 'w';
             })
-                .concat([image])
                 .join(', ');
             imgProps.srcset = srcset;
             jsx = jsx = [
@@ -74,14 +76,13 @@ function Image(props) {
             !(props.fitContent && props.children && props.children.length)) {
             var sizingDiv = h('div', {
                 class: 'builder-image-sizer',
-                style: "width:100%;padding-top:".concat((props.aspectRatio || 1) *
-                    100, "%;pointer-events:none;font-size:0"),
+                style: "width:100%;padding-top:".concat((props.aspectRatio || 1) * 100, "%;pointer-events:none;font-size:0"),
             });
             jsx.push(sizingDiv);
         }
     }
     var children = props.children ? [jsx].concat(props.children) : [jsx];
-    return h(props.href ? 'a' : 'div', { href: props.href, class: props.class }, children);
+    return h(props.href ? 'a' : 'div', __passThroughProps__({ href: props.href, class: props.class }, props), children);
     function updateQueryParam(uri, key, value) {
         if (uri === void 0) { uri = ''; }
         var re = new RegExp('([?&])' + key + '=.*?(&|$)', 'i');
@@ -93,6 +94,16 @@ function Image(props) {
     }
 }
 exports.Image = Image;
+function __passThroughProps__(dstProps, srcProps) {
+    for (var key in srcProps) {
+        if (Object.prototype.hasOwnProperty.call(srcProps, key) &&
+            ((key.startsWith('on') && key.endsWith('Qrl')) || key == 'style')) {
+            dstProps[key] = srcProps[key];
+        }
+    }
+    return dstProps;
+}
+exports.__passThroughProps__ = __passThroughProps__;
 function CoreButton(props) {
     var hasLink = !!props.link;
     var hProps = {
@@ -101,7 +112,7 @@ function CoreButton(props) {
         target: props.openInNewTab ? '_blank' : '_self',
         class: props.class,
     };
-    return h(hasLink ? 'a' : props.tagName$ || 'span', hProps);
+    return h(hasLink ? 'a' : props.tagName$ || 'span', __passThroughProps__(hProps, props));
 }
 exports.CoreButton = CoreButton;
-var templateObject_1, templateObject_2;
+var templateObject_1, templateObject_2, templateObject_3;

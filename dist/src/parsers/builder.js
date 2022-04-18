@@ -12,7 +12,11 @@ var __assign = (this && this.__assign) || function () {
 };
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -114,8 +118,7 @@ var getStyleStringFromBlock = function (block, options) {
         for (var key in block.bindings) {
             if (key.includes('style') && key.includes('.')) {
                 var styleProperty = key.split('.')[1];
-                styleBindings[styleProperty] =
-                    ((_b = (_a = block.code) === null || _a === void 0 ? void 0 : _a.bindings) === null || _b === void 0 ? void 0 : _b[key]) || block.bindings[key];
+                styleBindings[styleProperty] = convertExportDefaultToReturn(((_b = (_a = block.code) === null || _a === void 0 ? void 0 : _a.bindings) === null || _b === void 0 ? void 0 : _b[key]) || block.bindings[key]);
             }
         }
     }
@@ -206,7 +209,7 @@ var wrapBinding = function (value) {
     if (!(value.includes(';') || value.match(/(^|\s|;)return[^a-z0-9A-Z]/))) {
         return value;
     }
-    return "(() => {\n    try { ".concat(value, " }\n    catch (err) {\n      console.warn('Builder code error', err);\n    }\n  })()");
+    return "(() => {\n    try { ".concat(isExpression(value) ? 'return ' : '').concat(value, " }\n    catch (err) {\n      console.warn('Builder code error', err);\n    }\n  })()");
 };
 var getBlockBindings = function (block, options) {
     var obj = __assign(__assign({}, getBlockNonActionBindings(block, options)), getBlockActionsAsBindings(block, options));
@@ -328,8 +331,7 @@ var componentMappers = __assign(__assign({ Symbol: function (block, options) {
             _a[options.preserveTextBlocks ? 'innerHTML' : '_text'] = wrapBindingIfNeeded(blockBindings['component.options.text'], options),
             _a);
         var innerProperties = (_b = {},
-            _b[options.preserveTextBlocks ? 'innerHTML' : '_text'] = block.component
-                .options.text,
+            _b[options.preserveTextBlocks ? 'innerHTML' : '_text'] = block.component.options.text,
             _b);
         if (options.preserveTextBlocks) {
             return (0, create_mitosis_node_1.createMitosisNode)({
@@ -554,15 +556,7 @@ var getHooks = function (content) {
 function extractStateHook(code) {
     var types = babel.types;
     var state = {};
-    var ast = babel.parse(code, {
-        presets: [[tsPreset, { isTSX: true, allExtensions: true }]],
-        plugins: [[decorators, { legacy: true }], jsxPlugin],
-    });
-    var body = types.isFile(ast)
-        ? ast.program.body
-        : types.isProgram(ast)
-            ? ast.body
-            : [];
+    var body = parseCode(code);
     var newBody = body.slice();
     for (var i = 0; i < body.length; i++) {
         var statement = body[i];
@@ -600,20 +594,13 @@ function extractStateHook(code) {
 exports.extractStateHook = extractStateHook;
 function convertExportDefaultToReturn(code) {
     var types = babel.types;
-    var ast = babel.parse(code, {
-        presets: [[tsPreset, { isTSX: true, allExtensions: true }]],
-        plugins: [[decorators, { legacy: true }], jsxPlugin],
-    });
-    var body = types.isFile(ast)
-        ? ast.program.body
-        : types.isProgram(ast)
-            ? ast.body
-            : [];
+    var body = parseCode(code);
     var newBody = body.slice();
     for (var i = 0; i < body.length; i++) {
         var statement = body[i];
         if (types.isExportDefaultDeclaration(statement)) {
-            if (types.isCallExpression(statement.declaration)) {
+            if (types.isCallExpression(statement.declaration) ||
+                types.isExpression(statement.declaration)) {
                 newBody[i] = types.returnStatement(statement.declaration);
             }
         }
@@ -621,6 +608,32 @@ function convertExportDefaultToReturn(code) {
     return (0, generator_1.default)(types.program(newBody)).code || '';
 }
 exports.convertExportDefaultToReturn = convertExportDefaultToReturn;
+function parseCode(code) {
+    var ast = babel.parse(code, {
+        presets: [[tsPreset, { isTSX: true, allExtensions: true }]],
+        plugins: [[decorators, { legacy: true }], jsxPlugin],
+    });
+    var body = babel.types.isFile(ast)
+        ? ast.program.body
+        : babel.types.isProgram(ast)
+            ? ast.body
+            : [];
+    return body;
+}
+/**
+ * Returns `true` if the `code` is a valid expression. (vs a statement)
+ */
+function isExpression(code) {
+    try {
+        var body = parseCode(code);
+        return (body.length == 1 &&
+            (babel.types.isExpression(body[0]) ||
+                babel.types.isExpressionStatement(body[0])));
+    }
+    catch (e) {
+        return false;
+    }
+}
 // TODO: maybe this should be part of the builder -> Mitosis part
 function extractSymbols(json) {
     var _a, _b, _c, _d;
@@ -660,15 +673,14 @@ function extractSymbols(json) {
         subComponents: subComponents,
     };
 }
-var createBuilderElement = function (options) { return (__assign({ '@type': '@builder.io/sdk:Element', id: 'builder-' +
-        Math.random()
-            .toString(36)
-            .split('.')[1] }, options)); };
+var createBuilderElement = function (options) { return (__assign({ '@type': '@builder.io/sdk:Element', id: 'builder-' + Math.random().toString(36).split('.')[1] }, options)); };
 exports.createBuilderElement = createBuilderElement;
-var isBuilderElement = function (el) { var _a; return ((_a = el) === null || _a === void 0 ? void 0 : _a['@type']) === '@builder.io/sdk:Element'; };
+var isBuilderElement = function (el) {
+    return (el === null || el === void 0 ? void 0 : el['@type']) === '@builder.io/sdk:Element';
+};
 exports.isBuilderElement = isBuilderElement;
 var builderContentPartToMitosisComponent = function (builderContent, options) {
-    var _a, _b, _c, _d, _e, _f;
+    var _a, _b, _c, _d, _e, _f, _g, _h;
     if (options === void 0) { options = {}; }
     builderContent = (0, fast_clone_1.fastClone)(builderContent);
     (0, traverse_1.default)(builderContent).forEach(function (elem) {
@@ -697,7 +709,7 @@ var builderContentPartToMitosisComponent = function (builderContent, options) {
             }
         }
     });
-    var _g = extractStateHook(((_a = builderContent === null || builderContent === void 0 ? void 0 : builderContent.data) === null || _a === void 0 ? void 0 : _a.tsCode) || ((_b = builderContent === null || builderContent === void 0 ? void 0 : builderContent.data) === null || _b === void 0 ? void 0 : _b.jsCode) || ''), state = _g.state, code = _g.code;
+    var _j = extractStateHook(((_a = builderContent === null || builderContent === void 0 ? void 0 : builderContent.data) === null || _a === void 0 ? void 0 : _a.tsCode) || ((_b = builderContent === null || builderContent === void 0 ? void 0 : builderContent.data) === null || _b === void 0 ? void 0 : _b.jsCode) || ''), state = _j.state, code = _j.code;
     var customCode = convertExportDefaultToReturn(code);
     var parsed = getHooks(builderContent);
     var componentJson = (0, create_mitosis_component_1.createMitosisComponent)({
@@ -706,12 +718,16 @@ var builderContentPartToMitosisComponent = function (builderContent, options) {
                 httpRequests: (_c = builderContent.data) === null || _c === void 0 ? void 0 : _c.httpRequests,
             },
         },
-        state: (parsed === null || parsed === void 0 ? void 0 : parsed.state) || __assign(__assign({}, state), (_d = builderContent.data) === null || _d === void 0 ? void 0 : _d.state),
-        hooks: __assign({}, ((((_e = parsed === null || parsed === void 0 ? void 0 : parsed.hooks.onMount) === null || _e === void 0 ? void 0 : _e.code) ||
+        inputs: (_e = (_d = builderContent.data) === null || _d === void 0 ? void 0 : _d.inputs) === null || _e === void 0 ? void 0 : _e.map(function (input) { return ({
+            name: input.name,
+            defaultValue: input.defaultValue,
+        }); }),
+        state: (parsed === null || parsed === void 0 ? void 0 : parsed.state) || __assign(__assign({}, state), (_f = builderContent.data) === null || _f === void 0 ? void 0 : _f.state),
+        hooks: __assign({}, ((((_g = parsed === null || parsed === void 0 ? void 0 : parsed.hooks.onMount) === null || _g === void 0 ? void 0 : _g.code) ||
             (customCode && { code: customCode })) && {
             onMount: (parsed === null || parsed === void 0 ? void 0 : parsed.hooks.onMount) || { code: customCode },
         })),
-        children: (((_f = builderContent.data) === null || _f === void 0 ? void 0 : _f.blocks) || [])
+        children: (((_h = builderContent.data) === null || _h === void 0 ? void 0 : _h.blocks) || [])
             .filter(function (item) {
             var _a, _b;
             if ((_b = (_a = item.properties) === null || _a === void 0 ? void 0 : _a.src) === null || _b === void 0 ? void 0 : _b.includes('/api/v1/pixel')) {

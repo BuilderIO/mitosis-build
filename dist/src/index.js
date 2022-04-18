@@ -1,7 +1,11 @@
 "use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -17,13 +21,13 @@ var useState = function (obj) { return obj; };
 exports.useState = useState;
 var useRef = function () { return null; };
 exports.useRef = useRef;
-var useContext = function (key) { return null; };
+var useContext = function (key) {
+    return null;
+};
 exports.useContext = useContext;
 var createContext = function (value) { return null; };
 exports.createContext = createContext;
-var setContext = function (key, value) {
-    return null;
-};
+var setContext = function (key, value) { };
 exports.setContext = setContext;
 var onMount = function (fn) { return null; };
 exports.onMount = onMount;
@@ -58,6 +62,7 @@ __exportStar(require("./generators/qwik/index"), exports);
 __exportStar(require("./symbols/symbol-processor"), exports);
 __exportStar(require("./generators/html"), exports);
 __exportStar(require("./generators/svelte"), exports);
+__exportStar(require("./generators/stencil"), exports);
 __exportStar(require("./generators/mitosis"), exports);
 __exportStar(require("./generators/template"), exports);
 __exportStar(require("./generators/swift-ui"), exports);

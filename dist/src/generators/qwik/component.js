@@ -10,6 +10,15 @@ var __assign = (this && this.__assign) || function () {
     };
     return __assign.apply(this, arguments);
 };
+var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
+    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
+        if (ar || !(i in from)) {
+            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+            ar[i] = from[i];
+        }
+    }
+    return to.concat(ar || Array.prototype.slice.call(from));
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.addCommonStyles = exports.renderUseLexicalScope = exports.addComponent = exports.createFileSet = void 0;
 var compile_away_builder_components_1 = require("../../plugins/compile-away-builder-components");
@@ -74,8 +83,7 @@ function addComponent(fileSet, component, opts) {
         }
     }
     addComponentOnMount(componentFile, onRenderFile, componentName, component, useStyles);
-    componentFile.exportConst(componentName, (0, src_generator_1.invoke)(componentFile.import(componentFile.qwikModule, 'componentFromQrl'), [generateQrl(componentFile, componentName + '_onMount')], ['any', 'any']));
-    onRenderFile.src.emit(src_generator_1.NL);
+    componentFile.exportConst(componentName, (0, src_generator_1.invoke)(componentFile.import(componentFile.qwikModule, 'componentQrl'), [generateQrl(componentFile, componentName + '_onMount')], ['any', 'any']));
     var directives = new Map();
     onRenderFile.exportConst(componentName + '_onRender', (0, src_generator_1.arrowFnBlock)([], [
         renderUseLexicalScope(onRenderFile),
@@ -91,12 +99,12 @@ function addComponent(fileSet, component, opts) {
 exports.addComponent = addComponent;
 function generateStyles(componentFile, styleFile, symbol, scoped) {
     return function () {
-        this.emit((0, src_generator_1.invoke)(componentFile.import(componentFile.qwikModule, scoped ? 'withScopedStylesFromQrl' : 'useStylesFromQrl'), [generateQrl(styleFile, symbol)]));
+        this.emit((0, src_generator_1.invoke)(componentFile.import(componentFile.qwikModule, scoped ? 'withScopedStylesQrl' : 'useStylesQrl'), [generateQrl(styleFile, symbol)]), ';');
     };
 }
 function renderUseLexicalScope(file) {
     return function () {
-        return this.emit('const state', src_generator_1.WS, '=', src_generator_1.WS, file.import(file.qwikModule, 'useLexicalScope').name, '()[0];');
+        return this.emit('const state=', file.import(file.qwikModule, 'useLexicalScope').name, '()[0]');
     };
 }
 exports.renderUseLexicalScope = renderUseLexicalScope;
@@ -109,11 +117,24 @@ function addCommonStyles(fileSet) {
 }
 exports.addCommonStyles = addCommonStyles;
 function addComponentOnMount(componentFile, onRenderFile, componentName, component, useStyles) {
+    var inputInitializer = [];
+    if (component.inputs) {
+        component.inputs.forEach(function (input) {
+            input.defaultValue !== undefined &&
+                inputInitializer.push('if(state.', input.name, '===undefined)state.', input.name, '=', JSON.stringify(input.defaultValue), ';');
+        });
+    }
     componentFile.exportConst(componentName + '_onMount', function () {
         var _this = this;
         this.emit((0, src_generator_1.arrowFnValue)(['state'], function () {
             var _a;
-            return _this.emit('{', (0, src_generator_1.iif)((_a = component.hooks.onMount) === null || _a === void 0 ? void 0 : _a.code), ';', useStyles, src_generator_1.NL, 'return ', generateQrl(onRenderFile, componentName + '_onRender', ['state']), ';', src_generator_1.UNINDENT, src_generator_1.NL, '}');
+            return _this.emit.apply(_this, __spreadArray(__spreadArray(['{'], inputInitializer, false), ['typeof __STATE__==="object"&&Object.assign(state,__STATE__[state.serverStateId]);',
+                (0, src_generator_1.iif)((_a = component.hooks.onMount) === null || _a === void 0 ? void 0 : _a.code),
+                ';',
+                useStyles,
+                'return ',
+                generateQrl(onRenderFile, componentName + '_onRender', ['state']),
+                ';}'], false));
         }));
     });
 }

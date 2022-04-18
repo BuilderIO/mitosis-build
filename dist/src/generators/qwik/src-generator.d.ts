@@ -1,8 +1,3 @@
-export declare const WS: string;
-export declare const RS = " ";
-export declare const NL = "\n";
-export declare const INDENT: string;
-export declare const UNINDENT: string;
 export interface SrcBuilderOptions {
     isPretty: boolean;
     isTypeScript: boolean;
@@ -28,14 +23,10 @@ export declare class File {
     toString(): string;
 }
 export declare class SrcBuilder {
-    isPretty: boolean;
     isTypeScript: boolean;
     isModule: boolean;
     isJSX: boolean;
     buf: string[];
-    wasLastNL: boolean;
-    nestingDepth: number;
-    offset: number;
     constructor(options: SrcBuilderOptions);
     import(module: string, symbols: string[]): this;
     emit(...values: any[]): this;

@@ -3,6 +3,37 @@ var __makeTemplateObject = (this && this.__makeTemplateObject) || function (cook
     if (Object.defineProperty) { Object.defineProperty(cooked, "raw", { value: raw }); } else { cooked.raw = raw; }
     return cooked;
 };
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
+var __rest = (this && this.__rest) || function (s, e) {
+    var t = {};
+    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+        t[p] = s[p];
+    if (s != null && typeof Object.getOwnPropertySymbols === "function")
+        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+                t[p[i]] = s[p[i]];
+        }
+    return t;
+};
+var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
+    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
+        if (ar || !(i in from)) {
+            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+            ar[i] = from[i];
+        }
+    }
+    return to.concat(ar || Array.prototype.slice.call(from));
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -31,9 +62,12 @@ var filter_empty_text_nodes_1 = require("../helpers/filter-empty-text-nodes");
 var json5_1 = __importDefault(require("json5"));
 var process_http_requests_1 = require("../helpers/process-http-requests");
 var patterns_1 = require("../helpers/patterns");
+var method_literal_prefix_1 = require("../constants/method-literal-prefix");
 function getContextNames(json) {
     return Object.keys(json.context.get);
 }
+var ON_UPDATE_HOOK_NAME = 'onUpdateHook';
+var getOnUpdateHookName = function (index) { return ON_UPDATE_HOOK_NAME + "".concat(index); };
 // TODO: migrate all stripStateAndPropsRefs to use this here
 // to properly replace context refs
 function processBinding(code, _options, json) {
@@ -114,42 +148,44 @@ function processForKeys(json, _options) {
         }
     });
 }
-var stringifyBinding = function (node) { return function (_a) {
-    var key = _a[0], value = _a[1];
-    if (key === '_spread') {
-        return '';
-    }
-    else if (key === 'class') {
-        return " :class=\"_classStringToObject(".concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(value, {
-            replaceWith: 'this.',
-        }), ")\" ");
-        // TODO: support dynamic classes as objects somehow like Vue requires
-        // https://vuejs.org/v2/guide/class-and-style.html
-    }
-    else {
-        // TODO: proper babel transform to replace. Util for this
-        var useValue = (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(value);
-        if (key.startsWith('on')) {
-            var event_1 = key.replace('on', '').toLowerCase();
-            if (event_1 === 'change' && node.name === 'input') {
-                event_1 = 'input';
-            }
-            // TODO: proper babel transform to replace. Util for this
-            return " @".concat(event_1, "=\"").concat((0, remove_surrounding_block_1.removeSurroundingBlock)(useValue
-                // TODO: proper reference parse and replacing
-                .replace(/event\./g, '$event.')), "\" ");
+var stringifyBinding = function (node) {
+    return function (_a) {
+        var key = _a[0], value = _a[1];
+        if (key === '_spread') {
+            return '';
         }
-        else if (key === 'ref') {
-            return " ref=\"".concat(useValue, "\" ");
-        }
-        else if (BINDING_MAPPERS[key]) {
-            return " ".concat(BINDING_MAPPERS[key], "=\"").concat(useValue, "\" ");
+        else if (key === 'class') {
+            return " :class=\"_classStringToObject(".concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(value, {
+                replaceWith: 'this.',
+            }), ")\" ");
+            // TODO: support dynamic classes as objects somehow like Vue requires
+            // https://vuejs.org/v2/guide/class-and-style.html
         }
         else {
-            return " :".concat(key, "=\"").concat(useValue, "\" ");
+            // TODO: proper babel transform to replace. Util for this
+            var useValue = (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(value);
+            if (key.startsWith('on')) {
+                var event_1 = key.replace('on', '').toLowerCase();
+                if (event_1 === 'change' && node.name === 'input') {
+                    event_1 = 'input';
+                }
+                // TODO: proper babel transform to replace. Util for this
+                return " @".concat(event_1, "=\"").concat((0, remove_surrounding_block_1.removeSurroundingBlock)(useValue
+                    // TODO: proper reference parse and replacing
+                    .replace(/event\./g, '$event.')), "\" ");
+            }
+            else if (key === 'ref') {
+                return " ref=\"".concat(useValue, "\" ");
+            }
+            else if (BINDING_MAPPERS[key]) {
+                return " ".concat(BINDING_MAPPERS[key], "=\"").concat(useValue, "\" ");
+            }
+            else {
+                return " :".concat(key, "=\"").concat(useValue, "\" ");
+            }
         }
-    }
-}; };
+    };
+};
 var blockToVue = function (node, options) {
     var nodeMapper = NODE_MAPPERS[node.name];
     if (nodeMapper) {
@@ -216,13 +252,45 @@ function getContextProvideString(component, options) {
     str += '}';
     return str;
 }
-var componentToVue = function (options) {
-    if (options === void 0) { options = {}; }
+/**
+ * This plugin handle `onUpdate` code that watches depdendencies.
+ * We need to apply this workaround to be able to watch specific dependencies in Vue 2: https://stackoverflow.com/a/45853349
+ *
+ * We add a `computed` property for the dependencies, and a matching `watch` function for the `onUpdate` code
+ */
+var onUpdatePlugin = function (options) { return ({
+    json: {
+        post: function (component) {
+            if (component.hooks.onUpdate) {
+                component.hooks.onUpdate
+                    .filter(function (hook) { var _a; return (_a = hook.deps) === null || _a === void 0 ? void 0 : _a.length; })
+                    .forEach(function (hook, index) {
+                    var _a;
+                    component.state[getOnUpdateHookName(index)] = "".concat(method_literal_prefix_1.methodLiteralPrefix, "get ").concat(getOnUpdateHookName(index), " () {\n            return {\n              ").concat((_a = hook.deps) === null || _a === void 0 ? void 0 : _a.slice(1, -1).split(',').map(function (dep, k) {
+                        var val = dep.trim();
+                        return "".concat(k, ": ").concat(val);
+                    }).join(','), "\n            }\n          }");
+                });
+            }
+        },
+    },
+}); };
+var BASE_OPTIONS = {
+    plugins: [onUpdatePlugin],
+};
+var mergeOptions = function (_a, _b) {
+    var _c = _a.plugins, pluginsA = _c === void 0 ? [] : _c, a = __rest(_a, ["plugins"]);
+    var _d = _b.plugins, pluginsB = _d === void 0 ? [] : _d, b = __rest(_b, ["plugins"]);
+    return (__assign(__assign(__assign({}, a), b), { plugins: __spreadArray(__spreadArray([], pluginsA, true), pluginsB, true) }));
+};
+var componentToVue = function (userOptions) {
+    if (userOptions === void 0) { userOptions = {}; }
     // hack while we migrate all other transpilers to receive/handle path
     // TO-DO: use `Transpiler` once possible
     return function (_a) {
-        var _b, _c, _d, _e, _f, _g;
+        var _b, _c, _d, _e, _f, _g, _h, _j;
         var component = _a.component, path = _a.path;
+        var options = mergeOptions(BASE_OPTIONS, userOptions);
         // Make a copy we can safely mutate, similar to babel's toolchain can be used
         component = (0, fast_clone_1.fastClone)(component);
         (0, process_http_requests_1.processHttpRequests)(component);
@@ -285,12 +353,14 @@ var componentToVue = function (options) {
             functionsString = functionsString.replace(/}\s*$/, "_classStringToObject(str) {\n        const obj = {};\n        if (typeof str !== 'string') { return obj }\n        const classNames = str.trim().split(/\\s+/); \n        for (const name of classNames) {\n          obj[name] = true;\n        } \n        return obj;\n      }  }");
         }
         var builderRegister = Boolean(options.builderRegister && component.meta.registerComponent);
-        var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    <template>\n      ", "\n    </template>\n    <script>\n      ", "\n      ", "\n\n      export default ", "{\n        ", "\n        ", "\n        ", "\n        ", "\n\n        ", "\n        ", "\n\n        ", "\n        ", "\n        ", "\n\n        ", "\n        ", "\n      }", "\n    </script>\n    ", "\n  "], ["\n    <template>\n      ", "\n    </template>\n    <script>\n      ", "\n      ", "\n\n      export default ", "{\n        ", "\n        ", "\n        ", "\n        ", "\n\n        ", "\n        ", "\n\n        ", "\n        ", "\n        ", "\n\n        ", "\n        ", "\n      }", "\n    </script>\n    ", "\n  "])), template, (0, render_imports_1.renderPreComponent)(component), component.meta.registerComponent
-            ? (_d = options.registerComponentPrepend) !== null && _d !== void 0 ? _d : ''
+        var onUpdateWithDeps = ((_d = component.hooks.onUpdate) === null || _d === void 0 ? void 0 : _d.filter(function (hook) { var _a; return (_a = hook.deps) === null || _a === void 0 ? void 0 : _a.length; })) || [];
+        var onUpdateWithoutDeps = ((_e = component.hooks.onUpdate) === null || _e === void 0 ? void 0 : _e.filter(function (hook) { var _a; return !((_a = hook.deps) === null || _a === void 0 ? void 0 : _a.length); })) || [];
+        var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    <template>\n      ", "\n    </template>\n    <script>\n      ", "\n      ", "\n\n      export default ", "{\n        ", "\n        ", "\n        ", "\n        ", "\n\n        ", "\n        ", "\n\n        ", "\n        ", "\n        ", "\n        ", "\n\n        ", "\n        ", "\n      }", "\n    </script>\n    ", "\n  "], ["\n    <template>\n      ", "\n    </template>\n    <script>\n      ", "\n      ", "\n\n      export default ", "{\n        ", "\n        ", "\n        ", "\n        ", "\n\n        ", "\n        ", "\n\n        ", "\n        ", "\n        ", "\n        ", "\n\n        ", "\n        ", "\n      }", "\n    </script>\n    ", "\n  "])), template, (0, render_imports_1.renderPreComponent)(component), component.meta.registerComponent
+            ? (_f = options.registerComponentPrepend) !== null && _f !== void 0 ? _f : ''
             : '', !builderRegister ? '' : 'registerComponent(', !component.name
             ? ''
-            : "name: '".concat(((_e = options.namePrefix) === null || _e === void 0 ? void 0 : _e.call(options, path))
-                ? ((_f = options.namePrefix) === null || _f === void 0 ? void 0 : _f.call(options, path)) + '-'
+            : "name: '".concat(((_g = options.namePrefix) === null || _g === void 0 ? void 0 : _g.call(options, path))
+                ? ((_h = options.namePrefix) === null || _h === void 0 ? void 0 : _h.call(options, path)) + '-'
                 : '').concat((0, lodash_1.kebabCase)(component.name), "',"), !componentsUsed.length
             ? ''
             : "components: { ".concat(componentsUsed
@@ -305,10 +375,18 @@ var componentToVue = function (options) {
             ? "provide() {\n                const _this = this;\n                return ".concat(getContextProvideString(component, options), "\n              },")
             : '', (0, lodash_1.size)(component.context.get)
             ? "inject: ".concat(getContextInjectString(component, options), ",")
-            : '', ((_g = component.hooks.onMount) === null || _g === void 0 ? void 0 : _g.code)
+            : '', ((_j = component.hooks.onMount) === null || _j === void 0 ? void 0 : _j.code)
             ? "mounted() {\n                ".concat(processBinding(component.hooks.onMount.code, options, component), "\n              },")
-            : '', component.hooks.onUpdate
-            ? "updated() {\n                ".concat(processBinding(component.hooks.onUpdate.code, options, component), "\n              },")
+            : '', onUpdateWithoutDeps.length
+            ? "updated() {\n            ".concat(onUpdateWithoutDeps
+                .map(function (hook) { return processBinding(hook.code, options, component); })
+                .join('\n'), "\n          },")
+            : '', onUpdateWithDeps.length
+            ? "watch: {\n            ".concat(onUpdateWithDeps
+                .map(function (hook, index) {
+                return "".concat(getOnUpdateHookName(index), "() {\n                  ").concat(processBinding(hook.code, options, component), "\n                  }\n                ");
+            })
+                .join(','), "\n          },")
             : '', component.hooks.onUnMount
             ? "unmounted() {\n                ".concat(processBinding(component.hooks.onUnMount.code, options, component), "\n              },")
             : '', getterString.length < 4

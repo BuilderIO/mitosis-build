@@ -24,6 +24,7 @@ var get_props_1 = require("../helpers/get-props");
 var lodash_1 = require("lodash");
 var strip_meta_properties_1 = require("../helpers/strip-meta-properties");
 var remove_surrounding_block_1 = require("../helpers/remove-surrounding-block");
+var indent_1 = require("../helpers/indent");
 var mappers = {
     Fragment: function (json, options) {
         return "<div>".concat(json.children
@@ -116,13 +117,10 @@ var blockToAngular = function (json, options) {
     return str;
 };
 exports.blockToAngular = blockToAngular;
-var indent = function (str, spaces) {
-    if (spaces === void 0) { spaces = 4; }
-    return str.replace(/\n([^\n])/g, "\n".concat(' '.repeat(spaces), "$1"));
-};
 var componentToAngular = function (options) {
     if (options === void 0) { options = {}; }
     return function (_a) {
+        var _b;
         var component = _a.component;
         // Make a copy we can safely mutate, similar to babel's toolchain
         var json = (0, fast_clone_1.fastClone)(component);
@@ -150,10 +148,8 @@ var componentToAngular = function (options) {
                 return (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(code, { replaceWith: 'this.' });
             },
         });
-        var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    import { Component ", "", " } from '@angular/core';\n    ", "\n\n    @Component({\n      selector: '", "',\n      template: `\n        ", "\n      `,\n      ", "\n    })\n    export default class ", " {\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n    }\n  "], ["\n    import { Component ", "", " } from '@angular/core';\n    ", "\n\n    @Component({\n      selector: '", "',\n      template: \\`\n        ", "\n      \\`,\n      ", "\n    })\n    export default class ", " {\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n    }\n  "])), refs.length ? ', ViewChild, ElementRef' : '', props.size ? ', Input' : '', (0, render_imports_1.renderPreComponent)(json), (0, lodash_1.kebabCase)(json.name || 'my-component'), indent(template, 8)
-            .replace(/`/g, '\\`')
-            .replace(/\$\{/g, '\\${'), css.length
-            ? "styles: [\n        `".concat(indent(css, 8), "`\n      ],")
+        var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    import { Component ", "", " } from '@angular/core';\n    ", "\n\n    @Component({\n      selector: '", "',\n      template: `\n        ", "\n      `,\n      ", "\n    })\n    export default class ", " {\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n    }\n  "], ["\n    import { Component ", "", " } from '@angular/core';\n    ", "\n\n    @Component({\n      selector: '", "',\n      template: \\`\n        ", "\n      \\`,\n      ", "\n    })\n    export default class ", " {\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n    }\n  "])), refs.length ? ', ViewChild, ElementRef' : '', props.size ? ', Input' : '', (0, render_imports_1.renderPreComponent)(json), (0, lodash_1.kebabCase)(json.name || 'my-component'), (0, indent_1.indent)(template, 8).replace(/`/g, '\\`').replace(/\$\{/g, '\\${'), css.length
+            ? "styles: [\n        `".concat((0, indent_1.indent)(css, 8), "`\n      ],")
             : '', component.name, Array.from(props)
             .map(function (item) { return "@Input() ".concat(item, ": any"); })
             .join('\n'), refs
@@ -162,10 +158,12 @@ var componentToAngular = function (options) {
             ? ''
             : "ngOnInit() {\n              ".concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(component.hooks.onMount.code, {
                 replaceWith: 'this.',
-            }), "\n            }"), !component.hooks.onUpdate
+            }), "\n            }"), !((_b = component.hooks.onUpdate) === null || _b === void 0 ? void 0 : _b.length)
             ? ''
-            : "ngAfterContentChecked() {\n              ".concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(component.hooks.onUpdate.code, {
-                replaceWith: 'this.',
+            : "ngAfterContentChecked() {\n              ".concat(component.hooks.onUpdate.map(function (hook) {
+                return (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(hook.code, {
+                    replaceWith: 'this.',
+                });
             }), "\n            }"), !component.hooks.onUnMount
             ? ''
             : "ngOnDestroy() {\n              ".concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(component.hooks.onUnMount.code, {

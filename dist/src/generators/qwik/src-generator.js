@@ -1,11 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.iteratorProperty = exports.lastProperty = exports.isStatement = exports.iif = exports.arrowFnValue = exports.arrowFnBlock = exports.invoke = exports.quote = exports.Block = exports.Imports = exports.Symbol = exports.SrcBuilder = exports.File = exports.UNINDENT = exports.INDENT = exports.NL = exports.RS = exports.WS = void 0;
-exports.WS = String.fromCharCode(29);
-exports.RS = ' ';
-exports.NL = '\n';
-exports.INDENT = String.fromCharCode(16);
-exports.UNINDENT = String.fromCharCode(17);
+exports.iteratorProperty = exports.lastProperty = exports.isStatement = exports.iif = exports.arrowFnValue = exports.arrowFnBlock = exports.invoke = exports.quote = exports.Block = exports.Imports = exports.Symbol = exports.SrcBuilder = exports.File = void 0;
+var standalone_1 = require("prettier/standalone");
 var File = /** @class */ (function () {
     function File(filename, options, qwikModule, qrlPrefix) {
         this.imports = new Imports();
@@ -62,8 +58,21 @@ var File = /** @class */ (function () {
                 srcImports.import(module, symbols);
             }
         });
-        srcImports.emit(exports.NL);
-        return srcImports.toString() + this.src.toString();
+        var source = srcImports.toString() + this.src.toString();
+        if (this.options.isPretty) {
+            source = (0, standalone_1.format)(source, {
+                parser: 'typescript',
+                plugins: [
+                    // To support running in browsers
+                    require('prettier/parser-typescript'),
+                    require('prettier/parser-postcss'),
+                    require('prettier/parser-html'),
+                    require('prettier/parser-babel'),
+                ],
+                htmlWhitespaceSensitivity: 'ignore',
+            });
+        }
+        return source;
     };
     return File;
 }());
@@ -76,10 +85,6 @@ var spaces = [''];
 var SrcBuilder = /** @class */ (function () {
     function SrcBuilder(options) {
         this.buf = [];
-        this.wasLastNL = false;
-        this.nestingDepth = 0;
-        this.offset = 0;
-        this.isPretty = options.isPretty;
         this.isTypeScript = options.isTypeScript;
         this.isModule = options.isModule;
         this.isJSX = options.isJSX;
@@ -87,7 +92,7 @@ var SrcBuilder = /** @class */ (function () {
     SrcBuilder.prototype.import = function (module, symbols) {
         var _this = this;
         if (this.isModule) {
-            this.emit('import', exports.WS, '{', exports.WS, symbols, exports.WS, '}', exports.WS, 'from', exports.WS, quote(module), ';', exports.NL);
+            this.emit('import{', symbols, '}from', quote(module), ';');
         }
         else {
             symbols.forEach(function (symbol) {
@@ -96,7 +101,6 @@ var SrcBuilder = /** @class */ (function () {
                 });
             });
         }
-        this.emit(exports.NL);
         return this;
     };
     SrcBuilder.prototype.emit = function () {
@@ -128,18 +132,18 @@ var SrcBuilder = /** @class */ (function () {
                 this.emitList(value);
             }
             else if (typeof value == 'object') {
-                this.emit('{', exports.NL, exports.INDENT);
+                this.emit('{');
                 var separator = false;
                 for (var key in value) {
                     if (Object.prototype.hasOwnProperty.call(value, key)) {
                         if (separator) {
-                            this.emit(',', exports.NL);
+                            this.emit(',');
                         }
-                        this.emit(possiblyQuotePropertyName(key)).emit(':', exports.WS, value[key]);
+                        this.emit(possiblyQuotePropertyName(key)).emit(':', value[key]);
                         separator = true;
                     }
                 }
-                this.emit(exports.NL, exports.UNINDENT, '}');
+                this.emit('}');
             }
             else {
                 throw new Error('Unexpected value: ' + value);
@@ -148,35 +152,20 @@ var SrcBuilder = /** @class */ (function () {
         return this;
     };
     SrcBuilder.prototype.push = function (value) {
-        if (value == exports.UNINDENT) {
-            this.nestingDepth--;
-        }
-        else if (value == exports.INDENT) {
-            this.nestingDepth++;
-        }
-        else {
-            if (value == ')' || value == ':' || value == ']' || value == '}') {
-                // clear last ',';
-                var index = this.buf.length - 1;
-                var ch = '';
-                while (index > 1 && isWhitespace((ch = this.buf[index]))) {
-                    index--;
-                }
-                if (ch == ',') {
-                    this.buf[index] = '';
-                }
-            }
-            if (this.isPretty && this.wasLastNL) {
-                while (spaces.length <= this.nestingDepth) {
-                    spaces.push(spaces[spaces.length - 1] + '  ');
-                }
-                this.buf.push(spaces[this.nestingDepth]);
-            }
-            this.wasLastNL = value === exports.NL;
-            if (this.isPretty || (value !== exports.WS && value !== exports.NL)) {
-                this.buf.push(value == exports.WS ? ' ' : value);
+        if (value.startsWith(')') ||
+            value.startsWith(':') ||
+            value.startsWith(']') ||
+            value.startsWith('}') ||
+            value.startsWith('?')) {
+            // clear last ',' or ';';
+            var index = this.buf.length - 1;
+            var ch = this.buf[index];
+            if (ch.endsWith(',') || ch.endsWith(';')) {
+                ch = ch.substring(0, ch.length - 1);
+                this.buf[index] = ch;
             }
         }
+        this.buf.push(value);
     };
     SrcBuilder.prototype.emitList = function (values, sep) {
         if (sep === void 0) { sep = ','; }
@@ -184,7 +173,7 @@ var SrcBuilder = /** @class */ (function () {
         for (var _i = 0, values_1 = values; _i < values_1.length; _i++) {
             var value = values_1[_i];
             if (separator) {
-                this.emit(sep, sep == ';' ? exports.NL : exports.WS);
+                this.emit(sep);
             }
             this.emit(value);
             separator = true;
@@ -204,9 +193,9 @@ var SrcBuilder = /** @class */ (function () {
         }
         this.emit(name);
         if (value !== undefined) {
-            this.emit(exports.WS, '=', exports.WS, value);
+            this.emit('=', value);
         }
-        this.emit(';', exports.NL);
+        this.emit(';');
         return this;
     };
     SrcBuilder.prototype.type = function (def) {
@@ -221,6 +210,7 @@ var SrcBuilder = /** @class */ (function () {
         }
     };
     SrcBuilder.prototype.jsxBegin = function (symbol, props, bindings) {
+        var self = this;
         if (symbol == 'div' && ('href' in props || 'href' in bindings)) {
             // HACK: if we contain href then we are `a` not `div`
             symbol = 'a';
@@ -229,91 +219,93 @@ var SrcBuilder = /** @class */ (function () {
             this.emit('<' + symbol);
         }
         else {
-            this.emit('h', '(', exports.INDENT, exports.NL, literalTagName(symbol), ',', exports.NL, '{', exports.NL, exports.INDENT);
+            this.emit('h(', literalTagName(symbol), ',{');
         }
-        var first = true;
         for (var key in props) {
             if (Object.prototype.hasOwnProperty.call(props, key) &&
                 !ignoreKey(key) &&
                 !Object.prototype.hasOwnProperty.call(bindings, key)) {
-                if (first) {
-                    first = false;
-                    this.isJSX && this.emit(exports.RS, exports.INDENT, exports.INDENT);
-                }
-                else {
-                    this.isJSX ? this.emit(exports.NL) : this.emit(',', exports.NL);
-                }
-                this.isJSX ? this.emit(key) : this.emit(possiblyQuotePropertyName(key));
-                this.isJSX ? this.emit('=') : this.emit(':', exports.WS);
-                this.emit(quote(props[key]));
+                emitJsxProp(possiblyQuotePropertyName(key), quote(props[key]));
             }
         }
-        for (var rawKey in bindings) {
+        var _loop_1 = function (rawKey) {
             if (Object.prototype.hasOwnProperty.call(bindings, rawKey) &&
                 !ignoreKey(rawKey)) {
-                var binding = bindings[rawKey];
+                var binding_1 = bindings[rawKey];
                 var key = lastProperty(rawKey);
-                if (first) {
-                    first = false;
-                    this.isJSX && this.emit(exports.RS, exports.INDENT, exports.INDENT);
-                }
-                else {
-                    this.isJSX ? this.emit(exports.NL) : this.emit(',', exports.NL);
-                }
-                this.isJSX ? this.emit(key) : this.emit(possiblyQuotePropertyName(key));
-                this.isJSX ? this.emit('={') : this.emit(':', exports.WS);
-                if (binding === props[key]) {
+                if (binding_1 === props[key]) {
                     // HACK: workaround for the fact that sometimes the `bindings` have string literals
                     // We assume that when the binding content equals prop content.
-                    binding = JSON.stringify(binding);
+                    binding_1 = quote(binding_1);
                 }
-                else if (typeof binding == 'string' && isStatement(binding)) {
-                    binding = iif(binding);
+                else if (typeof binding_1 == 'string' && isStatement(binding_1)) {
+                    binding_1 = iif(binding_1);
                 }
-                this.emit(binding);
-                this.isJSX ? this.emit('}') : this.emit();
+                if (key === 'hide' || key === 'show') {
+                    var _a = key == 'hide' ? ['"none"', '"inherit"'] : ['"inherit"', '"none"'], truthy_1 = _a[0], falsy_1 = _a[1];
+                    emitJsxProp('style', function () {
+                        this.emit('{display:', binding_1, '?', truthy_1, ':', falsy_1, '}');
+                    });
+                }
+                else {
+                    emitJsxProp(possiblyQuotePropertyName(key), binding_1);
+                }
             }
-        }
-        if (!first) {
-            this.isJSX && this.emit(exports.UNINDENT, exports.UNINDENT);
+        };
+        for (var rawKey in bindings) {
+            _loop_1(rawKey);
         }
         if (this.isJSX) {
-            this.emit('>', exports.INDENT, exports.NL);
+            this.emit('>');
         }
         else {
-            this.emit(exports.NL, exports.UNINDENT, '}', ',', exports.NL);
+            this.emit('},');
+        }
+        function emitJsxProp(key, value) {
+            if (self.isJSX) {
+                self.emit(' ', key, '=');
+                if (typeof value == 'string' && value.startsWith('"')) {
+                    self.emit(value);
+                }
+                else {
+                    self.emit('{', value, '}');
+                }
+            }
+            else {
+                self.emit(key, ':', value, ',');
+            }
         }
     };
     SrcBuilder.prototype.jsxEnd = function (symbol) {
         if (this.isJSX) {
-            this.emit(exports.UNINDENT, '</', symbol, '>', exports.NL);
+            this.emit('</', symbol, '>');
         }
         else {
-            this.emit(exports.UNINDENT, ')', ',', exports.NL);
+            this.emit('),');
         }
     };
     SrcBuilder.prototype.jsxBeginFragment = function (symbol) {
         if (this.isJSX) {
-            this.emit('<>', exports.INDENT, exports.NL);
+            this.emit('<>');
         }
         else {
-            this.emit('h', '(', symbol.name, ',', exports.WS, 'null', ',', exports.INDENT, exports.NL);
+            this.emit('h(', symbol.name, ',null,');
         }
     };
     SrcBuilder.prototype.jsxEndFragment = function () {
         if (this.isJSX) {
-            this.emit(exports.UNINDENT, exports.NL, '</>');
+            this.emit('</>');
         }
         else {
-            this.emit(exports.UNINDENT, ')', exports.NL);
+            this.emit(')');
         }
     };
     SrcBuilder.prototype.jsxTextBinding = function (exp) {
         if (this.isJSX) {
-            this.emit('{', exp, '}', exports.NL);
+            this.emit('{', exp, '}');
         }
         else {
-            this.emit(exp, exports.NL);
+            this.emit(exp);
         }
     };
     SrcBuilder.prototype.toString = function () {
@@ -365,10 +357,16 @@ var Block = /** @class */ (function () {
 }());
 exports.Block = Block;
 function possiblyQuotePropertyName(key) {
-    return /^\w[\w\d]*$/.test(key) ? key : JSON.stringify(key);
+    return /^\w[\w\d]*$/.test(key) ? key : quote(key);
 }
 function quote(text) {
-    return JSON.stringify(text);
+    var string = JSON.stringify(text);
+    // So \u2028 is a line separator character and prettier treats it as such
+    // https://www.fileformat.info/info/unicode/char/2028/index.htm
+    // That means it can't be inside of a string, so we replace it with `\\u2028`.
+    // (see double `\\` vs `\`)
+    var parts = string.split('\u2028');
+    return parts.join('\\u2028');
 }
 exports.quote = quote;
 function invoke(symbol, args, typeParameters) {
@@ -381,22 +379,19 @@ function invoke(symbol, args, typeParameters) {
 exports.invoke = invoke;
 function arrowFnBlock(args, statements) {
     return function () {
-        this.emit('(', args, ')', exports.WS, '=>', exports.WS);
-        this.emit('{', exports.INDENT, exports.NL)
-            .emitList(statements, ';')
-            .emit(exports.UNINDENT, exports.NL, '}');
+        this.emit('(', args, ')=>{').emitList(statements, ';').emit('}');
     };
 }
 exports.arrowFnBlock = arrowFnBlock;
 function arrowFnValue(args, expression) {
     return function () {
-        this.emit('(', args, ')', exports.WS, '=>', exports.WS, expression);
+        this.emit('(', args, ')=>', expression);
     };
 }
 exports.arrowFnValue = arrowFnValue;
 function iif(code) {
     return function () {
-        code && this.emit('(()', exports.WS, '=>', exports.WS, '{', exports.WS, exports.NL, code, exports.NL, '}', ')()');
+        code && this.emit('(()=>{', code, '})()');
     };
 }
 exports.iif = iif;
@@ -409,9 +404,6 @@ function literalTagName(symbol) {
     }
     return symbol;
 }
-function isWhitespace(ch) {
-    return ch == '' || ch == exports.RS || ch == exports.NL;
-}
 /**
  * Returns `true` if the code is a statement (rather than expression).
  *
@@ -422,7 +414,8 @@ function isWhitespace(ch) {
  * it is not 100% but a good enough approximation
  */
 function isStatement(code) {
-    if (code.startsWith('(')) {
+    code = code.trim();
+    if (code.startsWith('(') || code.startsWith('{') || code.endsWith('}')) {
         // Code starting with `(` is most likely and IFF and hence is an expression.
         return false;
     }

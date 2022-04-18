@@ -1,13 +1,16 @@
 export * from './flow';
+export declare type Context<T> = {};
 export declare const useState: <T>(obj: T) => T;
 export declare const useRef: () => any;
-export declare const useContext: (key: any) => any;
-export declare const createContext: (value: {
+export declare const useContext: <T = {
     [key: string]: any;
-}) => any;
-export declare const setContext: (key: any, value: {
+}>(key: Context<T>) => T;
+export declare const createContext: <T = {
     [key: string]: any;
-}) => any;
+}>(value: T) => Context<T>;
+export declare const setContext: <T = {
+    [key: string]: any;
+}>(key: Context<T>, value: Partial<T>) => void;
 export declare const onMount: (fn: () => any) => any;
 export declare const onUpdate: (fn: () => any, deps?: any[] | undefined) => any;
 export declare const onCreate: (fn: () => any) => any;
@@ -33,6 +36,7 @@ export * from './generators/qwik/index';
 export * from './symbols/symbol-processor';
 export * from './generators/html';
 export * from './generators/svelte';
+export * from './generators/stencil';
 export * from './generators/mitosis';
 export * from './generators/template';
 export * from './generators/swift-ui';
