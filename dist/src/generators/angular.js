@@ -38,7 +38,7 @@ var blockToAngular = function (json, options) {
         return mappers[json.name](json, options);
     }
     if ((0, is_children_1.default)(json)) {
-        return "<ng-slot></ng-slot>";
+        return "<ng-content></ng-content>";
     }
     if (json.properties._text) {
         return json.properties._text;
