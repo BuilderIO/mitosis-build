@@ -236,7 +236,7 @@ var SrcBuilder = /** @class */ (function () {
                 if (binding_1 === props[key]) {
                     // HACK: workaround for the fact that sometimes the `bindings` have string literals
                     // We assume that when the binding content equals prop content.
-                    binding_1 = JSON.stringify(binding_1);
+                    binding_1 = quote(binding_1);
                 }
                 else if (typeof binding_1 == 'string' && isStatement(binding_1)) {
                     binding_1 = iif(binding_1);
@@ -357,10 +357,16 @@ var Block = /** @class */ (function () {
 }());
 exports.Block = Block;
 function possiblyQuotePropertyName(key) {
-    return /^\w[\w\d]*$/.test(key) ? key : JSON.stringify(key);
+    return /^\w[\w\d]*$/.test(key) ? key : quote(key);
 }
 function quote(text) {
-    return JSON.stringify(text);
+    var string = JSON.stringify(text);
+    // So \u2028 is a line separator character and prettier treats it as such
+    // https://www.fileformat.info/info/unicode/char/2028/index.htm
+    // That means it can't be inside of a string, so we replace it with `\\u2028`.
+    // (see double `\\` vs `\`)
+    var parts = string.split('\u2028');
+    return parts.join('\\u2028');
 }
 exports.quote = quote;
 function invoke(symbol, args, typeParameters) {
@@ -385,7 +391,7 @@ function arrowFnValue(args, expression) {
 exports.arrowFnValue = arrowFnValue;
 function iif(code) {
     return function () {
-        code && this.emit('(()=>{', code, '})();');
+        code && this.emit('(()=>{', code, '})()');
     };
 }
 exports.iif = iif;
