@@ -3,6 +3,17 @@ var __makeTemplateObject = (this && this.__makeTemplateObject) || function (cook
     if (Object.defineProperty) { Object.defineProperty(cooked, "raw", { value: raw }); } else { cooked.raw = raw; }
     return cooked;
 };
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -21,6 +32,8 @@ var strip_meta_properties_1 = require("../helpers/strip-meta-properties");
 var get_components_used_1 = require("../helpers/get-components-used");
 var traverse_1 = __importDefault(require("traverse"));
 var is_mitosis_node_1 = require("../helpers/is-mitosis-node");
+var filter_empty_text_nodes_1 = require("../helpers/filter-empty-text-nodes");
+var create_mitosis_node_1 = require("../helpers/create-mitosis-node");
 // Transform <foo.bar key="value" /> to <component :is="foo.bar" key="value" />
 function processDynamicComponents(json, options) {
     var found = false;
@@ -34,6 +47,13 @@ function processDynamicComponents(json, options) {
         }
     });
     return found;
+}
+function getContextString(component, options) {
+    var str = '';
+    for (var key in component.context.get) {
+        str += "\n      const ".concat(key, " = useContext(").concat(component.context.get[key].name, ");\n    ");
+    }
+    return str;
 }
 // This should really be a preprocessor mapping the `class` attribute binding based on what other values have
 // to make this more pluggable
@@ -90,7 +110,9 @@ var blockToSolid = function (json, options) {
     }
     if (json.name === 'For') {
         var needsWrapper = json.children.length !== 1;
-        return "<For each={".concat(json.bindings.each, "}>\n    {(").concat(json.properties._forName, ", index) =>\n      ").concat(needsWrapper ? '<>' : '', "\n        ").concat(json.children.map(function (child) { return blockToSolid(child, options); }), "}\n      ").concat(needsWrapper ? '</>' : '', "\n    </For>");
+        return "<For each={".concat(json.bindings.each, "}>\n    {(").concat(json.properties._forName, ", index) =>\n      ").concat(needsWrapper ? '<>' : '', "\n        ").concat(json.children
+            .filter(filter_empty_text_nodes_1.filterEmptyTextNodes)
+            .map(function (child) { return blockToSolid(child, options); }), "}\n      ").concat(needsWrapper ? '</>' : '', "\n    </For>");
     }
     var str = '';
     if (json.name === 'Fragment') {
@@ -128,7 +150,10 @@ var blockToSolid = function (json, options) {
     }
     str += '>';
     if (json.children) {
-        str += json.children.map(function (item) { return blockToSolid(item, options); }).join('\n');
+        str += json.children
+            .filter(filter_empty_text_nodes_1.filterEmptyTextNodes)
+            .map(function (item) { return blockToSolid(item, options); })
+            .join('\n');
     }
     if (json.name === 'Fragment') {
         str += '</>';
@@ -147,6 +172,18 @@ var getRefsString = function (json, refs) {
     }
     return str;
 };
+function addProviderComponents(json, options) {
+    for (var key in json.context.set) {
+        var _a = json.context.set[key], name_1 = _a.name, value = _a.value;
+        json.children = [
+            (0, create_mitosis_node_1.createMitosisNode)(__assign({ name: "".concat(name_1, ".Provider"), children: json.children }, (value && {
+                bindings: {
+                    value: (0, get_state_object_string_1.getMemberObjectString)(value),
+                },
+            }))),
+        ];
+    }
+}
 var componentToSolid = function (options) {
     if (options === void 0) { options = {}; }
     return function (_a) {
@@ -156,8 +193,9 @@ var componentToSolid = function (options) {
         if (options.plugins) {
             json = (0, plugins_1.runPreJsonPlugins)(json, options.plugins);
         }
+        // addProviderComponents(json, options);
         var componentHasStyles = (0, collect_styles_1.hasStyles)(json);
-        var addWrapper = json.children.length > 1;
+        var addWrapper = json.children.filter(filter_empty_text_nodes_1.filterEmptyTextNodes).length !== 1;
         if (options.plugins) {
             json = (0, plugins_1.runPostJsonPlugins)(json, options.plugins);
         }
@@ -168,13 +206,16 @@ var componentToSolid = function (options) {
         var componentsUsed = (0, get_components_used_1.getComponentsUsed)(json);
         var hasShowComponent = componentsUsed.has('Show');
         var hasForComponent = componentsUsed.has('For');
-        var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n\n    export default function ", "(props) {\n      ", "\n      \n      ", "\n\n      ", "\n\n      return (", "\n        ", "\n        ", ")\n    }\n\n  "], ["\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n\n    export default function ", "(props) {\n      ", "\n      \n      ", "\n\n      ", "\n\n      return (", "\n        ", "\n        ", ")\n    }\n\n  "])), !(hasShowComponent || hasForComponent)
+        var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n\n    export default function ", "(props) {\n      ", "\n      \n      ", "\n      ", "\n\n      ", "\n\n      return (", "\n        ", "\n        ", ")\n    }\n\n  "], ["\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n\n    export default function ", "(props) {\n      ", "\n      \n      ", "\n      ", "\n\n      ", "\n\n      return (", "\n        ", "\n        ", ")\n    }\n\n  "])), !(hasShowComponent || hasForComponent)
             ? ''
             : "import { \n          ".concat(!hasShowComponent ? '' : 'Show, ', "\n          ").concat(!hasForComponent ? '' : 'For, ', "\n          ").concat(!((_b = json.hooks.onMount) === null || _b === void 0 ? void 0 : _b.code) ? '' : 'onMount, ', "\n         } from 'solid-js';"), !foundDynamicComponents ? '' : "import { Dynamic } from 'solid-js/web';", !hasState ? '' : "import { createMutable } from 'solid-js/store';", !componentHasStyles
             ? ''
-            : "import { css } from \"solid-styled-components\";", (0, render_imports_1.renderPreComponent)(json), json.name, !hasState ? '' : "const state = createMutable(".concat(stateString, ");"), getRefsString(json), !((_c = json.hooks.onMount) === null || _c === void 0 ? void 0 : _c.code)
+            : "import { css } from \"solid-styled-components\";", (0, render_imports_1.renderPreComponent)(json), json.name, !hasState ? '' : "const state = createMutable(".concat(stateString, ");"), getRefsString(json), getContextString(json, options), !((_c = json.hooks.onMount) === null || _c === void 0 ? void 0 : _c.code)
             ? ''
-            : "onMount(() => { ".concat(json.hooks.onMount.code, " })"), addWrapper ? '<>' : '', json.children.map(function (item) { return blockToSolid(item, options); }).join('\n'), addWrapper ? '</>' : '');
+            : "onMount(() => { ".concat(json.hooks.onMount.code, " })"), addWrapper ? '<>' : '', json.children
+            .filter(filter_empty_text_nodes_1.filterEmptyTextNodes)
+            .map(function (item) { return blockToSolid(item, options); })
+            .join('\n'), addWrapper ? '</>' : '');
         if (options.plugins) {
             str = (0, plugins_1.runPreCodePlugins)(str, options.plugins);
         }

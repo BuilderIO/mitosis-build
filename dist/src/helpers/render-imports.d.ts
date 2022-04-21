@@ -1,2 +1,4 @@
-import { MitosisComponent } from '../types/mitosis-component';
-export declare const renderPreComponent: (component: MitosisComponent, target?: "react" | "template" | "angular" | "builder" | "customElement" | "html" | "mitosis" | "liquid" | "reactNative" | "solid" | "svelte" | "swift" | "webcomponent" | "vue" | undefined) => string;
+import { MitosisComponent, MitosisImport } from '../types/mitosis-component';
+export declare const renderImport: (theImport: MitosisImport) => string;
+export declare const renderImports: (imports: MitosisImport[]) => string;
+export declare const renderPreComponent: (component: MitosisComponent) => string;
