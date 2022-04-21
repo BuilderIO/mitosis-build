@@ -35,11 +35,27 @@ var plugins_1 = require("../modules/plugins");
 var is_children_1 = __importDefault(require("../helpers/is-children"));
 var strip_meta_properties_1 = require("../helpers/strip-meta-properties");
 var remove_surrounding_block_1 = require("../helpers/remove-surrounding-block");
+var getters_to_functions_1 = require("../helpers/getters-to-functions");
+var babel_transform_1 = require("../helpers/babel-transform");
+var function_1 = require("fp-ts/lib/function");
 var mappers = {
     Fragment: function (json, options) {
-        return "".concat(json.children
-            .map(function (item) { return (0, exports.blockToSvelte)(item, options); })
-            .join('\n'));
+        if (json.bindings.innerHTML) {
+            return BINDINGS_MAPPER.innerHTML(json, options);
+        }
+        else if (json.children.length > 0) {
+            return "".concat(json.children
+                .map(function (item) { return (0, exports.blockToSvelte)(item, options); })
+                .join('\n'));
+        }
+        else {
+            return '';
+        }
+    },
+};
+var BINDINGS_MAPPER = {
+    innerHTML: function (json, options) {
+        return "{@html ".concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(json.bindings.innerHTML), "}");
     },
 };
 var blockToSvelte = function (json, options) {
@@ -61,7 +77,7 @@ var blockToSvelte = function (json, options) {
     if (json.name === 'For') {
         str += "{#each ".concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(json.bindings.each, {
             includeState: options.stateType === 'variables',
-        }), " as ").concat(json.properties._forName, " }");
+        }), " as ").concat(json.properties._forName, ", index }");
         str += json.children.map(function (item) { return (0, exports.blockToSvelte)(item, options); }).join('\n');
         str += "{/each}";
     }
@@ -84,6 +100,9 @@ var blockToSvelte = function (json, options) {
             str += " ".concat(key, "=\"").concat(value, "\" ");
         }
         for (var key in json.bindings) {
+            if (key === 'innerHTML') {
+                continue;
+            }
             if (key === '_spread') {
                 continue;
             }
@@ -103,6 +122,14 @@ var blockToSvelte = function (json, options) {
             else {
                 str += " ".concat(key, "={").concat(useValue, "} ");
             }
+        }
+        // if we have innerHTML, it doesn't matter whether we have closing tags or not, or children or not.
+        // we use the innerHTML content as children and don't render the self-closing tag.
+        if (json.bindings.innerHTML) {
+            str += '>';
+            str += BINDINGS_MAPPER.innerHTML(json, options);
+            str += "</".concat(json.name, ">");
+            return str;
         }
         if (jsx_1.selfClosingTags.has(json.name)) {
             return str + ' />';
@@ -153,12 +180,13 @@ var componentToSvelte = function (options) {
         }
         var refs = Array.from((0, get_refs_1.getRefs)(json));
         useBindValue(json, useOptions);
+        (0, getters_to_functions_1.gettersToFunctions)(json);
         if (useOptions.plugins) {
             json = (0, plugins_1.runPostJsonPlugins)(json, useOptions.plugins);
         }
         var css = (0, collect_styles_1.collectCss)(json);
         (0, strip_meta_properties_1.stripMetaProperties)(json);
-        var dataString = (0, get_state_object_string_1.getStateObjectStringFromComponent)(json, {
+        var dataString = (0, function_1.pipe)((0, get_state_object_string_1.getStateObjectStringFromComponent)(json, {
             data: true,
             functions: false,
             getters: false,
@@ -169,8 +197,8 @@ var componentToSvelte = function (options) {
                     includeState: useOptions.stateType === 'variables',
                 });
             },
-        });
-        var getterString = (0, get_state_object_string_1.getStateObjectStringFromComponent)(json, {
+        }), babel_transform_1.babelTransformCode);
+        var getterString = (0, function_1.pipe)((0, get_state_object_string_1.getStateObjectStringFromComponent)(json, {
             data: false,
             getters: true,
             functions: false,
@@ -183,8 +211,8 @@ var componentToSvelte = function (options) {
                     includeState: useOptions.stateType === 'variables',
                 });
             },
-        });
-        var functionsString = (0, get_state_object_string_1.getStateObjectStringFromComponent)(json, {
+        }), babel_transform_1.babelTransformCode);
+        var functionsString = (0, function_1.pipe)((0, get_state_object_string_1.getStateObjectStringFromComponent)(json, {
             data: false,
             getters: false,
             functions: true,
@@ -195,12 +223,12 @@ var componentToSvelte = function (options) {
                     includeState: useOptions.stateType === 'variables',
                 });
             },
-        });
+        }), babel_transform_1.babelTransformCode);
         var hasData = dataString.length > 4;
         var props = Array.from((0, get_props_1.getProps)(json));
         var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    <script>\n      ", "\n      ", "\n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n    </script>\n\n    ", "\n\n    ", "\n  "], ["\n    <script>\n      ", "\n      ", "\n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n    </script>\n\n    ", "\n\n    ", "\n  "])), !((_b = json.hooks.onMount) === null || _b === void 0 ? void 0 : _b.code) ? '' : "import { onMount } from 'svelte'", !((_c = json.hooks.onUpdate) === null || _c === void 0 ? void 0 : _c.length)
             ? ''
-            : "import { afterUpdate } from 'svelte'", !((_d = json.hooks.onUnMount) === null || _d === void 0 ? void 0 : _d.code) ? '' : "import { onDestroy } from 'svelte'", (0, render_imports_1.renderPreComponent)(json), !hasData || useOptions.stateType === 'variables'
+            : "import { afterUpdate } from 'svelte'", !((_d = json.hooks.onUnMount) === null || _d === void 0 ? void 0 : _d.code) ? '' : "import { onDestroy } from 'svelte'", (0, render_imports_1.renderPreComponent)(json, 'svelte'), !hasData || useOptions.stateType === 'variables'
             ? ''
             : "import onChange from 'on-change'", refs
             .concat(props)

@@ -71,6 +71,7 @@ var getMemberObjectString = function (object, options) {
 exports.getMemberObjectString = getMemberObjectString;
 var getStateObjectStringFromComponent = function (component, options) {
     if (options === void 0) { options = {}; }
-    return (0, exports.getMemberObjectString)(component.state, options);
+    var stateObjectStr = (0, exports.getMemberObjectString)(component.state, options);
+    return stateObjectStr;
 };
 exports.getStateObjectStringFromComponent = getStateObjectStringFromComponent;

@@ -22,6 +22,15 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
+var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
+    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
+        if (ar || !(i in from)) {
+            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+            ar[i] = from[i];
+        }
+    }
+    return to.concat(ar || Array.prototype.slice.call(from));
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.babelTransformExpression = exports.babelTransformCode = exports.babelTransform = void 0;
 var babel = __importStar(require("@babel/core"));
@@ -35,7 +44,10 @@ var babelTransform = function (code, visitor) {
         configFile: false,
         babelrc: false,
         presets: [[tsPreset, { isTSX: true, allExtensions: true }]],
-        plugins: [[decorators, { legacy: true }], jsxPlugin, function () { return ({ visitor: visitor }); }],
+        plugins: __spreadArray([
+            [decorators, { legacy: true }],
+            jsxPlugin
+        ], (visitor ? [function () { return ({ visitor: visitor }); }] : []), true),
     });
 };
 exports.babelTransform = babelTransform;

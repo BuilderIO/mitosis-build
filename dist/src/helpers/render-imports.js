@@ -1,7 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.renderPreComponent = exports.renderImports = exports.renderImport = void 0;
-var getStarImport = function (theImport) {
+exports.renderPreComponent = void 0;
+var getStarImport = function (_a) {
+    var theImport = _a.theImport;
     for (var key in theImport.imports) {
         var value = theImport.imports[key];
         if (value === '*') {
@@ -10,7 +11,8 @@ var getStarImport = function (theImport) {
     }
     return null;
 };
-var getDefaultImport = function (theImport) {
+var getDefaultImport = function (_a) {
+    var theImport = _a.theImport;
     for (var key in theImport.imports) {
         var value = theImport.imports[key];
         if (value === 'default') {
@@ -19,14 +21,15 @@ var getDefaultImport = function (theImport) {
     }
     return null;
 };
-var renderImport = function (theImport) {
+var renderImport = function (_a) {
+    var theImport = _a.theImport, target = _a.target;
     var importString = 'import ';
-    var starImport = getStarImport(theImport);
+    var starImport = getStarImport({ theImport: theImport });
     if (starImport) {
         importString += " * as ".concat(starImport, " ");
     }
     else {
-        var defaultImport = getDefaultImport(theImport);
+        var defaultImport = getDefaultImport({ theImport: theImport });
         if (defaultImport) {
             importString += " ".concat(defaultImport, ", ");
         }
@@ -50,11 +53,14 @@ var renderImport = function (theImport) {
         }
         importString += ' } ';
     }
-    importString += " from '".concat(theImport.path, "';");
+    var path = target === 'svelte' && theImport.path.endsWith('.lite')
+        ? theImport.path.replace('.lite', '.svelte')
+        : theImport.path;
+    importString += " from '".concat(path, "';");
     return importString;
 };
-exports.renderImport = renderImport;
-var renderImports = function (imports) {
+var renderImports = function (_a) {
+    var imports = _a.imports, target = _a.target;
     var importString = '';
     for (var _i = 0, imports_1 = imports; _i < imports_1.length; _i++) {
         var theImport = imports_1[_i];
@@ -66,12 +72,9 @@ var renderImports = function (imports) {
         if (theImport.path.startsWith('@builder.io/mitosis')) {
             continue;
         }
-        importString += (0, exports.renderImport)(theImport) + '\n';
+        importString += renderImport({ theImport: theImport, target: target }) + '\n';
     }
     return importString;
 };
-exports.renderImports = renderImports;
-var renderPreComponent = function (component) {
-    return "\n    ".concat((0, exports.renderImports)(component.imports), "\n    ").concat(component.hooks.preComponent || '', "\n  ");
-};
+var renderPreComponent = function (component, target) { return "\n    ".concat(renderImports({ imports: component.imports, target: target }), "\n    ").concat(component.hooks.preComponent || '', "\n  "); };
 exports.renderPreComponent = renderPreComponent;
