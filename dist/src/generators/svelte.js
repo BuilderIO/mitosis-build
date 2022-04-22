@@ -39,13 +39,13 @@ var getters_to_functions_1 = require("../helpers/getters-to-functions");
 var babel_transform_1 = require("../helpers/babel-transform");
 var function_1 = require("fp-ts/lib/function");
 var mappers = {
-    Fragment: function (json, options) {
+    Fragment: function (json, options, parentComponent) {
         if (json.bindings.innerHTML) {
             return BINDINGS_MAPPER.innerHTML(json, options);
         }
         else if (json.children.length > 0) {
             return "".concat(json.children
-                .map(function (item) { return (0, exports.blockToSvelte)(item, options); })
+                .map(function (item) { return (0, exports.blockToSvelte)({ json: item, options: options, parentComponent: parentComponent }); })
                 .join('\n'));
         }
         else {
@@ -58,9 +58,11 @@ var BINDINGS_MAPPER = {
         return "{@html ".concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(json.bindings.innerHTML), "}");
     },
 };
-var blockToSvelte = function (json, options) {
-    if (mappers[json.name]) {
-        return mappers[json.name](json, options);
+var blockToSvelte = function (_a) {
+    var json = _a.json, options = _a.options, parentComponent = _a.parentComponent;
+    var tagName = json.name;
+    if (mappers[tagName]) {
+        return mappers[tagName](json, options, parentComponent);
     }
     if ((0, is_children_1.default)(json)) {
         return "<slot></slot>";
@@ -74,22 +76,29 @@ var blockToSvelte = function (json, options) {
         }), "}");
     }
     var str = '';
-    if (json.name === 'For') {
+    if (tagName === 'For') {
         str += "{#each ".concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(json.bindings.each, {
             includeState: options.stateType === 'variables',
         }), " as ").concat(json.properties._forName, ", index }");
-        str += json.children.map(function (item) { return (0, exports.blockToSvelte)(item, options); }).join('\n');
+        str += json.children
+            .map(function (item) { return (0, exports.blockToSvelte)({ json: item, options: options, parentComponent: parentComponent }); })
+            .join('\n');
         str += "{/each}";
     }
-    else if (json.name === 'Show') {
+    else if (tagName === 'Show') {
         str += "{#if ".concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(json.bindings.when, {
             includeState: options.stateType === 'variables',
         }), " }");
-        str += json.children.map(function (item) { return (0, exports.blockToSvelte)(item, options); }).join('\n');
+        str += json.children
+            .map(function (item) { return (0, exports.blockToSvelte)({ json: item, options: options, parentComponent: parentComponent }); })
+            .join('\n');
         str += "{/if}";
     }
     else {
-        str += "<".concat(json.name, " ");
+        if (parentComponent && tagName === parentComponent.name) {
+            tagName = 'svelte:self';
+        }
+        str += "<".concat(tagName, " ");
         if (json.bindings._spread) {
             str += "{...".concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(json.bindings._spread, {
                 includeState: options.stateType === 'variables',
@@ -131,16 +140,16 @@ var blockToSvelte = function (json, options) {
             str += "</".concat(json.name, ">");
             return str;
         }
-        if (jsx_1.selfClosingTags.has(json.name)) {
+        if (jsx_1.selfClosingTags.has(tagName)) {
             return str + ' />';
         }
         str += '>';
         if (json.children) {
             str += json.children
-                .map(function (item) { return (0, exports.blockToSvelte)(item, options); })
+                .map(function (item) { return (0, exports.blockToSvelte)({ json: item, options: options, parentComponent: parentComponent }); })
                 .join('\n');
         }
-        str += "</".concat(json.name, ">");
+        str += "</".concat(tagName, ">");
     }
     return str;
 };
@@ -232,7 +241,12 @@ var componentToSvelte = function (options) {
             ? ''
             : "import onChange from 'on-change'", refs
             .concat(props)
-            .map(function (name) { return "export let ".concat(name, ";"); })
+            .map(function (name) {
+            if (name === 'children') {
+                return '';
+            }
+            return "export let ".concat(name, ";");
+        })
             .join('\n'), functionsString.length < 4 ? '' : functionsString, getterString.length < 4 ? '' : getterString, useOptions.stateType === 'proxies'
             ? dataString.length < 4
                 ? ''
@@ -253,7 +267,15 @@ var componentToSvelte = function (options) {
             ? ''
             : "onDestroy(() => { ".concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(json.hooks.onUnMount.code, {
                 includeState: useOptions.stateType === 'variables',
-            }), " });"), json.children.map(function (item) { return (0, exports.blockToSvelte)(item, useOptions); }).join('\n'), !css.trim().length
+            }), " });"), json.children
+            .map(function (item) {
+            return (0, exports.blockToSvelte)({
+                json: item,
+                options: useOptions,
+                parentComponent: json,
+            });
+        })
+            .join('\n'), !css.trim().length
             ? ''
             : "<style>\n      ".concat(css, "\n    </style>"));
         if (useOptions.plugins) {
