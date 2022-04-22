@@ -193,7 +193,7 @@ var componentToSolid = function (options) {
         if (options.plugins) {
             json = (0, plugins_1.runPreJsonPlugins)(json, options.plugins);
         }
-        // addProviderComponents(json, options);
+        addProviderComponents(json, options);
         var componentHasStyles = (0, collect_styles_1.hasStyles)(json);
         var addWrapper = json.children.filter(filter_empty_text_nodes_1.filterEmptyTextNodes).length !== 1;
         if (options.plugins) {
