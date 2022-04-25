@@ -47,6 +47,7 @@ var strip_meta_properties_1 = require("../helpers/strip-meta-properties");
 var strip_state_and_props_refs_1 = require("../helpers/strip-state-and-props-refs");
 var plugins_1 = require("../modules/plugins");
 var jsx_1 = require("../parsers/jsx");
+var context_1 = require("./helpers/context");
 var react_native_1 = require("./react-native");
 var wrapInFragment = function (json) {
     return json.children.length !== 1;
@@ -289,10 +290,6 @@ function getContextString(component, options) {
     }
     return str;
 }
-function hasContext(component) {
-    return Boolean(Object.keys(component.context.get).length ||
-        Object.keys(component.context.set).length);
-}
 var getInitCode = function (json, options) {
     var _a;
     return processBinding(((_a = json.hooks.init) === null || _a === void 0 ? void 0 : _a.code) || '', options);
@@ -379,7 +376,7 @@ var _componentToReact = function (json, options, isSubComponent) {
     if (useStateCode && useStateCode.includes('useState')) {
         reactLibImports.add('useState');
     }
-    if (hasContext(json)) {
+    if ((0, context_1.hasContext)(json)) {
         reactLibImports.add('useContext');
     }
     if (refs.size) {

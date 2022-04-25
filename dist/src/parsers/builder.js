@@ -49,9 +49,7 @@ var capitalize_1 = require("../helpers/capitalize");
 var create_mitosis_component_1 = require("../helpers/create-mitosis-component");
 var create_mitosis_node_1 = require("../helpers/create-mitosis-node");
 var jsx_1 = require("./jsx");
-var jsxPlugin = require('@babel/plugin-syntax-jsx');
-var tsPreset = require('@babel/preset-typescript');
-var decorators = require('@babel/plugin-syntax-decorators');
+var parsers_1 = require("../helpers/parsers");
 // Omit some superflous styles that can come from Builder's web importer
 var styleOmitList = [
     'backgroundRepeatX',
@@ -182,7 +180,7 @@ var getBlockNonActionBindings = function (block, options) {
     if (options.includeBuilderExtras) {
         for (var key in obj) {
             if (!isValidBindingKey(key)) {
-                console.warn('Skipping invalid biding key:', key);
+                console.warn('Skipping invalid binding key:', key);
                 continue;
             }
             var value = obj[key];
@@ -209,7 +207,7 @@ var wrapBinding = function (value) {
     if (!(value.includes(';') || value.match(/(^|\s|;)return[^a-z0-9A-Z]/))) {
         return value;
     }
-    return "(() => {\n    try { ".concat(isExpression(value) ? 'return ' : '').concat(value, " }\n    catch (err) {\n      console.warn('Builder code error', err);\n    }\n  })()");
+    return "(() => {\n    try { ".concat((0, parsers_1.isExpression)(value) ? 'return ' : '').concat(value, " }\n    catch (err) {\n      console.warn('Builder code error', err);\n    }\n  })()");
 };
 var getBlockBindings = function (block, options) {
     var obj = __assign(__assign({}, getBlockNonActionBindings(block, options)), getBlockActionsAsBindings(block, options));
@@ -556,7 +554,7 @@ var getHooks = function (content) {
 function extractStateHook(code) {
     var types = babel.types;
     var state = {};
-    var body = parseCode(code);
+    var body = (0, parsers_1.parseCode)(code);
     var newBody = body.slice();
     for (var i = 0; i < body.length; i++) {
         var statement = body[i];
@@ -594,7 +592,7 @@ function extractStateHook(code) {
 exports.extractStateHook = extractStateHook;
 function convertExportDefaultToReturn(code) {
     var types = babel.types;
-    var body = parseCode(code);
+    var body = (0, parsers_1.parseCode)(code);
     var newBody = body.slice();
     for (var i = 0; i < body.length; i++) {
         var statement = body[i];
@@ -608,32 +606,6 @@ function convertExportDefaultToReturn(code) {
     return (0, generator_1.default)(types.program(newBody)).code || '';
 }
 exports.convertExportDefaultToReturn = convertExportDefaultToReturn;
-function parseCode(code) {
-    var ast = babel.parse(code, {
-        presets: [[tsPreset, { isTSX: true, allExtensions: true }]],
-        plugins: [[decorators, { legacy: true }], jsxPlugin],
-    });
-    var body = babel.types.isFile(ast)
-        ? ast.program.body
-        : babel.types.isProgram(ast)
-            ? ast.body
-            : [];
-    return body;
-}
-/**
- * Returns `true` if the `code` is a valid expression. (vs a statement)
- */
-function isExpression(code) {
-    try {
-        var body = parseCode(code);
-        return (body.length == 1 &&
-            (babel.types.isExpression(body[0]) ||
-                babel.types.isExpressionStatement(body[0])));
-    }
-    catch (e) {
-        return false;
-    }
-}
 // TODO: maybe this should be part of the builder -> Mitosis part
 function extractSymbols(json) {
     var _a, _b, _c, _d;

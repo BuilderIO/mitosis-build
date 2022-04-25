@@ -55,6 +55,7 @@ __exportStar(require("./generators/angular"), exports);
 __exportStar(require("./generators/context/react"), exports);
 __exportStar(require("./generators/context/solid"), exports);
 __exportStar(require("./generators/context/vue"), exports);
+__exportStar(require("./generators/context/svelte"), exports);
 __exportStar(require("./generators/react"), exports);
 __exportStar(require("./generators/solid"), exports);
 __exportStar(require("./generators/liquid"), exports);

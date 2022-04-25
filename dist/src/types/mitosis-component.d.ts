@@ -45,7 +45,6 @@ export declare type MitosisComponent = {
     imports: MitosisImport[];
     meta: JSONObject & {
         useMetadata?: JSONObject;
-        metadataHook?: JSONObject;
     };
     inputs: MitosisComponentInput[];
     state: JSONObject;

@@ -21,6 +21,23 @@ var getDefaultImport = function (_a) {
     }
     return null;
 };
+var transformImportPath = function (theImport, target) {
+    // We need to drop the `.lite` from context files, because the context generator does so as well.
+    if (theImport.path.endsWith('.context.lite')) {
+        return theImport.path.replace('.lite', '');
+    }
+    switch (target) {
+        case 'svelte':
+            if (theImport.path.endsWith('.lite'))
+                // all svelte components have `.svelte` extension
+                return theImport.path.replace('.lite', '.svelte');
+            else {
+                return theImport.path;
+            }
+        default:
+            return theImport.path;
+    }
+};
 var renderImport = function (_a) {
     var theImport = _a.theImport, target = _a.target;
     var importString = 'import ';
@@ -53,9 +70,7 @@ var renderImport = function (_a) {
         }
         importString += ' } ';
     }
-    var path = target === 'svelte' && theImport.path.endsWith('.lite')
-        ? theImport.path.replace('.lite', '.svelte')
-        : theImport.path;
+    var path = transformImportPath(theImport, target);
     importString += " from '".concat(path, "';");
     return importString;
 };

@@ -163,7 +163,7 @@ var componentToStencil = function (options) {
          *
          *    export default function ...
          */
-        ((_b = json.meta.metadataHook) === null || _b === void 0 ? void 0 : _b.tagName) || (0, dash_case_1.dashCase)(json.name), css.length
+        ((_b = json.meta.useMetadata) === null || _b === void 0 ? void 0 : _b.tagName) || (0, dash_case_1.dashCase)(json.name), css.length
             ? "styles: `\n        ".concat((0, indent_1.indent)(css, 8), "`,")
             : '', json.name, Array.from(props)
             .map(function (item) { return "@Prop() ".concat(item, ": any"); })

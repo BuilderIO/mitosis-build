@@ -7,8 +7,9 @@ export interface ToSvelteOptions extends BaseTranspilerOptions {
 interface BlockToSvelteProps {
     json: MitosisNode;
     options: ToSvelteOptions;
-    parentComponent?: MitosisComponent;
+    parentComponent: MitosisComponent;
 }
-export declare const blockToSvelte: ({ json, options, parentComponent, }: BlockToSvelteProps) => string;
+declare type BlockToSvelte = (props: BlockToSvelteProps) => string;
+export declare const blockToSvelte: BlockToSvelte;
 export declare const componentToSvelte: (options?: ToSvelteOptions) => Transpiler;
 export {};

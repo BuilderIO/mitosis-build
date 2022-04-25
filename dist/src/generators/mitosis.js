@@ -142,14 +142,15 @@ var componentToMitosis = function (toMitosisOptions) {
         var otherComponents = components.filter(function (item) { return !mitosisCoreComponents.includes(item); });
         var hasState = Boolean(Object.keys(component.state).length);
         var needsMitosisCoreImport = Boolean(hasState || refs.size || mitosisComponents.length);
+        var stringifiedUseMetadata = json5_1.default.stringify(component.meta.useMetadata);
         // TODO: smart only pull in imports as needed
         var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    ", "\n    ", "\n    ", "\n\n    ", "\n\n    export default function ", "(props) {\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      return (", "\n        ", "\n        ", ")\n    }\n\n  "], ["\n    ", "\n    ", "\n    ", "\n\n    ", "\n\n    export default function ", "(props) {\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      return (", "\n        ", "\n        ", ")\n    }\n\n  "])), !needsMitosisCoreImport
             ? ''
             : "import { ".concat(!hasState ? '' : 'useState, ', " ").concat(!refs.size ? '' : 'useRef, ', " ").concat(mitosisComponents.join(', '), " } from '@builder.io/mitosis';"), !otherComponents.length
             ? ''
-            : "import { ".concat(otherComponents.join(','), " } from '@components';"), (0, render_imports_1.renderPreComponent)(json), !component.meta.metadataHook
-            ? ''
-            : "".concat(jsx_1.METADATA_HOOK_NAME, "(").concat(json5_1.default.stringify(component.meta.metadataHook), ")"), component.name, !hasState
+            : "import { ".concat(otherComponents.join(','), " } from '@components';"), (0, render_imports_1.renderPreComponent)(json), stringifiedUseMetadata !== '{}'
+            ? "".concat(jsx_1.METADATA_HOOK_NAME, "(").concat(stringifiedUseMetadata, ")")
+            : '', component.name, !hasState
             ? ''
             : "const state = useState(".concat((0, get_state_object_string_1.getStateObjectStringFromComponent)(json), ");"), getRefsString(json), !((_b = json.hooks.onMount) === null || _b === void 0 ? void 0 : _b.code)
             ? ''
