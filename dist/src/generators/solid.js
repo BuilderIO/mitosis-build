@@ -34,6 +34,10 @@ var traverse_1 = __importDefault(require("traverse"));
 var is_mitosis_node_1 = require("../helpers/is-mitosis-node");
 var filter_empty_text_nodes_1 = require("../helpers/filter-empty-text-nodes");
 var create_mitosis_node_1 = require("../helpers/create-mitosis-node");
+var context_1 = require("./helpers/context");
+var babel_transform_1 = require("../helpers/babel-transform");
+var core_1 = require("@babel/core");
+var lodash_1 = require("lodash");
 // Transform <foo.bar key="value" /> to <component :is="foo.bar" key="value" />
 function processDynamicComponents(json, options) {
     var found = false;
@@ -142,7 +146,32 @@ var blockToSolid = function (json, options) {
             str += " ".concat(useKey, "={event => ").concat(value, "} ");
         }
         else {
-            str += " ".concat(key, "={").concat(value, "} ");
+            var useValue = value;
+            if (key === 'style') {
+                // Convert camelCase keys to kebab-case
+                // TODO: support more than top level objects, may need
+                // a runtime helper for expressions that are not a direct
+                // object literal, such as ternaries and other expression
+                // types
+                useValue = (0, babel_transform_1.babelTransformExpression)(value, {
+                    ObjectExpression: function (path) {
+                        // TODO: limit to top level objects only
+                        for (var _i = 0, _a = path.node.properties; _i < _a.length; _i++) {
+                            var property = _a[_i];
+                            if (core_1.types.isObjectProperty(property)) {
+                                if (core_1.types.isIdentifier(property.key) ||
+                                    core_1.types.isStringLiteral(property.key)) {
+                                    var key_1 = core_1.types.isIdentifier(property.key)
+                                        ? property.key.name
+                                        : property.key.value;
+                                    property.key = core_1.types.stringLiteral((0, lodash_1.kebabCase)(key_1));
+                                }
+                            }
+                        }
+                    },
+                });
+            }
+            str += " ".concat(key, "={").concat(useValue, "} ");
         }
     }
     if (jsx_1.selfClosingTags.has(json.name)) {
@@ -204,11 +233,12 @@ var componentToSolid = function (options) {
         var stateString = (0, get_state_object_string_1.getStateObjectStringFromComponent)(json);
         var hasState = Boolean(Object.keys(component.state).length);
         var componentsUsed = (0, get_components_used_1.getComponentsUsed)(json);
+        var componentHasContext = (0, context_1.hasContext)(json);
         var hasShowComponent = componentsUsed.has('Show');
         var hasForComponent = componentsUsed.has('For');
         var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n\n    export default function ", "(props) {\n      ", "\n      \n      ", "\n      ", "\n\n      ", "\n\n      return (", "\n        ", "\n        ", ")\n    }\n\n  "], ["\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n\n    export default function ", "(props) {\n      ", "\n      \n      ", "\n      ", "\n\n      ", "\n\n      return (", "\n        ", "\n        ", ")\n    }\n\n  "])), !(hasShowComponent || hasForComponent)
             ? ''
-            : "import { \n          ".concat(!hasShowComponent ? '' : 'Show, ', "\n          ").concat(!hasForComponent ? '' : 'For, ', "\n          ").concat(!((_b = json.hooks.onMount) === null || _b === void 0 ? void 0 : _b.code) ? '' : 'onMount, ', "\n         } from 'solid-js';"), !foundDynamicComponents ? '' : "import { Dynamic } from 'solid-js/web';", !hasState ? '' : "import { createMutable } from 'solid-js/store';", !componentHasStyles
+            : "import { \n          ".concat(!componentHasContext ? '' : 'useContext, ', "\n          ").concat(!hasShowComponent ? '' : 'Show, ', "\n          ").concat(!hasForComponent ? '' : 'For, ', "\n          ").concat(!((_b = json.hooks.onMount) === null || _b === void 0 ? void 0 : _b.code) ? '' : 'onMount, ', "\n         } from 'solid-js';"), !foundDynamicComponents ? '' : "import { Dynamic } from 'solid-js/web';", !hasState ? '' : "import { createMutable } from 'solid-js/store';", !componentHasStyles
             ? ''
             : "import { css } from \"solid-styled-components\";", (0, render_imports_1.renderPreComponent)(json), json.name, !hasState ? '' : "const state = createMutable(".concat(stateString, ");"), getRefsString(json), getContextString(json, options), !((_c = json.hooks.onMount) === null || _c === void 0 ? void 0 : _c.code)
             ? ''
@@ -216,6 +246,9 @@ var componentToSolid = function (options) {
             .filter(filter_empty_text_nodes_1.filterEmptyTextNodes)
             .map(function (item) { return blockToSolid(item, options); })
             .join('\n'), addWrapper ? '</>' : '');
+        // HACK: for some reason we are generating `state.state.foo` instead of `state.foo`
+        // need a full fix, but this unblocks a lot in the short term
+        str = str.replace(/state\.state\./g, 'state.');
         if (options.plugins) {
             str = (0, plugins_1.runPreCodePlugins)(str, options.plugins);
         }
