@@ -114,9 +114,11 @@ var blockToSolid = function (json, options) {
     }
     if (json.name === 'For') {
         var needsWrapper = json.children.length !== 1;
-        return "<For each={".concat(json.bindings.each, "}>\n    {(").concat(json.properties._forName, ", index) =>\n      ").concat(needsWrapper ? '<>' : '', "\n        ").concat(json.children
+        // The SolidJS `<For>` component has a special index() signal function.
+        // https://www.solidjs.com/docs/latest#%3Cfor%3E
+        return "<For each={".concat(json.bindings.each, "}>\n    {(").concat(json.properties._forName, ", _index) => {\n      const index = _index();\n      return ").concat(needsWrapper ? '<>' : '').concat(json.children
             .filter(filter_empty_text_nodes_1.filterEmptyTextNodes)
-            .map(function (child) { return blockToSolid(child, options); }), "}\n      ").concat(needsWrapper ? '</>' : '', "\n    </For>");
+            .map(function (child) { return blockToSolid(child, options); }), "}}\n      ").concat(needsWrapper ? '</>' : '', "\n    </For>");
     }
     var str = '';
     if (json.name === 'Fragment') {
@@ -236,7 +238,7 @@ var componentToSolid = function (options) {
         var componentHasContext = (0, context_1.hasContext)(json);
         var hasShowComponent = componentsUsed.has('Show');
         var hasForComponent = componentsUsed.has('For');
-        var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n\n    export default function ", "(props) {\n      ", "\n      \n      ", "\n      ", "\n\n      ", "\n\n      return (", "\n        ", "\n        ", ")\n    }\n\n  "], ["\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n\n    export default function ", "(props) {\n      ", "\n      \n      ", "\n      ", "\n\n      ", "\n\n      return (", "\n        ", "\n        ", ")\n    }\n\n  "])), !(hasShowComponent || hasForComponent)
+        var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n\n    function ", "(props) {\n      ", "\n      \n      ", "\n      ", "\n\n      ", "\n\n      return (", "\n        ", "\n        ", ")\n    }\n\n    export default ", ";\n  "], ["\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n\n    function ", "(props) {\n      ", "\n      \n      ", "\n      ", "\n\n      ", "\n\n      return (", "\n        ", "\n        ", ")\n    }\n\n    export default ", ";\n  "])), !(hasShowComponent || hasForComponent)
             ? ''
             : "import { \n          ".concat(!componentHasContext ? '' : 'useContext, ', "\n          ").concat(!hasShowComponent ? '' : 'Show, ', "\n          ").concat(!hasForComponent ? '' : 'For, ', "\n          ").concat(!((_b = json.hooks.onMount) === null || _b === void 0 ? void 0 : _b.code) ? '' : 'onMount, ', "\n         } from 'solid-js';"), !foundDynamicComponents ? '' : "import { Dynamic } from 'solid-js/web';", !hasState ? '' : "import { createMutable } from 'solid-js/store';", !componentHasStyles
             ? ''
@@ -245,7 +247,7 @@ var componentToSolid = function (options) {
             : "onMount(() => { ".concat(json.hooks.onMount.code, " })"), addWrapper ? '<>' : '', json.children
             .filter(filter_empty_text_nodes_1.filterEmptyTextNodes)
             .map(function (item) { return blockToSolid(item, options); })
-            .join('\n'), addWrapper ? '</>' : '');
+            .join('\n'), addWrapper ? '</>' : '', json.name);
         // HACK: for some reason we are generating `state.state.foo` instead of `state.foo`
         // need a full fix, but this unblocks a lot in the short term
         str = str.replace(/state\.state\./g, 'state.');
