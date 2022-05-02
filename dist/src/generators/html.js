@@ -167,12 +167,12 @@ var blockToHtml = function (json, options) {
         str += '</template>';
     }
     else if (json.name === 'Show') {
-        addOnChangeJs(elId, options, "el.style.display = ".concat(json.bindings.when.replace(/;$/, ''), " ? 'inline' : 'none'"));
-        str += "<span data-name=\"".concat(elId, "\">");
+        addOnChangeJs(elId, options, "\n      if(".concat(json.bindings.when.replace(/;$/, ''), ") {\n      \tconst clonedElement = el.content.cloneNode(true);\n        const endTag = document.createElement('template');\n        endTag.setAttribute('data-show', '").concat(elId, "-end');\n\t\t\t\t\n        el.after(endTag);\n        el.after(clonedElement)\n      } else {\n        if (this.querySelector(\"[data-show='").concat(elId, "-end']\") === null) {\n        \treturn;\n        }\n\n        let sibling = el.nextSibling;\n        const toBeRemoved = [];\n        while (sibling) {\n          toBeRemoved.push(sibling);\n          if (sibling?.dataset?.show === '").concat(elId, "-end') {\n          \ttoBeRemoved.forEach(sib => sib.remove());\n            return;\n          }        \n          sibling = sibling.nextSibling;\n        }\n      }     \n      "));
+        str += "<template data-name=\"".concat(elId, "\">");
         if (json.children) {
             str += json.children.map(function (item) { return blockToHtml(item, options); }).join('\n');
         }
-        str += '</span>';
+        str += '</template>';
     }
     else {
         str += "<".concat(json.name, " ");
