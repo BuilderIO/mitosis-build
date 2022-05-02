@@ -49,6 +49,14 @@ var plugins_1 = require("../modules/plugins");
 var jsx_1 = require("../parsers/jsx");
 var context_1 = require("./helpers/context");
 var react_native_1 = require("./react-native");
+/**
+ * If the root Mitosis component only has 1 child, and it is a `Show` node, then we need to wrap it in a fragment.
+ * Otherwise, we end up with invalid React render code.
+ *
+ */
+var isRootShowNode = function (json) {
+    return json.children.length === 1 && ['Show'].includes(json.children[0].name);
+};
 var wrapInFragment = function (json) {
     return json.children.length !== 1;
 };
@@ -387,7 +395,9 @@ var _componentToReact = function (json, options, isSubComponent) {
         ((_c = json.hooks.onUpdate) === null || _c === void 0 ? void 0 : _c.length)) {
         reactLibImports.add('useEffect');
     }
-    var wrap = wrapInFragment(json) || (componentHasStyles && stylesType === 'styled-jsx');
+    var wrap = wrapInFragment(json) ||
+        (componentHasStyles && stylesType === 'styled-jsx') ||
+        isRootShowNode(json);
     var nativeStyles = stylesType === 'react-native' &&
         componentHasStyles &&
         (0, react_native_1.collectReactNativeStyles)(json);
