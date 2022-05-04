@@ -1,1 +1,3 @@
-export default function ComponentWithContext(): JSX.Element;
+export default function ComponentWithContext(props: {
+    content: string;
+}): JSX.Element;

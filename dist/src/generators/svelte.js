@@ -69,7 +69,13 @@ var mappers = {
             includeState: options.stateType === 'variables',
         }), " }\n").concat(json.children
             .map(function (item) { return (0, exports.blockToSvelte)({ json: item, options: options, parentComponent: parentComponent }); })
-            .join('\n'), "\n{/if}");
+            .join('\n'), "\n\n  ").concat(json.meta.else
+            ? "\n  {:else}\n  ".concat((0, exports.blockToSvelte)({
+                json: json.meta.else,
+                options: options,
+                parentComponent: parentComponent,
+            }), "\n  ")
+            : '', "\n{/if}");
     },
 };
 var getContextCode = function (json) {
@@ -83,7 +89,9 @@ var setContextCode = function (json) {
     return Object.keys(contextSetters)
         .map(function (key) {
         var _a = contextSetters[key], value = _a.value, name = _a.name;
-        return "setContext(".concat(name, ".key, ").concat(value ? (0, get_state_object_string_1.getMemberObjectString)(value) : 'undefined', ");");
+        return "setContext(".concat(name, ".key, ").concat(value
+            ? (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)((0, get_state_object_string_1.getMemberObjectString)(value))
+            : 'undefined', ");");
     })
         .join('\n');
 };

@@ -196,9 +196,9 @@ var blockToVue = function (node, options) {
     }
     if (node.name === 'style') {
         // Vue doesn't allow <style>...</style> in templates, but does support the synonymous
-        // <component is="style">...</component>
+        // <component is="'style'">...</component>
         node.name = 'component';
-        node.bindings.is = 'style';
+        node.bindings.is = "'style'";
     }
     if (node.properties._text) {
         return "".concat(node.properties._text);
