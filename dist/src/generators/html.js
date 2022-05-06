@@ -10,6 +10,15 @@ var __assign = (this && this.__assign) || function () {
     };
     return __assign.apply(this, arguments);
 };
+var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
+    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
+        if (ar || !(i in from)) {
+            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+            ar[i] = from[i];
+        }
+    }
+    return to.concat(ar || Array.prototype.slice.call(from));
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -28,7 +37,6 @@ var get_state_object_string_1 = require("../helpers/get-state-object-string");
 var has_component_1 = require("../helpers/has-component");
 var is_component_1 = require("../helpers/is-component");
 var is_mitosis_node_1 = require("../helpers/is-mitosis-node");
-var replace_idenifiers_1 = require("../helpers/replace-idenifiers");
 var jsx_1 = require("../parsers/jsx");
 var strip_state_and_props_refs_1 = require("../helpers/strip-state-and-props-refs");
 var plugins_1 = require("../modules/plugins");
@@ -49,7 +57,7 @@ var needsSetAttribute = function (key) {
 var generateSetElementAttributeCode = function (key, useValue) {
     return needsSetAttribute(key)
         ? ";el.setAttribute(\"".concat(key, "\", ").concat(useValue, ");")
-        : ";el.".concat(updateKeyIfException(key), " = ").concat(useValue);
+        : ";el.".concat(updateKeyIfException(key), " = ").concat(useValue, ";");
 };
 var addUpdateAfterSet = function (json, options) {
     (0, traverse_1.default)(json).forEach(function (item) {
@@ -64,39 +72,21 @@ var addUpdateAfterSet = function (json, options) {
         }
     });
 };
-var getForNames = function (json) {
-    var names = [];
-    (0, traverse_1.default)(json).forEach(function (item) {
-        if ((0, is_mitosis_node_1.isMitosisNode)(item)) {
-            if (item.name === 'For') {
-                names.push(item.properties._forName);
-            }
-        }
-    });
-    return names;
-};
-var replaceForNameIdentifiers = function (json, options) {
-    // TODO: cache this. by reference? lru?
-    var forNames = getForNames(json);
-    (0, traverse_1.default)(json).forEach(function (item) {
-        if ((0, is_mitosis_node_1.isMitosisNode)(item)) {
-            for (var key in item.bindings) {
-                if (key === 'css' || key === '_forName') {
-                    continue;
-                }
-                var value = item.bindings[key];
-                if (typeof value === 'string') {
-                    item.bindings[key] = (0, replace_idenifiers_1.replaceIdentifiers)(value, forNames, function (name) {
-                        return "".concat(options.format === 'class' ? 'this.' : '', "getContext(el, \"").concat(name, "\")");
-                    });
-                }
-            }
-        }
-    });
+var addScopeVars = function (parentScopeVars, value, fn) {
+    return "".concat(parentScopeVars
+        .filter(function (scopeVar) {
+        return new RegExp(scopeVar).test(value);
+    })
+        .map(function (scopeVar) {
+        return fn(scopeVar);
+    })
+        .join('\n'));
 };
 var mappers = {
-    Fragment: function (json, options) {
-        return json.children.map(function (item) { return blockToHtml(item, options); }).join('\n');
+    Fragment: function (json, options, parentScopeVars) {
+        return json.children
+            .map(function (item) { return blockToHtml(item, options, parentScopeVars); })
+            .join('\n');
     },
 };
 var getId = function (json, options) {
@@ -131,7 +121,8 @@ var addOnChangeJs = function (id, options, code) {
     options.onChangeJsById[id] += code;
 };
 // TODO: spread support
-var blockToHtml = function (json, options) {
+var blockToHtml = function (json, options, parentScopeVars) {
+    if (parentScopeVars === void 0) { parentScopeVars = []; }
     var hasData = Object.keys(json.bindings).length;
     var elId = '';
     if (hasData) {
@@ -139,7 +130,7 @@ var blockToHtml = function (json, options) {
         json.properties['data-name'] = elId;
     }
     if (mappers[json.name]) {
-        return mappers[json.name](json, options);
+        return mappers[json.name](json, options, parentScopeVars);
     }
     if ((0, is_children_1.default)(json)) {
         return "<slot></slot>";
@@ -149,28 +140,41 @@ var blockToHtml = function (json, options) {
     }
     if (json.bindings._text) {
         // TO-DO: textContent might be better performance-wise
-        addOnChangeJs(elId, options, "el.innerText = ".concat(json.bindings._text, ";"));
-        return "<span data-name=\"".concat(elId, "\"><!-- ").concat(json.bindings._text.replace(/getContext\(el, "([^"]+)"\)/g, '$1'), " --></span>");
+        addOnChangeJs(elId, options, "\n      ".concat(addScopeVars(parentScopeVars, json.bindings._text, function (scopeVar) {
+            return "const ".concat(scopeVar, " = ").concat(options.format === 'class' ? 'this.' : '', "getContext(el, \"").concat(scopeVar, "\");");
+        }), "\n      ;el.innerText = ").concat(json.bindings._text, ";"));
+        return "<span data-name=\"".concat(elId, "\"><!-- ").concat(json.bindings._text, " --></span>");
     }
     var str = '';
     if (json.name === 'For') {
         var itemName = json.properties._forName;
+        var indexName = json.properties._indexName;
+        var collectionName = json.properties._collectionName;
+        var scopedVars_1 = __spreadArray(__spreadArray([], parentScopeVars, true), [
+            itemName,
+            indexName,
+            collectionName,
+        ], false).filter(Boolean);
         addOnChangeJs(elId, options, 
         // TODO: be smarter about rendering, deleting old items and adding new ones by
         // querying dom potentially
-        "\n        let array = ".concat(json.bindings.each, ";\n        let template = ").concat(options.format === 'class' ? 'this._root' : 'document', ".querySelector('[data-template-for=\"").concat(elId, "\"]');\n        ").concat(options.format === 'class' ? 'this.' : '', "renderLoop(el, array, template, \"").concat(itemName, "\");\n      "));
+        "\n        let array = ".concat(json.bindings.each, ";\n        let template = ").concat(options.format === 'class' ? 'this._root' : 'document', ".querySelector('[data-template-for=\"").concat(elId, "\"]');\n        ").concat(options.format === 'class' ? 'this.' : '', "renderLoop(el, array, template, ").concat(itemName ? "\"".concat(itemName, "\"") : 'undefined', ", ").concat(indexName ? "\"".concat(indexName, "\"") : 'undefined', ", ").concat(collectionName ? "\"".concat(collectionName, "\"") : 'undefined', ");\n      "));
         // TODO: decide on how to handle this...
         str += "\n      <span data-name=\"".concat(elId, "\"></span>\n      <template data-template-for=\"").concat(elId, "\">");
         if (json.children) {
-            str += json.children.map(function (item) { return blockToHtml(item, options); }).join('\n');
+            str += json.children
+                .map(function (item) { return blockToHtml(item, options, scopedVars_1); })
+                .join('\n');
         }
         str += '</template>';
     }
     else if (json.name === 'Show') {
-        addOnChangeJs(elId, options, "\n        const whenCondition = ".concat(json.bindings.when.replace(/;$/, ''), ";\n        if (whenCondition) {\n          this.showContent(el)\n        }\n      "));
+        addOnChangeJs(elId, options, "\n        const whenCondition = ".concat(json.bindings.when.replace(/;$/, ''), ";\n        if (whenCondition) {\n          ").concat(options.format === 'class' ? 'this.' : '', "showContent(el)\n        }\n      "));
         str += "<template data-name=\"".concat(elId, "\">");
         if (json.children) {
-            str += json.children.map(function (item) { return blockToHtml(item, options); }).join('\n');
+            str += json.children
+                .map(function (item) { return blockToHtml(item, options, parentScopeVars); })
+                .join('\n');
         }
         str += '</template>';
     }
@@ -209,18 +213,26 @@ var blockToHtml = function (json, options) {
                     event_1 = 'input';
                 }
                 var fnName = (0, lodash_1.camelCase)("on-".concat(elId, "-").concat(event_1));
+                var codeContent = (0, remove_surrounding_block_1.removeSurroundingBlock)(updateReferencesInCode(useValue, options));
                 options.js += "\n          // Event handler for '".concat(event_1, "' event on ").concat(elId, "\n          ").concat(options.format === 'class'
                     ? "this.".concat(fnName, " = (event) => {")
-                    : "function ".concat(fnName, " (event) {"), "\n            ").concat((0, remove_surrounding_block_1.removeSurroundingBlock)(updateReferencesInCode(useValue, options)), "\n          }\n        ");
+                    : "function ".concat(fnName, " (event) {"), "\n              ").concat(addScopeVars(parentScopeVars, codeContent, function (scopeVar) {
+                    return "const ".concat(scopeVar, " = ").concat(options.format === 'class' ? 'this.' : '', "getContext(event.currentTarget, \"").concat(scopeVar, "\");");
+                }), "\n            ").concat(codeContent, "\n          }\n        ");
                 var fnIdentifier = "".concat(options.format === 'class' ? 'this.' : '').concat(fnName);
                 addOnChangeJs(elId, options, "\n            ;el.removeEventListener('".concat(event_1, "', ").concat(fnIdentifier, ");\n            ;el.addEventListener('").concat(event_1, "', ").concat(fnIdentifier, ");\n          "));
             }
             else {
                 if (key === 'style') {
-                    addOnChangeJs(elId, options, ";Object.assign(el.style, ".concat(useValue, ");"));
+                    addOnChangeJs(elId, options, "\n            ".concat(addScopeVars(parentScopeVars, useValue, function (scopeVar) {
+                        return "const ".concat(scopeVar, " = ").concat(options.format === 'class' ? 'this.' : '', "getContext(el, \"").concat(scopeVar, "\");");
+                    }), "\n            ;Object.assign(el.style, ").concat(useValue, ");"));
                 }
                 else {
-                    addOnChangeJs(elId, options, generateSetElementAttributeCode(key, useValue));
+                    addOnChangeJs(elId, options, "\n            ".concat(addScopeVars(parentScopeVars, useValue, function (scopeVar) {
+                        // TODO: multiple loops may duplicate variable declarations
+                        return ";var ".concat(scopeVar, " = ").concat(options.format === 'class' ? 'this.' : '', "getContext(el, \"").concat(scopeVar, "\");");
+                    }), "\n            ").concat(generateSetElementAttributeCode(key, useValue), "\n            "));
                 }
             }
         }
@@ -229,7 +241,9 @@ var blockToHtml = function (json, options) {
         }
         str += '>';
         if (json.children) {
-            str += json.children.map(function (item) { return blockToHtml(item, options); }).join('\n');
+            str += json.children
+                .map(function (item) { return blockToHtml(item, options, parentScopeVars); })
+                .join('\n');
         }
         if (json.properties.innerHTML) {
             // Maybe put some kind of safety here for broken HTML such as no close tag
@@ -286,10 +300,10 @@ var componentToHtml = function (options) {
         if (options.plugins) {
             json = (0, plugins_1.runPreJsonPlugins)(json, options.plugins);
         }
-        replaceForNameIdentifiers(json, useOptions);
         addUpdateAfterSet(json, useOptions);
         var componentHasProps = (0, has_props_1.hasProps)(json);
         var hasLoop = (0, has_component_1.hasComponent)('For', json);
+        var hasShow = (0, has_component_1.hasComponent)('Show', json);
         if (options.plugins) {
             json = (0, plugins_1.runPostJsonPlugins)(json, options.plugins);
         }
@@ -313,7 +327,7 @@ var componentToHtml = function (options) {
                 valueMapper: function (value) {
                     return addUpdateAfterSetInCode(updateReferencesInCode(value, useOptions), useOptions);
                 },
-            }), ";\n        ").concat(componentHasProps ? "let props = {};" : '', "\n\n        ").concat(!hasChangeListeners
+            }), ";\n        ").concat(componentHasProps ? "let props = {};" : '', "\n        let nodesToDestroy = [];\n\n        function destroyAnyNodes() {\n          // destroy current view template refs before rendering again\n          nodesToDestroy.forEach(el => el.remove());\n          nodesToDestroy = [];\n        }\n        ").concat(!hasChangeListeners
                 ? ''
                 : "\n        \n        // Function to update data bindings and loops\n        // call update() when you mutate state and need the updates to reflect\n        // in the dom\n        function update() {\n          ".concat(Object.keys(useOptions.onChangeJsById)
                     .map(function (key) {
@@ -323,16 +337,18 @@ var componentToHtml = function (options) {
                     }
                     return "\n              document.querySelectorAll(\"[data-name='".concat(key, "']\").forEach((el, index) => {\n                ").concat(value, "\n              })\n            ");
                 })
-                    .join('\n\n'), "\n\n            ").concat(!((_c = json.hooks.onUpdate) === null || _c === void 0 ? void 0 : _c.length)
+                    .join('\n\n'), "\n\n            destroyAnyNodes();\n\n            ").concat(!((_c = json.hooks.onUpdate) === null || _c === void 0 ? void 0 : _c.length)
                     ? ''
                     : "\n                  ".concat(json.hooks.onUpdate.map(function (hook) {
                         return updateReferencesInCode(hook.code, useOptions);
                     }), " \n                  "), "\n        }\n\n        ").concat(useOptions.js, "\n\n        // Update with initial state on first load\n        update();\n        "), "\n\n        ").concat(!((_d = json.hooks.onMount) === null || _d === void 0 ? void 0 : _d.code)
                 ? ''
                 : // TODO: make prettier by grabbing only the function body
-                    "\n              // onMount\n              ".concat(updateReferencesInCode(addUpdateAfterSetInCode(json.hooks.onMount.code, useOptions), useOptions), " \n              "), "\n\n        ").concat(!hasLoop
+                    "\n              // onMount\n              ".concat(updateReferencesInCode(addUpdateAfterSetInCode(json.hooks.onMount.code, useOptions), useOptions), " \n              "), "\n        ").concat(!hasShow
                 ? ''
-                : "\n          // Helper to render loops\n          function renderLoop(el, array, template, itemName) {\n            el.innerHTML = '';\n            for (let value of array) {\n              let tmp = document.createElement('span');\n              tmp.innerHTML = template.innerHTML;\n              Array.from(tmp.children).forEach(function (child) {\n                contextMap.set(child, {\n                  ...contextMap.get(child),\n                  [itemName]: value\n                });\n                el.appendChild(child);\n              });\n            }\n          }\n\n          // Helper to pass context down for loops\n          let contextMap = new WeakMap();\n          function getContext(el, name) {\n            let parent = el;\n            do {\n              let context = contextMap.get(parent);\n              if (context && name in context) {\n                return context[name];\n              }\n            } while (parent = parent.parentNode)\n          }\n        ", "\n      })()\n      </script>\n    ");
+                : "\n          function showContent(el) {\n            // https://developer.mozilla.org/en-US/docs/Web/API/HTMLTemplateElement/content\n            // grabs the content of a node that is between <template> tags\n            // iterates through child nodes to register all content including text elements\n            // attaches the content after the template\n  \n  \n            const elementFragment = el.content.cloneNode(true);\n            const children = Array.from(elementFragment.childNodes)\n            children.forEach(child => {\n              ".concat(options.format === 'class' ? 'this.' : '', "nodesToDestroy.push(child);\n            });\n            el.after(elementFragment);\n          }\n  \n        "), "\n        ").concat(!hasLoop
+                ? ''
+                : "\n          // Helper to render loops\n          function renderLoop(el, array, template, itemName, itemIndex, collectionName) {\n            el.innerHTML = \"\";\n            for (let [index, value] of array.entries()) {\n              let tmp = document.createElement(\"span\");\n              tmp.innerHTML = template.innerHTML;\n              Array.from(tmp.children).forEach((child) => {\n                if (itemName !== undefined) {\n                  child['__' + itemName] = value;\n                }\n                if (itemIndex !== undefined) {\n                  child['__' + itemIndex] = index;\n                }\n                if (collectionName !== undefined) {\n                  child['__' + collectionName] = array;\n                }\n                el.appendChild(child);\n              });\n            }\n          }\n\n          function getContext(el, name) {\n            do {\n              let value = el['__' + name]\n              if (value !== undefined) {\n                return value\n              }\n            } while ((el = el.parentNode));\n          }\n        ", "\n      })()\n      </script>\n    ");
         }
         if (options.plugins) {
             str = (0, plugins_1.runPreCodePlugins)(str, options.plugins);
@@ -373,9 +389,9 @@ var componentToCustomElement = function (options) {
             json = (0, plugins_1.runPreJsonPlugins)(json, options.plugins);
         }
         var componentHasProps = (0, has_props_1.hasProps)(json);
-        replaceForNameIdentifiers(json, useOptions);
         addUpdateAfterSet(json, useOptions);
         var hasLoop = (0, has_component_1.hasComponent)('For', json);
+        var hasShow = (0, has_component_1.hasComponent)('Show', json);
         if (options.plugins) {
             json = (0, plugins_1.runPostJsonPlugins)(json, options.plugins);
         }
@@ -425,11 +441,11 @@ var componentToCustomElement = function (options) {
             },
         }), ";\n          ").concat(componentHasProps /* TODO: accept these as attributes/properties on the custom element */
             ? "this.props = {};"
-            : '', "\n\n          ").concat(!hasLoop
+            : '', "\n\n\n          // used to keep track of all nodes created by show/for\n          this.nodesToDestroy = [];\n\n          ").concat(useOptions.js, "\n\n          if (").concat((_b = json.meta.useMetadata) === null || _b === void 0 ? void 0 : _b.isAttachedToShadowDom, ") {\n            this.attachShadow({ mode: 'open' })\n          }\n        }\n\n\n        ").concat(!((_c = json.hooks.onUnMount) === null || _c === void 0 ? void 0 : _c.code)
             ? ''
-            : "\n            // Helper to pass context down for loops\n            this.contextMap = new WeakMap();\n          ", "\n\n          // used to keep track of all nodes created by show/for\n          this.nodesToDestroy = [];\n\n          ").concat(useOptions.js, "\n\n          if (").concat((_b = json.meta.useMetadata) === null || _b === void 0 ? void 0 : _b.isAttachedToShadowDom, ") {\n            this.attachShadow({ mode: 'open' })\n          }\n        }\n\n\n        ").concat(!((_c = json.hooks.onUnMount) === null || _c === void 0 ? void 0 : _c.code)
+            : "\n          disconnectedCallback() {\n            // onUnMount\n            ".concat(updateReferencesInCode(addUpdateAfterSetInCode(json.hooks.onUnMount.code, useOptions), useOptions), "\n            this.destroyAnyNodes(); // clean up nodes when component is destroyed\n          }\n          "), "\n\n        destroyAnyNodes() {\n          // destroy current view template refs before rendering again\n          this.nodesToDestroy.forEach(el => el.remove());\n          this.nodesToDestroy = [];\n        }\n\n        get _root() {\n          return this.shadowRoot || this;\n        }\n\n        connectedCallback() {\n          this._root.innerHTML = `\n      ").concat(html, "`;\n          this.onMount();\n          this.update();\n        }\n\n\n        ").concat(!hasShow
             ? ''
-            : "\n          disconnectedCallback() {\n            // onUnMount\n            ".concat(updateReferencesInCode(addUpdateAfterSetInCode(json.hooks.onUnMount.code, useOptions), useOptions), "\n            this.destroyAnyNodes(); // clean up nodes when component is destroyed\n          }\n          "), "\n\n        destroyAnyNodes() {\n          // destroy current view template refs before rendering again\n          this.nodesToDestroy.forEach(el => el.remove()) \n          this.nodesToDestroy = [];\n        }\n\n        get _root() {\n          return this.shadowRoot || this;\n        }\n\n        connectedCallback() {\n          this._root.innerHTML = `\n      ").concat(html, "`;\n          this.onMount();\n          this.update();\n        }\n\n\n  showContent(el) {\n    // https://developer.mozilla.org/en-US/docs/Web/API/HTMLTemplateElement/content\n    // grabs the content of a node that is between <template> tags\n    // iterates through child nodes to register all content including text elements\n    // attaches the content after the template\n\n\n    const elementFragment = el.content.cloneNode(true);\n    const children = Array.from(elementFragment.childNodes)\n    children.forEach(child => {\n      this.nodesToDestroy.push(child);\n    });\n    el.after(elementFragment);\n  }\n\n        onMount() {\n          ").concat(!((_d = json.hooks.onMount) === null || _d === void 0 ? void 0 : _d.code)
+            : "\n          showContent(el) {\n            // https://developer.mozilla.org/en-US/docs/Web/API/HTMLTemplateElement/content\n            // grabs the content of a node that is between <template> tags\n            // iterates through child nodes to register all content including text elements\n            // attaches the content after the template\n  \n  \n            const elementFragment = el.content.cloneNode(true);\n            const children = Array.from(elementFragment.childNodes)\n            children.forEach(child => {\n              this.nodesToDestroy.push(child);\n            });\n            el.after(elementFragment);\n          }", "\n\n        onMount() {\n          ").concat(!((_d = json.hooks.onMount) === null || _d === void 0 ? void 0 : _d.code)
             ? ''
             : // TODO: make prettier by grabbing only the function body
                 "\n                // onMount\n                ".concat(updateReferencesInCode(addUpdateAfterSetInCode(json.hooks.onMount.code, useOptions), useOptions), "\n                "), "\n        }\n\n        onUpdate() {\n          ").concat(!((_e = json.hooks.onUpdate) === null || _e === void 0 ? void 0 : _e.length)
@@ -446,7 +462,7 @@ var componentToCustomElement = function (options) {
         })
             .join('\n\n'), "\n        }\n\n        ").concat(!hasLoop
             ? ''
-            : "\n\n          // Helper to render loops\n          renderLoop(el, array, template, itemName) {\n            el.innerHTML = '';\n            for (let value of array) {\n              let tmp = document.createElement('span');\n              tmp.innerHTML = template.innerHTML;\n              Array.from(tmp.children).forEach((child) => {\n                this.contextMap.set(child, {\n                  ...this.contextMap.get(child),\n                  [itemName]: value\n                });\n                el.appendChild(child);\n              });\n            }\n          }\n\n          getContext(el, name) {\n            let parent = el;\n            do {\n              let context = this.contextMap.get(parent);\n              if (context && name in context) {\n                return context[name];\n              }\n            } while (parent = parent.parentNode || parent.host)\n          }\n        ", "\n      }\n\n      customElements.define('").concat(kebabName, "', ").concat(component.name, ");\n    ");
+            : "\n\n          // Helper to render loops\n          renderLoop(el, array, template, itemName, itemIndex, collectionName) {\n            el.innerHTML = \"\";\n            for (let [index, value] of array.entries()) {\n              let tmp = document.createElement(\"span\");\n              tmp.innerHTML = template.innerHTML;\n              Array.from(tmp.children).forEach((child) => {\n                if (itemName !== undefined) {\n                  child['__' + itemName] = value;\n                }\n                if (itemIndex !== undefined) {\n                  child['__' + itemIndex] = index;\n                }\n                if (collectionName !== undefined) {\n                  child['__' + collectionName] = array;\n                }\n                el.appendChild(child);\n              });\n            }\n          }\n        \n          getContext(el, name) {\n            do {\n              let value = el['__' + name]\n              if (value !== undefined) {\n                return value\n              }\n            } while ((el = el.parentNode));\n          }\n        ", "\n      }\n\n      customElements.define('").concat(kebabName, "', ").concat(component.name, ");\n    ");
         if (options.plugins) {
             str = (0, plugins_1.runPreCodePlugins)(str, options.plugins);
         }
