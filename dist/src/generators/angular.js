@@ -120,7 +120,7 @@ exports.blockToAngular = blockToAngular;
 var componentToAngular = function (options) {
     if (options === void 0) { options = {}; }
     return function (_a) {
-        var _b;
+        var _b, _c, _d, _e, _f, _g, _h;
         var component = _a.component;
         // Make a copy we can safely mutate, similar to babel's toolchain
         var json = (0, fast_clone_1.fastClone)(component);
@@ -128,6 +128,7 @@ var componentToAngular = function (options) {
             json = (0, plugins_1.runPreJsonPlugins)(json, options.plugins);
         }
         var props = (0, get_props_1.getProps)(component);
+        var hasOnInit = Boolean(((_b = component.hooks) === null || _b === void 0 ? void 0 : _b.onInit) || ((_c = component.hooks) === null || _c === void 0 ? void 0 : _c.onMount));
         var refs = Array.from((0, get_refs_1.getRefs)(json));
         (0, map_refs_1.mapRefs)(json, function (refName) { return "this.".concat(refName, ".nativeElement"); });
         if (options.plugins) {
@@ -154,11 +155,17 @@ var componentToAngular = function (options) {
             .map(function (item) { return "@Input() ".concat(item, ": any"); })
             .join('\n'), refs
             .map(function (refName) { return "@ViewChild('".concat(refName, "') ").concat(refName, ": ElementRef"); })
-            .join('\n'), !component.hooks.onMount
+            .join('\n'), !hasOnInit
             ? ''
-            : "ngOnInit() {\n              ".concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(component.hooks.onMount.code, {
-                replaceWith: 'this.',
-            }), "\n            }"), !((_b = component.hooks.onUpdate) === null || _b === void 0 ? void 0 : _b.length)
+            : "ngOnInit() {\n              ".concat(!((_d = component.hooks) === null || _d === void 0 ? void 0 : _d.onInit)
+                ? ''
+                : "\n                ".concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)((_e = component.hooks.onInit) === null || _e === void 0 ? void 0 : _e.code, {
+                    replaceWith: 'this.',
+                }), "\n                "), "\n              ").concat(!((_f = component.hooks) === null || _f === void 0 ? void 0 : _f.onMount)
+                ? ''
+                : "\n                ".concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)((_g = component.hooks.onMount) === null || _g === void 0 ? void 0 : _g.code, {
+                    replaceWith: 'this.',
+                }), "\n                "), "\n            }"), !((_h = component.hooks.onUpdate) === null || _h === void 0 ? void 0 : _h.length)
             ? ''
             : "ngAfterContentChecked() {\n              ".concat(component.hooks.onUpdate.map(function (hook) {
                 return (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(hook.code, {

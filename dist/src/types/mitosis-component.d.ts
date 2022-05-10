@@ -61,6 +61,7 @@ export declare type MitosisComponent = {
     };
     hooks: {
         init?: extendedHook;
+        onInit?: extendedHook;
         onMount?: extendedHook;
         onUnMount?: extendedHook;
         preComponent?: extendedHook;

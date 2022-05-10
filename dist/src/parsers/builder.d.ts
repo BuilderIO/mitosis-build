@@ -55,6 +55,7 @@ export declare const builderContentToMitosisComponent: (builderContent: BuilderC
         };
         hooks: {
             init?: import("..").extendedHook | undefined;
+            onInit?: import("..").extendedHook | undefined;
             onMount?: import("..").extendedHook | undefined;
             onUnMount?: import("..").extendedHook | undefined;
             preComponent?: import("..").extendedHook | undefined;
@@ -88,6 +89,7 @@ export declare const builderContentToMitosisComponent: (builderContent: BuilderC
     };
     hooks: {
         init?: import("..").extendedHook | undefined;
+        onInit?: import("..").extendedHook | undefined;
         onMount?: import("..").extendedHook | undefined;
         onUnMount?: import("..").extendedHook | undefined;
         preComponent?: import("..").extendedHook | undefined;

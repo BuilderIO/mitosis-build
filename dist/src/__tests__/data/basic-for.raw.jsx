@@ -6,6 +6,9 @@ function MyBasicForComponent() {
         name: 'PatrickJS',
         names: ['Steve', 'PatrickJS'],
     });
+    (0, mitosis_1.onMount)(function () {
+        console.log('onMount code');
+    });
     return (<div>
       <mitosis_1.For each={state.names}>
         {function (person) { return (<>
