@@ -4,12 +4,11 @@ export declare type MitosisNode = {
     name: string;
     meta: JSONObject;
     /**
-     * Key-value store of static values for DOM attributes.
+     * Key-value store of string values for DOM attributes.
      * ```js
      * {
-     *   disabled: false,
-     *   defaultValue: 'initial text`,
-     *   width: 100,
+     *   defaultValue: 'initial text',
+     *   width: '100px',
      * }
      * ```
      */
@@ -17,13 +16,14 @@ export declare type MitosisNode = {
         [key: string]: string | undefined;
     };
     /**
-     * Key-value store of _dynamic_ values for DOM attributes.
+     * Key-value store of expression values for DOM attributes. These are always represented as strings.
      *
      * ```js
      * {
-     *   disabled: state.isDisabled,
-     *   defaultValue: `${props.text} + ' initial'`,
-     *   width: props.width * 10,
+     *   disabled: "state.isDisabled",
+     *   defaultValue: "`${props.text} + ' initial'`",
+     *   width: "props.width * 10",
+     *   height: "100",
      * }
      * ```
      */
