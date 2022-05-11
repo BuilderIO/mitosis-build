@@ -6,5 +6,5 @@ export interface ToReactOptions extends BaseTranspilerOptions {
     format?: 'lite' | 'safe';
     type?: 'dom' | 'native';
 }
-export declare const blockToReact: (json: MitosisNode, options: ToReactOptions) => string;
+export declare const blockToReact: (json: MitosisNode, options: ToReactOptions, parentSlots?: any[] | undefined) => string;
 export declare const componentToReact: (reactOptions?: ToReactOptions) => Transpiler;

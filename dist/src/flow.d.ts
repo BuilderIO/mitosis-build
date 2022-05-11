@@ -11,7 +11,9 @@ export declare function For<T, U extends JSX.Element>(props: {
     children: (item: T, index: number) => U;
 }): any;
 export declare function Slot<T, U extends JSX.Element>(props: {
-    name: JSX.Element;
+    name?: JSX.Element;
+} | {
+    [key: string]: any;
 }): any;
 export declare function Show<T>(props: {
     when: T | undefined | null | false;

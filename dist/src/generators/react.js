@@ -22,6 +22,7 @@ exports.componentToReact = exports.blockToReact = void 0;
 var core_1 = require("@babel/core");
 var dedent_1 = __importDefault(require("dedent"));
 var json5_1 = __importDefault(require("json5"));
+var lodash_1 = require("lodash");
 var standalone_1 = require("prettier/standalone");
 var traverse_1 = __importDefault(require("traverse"));
 var function_literal_prefix_1 = require("../constants/function-literal-prefix");
@@ -61,7 +62,17 @@ var wrapInFragment = function (json) {
     return json.children.length !== 1;
 };
 var NODE_MAPPERS = {
-    Slot: function (json, options) {
+    Slot: function (json, options, parentSlots) {
+        if (!json.bindings.name) {
+            // TODO: update MitosisNode for simple code
+            var key = Object.keys(json.bindings).find(Boolean);
+            if (key && parentSlots) {
+                var propKey = (0, lodash_1.camelCase)('Slot' + key[0].toUpperCase() + key.substring(1));
+                parentSlots.push({ key: propKey, value: json.bindings[key] });
+                return '';
+            }
+            return "{".concat(processBinding('props.children', options), "}");
+        }
         var slotProp = processBinding(json.bindings.name, options).replace('name=', '');
         return "{".concat(slotProp, "}");
     },
@@ -97,9 +108,9 @@ var BINDING_MAPPERS = {
         ];
     },
 };
-var blockToReact = function (json, options) {
+var blockToReact = function (json, options, parentSlots) {
     if (NODE_MAPPERS[json.name]) {
-        return NODE_MAPPERS[json.name](json, options);
+        return NODE_MAPPERS[json.name](json, options, parentSlots);
     }
     if (json.properties._text) {
         var text = json.properties._text;
@@ -186,9 +197,23 @@ var blockToReact = function (json, options) {
         str += ' />';
         return str;
     }
+    // TODO: update MitosisNode for simple code
+    var needsToRenderSlots = [];
+    var childrenNodes = '';
+    if (json.children) {
+        childrenNodes = json.children
+            .map(function (item) { return (0, exports.blockToReact)(item, options, needsToRenderSlots); })
+            .join('\n');
+    }
+    if (needsToRenderSlots.length) {
+        needsToRenderSlots.forEach(function (_a) {
+            var key = _a.key, value = _a.value;
+            str += " ".concat(key, "={").concat(value, "} ");
+        });
+    }
     str += '>';
     if (json.children) {
-        str += json.children.map(function (item) { return (0, exports.blockToReact)(item, options); }).join('\n');
+        str += childrenNodes;
     }
     return str + "</".concat(json.name, ">");
 };

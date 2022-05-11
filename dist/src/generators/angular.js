@@ -45,6 +45,7 @@ var mappers = {
     },
 };
 var blockToAngular = function (json, options) {
+    var _a;
     if (options === void 0) { options = {}; }
     if (mappers[json.name]) {
         return mappers[json.name](json, options);
@@ -54,6 +55,10 @@ var blockToAngular = function (json, options) {
     }
     if (json.properties._text) {
         return json.properties._text;
+    }
+    if (/props\.slot/.test(json.bindings._text)) {
+        var selector = (0, lodash_1.kebabCase)((_a = json.bindings._text) === null || _a === void 0 ? void 0 : _a.replace('props.slot', ''));
+        return "<ng-content select=\"[".concat(selector, "]\"></ng-content>");
     }
     if (json.bindings._text) {
         return "{{".concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(json.bindings._text), "}}");
