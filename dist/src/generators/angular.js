@@ -31,6 +31,18 @@ var mappers = {
             .map(function (item) { return (0, exports.blockToAngular)(item, options); })
             .join('\n'), "</div>");
     },
+    Slot: function (json, options) {
+        return "<ng-content ".concat(Object.keys(json.bindings)
+            .map(function (binding) {
+            var _a;
+            if (binding === 'name') {
+                var selector = (0, lodash_1.kebabCase)((_a = json.bindings.name) === null || _a === void 0 ? void 0 : _a.replace('props.slot', ''));
+                return "select=\"[".concat(selector, "]\"");
+            }
+            return "".concat(json.bindings[binding]);
+        })
+            .join('\n'), "></ng-content>");
+    },
 };
 var blockToAngular = function (json, options) {
     if (options === void 0) { options = {}; }
@@ -47,6 +59,7 @@ var blockToAngular = function (json, options) {
         return "{{".concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(json.bindings._text), "}}");
     }
     var str = '';
+    var needsToRenderSlots = [];
     if (json.name === 'For') {
         str += "<ng-container *ngFor=\"let ".concat(json.properties._forName, " of ").concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(json.bindings.each), "\">");
         str += json.children
@@ -99,6 +112,11 @@ var blockToAngular = function (json, options) {
             else if (key === 'ref') {
                 str += " #".concat(useValue, " ");
             }
+            else if (key.startsWith('slot')) {
+                var lowercaseKey = key.replace('slot', '')[0].toLowerCase() +
+                    key.replace('slot', '').substring(1);
+                needsToRenderSlots.push("".concat(useValue.replace(/(\/\>)|\>/, " ".concat(lowercaseKey, ">"))));
+            }
             else {
                 str += " [".concat(key, "]=\"").concat(useValue, "\" ");
             }
@@ -107,6 +125,9 @@ var blockToAngular = function (json, options) {
             return str + ' />';
         }
         str += '>';
+        if (needsToRenderSlots.length > 0) {
+            str += needsToRenderSlots.map(function (el) { return el; }).join('');
+        }
         if (json.children) {
             str += json.children
                 .map(function (item) { return (0, exports.blockToAngular)(item, options); })
@@ -152,6 +173,7 @@ var componentToAngular = function (options) {
         var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    import { Component ", "", " } from '@angular/core';\n    ", "\n\n    @Component({\n      selector: '", "',\n      template: `\n        ", "\n      `,\n      ", "\n    })\n    export default class ", " {\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n    }\n  "], ["\n    import { Component ", "", " } from '@angular/core';\n    ", "\n\n    @Component({\n      selector: '", "',\n      template: \\`\n        ", "\n      \\`,\n      ", "\n    })\n    export default class ", " {\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n    }\n  "])), refs.length ? ', ViewChild, ElementRef' : '', props.size ? ', Input' : '', (0, render_imports_1.renderPreComponent)(json), (0, lodash_1.kebabCase)(json.name || 'my-component'), (0, indent_1.indent)(template, 8).replace(/`/g, '\\`').replace(/\$\{/g, '\\${'), css.length
             ? "styles: [\n        `".concat((0, indent_1.indent)(css, 8), "`\n      ],")
             : '', component.name, Array.from(props)
+            .filter(function (item) { return !item.startsWith('slot'); })
             .map(function (item) { return "@Input() ".concat(item, ": any"); })
             .join('\n'), refs
             .map(function (refName) { return "@ViewChild('".concat(refName, "') ").concat(refName, ": ElementRef"); })
@@ -167,11 +189,12 @@ var componentToAngular = function (options) {
                     replaceWith: 'this.',
                 }), "\n                "), "\n            }"), !((_h = component.hooks.onUpdate) === null || _h === void 0 ? void 0 : _h.length)
             ? ''
-            : "ngAfterContentChecked() {\n              ".concat(component.hooks.onUpdate.map(function (hook) {
-                return (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(hook.code, {
+            : "ngAfterContentChecked() {\n              ".concat(component.hooks.onUpdate.reduce(function (code, hook) {
+                code += (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(hook.code, {
                     replaceWith: 'this.',
                 });
-            }), "\n            }"), !component.hooks.onUnMount
+                return code + '\n';
+            }, ''), "\n            }"), !component.hooks.onUnMount
             ? ''
             : "ngOnDestroy() {\n              ".concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(component.hooks.onUnMount.code, {
                 replaceWith: 'this.',

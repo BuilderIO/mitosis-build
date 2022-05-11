@@ -61,6 +61,10 @@ var wrapInFragment = function (json) {
     return json.children.length !== 1;
 };
 var NODE_MAPPERS = {
+    Slot: function (json, options) {
+        var slotProp = processBinding(json.bindings.name, options).replace('name=', '');
+        return "{".concat(slotProp, "}");
+    },
     Fragment: function (json, options) {
         var wrap = wrapInFragment(json);
         return "".concat(wrap ? '<>' : '').concat(json.children
@@ -151,6 +155,10 @@ var blockToReact = function (json, options) {
         if (key.startsWith('on')) {
             str += " ".concat(key, "={event => ").concat(updateStateSettersInCode(useBindingValue, options), " } ");
         }
+        else if (key.startsWith('slot')) {
+            // <Component slotProjected={<AnotherComponent />} />
+            str += " ".concat(key, "={").concat(value, "} ");
+        }
         else if (key === 'class') {
             str += " className={".concat(useBindingValue, "} ");
         }
@@ -206,6 +214,12 @@ var stripThisRefs = function (str, options) {
 var processBinding = function (str, options) {
     if (options.stateType !== 'useState') {
         return str;
+    }
+    if (str.startsWith('slot')) {
+        return (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(str, {
+            includeState: true,
+            includeProps: false,
+        });
     }
     return (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(str, {
         includeState: true,

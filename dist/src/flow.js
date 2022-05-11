@@ -8,11 +8,15 @@
  * These elements all compile away so they return `null`
  */
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Show = exports.For = void 0;
+exports.Show = exports.Slot = exports.For = void 0;
 function For(props) {
     return null;
 }
 exports.For = For;
+function Slot(props) {
+    return null;
+}
+exports.Slot = Slot;
 function Show(props) {
     return null;
 }
