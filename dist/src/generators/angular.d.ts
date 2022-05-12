@@ -2,5 +2,9 @@ import { MitosisNode } from '../types/mitosis-node';
 import { BaseTranspilerOptions, Transpiler } from '../types/config';
 export interface ToAngularOptions extends BaseTranspilerOptions {
 }
-export declare const blockToAngular: (json: MitosisNode, options?: ToAngularOptions) => string;
+interface AngularBlockOptions {
+    contextVars?: string[];
+}
+export declare const blockToAngular: (json: MitosisNode, options?: ToAngularOptions, blockOptions?: AngularBlockOptions) => string;
 export declare const componentToAngular: (options?: ToAngularOptions) => Transpiler;
+export {};

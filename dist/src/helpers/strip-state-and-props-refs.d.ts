@@ -2,6 +2,7 @@ export declare type StripStateAndPropsRefsOptions = {
     replaceWith?: string | ((name: string) => string);
     includeProps?: boolean;
     includeState?: boolean;
+    contextVars?: string[];
 };
 /**
  * Remove state. and props. from expressions, e.g.

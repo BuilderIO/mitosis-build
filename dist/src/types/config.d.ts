@@ -17,6 +17,9 @@ export interface TranspilerArgs {
 }
 export declare type Transpiler = (args: TranspilerArgs) => string;
 export interface BaseTranspilerOptions {
+    experimental?: {
+        [key: string]: any;
+    };
     prettier?: boolean;
     plugins?: Plugin[];
 }

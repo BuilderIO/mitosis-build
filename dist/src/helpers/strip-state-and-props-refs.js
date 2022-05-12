@@ -13,6 +13,7 @@ var stripStateAndPropsRefs = function (code, options) {
     if (options === void 0) { options = {}; }
     var newCode = code || '';
     var replacer = options.replaceWith || '';
+    var contextVars = options.contextVars || [];
     if (options.includeProps !== false) {
         if (typeof replacer === 'string') {
             newCode = newCode.replace(/props\./g, replacer);
@@ -32,6 +33,13 @@ var stripStateAndPropsRefs = function (code, options) {
                 return replacer(name);
             });
         }
+    }
+    if (contextVars.length) {
+        contextVars.forEach(function (_var) {
+            newCode = newCode.replace(
+            // determine expression edge cases
+            new RegExp('( |;|(\\())' + _var, 'g'), '$2this.' + _var);
+        });
     }
     return newCode;
 };
