@@ -21,22 +21,27 @@ var getDefaultImport = function (_a) {
     }
     return null;
 };
+var getFileExtensionForTarget = function (target) {
+    switch (target) {
+        case 'svelte':
+            return '.svelte';
+        case 'solid':
+            return '.jsx';
+        // these `.lite` extensions are handled in the `transpile` step of the CLI.
+        // TO-DO: consolidate file-extension renaming to one place.
+        default:
+            return '.lite';
+    }
+};
 var transformImportPath = function (theImport, target) {
     // We need to drop the `.lite` from context files, because the context generator does so as well.
     if (theImport.path.endsWith('.context.lite')) {
         return theImport.path.replace('.lite', '');
     }
-    switch (target) {
-        case 'svelte':
-            if (theImport.path.endsWith('.lite'))
-                // all svelte components have `.svelte` extension
-                return theImport.path.replace('.lite', '.svelte');
-            else {
-                return theImport.path;
-            }
-        default:
-            return theImport.path;
+    if (theImport.path.endsWith('.lite')) {
+        return theImport.path.replace('.lite', getFileExtensionForTarget(target));
     }
+    return theImport.path;
 };
 var renderImport = function (_a) {
     var theImport = _a.theImport, target = _a.target;

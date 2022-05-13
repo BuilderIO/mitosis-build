@@ -127,6 +127,9 @@ var blockToSolid = function (json, options) {
     else {
         str += "<".concat(json.name, " ");
     }
+    if (json.name === 'Show' && json.meta.else) {
+        str += "fallback={".concat(blockToSolid(json.meta.else, options), "}");
+    }
     var classString = collectClassString(json);
     if (classString) {
         str += " class=".concat(classString, " ");
@@ -238,9 +241,15 @@ var componentToSolid = function (options) {
         var componentHasContext = (0, context_1.hasContext)(json);
         var hasShowComponent = componentsUsed.has('Show');
         var hasForComponent = componentsUsed.has('For');
-        var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n\n    function ", "(props) {\n      ", "\n      \n      ", "\n      ", "\n\n      ", "\n\n      return (", "\n        ", "\n        ", ")\n    }\n\n    export default ", ";\n  "], ["\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n\n    function ", "(props) {\n      ", "\n      \n      ", "\n      ", "\n\n      ", "\n\n      return (", "\n        ", "\n        ", ")\n    }\n\n    export default ", ";\n  "])), !(hasShowComponent || hasForComponent)
-            ? ''
-            : "import { \n          ".concat(!componentHasContext ? '' : 'useContext, ', "\n          ").concat(!hasShowComponent ? '' : 'Show, ', "\n          ").concat(!hasForComponent ? '' : 'For, ', "\n          ").concat(!((_b = json.hooks.onMount) === null || _b === void 0 ? void 0 : _b.code) ? '' : 'onMount, ', "\n         } from 'solid-js';"), !foundDynamicComponents ? '' : "import { Dynamic } from 'solid-js/web';", !hasState ? '' : "import { createMutable } from 'solid-js/store';", !componentHasStyles
+        var solidJSImports = [
+            componentHasContext ? 'useContext' : undefined,
+            hasShowComponent ? 'Show' : undefined,
+            hasForComponent ? 'For' : undefined,
+            ((_b = json.hooks.onMount) === null || _b === void 0 ? void 0 : _b.code) ? 'onMount' : undefined,
+        ].filter(Boolean);
+        var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n\n    function ", "(props) {\n      ", "\n      \n      ", "\n      ", "\n\n      ", "\n\n      return (", "\n        ", "\n        ", ")\n    }\n\n    export default ", ";\n  "], ["\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n\n    function ", "(props) {\n      ", "\n      \n      ", "\n      ", "\n\n      ", "\n\n      return (", "\n        ", "\n        ", ")\n    }\n\n    export default ", ";\n  "])), solidJSImports.length > 0
+            ? "import { \n          ".concat(solidJSImports.map(function (item) { return item; }).join(', '), "\n         } from 'solid-js';")
+            : '', !foundDynamicComponents ? '' : "import { Dynamic } from 'solid-js/web';", !hasState ? '' : "import { createMutable } from 'solid-js/store';", !componentHasStyles
             ? ''
             : "import { css } from \"solid-styled-components\";", (0, render_imports_1.renderPreComponent)(json), json.name, !hasState ? '' : "const state = createMutable(".concat(stateString, ");"), getRefsString(json), getContextString(json, options), !((_c = json.hooks.onMount) === null || _c === void 0 ? void 0 : _c.code)
             ? ''
