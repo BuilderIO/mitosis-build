@@ -3,6 +3,7 @@ export declare type StripStateAndPropsRefsOptions = {
     includeProps?: boolean;
     includeState?: boolean;
     contextVars?: string[];
+    outputVars?: string[];
 };
 /**
  * Remove state. and props. from expressions, e.g.

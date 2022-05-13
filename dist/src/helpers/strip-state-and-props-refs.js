@@ -13,7 +13,23 @@ var stripStateAndPropsRefs = function (code, options) {
     if (options === void 0) { options = {}; }
     var newCode = code || '';
     var replacer = options.replaceWith || '';
-    var contextVars = options.contextVars || [];
+    var contextVars = (options === null || options === void 0 ? void 0 : options.contextVars) || [];
+    var outputVars = (options === null || options === void 0 ? void 0 : options.outputVars) || [];
+    if (contextVars.length) {
+        contextVars.forEach(function (_var) {
+            newCode = newCode.replace(
+            // determine expression edge cases
+            new RegExp('( |;|(\\())' + _var, 'g'), '$1this.' + _var);
+        });
+    }
+    if (outputVars.length) {
+        outputVars.forEach(function (_var) {
+            // determine expression edge cases onMessage( to this.onMessage.emit(
+            var regexp = '( |;|\\()(props\\.?)' + _var + '\\(';
+            var replacer = '$1this.' + _var + '.emit(';
+            newCode = newCode.replace(new RegExp(regexp, 'g'), replacer);
+        });
+    }
     if (options.includeProps !== false) {
         if (typeof replacer === 'string') {
             newCode = newCode.replace(/props\./g, replacer);
@@ -33,13 +49,6 @@ var stripStateAndPropsRefs = function (code, options) {
                 return replacer(name);
             });
         }
-    }
-    if (contextVars.length) {
-        contextVars.forEach(function (_var) {
-            newCode = newCode.replace(
-            // determine expression edge cases
-            new RegExp('( |;|(\\())' + _var, 'g'), '$2this.' + _var);
-        });
     }
     return newCode;
 };
