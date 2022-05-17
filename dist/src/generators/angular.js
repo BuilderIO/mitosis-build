@@ -101,7 +101,12 @@ var blockToAngular = function (json, options, blockOptions) {
                 continue;
             }
             var value = json.properties[key];
-            str += " ".concat(key, "=\"").concat(value, "\" ");
+            if (key === 'className') {
+                str += " class=\"".concat(value, "\" ");
+            }
+            else {
+                str += " ".concat(key, "=\"").concat(value, "\" ");
+            }
         }
         for (var key in json.bindings) {
             if (key === '_spread') {
@@ -125,6 +130,9 @@ var blockToAngular = function (json, options, blockOptions) {
                 // TODO: proper babel transform to replace. Util for this
                 var finalValue = (0, remove_surrounding_block_1.removeSurroundingBlock)(useValue.replace(/event\./g, '$event.'));
                 str += " (".concat(event_1, ")=\"").concat(finalValue, "\" ");
+            }
+            else if (key === 'className') {
+                str += " [class]=\"".concat(useValue, "\" ");
             }
             else if (key === 'ref') {
                 str += " #".concat(useValue, " ");
