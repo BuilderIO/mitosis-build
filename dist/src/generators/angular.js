@@ -3,6 +3,15 @@ var __makeTemplateObject = (this && this.__makeTemplateObject) || function (cook
     if (Object.defineProperty) { Object.defineProperty(cooked, "raw", { value: raw }); } else { cooked.raw = raw; }
     return cooked;
 };
+var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
+    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
+        if (ar || !(i in from)) {
+            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+            ar[i] = from[i];
+        }
+    }
+    return to.concat(ar || Array.prototype.slice.call(from));
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -21,6 +30,7 @@ var jsx_1 = require("../parsers/jsx");
 var plugins_1 = require("../modules/plugins");
 var is_children_1 = __importDefault(require("../helpers/is-children"));
 var get_props_1 = require("../helpers/get-props");
+var get_prop_functions_1 = require("../helpers/get-prop-functions");
 var lodash_1 = require("lodash");
 var strip_meta_properties_1 = require("../helpers/strip-meta-properties");
 var remove_surrounding_block_1 = require("../helpers/remove-surrounding-block");
@@ -50,6 +60,7 @@ var blockToAngular = function (json, options, blockOptions) {
     if (blockOptions === void 0) { blockOptions = {}; }
     var contextVars = (blockOptions === null || blockOptions === void 0 ? void 0 : blockOptions.contextVars) || [];
     var outputVars = (blockOptions === null || blockOptions === void 0 ? void 0 : blockOptions.outputVars) || [];
+    var childComponents = (blockOptions === null || blockOptions === void 0 ? void 0 : blockOptions.childComponents) || [];
     if (mappers[json.name]) {
         return mappers[json.name](json, options, blockOptions);
     }
@@ -89,7 +100,10 @@ var blockToAngular = function (json, options, blockOptions) {
         str += "</ng-container>";
     }
     else {
-        str += "<".concat(json.name, " ");
+        var elSelector = childComponents.find(function (impName) { return impName === json.name; })
+            ? (0, lodash_1.kebabCase)(json.name)
+            : json.name;
+        str += "<".concat(elSelector, " ");
         // TODO: spread support for angular
         // if (json.bindings._spread) {
         //   str += `v-bind="${stripStateAndPropsRefs(
@@ -158,7 +172,7 @@ var blockToAngular = function (json, options, blockOptions) {
                 .map(function (item) { return (0, exports.blockToAngular)(item, options, blockOptions); })
                 .join('\n');
         }
-        str += "</".concat(json.name, ">");
+        str += "</".concat(elSelector, ">");
     }
     return str;
 };
@@ -173,14 +187,16 @@ var componentToAngular = function (options) {
         if (options.plugins) {
             json = (0, plugins_1.runPreJsonPlugins)(json, options.plugins);
         }
-        var outputVars = ((_c = (_b = json.meta) === null || _b === void 0 ? void 0 : _b.useMetadata) === null || _c === void 0 ? void 0 : _c.outputs) || [];
-        var outputs = outputVars.map(function (variableName) {
-            var _a, _b;
-            if ((_a = options === null || options === void 0 ? void 0 : options.experimental) === null || _a === void 0 ? void 0 : _a.outputs) {
-                return (_b = options === null || options === void 0 ? void 0 : options.experimental) === null || _b === void 0 ? void 0 : _b.outputs(json, variableName);
-            }
-            return "@Output() ".concat(variableName, " = new EventEmitter<any>()");
+        var childComponents = [];
+        json.imports.forEach(function (_a) {
+            var imports = _a.imports;
+            Object.keys(imports).forEach(function (key) {
+                if (imports[key] === 'default') {
+                    childComponents.push(key);
+                }
+            });
         });
+        var metaOutputVars = ((_c = (_b = json.meta) === null || _b === void 0 ? void 0 : _b.useMetadata) === null || _c === void 0 ? void 0 : _c.outputs) || [];
         var contextVars = Object.keys(((_d = json === null || json === void 0 ? void 0 : json.context) === null || _d === void 0 ? void 0 : _d.get) || {});
         var hasInjectable = Boolean(contextVars.length);
         var injectables = contextVars.map(function (variableName) {
@@ -195,9 +211,17 @@ var componentToAngular = function (options) {
             return "public ".concat(variableName, " : ").concat(variableType);
         });
         var props = (0, get_props_1.getProps)(component);
+        var outputVars = (0, lodash_1.uniq)(__spreadArray(__spreadArray([], metaOutputVars, true), (0, get_prop_functions_1.getPropFunctions)(component), true));
         // remove props for outputs
         outputVars.forEach(function (variableName) {
             props.delete(variableName);
+        });
+        var outputs = outputVars.map(function (variableName) {
+            var _a, _b;
+            if ((_a = options === null || options === void 0 ? void 0 : options.experimental) === null || _a === void 0 ? void 0 : _a.outputs) {
+                return (_b = options === null || options === void 0 ? void 0 : options.experimental) === null || _b === void 0 ? void 0 : _b.outputs(json, variableName);
+            }
+            return "@Output() ".concat(variableName, " = new EventEmitter()");
         });
         var hasOnInit = Boolean(((_e = component.hooks) === null || _e === void 0 ? void 0 : _e.onInit) || ((_f = component.hooks) === null || _f === void 0 ? void 0 : _f.onMount));
         var refs = Array.from((0, get_refs_1.getRefs)(json));
@@ -210,7 +234,13 @@ var componentToAngular = function (options) {
             css = tryFormat(css, 'css');
         }
         var template = json.children
-            .map(function (item) { return (0, exports.blockToAngular)(item, options, { contextVars: contextVars, outputVars: outputVars }); })
+            .map(function (item) {
+            return (0, exports.blockToAngular)(item, options, {
+                contextVars: contextVars,
+                outputVars: outputVars,
+                childComponents: childComponents,
+            });
+        })
             .join('\n');
         if (options.prettier !== false) {
             template = tryFormat(template, 'html');

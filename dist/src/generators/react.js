@@ -83,10 +83,10 @@ var NODE_MAPPERS = {
             .join('\n')).concat(wrap ? '</>' : '');
     },
     For: function (json, options) {
+        var _a;
         var wrap = wrapInFragment(json);
-        return "{".concat(processBinding(json.bindings.each, options), "?.map((").concat(json.properties._forName).concat(json.properties._indexName ? ',' + json.properties._indexName : '').concat(json.properties._collectionName
-            ? ',' + json.properties._collectionName
-            : '', ") => (\n      ").concat(wrap ? '<>' : '').concat(json.children
+        var forArguments = (((_a = json === null || json === void 0 ? void 0 : json.scope) === null || _a === void 0 ? void 0 : _a.For) || []).join(',');
+        return "{".concat(processBinding(json.bindings.each, options), "?.map((").concat(forArguments, ") => (\n      ").concat(wrap ? '<>' : '').concat(json.children
             .filter(filter_empty_text_nodes_1.filterEmptyTextNodes)
             .map(function (item) { return (0, exports.blockToReact)(item, options); })
             .join('\n')).concat(wrap ? '</>' : '', "\n    ))}");

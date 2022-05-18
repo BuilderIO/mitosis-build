@@ -12,6 +12,9 @@ export declare type MitosisNode = {
      * }
      * ```
      */
+    scope: {
+        [key: string]: Array<string>;
+    };
     properties: {
         [key: string]: string | undefined;
     };

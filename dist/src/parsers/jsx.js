@@ -342,7 +342,6 @@ var componentFunctionToJson = function (node, context) {
         } }));
 };
 var jsxElementToJson = function (node) {
-    var _a, _b, _c, _d, _e, _f, _g, _h;
     if (types.isJSXText(node)) {
         return (0, create_mitosis_node_1.createMitosisNode)({
             properties: {
@@ -360,9 +359,9 @@ var jsxElementToJson = function (node) {
             var callback = node.expression.arguments[0];
             if (types.isArrowFunctionExpression(callback)) {
                 if (types.isIdentifier(callback.params[0])) {
-                    var forName = callback.params[0].name;
-                    var indexName = (_b = (_a = callback.params) === null || _a === void 0 ? void 0 : _a[1]) === null || _b === void 0 ? void 0 : _b.name;
-                    var collectionName = (_d = (_c = callback.params) === null || _c === void 0 ? void 0 : _c[2]) === null || _d === void 0 ? void 0 : _d.name;
+                    var forArguments = callback.params
+                        .map(function (param) { return param === null || param === void 0 ? void 0 : param.name; })
+                        .filter(Boolean);
                     return (0, create_mitosis_node_1.createMitosisNode)({
                         name: 'For',
                         bindings: {
@@ -370,10 +369,13 @@ var jsxElementToJson = function (node) {
                                 .code // Remove .map or potentially ?.map
                                 .replace(/\??\.map$/, ''),
                         },
+                        scope: {
+                            For: forArguments,
+                        },
                         properties: {
-                            _forName: forName,
-                            _indexName: indexName,
-                            _collectionName: collectionName,
+                            _forName: forArguments[0],
+                            _indexName: forArguments[1],
+                            _collectionName: forArguments[2],
                         },
                         children: [jsxElementToJson(callback.body)],
                     });
@@ -454,20 +456,20 @@ var jsxElementToJson = function (node) {
         if (types.isJSXExpressionContainer(child)) {
             var childExpression = child.expression;
             if (types.isArrowFunctionExpression(childExpression)) {
-                var forName = childExpression.params[0]
-                    .name;
-                var indexName = (_f = (_e = childExpression.params) === null || _e === void 0 ? void 0 : _e[1]) === null || _f === void 0 ? void 0 : _f.name;
-                var collectionName = (_h = (_g = childExpression.params) === null || _g === void 0 ? void 0 : _g[2]) === null || _h === void 0 ? void 0 : _h.name;
+                var forArguments = childExpression === null || childExpression === void 0 ? void 0 : childExpression.params.map(function (param) { return param === null || param === void 0 ? void 0 : param.name; }).filter(Boolean);
                 return (0, create_mitosis_node_1.createMitosisNode)({
                     name: 'For',
                     bindings: {
                         each: (0, generator_1.default)(node.openingElement.attributes[0]
                             .value.expression).code,
                     },
+                    scope: {
+                        For: forArguments,
+                    },
                     properties: {
-                        _forName: forName,
-                        _indexName: indexName,
-                        _collectionName: collectionName,
+                        _forName: forArguments[0],
+                        _indexName: forArguments[1],
+                        _collectionName: forArguments[2],
                     },
                     children: [jsxElementToJson(childExpression.body)],
                 });
