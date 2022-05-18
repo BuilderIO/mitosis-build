@@ -59,7 +59,6 @@ var get_components_used_1 = require("../helpers/get-components-used");
 var lodash_1 = require("lodash");
 var replace_idenifiers_1 = require("../helpers/replace-idenifiers");
 var filter_empty_text_nodes_1 = require("../helpers/filter-empty-text-nodes");
-var json5_1 = __importDefault(require("json5"));
 var process_http_requests_1 = require("../helpers/process-http-requests");
 var patterns_1 = require("../helpers/patterns");
 var method_literal_prefix_1 = require("../constants/method-literal-prefix");
@@ -288,7 +287,7 @@ var componentToVue = function (userOptions) {
     // hack while we migrate all other transpilers to receive/handle path
     // TO-DO: use `Transpiler` once possible
     return function (_a) {
-        var _b, _c, _d, _e, _f, _g, _h, _j;
+        var _b, _c, _d, _e, _f, _g, _h;
         var component = _a.component, path = _a.path;
         var options = mergeOptions(BASE_OPTIONS, userOptions);
         // Make a copy we can safely mutate, similar to babel's toolchain can be used
@@ -352,15 +351,12 @@ var componentToVue = function (userOptions) {
         if (includeClassMapHelper) {
             functionsString = functionsString.replace(/}\s*$/, "_classStringToObject(str) {\n        const obj = {};\n        if (typeof str !== 'string') { return obj }\n        const classNames = str.trim().split(/\\s+/); \n        for (const name of classNames) {\n          obj[name] = true;\n        } \n        return obj;\n      }  }");
         }
-        var builderRegister = Boolean(options.builderRegister && component.meta.registerComponent);
         var onUpdateWithDeps = ((_d = component.hooks.onUpdate) === null || _d === void 0 ? void 0 : _d.filter(function (hook) { var _a; return (_a = hook.deps) === null || _a === void 0 ? void 0 : _a.length; })) || [];
         var onUpdateWithoutDeps = ((_e = component.hooks.onUpdate) === null || _e === void 0 ? void 0 : _e.filter(function (hook) { var _a; return !((_a = hook.deps) === null || _a === void 0 ? void 0 : _a.length); })) || [];
-        var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    <template>\n      ", "\n    </template>\n    <script>\n      ", "\n      ", "\n\n      export default ", "{\n        ", "\n        ", "\n        ", "\n        ", "\n\n        ", "\n        ", "\n\n        ", "\n        ", "\n        ", "\n        ", "\n\n        ", "\n        ", "\n      }", "\n    </script>\n    ", "\n  "], ["\n    <template>\n      ", "\n    </template>\n    <script>\n      ", "\n      ", "\n\n      export default ", "{\n        ", "\n        ", "\n        ", "\n        ", "\n\n        ", "\n        ", "\n\n        ", "\n        ", "\n        ", "\n        ", "\n\n        ", "\n        ", "\n      }", "\n    </script>\n    ", "\n  "])), template, (0, render_imports_1.renderPreComponent)(component), component.meta.registerComponent
-            ? (_f = options.registerComponentPrepend) !== null && _f !== void 0 ? _f : ''
-            : '', !builderRegister ? '' : 'registerComponent(', !component.name
+        var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    <template>\n      ", "\n    </template>\n    <script>\n      ", "\n\n      export default {\n        ", "\n        ", "\n        ", "\n        ", "\n\n        ", "\n        ", "\n\n        ", "\n        ", "\n        ", "\n        ", "\n\n        ", "\n        ", "\n      }\n    </script>\n    ", "\n  "], ["\n    <template>\n      ", "\n    </template>\n    <script>\n      ", "\n\n      export default {\n        ", "\n        ", "\n        ", "\n        ", "\n\n        ", "\n        ", "\n\n        ", "\n        ", "\n        ", "\n        ", "\n\n        ", "\n        ", "\n      }\n    </script>\n    ", "\n  "])), template, (0, render_imports_1.renderPreComponent)(component), !component.name
             ? ''
-            : "name: '".concat(((_g = options.namePrefix) === null || _g === void 0 ? void 0 : _g.call(options, path))
-                ? ((_h = options.namePrefix) === null || _h === void 0 ? void 0 : _h.call(options, path)) + '-'
+            : "name: '".concat(((_f = options.namePrefix) === null || _f === void 0 ? void 0 : _f.call(options, path))
+                ? ((_g = options.namePrefix) === null || _g === void 0 ? void 0 : _g.call(options, path)) + '-'
                 : '').concat((0, lodash_1.kebabCase)(component.name), "',"), !componentsUsed.length
             ? ''
             : "components: { ".concat(componentsUsed
@@ -375,7 +371,7 @@ var componentToVue = function (userOptions) {
             ? "provide() {\n                const _this = this;\n                return ".concat(getContextProvideString(component, options), "\n              },")
             : '', (0, lodash_1.size)(component.context.get)
             ? "inject: ".concat(getContextInjectString(component, options), ",")
-            : '', ((_j = component.hooks.onMount) === null || _j === void 0 ? void 0 : _j.code)
+            : '', ((_h = component.hooks.onMount) === null || _h === void 0 ? void 0 : _h.code)
             ? "mounted() {\n                ".concat(processBinding(component.hooks.onMount.code, options, component), "\n              },")
             : '', onUpdateWithoutDeps.length
             ? "updated() {\n            ".concat(onUpdateWithoutDeps
@@ -393,9 +389,7 @@ var componentToVue = function (userOptions) {
             ? ''
             : "\n          computed: ".concat(getterString, ",\n        "), functionsString.length < 4
             ? ''
-            : "\n          methods: ".concat(functionsString, ",\n        "), !builderRegister
-            ? ''
-            : ", ".concat(json5_1.default.stringify(component.meta.registerComponent || {}), ")"), !css.trim().length
+            : "\n          methods: ".concat(functionsString, ",\n        "), !css.trim().length
             ? ''
             : "<style scoped>\n      ".concat(css, "\n    </style>"));
         if (options.plugins) {
