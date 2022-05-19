@@ -38,6 +38,10 @@ var get_state_object_string_1 = require("../helpers/get-state-object-string");
 var has_component_1 = require("../helpers/has-component");
 var is_component_1 = require("../helpers/is-component");
 var is_mitosis_node_1 = require("../helpers/is-mitosis-node");
+var is_html_attribute_1 = require("../helpers/is-html-attribute");
+var is_valid_attribute_name_1 = require("../helpers/is-valid-attribute-name");
+var get_props_1 = require("../helpers/get-props");
+var get_prop_functions_1 = require("../helpers/get-prop-functions");
 var jsx_1 = require("../parsers/jsx");
 var strip_state_and_props_refs_1 = require("../helpers/strip-state-and-props-refs");
 var plugins_1 = require("../modules/plugins");
@@ -45,6 +49,9 @@ var is_children_1 = __importDefault(require("../helpers/is-children"));
 var strip_meta_properties_1 = require("../helpers/strip-meta-properties");
 var remove_surrounding_block_1 = require("../helpers/remove-surrounding-block");
 var render_imports_1 = require("../helpers/render-imports");
+var isAttribute = function (key) {
+    return /-/.test(key);
+};
 var ATTRIBUTE_KEY_EXCEPTIONS_MAP = {
     class: 'className',
 };
@@ -52,22 +59,23 @@ var updateKeyIfException = function (key) {
     var _a;
     return (_a = ATTRIBUTE_KEY_EXCEPTIONS_MAP[key]) !== null && _a !== void 0 ? _a : key;
 };
-var needsSetAttribute = function (key) {
-    if (key === 'id') {
-        // we may want to set id on elements
-        return true;
-    }
-    return [key.includes('-')].some(Boolean);
-};
-var generateSetElementAttributeCode = function (key, useValue, options) {
+var generateSetElementAttributeCode = function (key, tagName, useValue, options, meta) {
     var _a, _b;
+    if (meta === void 0) { meta = {}; }
     if ((_a = options === null || options === void 0 ? void 0 : options.experimental) === null || _a === void 0 ? void 0 : _a.props) {
         return (_b = options === null || options === void 0 ? void 0 : options.experimental) === null || _b === void 0 ? void 0 : _b.props(key, useValue, options);
     }
-    // TODO: better ways to detect child components
-    return needsSetAttribute(key)
-        ? ";el.setAttribute(\"".concat(key, "\", ").concat(useValue, ");\n    if (el.props) {\n      ;el.props.").concat((0, lodash_1.camelCase)(key), " = ").concat(useValue, ";\n      ;el.update();\n    }\n    ")
-        : ";el.".concat(updateKeyIfException(key), " = ").concat(useValue, ";\n    if (el.props) {\n      ;el.props.").concat((0, lodash_1.camelCase)(key), " = ").concat(useValue, ";\n      ;el.update();\n    }\n    ");
+    var isKey = key === 'key';
+    var isComponent = meta === null || meta === void 0 ? void 0 : meta.component;
+    var isHtmlAttr = (0, is_html_attribute_1.isHtmlAttribute)(key, tagName);
+    var setAttr = !isKey && (isHtmlAttr || (0, is_valid_attribute_name_1.isValidAttributeName)(key) || isAttribute(key));
+    return setAttr
+        ? ";el.setAttribute(\"".concat(key, "\", ").concat(useValue, ");").concat(!isComponent || isHtmlAttr
+            ? ''
+            : "\n    ;el.props.".concat((0, lodash_1.camelCase)(key), " = ").concat(useValue, ";\n    ;el.update();\n    "), "\n    ")
+        : ";el.".concat(updateKeyIfException(key), " = ").concat(useValue, ";").concat(!isComponent || isKey
+            ? ''
+            : "\n    ;el.props.".concat((0, lodash_1.camelCase)(key), " = ").concat(useValue, ";\n    ;el.update();\n    "), "\n    ");
 };
 var addUpdateAfterSet = function (json, options) {
     (0, traverse_1.default)(json).forEach(function (item) {
@@ -82,12 +90,36 @@ var addUpdateAfterSet = function (json, options) {
         }
     });
 };
+var getChildComponents = function (json, options) {
+    var childComponents = [];
+    json.imports.forEach(function (_a) {
+        var imports = _a.imports;
+        Object.keys(imports).forEach(function (key) {
+            if (imports[key] === 'default') {
+                childComponents.push(key);
+            }
+        });
+    });
+    return childComponents;
+};
+var replaceClassname = function (json, options) {
+    (0, traverse_1.default)(json).forEach(function (node) {
+        if ((0, is_mitosis_node_1.isMitosisNode)(node)) {
+            if (node.properties.className) {
+                // Change className to class in the HTML elements
+                node.properties.class = node.properties.className;
+                delete node.properties.className;
+            }
+        }
+    });
+};
 var getScopeVars = function (parentScopeVars, value) {
     return parentScopeVars.filter(function (scopeVar) {
         if (typeof value === 'boolean') {
             return value;
         }
-        return new RegExp(scopeVar).test(value);
+        var checkVar = new RegExp('(\\.\\.\\.|,| |;|\\(|^|!)' + scopeVar + '(\\.|,| |;|\\)|$)', 'g');
+        return checkVar.test(value);
     });
 };
 var addScopeVars = function (parentScopeVars, value, fn) {
@@ -222,9 +254,8 @@ var blockToHtml = function (json, options, blockOptions) {
         str += '</template>';
     }
     else {
-        var elSelector = childComponents.find(function (impName) { return impName === json.name; })
-            ? (0, lodash_2.kebabCase)(json.name)
-            : json.name;
+        var component = childComponents.find(function (impName) { return impName === json.name; });
+        var elSelector = component ? (0, lodash_2.kebabCase)(json.name) : json.name;
         str += "<".concat(elSelector, " ");
         // For now, spread is not supported
         // if (json.bindings._spread === '_spread') {
@@ -284,7 +315,9 @@ var blockToHtml = function (json, options, blockOptions) {
                         // unique keys
                         batchScopeVars_1[key] = true;
                     });
-                    addOnChangeJs(elId, options, "\n            ".concat(injectOnce ? '' : startInjectVar, "\n            ").concat(generateSetElementAttributeCode(key, useValue, options), "\n            "));
+                    addOnChangeJs(elId, options, "\n            ".concat(injectOnce ? '' : startInjectVar, "\n            ").concat(generateSetElementAttributeCode(key, elSelector, useValue, options, {
+                        component: component,
+                    }), "\n            "));
                     if (!injectOnce) {
                         injectOnce = true;
                     }
@@ -466,16 +499,11 @@ var componentToCustomElement = function (options) {
         if (options.plugins) {
             json = (0, plugins_1.runPreJsonPlugins)(json, options.plugins);
         }
-        var childComponents = [];
-        json.imports.forEach(function (_a) {
-            var imports = _a.imports;
-            Object.keys(imports).forEach(function (key) {
-                if (imports[key] === 'default') {
-                    childComponents.push(key);
-                }
-            });
-        });
+        replaceClassname(json, useOptions);
+        var childComponents = getChildComponents(json, useOptions);
         var componentHasProps = (0, has_props_1.hasProps)(json);
+        var props = (0, get_props_1.getProps)(json);
+        var outputs = (0, get_prop_functions_1.getPropFunctions)(json);
         addUpdateAfterSet(json, useOptions);
         var hasLoop = (0, has_component_1.hasComponent)('For', json);
         var hasShow = (0, has_component_1.hasComponent)('Show', json);
@@ -496,7 +524,9 @@ var componentToCustomElement = function (options) {
         }
         (0, strip_meta_properties_1.stripMetaProperties)(json);
         var html = json.children
-            .map(function (item) { return blockToHtml(item, useOptions, { childComponents: childComponents }); })
+            .map(function (item) {
+            return blockToHtml(item, useOptions, { childComponents: childComponents, props: props, outputs: outputs });
+        })
             .join('\n');
         if ((_d = useOptions === null || useOptions === void 0 ? void 0 : useOptions.experimental) === null || _d === void 0 ? void 0 : _d.childrenHtml) {
             html = (_e = useOptions === null || useOptions === void 0 ? void 0 : useOptions.experimental) === null || _e === void 0 ? void 0 : _e.childrenHtml(html, kebabName, json, useOptions);
@@ -593,7 +623,7 @@ var componentToCustomElement = function (options) {
                 ? "\n              ".concat((_g = useOptions === null || useOptions === void 0 ? void 0 : useOptions.experimental) === null || _g === void 0 ? void 0 : _g.generateQuerySelectorAll(key, code), "\n              ")
                 : "              \n              this._root.querySelectorAll(\"[data-name='".concat(key, "']\").forEach((el) => {\n                ").concat(code, "\n              })\n              "), "\n            ");
         })
-            .join('\n\n'), "\n        }\n        renderTextNode(el, text) {\n          const textNode = document.createTextNode(text);\n          if (el?.scope) {\n            textNode.scope = el.scope;\n          }\n          el.after(textNode);\n          this.nodesToDestroy.push(el.nextSibling);\n        }\n\n        ").concat(!hasLoop
+            .join('\n\n'), "\n        }\n\n        // Helper to render content\n        renderTextNode(el, text) {\n          const textNode = document.createTextNode(text);\n          if (el?.scope) {\n            textNode.scope = el.scope;\n          }\n          el.after(textNode);\n          this.nodesToDestroy.push(el.nextSibling);\n        }\n\n        ").concat(!hasLoop
             ? ''
             : "\n\n          // Helper to render loops\n          renderLoop(template, array, itemName, itemIndex, collectionName) {\n            const collection = [];\n            for (let [index, value] of array.entries()) {\n              const elementFragment = template.content.cloneNode(true);\n              const children = Array.from(elementFragment.childNodes)\n              const localScope = {};\n              let scope = localScope;\n              if (template?.scope) {\n                const getParent = {\n                  get(target, prop, receiver) {\n                    if (prop in target) {\n                      return target[prop];\n                    }\n                    if (prop in template.scope) {\n                      return template.scope[prop];\n                    }\n                    return target[prop];\n                  }\n                };\n                scope = new Proxy(localScope, getParent);\n              }\n              children.forEach((child) => {\n                if (itemName !== undefined) {\n                  scope[itemName] = value;\n                }\n                if (itemIndex !== undefined) {\n                  scope[itemIndex] = index;\n                }\n                if (collectionName !== undefined) {\n                  scope[collectionName] = array;\n                }\n                child.scope = scope;\n                this.nodesToDestroy.push(child);\n                collection.push(child)\n              });\n            }\n            collection.reverse().forEach(child => template.after(child));\n          }\n        \n          getContext(el, name) {\n            do {\n              let value = el?.scope?.[name]\n              if (value !== undefined) {\n                return value\n              }\n            } while ((el = el.parentNode));\n          }\n        ", "\n      }\n\n      ").concat(((_15 = useOptions === null || useOptions === void 0 ? void 0 : useOptions.experimental) === null || _15 === void 0 ? void 0 : _15.customElementsDefine)
             ? (_16 = useOptions === null || useOptions === void 0 ? void 0 : useOptions.experimental) === null || _16 === void 0 ? void 0 : _16.customElementsDefine(kebabName, component, useOptions)

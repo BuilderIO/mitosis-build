@@ -9,11 +9,13 @@ var basic_onMount_update_raw_1 = __importDefault(require("./basic-onMount-update
 function MyBasicChildComponent() {
     var state = (0, mitosis_1.useState)({
         name: 'Steve',
+        dev: 'PatrickJS',
     });
     return (<div>
-      <basic_raw_1.default />
+      {/*// @ts-ignore */}
+      <basic_raw_1.default id={state.dev}/>
       <div>
-        <basic_onMount_update_raw_1.default />
+        <basic_onMount_update_raw_1.default hi={state.name} bye={state.dev}/>
       </div>
     </div>);
 }
