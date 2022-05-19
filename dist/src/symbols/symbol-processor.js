@@ -63,7 +63,12 @@ exports.ensureAllSymbolsHaveIds = ensureAllSymbolsHaveIds;
 //TODO(misko): needs test
 function convertBuilderContentToSymbolHierarchy(content, _a) {
     var _b;
-    var _c = _a === void 0 ? {} : _a, collectComponentStyles = _c.collectComponentStyles, collectComponentState = _c.collectComponentState;
+    var _c, _d;
+    var _e = _a === void 0 ? {} : _a, collectComponentStyles = _e.collectComponentStyles, collectComponentState = _e.collectComponentState;
+    if (collectComponentState && ((_c = content.data) === null || _c === void 0 ? void 0 : _c.state)) {
+        var state = (_d = content.data) === null || _d === void 0 ? void 0 : _d.state;
+        collectComponentState['ROOT_COMPONENT_STATE'] = state;
+    }
     var path = [-1, content.id];
     var hierarchy = (_b = {
             depthFirstSymbols: []
