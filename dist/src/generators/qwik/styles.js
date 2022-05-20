@@ -27,11 +27,12 @@ exports.renderStyles = exports.collectStyles = void 0;
 var json5_1 = __importDefault(require("json5"));
 var dash_case_1 = require("../../helpers/dash-case");
 function collectStyles(children, styleMap) {
+    var _a;
     var nodes = __spreadArray([], children, true);
     while (nodes.length) {
         var child = nodes.shift();
         nodes.push.apply(nodes, child.children);
-        var css = child.bindings.css;
+        var css = (_a = child.bindings.css) === null || _a === void 0 ? void 0 : _a.code;
         if (css && typeof css == 'string') {
             var value = __assign({ CLASS_NAME: 'c' + hashCode(css) }, json5_1.default.parse(css));
             styleMap.set(css, value);

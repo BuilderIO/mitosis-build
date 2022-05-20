@@ -103,7 +103,7 @@ var getActionBindingsFromBlock = function (block, options) {
                 continue;
             }
             var useKey = "on".concat((0, lodash_1.upperFirst)(key));
-            bindings[useKey] = "".concat(wrapBindingIfNeeded(value, options));
+            bindings[useKey] = { code: "".concat(wrapBindingIfNeeded(value, options)) };
         }
     }
     return bindings;
@@ -222,13 +222,15 @@ var componentMappers = __assign(__assign({ Symbol: function (block, options) {
         var actionBindings = getActionBindingsFromBlock(block, options);
         return (0, create_mitosis_node_1.createMitosisNode)({
             name: 'Symbol',
-            bindings: __assign(__assign(__assign({ symbol: JSON.stringify({
-                    data: (_a = block.component) === null || _a === void 0 ? void 0 : _a.options.symbol.data,
-                    content: (_b = block.component) === null || _b === void 0 ? void 0 : _b.options.symbol.content,
-                }) }, actionBindings), (styleString && {
-                style: styleString,
+            bindings: __assign(__assign(__assign({ symbol: {
+                    code: JSON.stringify({
+                        data: (_a = block.component) === null || _a === void 0 ? void 0 : _a.options.symbol.data,
+                        content: (_b = block.component) === null || _b === void 0 ? void 0 : _b.options.symbol.content,
+                    }),
+                } }, actionBindings), (styleString && {
+                style: { code: styleString },
             })), (Object.keys(css).length && {
-                css: JSON.stringify(css),
+                css: { code: JSON.stringify(css) },
             })),
         });
     } }, (!exports.symbolBlocksAsChildren
@@ -248,13 +250,15 @@ var componentMappers = __assign(__assign({ Symbol: function (block, options) {
                 name: 'Symbol',
                 bindings: __assign(__assign(__assign({ 
                     // TODO: this doesn't use all attrs
-                    symbol: JSON.stringify({
-                        data: (_c = block.component) === null || _c === void 0 ? void 0 : _c.options.symbol.content.data,
-                        content: content, // TODO: convert to <SymbolInternal>...</SymbolInternal> so can be parsed
-                    }) }, actionBindings), (styleString && {
-                    style: styleString,
+                    symbol: {
+                        code: JSON.stringify({
+                            data: (_c = block.component) === null || _c === void 0 ? void 0 : _c.options.symbol.content.data,
+                            content: content, // TODO: convert to <SymbolInternal>...</SymbolInternal> so can be parsed
+                        }),
+                    } }, actionBindings), (styleString && {
+                    style: { code: styleString },
                 })), (Object.keys(css).length && {
-                    css: JSON.stringify(css),
+                    css: { code: JSON.stringify(css) },
                 })),
                 children: !blocks
                     ? []
@@ -278,7 +282,7 @@ var componentMappers = __assign(__assign({ Symbol: function (block, options) {
         delete node.properties.columns;
         node.children = (_b = (_a = block.component) === null || _a === void 0 ? void 0 : _a.options.columns) === null || _b === void 0 ? void 0 : _b.map(function (col, index) {
             return (0, create_mitosis_node_1.createMitosisNode)(__assign(__assign({ name: 'Column', bindings: {
-                    width: col.width,
+                    width: { code: col.width },
                 } }, (col.link && {
                 properties: {
                     link: col.link,
@@ -292,7 +296,7 @@ var componentMappers = __assign(__assign({ Symbol: function (block, options) {
         return (0, create_mitosis_node_1.createMitosisNode)({
             name: 'For',
             bindings: {
-                each: "state.".concat(block.component.options.repeat.collection),
+                each: { code: "state.".concat(block.component.options.repeat.collection) },
             },
             properties: {
                 _forName: block.component.options.repeat.itemName,
@@ -317,16 +321,18 @@ var componentMappers = __assign(__assign({ Symbol: function (block, options) {
             }
             return false;
         })), actionBindings), (styleString && {
-            style: styleString,
+            style: { code: styleString },
         })), (Object.keys(css).length && {
-            css: JSON.stringify(css),
+            css: { code: JSON.stringify(css) },
         }));
         var properties = __assign({}, block.properties);
         if (block.layerName) {
             properties.$name = block.layerName;
         }
         var innerBindings = (_a = {},
-            _a[options.preserveTextBlocks ? 'innerHTML' : '_text'] = wrapBindingIfNeeded(blockBindings['component.options.text'], options),
+            _a[options.preserveTextBlocks ? 'innerHTML' : '_text'] = {
+                code: wrapBindingIfNeeded(blockBindings['component.options.text'], options),
+            },
             _a);
         var innerProperties = (_b = {},
             _b[options.preserveTextBlocks ? 'innerHTML' : '_text'] = block.component.options.text,
@@ -365,7 +371,7 @@ var componentMappers = __assign(__assign({ Symbol: function (block, options) {
     } });
 var builderElementToMitosisNode = function (block, options, _internalOptions) {
     var _a;
-    var _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t;
+    var _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v;
     if (_internalOptions === void 0) { _internalOptions = {}; }
     if (((_b = block.component) === null || _b === void 0 ? void 0 : _b.name) === 'Core:Fragment') {
         block.component.name = 'Fragment';
@@ -381,7 +387,7 @@ var builderElementToMitosisNode = function (block, options, _internalOptions) {
             return (0, create_mitosis_node_1.createMitosisNode)({
                 name: 'Show',
                 bindings: {
-                    when: wrapBindingIfNeeded(showBinding, options),
+                    when: { code: wrapBindingIfNeeded(showBinding, options) },
                 },
                 children: ((_d = block.children) === null || _d === void 0 ? void 0 : _d.map(function (child) {
                     return (0, exports.builderElementToMitosisNode)(child, options);
@@ -392,7 +398,7 @@ var builderElementToMitosisNode = function (block, options, _internalOptions) {
             return (0, create_mitosis_node_1.createMitosisNode)({
                 name: 'Show',
                 bindings: {
-                    when: wrapBindingIfNeeded(showBinding, options),
+                    when: { code: wrapBindingIfNeeded(showBinding, options) },
                 },
                 children: [
                     (0, exports.builderElementToMitosisNode)(__assign(__assign({}, block), { code: __assign(__assign({}, block.code), { bindings: (0, lodash_1.omit)(blockBindings, 'show') }), bindings: (0, lodash_1.omit)(blockBindings, 'show') }), options),
@@ -408,7 +414,9 @@ var builderElementToMitosisNode = function (block, options, _internalOptions) {
             return (0, create_mitosis_node_1.createMitosisNode)({
                 name: 'For',
                 bindings: {
-                    each: wrapBindingIfNeeded((_g = block.repeat) === null || _g === void 0 ? void 0 : _g.collection, options),
+                    each: {
+                        code: wrapBindingIfNeeded((_g = block.repeat) === null || _g === void 0 ? void 0 : _g.collection, options),
+                    },
                 },
                 properties: {
                     _forName: ((_h = block.repeat) === null || _h === void 0 ? void 0 : _h.itemName) || 'item',
@@ -426,7 +434,9 @@ var builderElementToMitosisNode = function (block, options, _internalOptions) {
             return (0, create_mitosis_node_1.createMitosisNode)({
                 name: 'For',
                 bindings: {
-                    each: wrapBindingIfNeeded((_m = block.repeat) === null || _m === void 0 ? void 0 : _m.collection, options),
+                    each: {
+                        code: wrapBindingIfNeeded((_m = block.repeat) === null || _m === void 0 ? void 0 : _m.collection, options),
+                    },
                 },
                 properties: {
                     _forName: ((_o = block.repeat) === null || _o === void 0 ? void 0 : _o.itemName) || 'item',
@@ -451,7 +461,9 @@ var builderElementToMitosisNode = function (block, options, _internalOptions) {
             }
             var useKey = key.replace(/^(component\.)?options\./, '');
             if (!useKey.includes('.')) {
-                bindings[useKey] = blockBindings[key];
+                bindings[useKey] = {
+                    code: blockBindings[key].code || blockBindings[key],
+                };
             }
             else if (useKey.includes('style') && useKey.includes('.')) {
                 var styleProperty = useKey.split('.')[1];
@@ -477,7 +489,7 @@ var builderElementToMitosisNode = function (block, options, _internalOptions) {
                 properties[key] = value;
             }
             else {
-                bindings[key] = json5_1.default.stringify(value);
+                bindings[key] = { code: json5_1.default.stringify(value) };
             }
         }
     }
@@ -492,7 +504,7 @@ var builderElementToMitosisNode = function (block, options, _internalOptions) {
             binding.startsWith('options')) {
             var value = blockBindings[binding];
             var useKey = binding.replace(/^(component\.options\.|options\.)/, '');
-            bindings[useKey] = value;
+            bindings[useKey] = { code: value };
         }
     }
     var node = (0, create_mitosis_node_1.createMitosisNode)({
@@ -505,10 +517,10 @@ var builderElementToMitosisNode = function (block, options, _internalOptions) {
             }
             : null)), properties),
         bindings: __assign(__assign(__assign(__assign({}, bindings), actionBindings), (styleString && {
-            style: styleString,
+            style: { code: styleString },
         })), (css &&
             Object.keys(css).length && {
-            css: JSON.stringify(css),
+            css: { code: JSON.stringify(css) },
         })),
     });
     // Has single text node child
@@ -516,13 +528,11 @@ var builderElementToMitosisNode = function (block, options, _internalOptions) {
         ((_t = block.children[0].component) === null || _t === void 0 ? void 0 : _t.name) === 'Text' &&
         !options.preserveTextBlocks) {
         var textProperties = (0, exports.builderElementToMitosisNode)(block.children[0], options);
-        var mergedCss = (0, lodash_1.merge)(json5_1.default.parse(node.bindings.css || '{}'), json5_1.default.parse(textProperties.bindings.css || '{}'));
+        var mergedCss = (0, lodash_1.merge)(json5_1.default.parse(((_u = node.bindings.css) === null || _u === void 0 ? void 0 : _u.code) || '{}'), json5_1.default.parse(((_v = textProperties.bindings.css) === null || _v === void 0 ? void 0 : _v.code) || '{}'));
         return (0, lodash_1.merge)({}, textProperties, node, {
-            bindings: {
-                css: Object.keys(mergedCss).length
-                    ? json5_1.default.stringify(mergedCss)
-                    : undefined,
-            },
+            bindings: __assign({}, (Object.keys(mergedCss).length && {
+                css: { code: json5_1.default.stringify(mergedCss) },
+            })),
         });
     }
     node.children = (block.children || []).map(function (item) {

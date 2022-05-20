@@ -38,7 +38,7 @@ function renderHandlers(file, componentName, children) {
         var bindings = node.bindings;
         for (var key in bindings) {
             if (Object.prototype.hasOwnProperty.call(bindings, key)) {
-                var binding = bindings[key];
+                var binding = bindings[key].code;
                 if (binding != null) {
                     if (key.startsWith('on')) {
                         var block = extractJSBlock(binding) || binding;

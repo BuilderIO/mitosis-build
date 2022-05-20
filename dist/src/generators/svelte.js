@@ -42,8 +42,9 @@ var context_1 = require("./helpers/context");
 var html_tags_1 = require("../constants/html_tags");
 var mappers = {
     Fragment: function (_a) {
+        var _b;
         var json = _a.json, options = _a.options, parentComponent = _a.parentComponent;
-        if (json.bindings.innerHTML) {
+        if ((_b = json.bindings.innerHTML) === null || _b === void 0 ? void 0 : _b.code) {
             return BINDINGS_MAPPER.innerHTML(json, options);
         }
         else if (json.children.length > 0) {
@@ -56,16 +57,18 @@ var mappers = {
         }
     },
     For: function (_a) {
+        var _b;
         var json = _a.json, options = _a.options, parentComponent = _a.parentComponent;
-        return "\n{#each ".concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(json.bindings.each, {
+        return "\n{#each ".concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)((_b = json.bindings.each) === null || _b === void 0 ? void 0 : _b.code, {
             includeState: options.stateType === 'variables',
         }), " as ").concat(json.properties._forName, ", index }\n").concat(json.children
             .map(function (item) { return (0, exports.blockToSvelte)({ json: item, options: options, parentComponent: parentComponent }); })
             .join('\n'), "\n{/each}\n");
     },
     Show: function (_a) {
+        var _b;
         var json = _a.json, options = _a.options, parentComponent = _a.parentComponent;
-        return "\n{#if ".concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(json.bindings.when, {
+        return "\n{#if ".concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)((_b = json.bindings.when) === null || _b === void 0 ? void 0 : _b.code, {
             includeState: options.stateType === 'variables',
         }), " }\n").concat(json.children
             .map(function (item) { return (0, exports.blockToSvelte)({ json: item, options: options, parentComponent: parentComponent }); })
@@ -97,7 +100,8 @@ var setContextCode = function (json) {
 };
 var BINDINGS_MAPPER = {
     innerHTML: function (json, options) {
-        return "{@html ".concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(json.bindings.innerHTML), "}");
+        var _a;
+        return "{@html ".concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)((_a = json.bindings.innerHTML) === null || _a === void 0 ? void 0 : _a.code), "}");
     },
 };
 var SVELTE_SPECIAL_TAGS = {
@@ -120,12 +124,13 @@ var getTagName = function (_a) {
     // TO-DO: no way to decide between <svelte:component> and <svelte:element>...need to do that through metadata
     // overrides for now
     if (!isValidHtmlTag && !isSpecialSvelteTag && !hasMatchingImport) {
-        json.bindings.this = json.name;
+        json.bindings.this = { code: json.name };
         return SVELTE_SPECIAL_TAGS.COMPONENT;
     }
     return json.name;
 };
 var blockToSvelte = function (_a) {
+    var _b, _c, _d;
     var json = _a.json, options = _a.options, parentComponent = _a.parentComponent;
     if (mappers[json.name]) {
         return mappers[json.name]({ json: json, options: options, parentComponent: parentComponent });
@@ -137,15 +142,15 @@ var blockToSvelte = function (_a) {
     if (json.properties._text) {
         return json.properties._text;
     }
-    if (json.bindings._text) {
-        return "{".concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(json.bindings._text, {
+    if ((_b = json.bindings._text) === null || _b === void 0 ? void 0 : _b.code) {
+        return "{".concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(json.bindings._text.code, {
             includeState: options.stateType === 'variables',
         }), "}");
     }
     var str = '';
     str += "<".concat(tagName, " ");
-    if (json.bindings._spread) {
-        str += "{...".concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(json.bindings._spread, {
+    if ((_c = json.bindings._spread) === null || _c === void 0 ? void 0 : _c.code) {
+        str += "{...".concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(json.bindings._spread.code, {
             includeState: options.stateType === 'variables',
         }), "}");
     }
@@ -160,7 +165,7 @@ var blockToSvelte = function (_a) {
         if (key === '_spread') {
             continue;
         }
-        var value = json.bindings[key];
+        var value = json.bindings[key].code;
         // TODO: proper babel transform to replace. Util for this
         var useValue = (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(value, {
             includeState: options.stateType === 'variables',
@@ -179,7 +184,7 @@ var blockToSvelte = function (_a) {
     }
     // if we have innerHTML, it doesn't matter whether we have closing tags or not, or children or not.
     // we use the innerHTML content as children and don't render the self-closing tag.
-    if (json.bindings.innerHTML) {
+    if ((_d = json.bindings.innerHTML) === null || _d === void 0 ? void 0 : _d.code) {
         str += '>';
         str += BINDINGS_MAPPER.innerHTML(json, options);
         str += "</".concat(tagName, ">");
@@ -210,8 +215,8 @@ var useBindValue = function (json, options) {
         if ((0, is_mitosis_node_1.isMitosisNode)(item)) {
             var _a = item.bindings, value = _a.value, onChange = _a.onChange;
             if (value && onChange) {
-                if (onChange.replace(/\s+/g, '') ===
-                    "".concat(value, "=event.target.value")) {
+                if (onChange.code.replace(/\s+/g, '') ===
+                    "".concat(value.code, "=event.target.value")) {
                     delete item.bindings.value;
                     delete item.bindings.onChange;
                     item.bindings['bind:value'] = value;

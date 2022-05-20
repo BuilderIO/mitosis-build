@@ -41,7 +41,7 @@ var stripStateAndPropsRefs = function (code, options) {
         }
         // TODO: webcomponent edge-case
         if (/el\.this\.props/.test(newCode)) {
-            newCode = newCode.replace(/el.this.props/g, 'el.props');
+            newCode = newCode.replace(/el\.this\.props/g, 'el.props');
         }
     }
     if (options.includeState !== false) {

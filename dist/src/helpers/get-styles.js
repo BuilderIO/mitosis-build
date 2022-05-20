@@ -7,15 +7,16 @@ exports.setStyles = exports.getStyles = void 0;
 var json5_1 = __importDefault(require("json5"));
 var lodash_1 = require("lodash");
 var getStyles = function (json) {
+    var _a;
     if (!json.bindings.css) {
         return null;
     }
     var css;
     try {
-        css = json5_1.default.parse(json.bindings.css);
+        css = json5_1.default.parse((_a = json.bindings.css) === null || _a === void 0 ? void 0 : _a.code);
     }
     catch (err) {
-        console.warn('Could not json 5 parse css', err, json.bindings.css);
+        console.warn('Could not json 5 parse css', err, json.bindings.css.code);
         return null;
     }
     return css;
@@ -26,7 +27,7 @@ var setStyles = function (json, styles) {
         delete json.bindings.css;
     }
     else {
-        json.bindings.css = json5_1.default.stringify(styles);
+        json.bindings.css = { code: json5_1.default.stringify(styles) };
     }
 };
 exports.setStyles = setStyles;

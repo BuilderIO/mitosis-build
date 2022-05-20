@@ -16,6 +16,6 @@ function Video(props) {
     return (<video {...props.attributes} style={__assign(__assign({ width: '100%', height: '100%' }, (_a = props.attributes) === null || _a === void 0 ? void 0 : _a.style), { objectFit: props.fit, objectPosition: props.position, 
             // Hack to get object fit to work as expected and
             // not have the video overflow
-            borderRadius: 1 })} preload="none" key={props.video || 'no-src'} poster={props.posterImage} autoPlay={props.autoPlay} muted={props.muted} controls={props.controls} loop={props.loop}/>);
+            borderRadius: 1 })} preload="none" key={props.video || 'no-src'} poster={props.posterImage} autoplay={props.autoPlay} muted={props.muted} controls={props.controls} loop={props.loop}/>);
 }
 exports.default = Video;

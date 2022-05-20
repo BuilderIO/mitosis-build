@@ -24,6 +24,7 @@ var mappers = {
 };
 // TODO: spread support
 var blockToTemplate = function (json, options) {
+    var _a, _b, _c, _d;
     if (options === void 0) { options = {}; }
     if (mappers[json.name]) {
         return mappers[json.name](json, options);
@@ -32,11 +33,11 @@ var blockToTemplate = function (json, options) {
         return json.properties._text;
     }
     if (json.bindings._text) {
-        return "${".concat(json.bindings._text, "}");
+        return "${".concat((_a = json.bindings._text) === null || _a === void 0 ? void 0 : _a.code, "}");
     }
     var str = '';
     if (json.name === 'For') {
-        str += "${".concat(json.bindings.each, "?.map(").concat(json.properties._forName, " => `");
+        str += "${".concat((_b = json.bindings.each) === null || _b === void 0 ? void 0 : _b.code, "?.map(").concat(json.properties._forName, " => `");
         if (json.children) {
             str += json.children
                 .map(function (item) { return blockToTemplate(item, options); })
@@ -45,7 +46,7 @@ var blockToTemplate = function (json, options) {
         str += '`).join("")}';
     }
     else if (json.name === 'Show') {
-        str += "${!(".concat(json.bindings.when, ") ? '' : `");
+        str += "${!(".concat((_c = json.bindings.when) === null || _c === void 0 ? void 0 : _c.code, ") ? '' : `");
         if (json.children) {
             str += json.children
                 .map(function (item) { return blockToTemplate(item, options); })
@@ -71,7 +72,7 @@ var blockToTemplate = function (json, options) {
             if (key === '_spread' || key === 'ref' || key === 'css') {
                 continue;
             }
-            var value = json.bindings[key];
+            var value = (_d = json.bindings[key]) === null || _d === void 0 ? void 0 : _d.code;
             // TODO: proper babel transform to replace. Util for this
             var useValue = value;
             if (key.startsWith('on')) {

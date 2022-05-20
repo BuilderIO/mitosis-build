@@ -58,7 +58,7 @@ var componentMappers = __assign(__assign({}, (!builder_1.symbolBlocksAsChildren
         Symbol: function (node, options) {
             var child = node.children[0];
             var symbolOptions = (node.bindings.symbol &&
-                json5_1.default.parse(node.bindings.symbol)) ||
+                json5_1.default.parse(node.bindings.symbol.code)) ||
                 {};
             if (child) {
                 (0, lodash_1.set)(symbolOptions, 'content.data.blocks', child.children.map(function (item) { return (0, exports.blockToBuilder)(item, options); }));
@@ -82,12 +82,13 @@ var componentMappers = __assign(__assign({}, (!builder_1.symbolBlocksAsChildren
         block.children = [];
         return block;
     }, For: function (node, options) {
+        var _a;
         return el({
             component: {
                 name: 'Core:Fragment',
             },
             repeat: {
-                collection: node.bindings.each,
+                collection: (_a = node.bindings.each) === null || _a === void 0 ? void 0 : _a.code,
                 itemName: node.properties._forName,
             },
             children: node.children
@@ -95,13 +96,14 @@ var componentMappers = __assign(__assign({}, (!builder_1.symbolBlocksAsChildren
                 .map(function (node) { return (0, exports.blockToBuilder)(node, options); }),
         }, options);
     }, Show: function (node, options) {
+        var _a;
         return el({
             // TODO: the reverse mapping for this
             component: {
                 name: 'Core:Fragment',
             },
             bindings: {
-                show: node.bindings.when,
+                show: (_a = node.bindings.when) === null || _a === void 0 ? void 0 : _a.code,
             },
             children: node.children
                 .filter(filter_empty_text_nodes_1.filterEmptyTextNodes)
@@ -129,20 +131,20 @@ function tryFormat(code) {
 }
 var blockToBuilder = function (json, options, _internalOptions) {
     var _a;
-    var _b;
+    var _b, _c, _d, _e, _f, _g;
     if (options === void 0) { options = {}; }
     if (_internalOptions === void 0) { _internalOptions = {}; }
     var mapper = !_internalOptions.skipMapper && componentMappers[json.name];
     if (mapper) {
         return mapper(json, options);
     }
-    if (json.properties._text || json.bindings._text) {
+    if (json.properties._text || ((_b = json.bindings._text) === null || _b === void 0 ? void 0 : _b.code)) {
         return el({
             tagName: 'span',
-            bindings: __assign({}, (json.bindings._text
+            bindings: __assign({}, (((_c = json.bindings._text) === null || _c === void 0 ? void 0 : _c.code)
                 ? {
-                    'component.options.text': json.bindings._text,
-                    'json.bindings._text': undefined,
+                    'component.options.text': json.bindings._text.code,
+                    'json.bindings._text.code': undefined,
                 }
                 : {})),
             component: {
@@ -158,9 +160,9 @@ var blockToBuilder = function (json, options, _internalOptions) {
     var actions = {};
     for (var key in bindings) {
         var eventBindingKeyRegex = /^on([A-Z])/;
-        var firstCharMatchForEventBindingKey = (_b = key.match(eventBindingKeyRegex)) === null || _b === void 0 ? void 0 : _b[1];
+        var firstCharMatchForEventBindingKey = (_d = key.match(eventBindingKeyRegex)) === null || _d === void 0 ? void 0 : _d[1];
         if (firstCharMatchForEventBindingKey) {
-            actions[key.replace(eventBindingKeyRegex, firstCharMatchForEventBindingKey.toLowerCase())] = (0, remove_surrounding_block_1.removeSurroundingBlock)(bindings[key]);
+            actions[key.replace(eventBindingKeyRegex, firstCharMatchForEventBindingKey.toLowerCase())] = (0, remove_surrounding_block_1.removeSurroundingBlock)((_e = bindings[key]) === null || _e === void 0 ? void 0 : _e.code);
             delete bindings[key];
         }
     }
@@ -172,7 +174,7 @@ var blockToBuilder = function (json, options, _internalOptions) {
                 return "continue";
             }
             var value = bindings[key];
-            var parsed = (0, lodash_1.attempt)(function () { return json5_1.default.parse(value); });
+            var parsed = (0, lodash_1.attempt)(function () { return json5_1.default.parse(value === null || value === void 0 ? void 0 : value.code); });
             if (!(parsed instanceof Error)) {
                 componentOptions[key] = parsed;
             }
@@ -184,12 +186,12 @@ var blockToBuilder = function (json, options, _internalOptions) {
             _loop_1(key);
         }
     }
-    var hasCss = !!bindings.css;
+    var hasCss = !!((_f = bindings.css) === null || _f === void 0 ? void 0 : _f.code);
     var responsiveStyles = {
         large: {},
     };
     if (hasCss) {
-        var cssRules = json5_1.default.parse(bindings.css);
+        var cssRules = json5_1.default.parse((_g = bindings.css) === null || _g === void 0 ? void 0 : _g.code);
         var cssRuleKeys = Object.keys(cssRules);
         for (var _i = 0, cssRuleKeys_1 = cssRuleKeys; _i < cssRuleKeys_1.length; _i++) {
             var ruleKey = cssRuleKeys_1[_i];

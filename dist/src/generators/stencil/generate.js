@@ -26,23 +26,24 @@ var collect_styles_1 = require("../../helpers/collect-styles");
 var indent_1 = require("../../helpers/indent");
 var map_refs_1 = require("../../helpers/map-refs");
 var blockToStencil = function (json, options) {
+    var _a, _b, _c, _d, _e, _f;
     if (options === void 0) { options = {}; }
     if (json.properties._text) {
         return json.properties._text;
     }
-    if (json.bindings._text) {
-        return "{".concat(processBinding(json.bindings._text), "}");
+    if ((_a = json.bindings._text) === null || _a === void 0 ? void 0 : _a.code) {
+        return "{".concat(processBinding((_b = json.bindings) === null || _b === void 0 ? void 0 : _b._text.code), "}");
     }
     if (json.name === 'For') {
         var wrap = json.children.length !== 1;
-        return "{".concat(processBinding(json.bindings.each), "?.map((").concat(json.properties._forName, ", index) => (\n      ").concat(wrap ? '<>' : '').concat(json.children
+        return "{".concat(processBinding((_c = json.bindings.each) === null || _c === void 0 ? void 0 : _c.code), "?.map((").concat(json.properties._forName, ", index) => (\n      ").concat(wrap ? '<>' : '').concat(json.children
             .filter(filter_empty_text_nodes_1.filterEmptyTextNodes)
             .map(function (item) { return blockToStencil(item, options); })
             .join('\n')).concat(wrap ? '</>' : '', "\n    ))}");
     }
     else if (json.name === 'Show') {
         var wrap = json.children.length !== 1;
-        return "{".concat(processBinding(json.bindings.when), " ? (\n      ").concat(wrap ? '<>' : '').concat(json.children
+        return "{".concat(processBinding((_d = json.bindings.when) === null || _d === void 0 ? void 0 : _d.code), " ? (\n      ").concat(wrap ? '<>' : '').concat(json.children
             .filter(filter_empty_text_nodes_1.filterEmptyTextNodes)
             .map(function (item) { return blockToStencil(item, options); })
             .join('\n')).concat(wrap ? '</>' : '', "\n    ) : ").concat(!json.meta.else ? 'null' : blockToStencil(json.meta.else, options), "}");
@@ -53,15 +54,15 @@ var blockToStencil = function (json, options) {
     if (classString) {
         str += " class=".concat(classString, " ");
     }
-    if (json.bindings._spread) {
-        str += " {...(".concat(json.bindings._spread, ")} ");
+    if ((_e = json.bindings._spread) === null || _e === void 0 ? void 0 : _e.code) {
+        str += " {...(".concat(json.bindings._spread.code, ")} ");
     }
     for (var key in json.properties) {
         var value = json.properties[key];
         str += " ".concat(key, "=\"").concat(value, "\" ");
     }
     for (var key in json.bindings) {
-        var value = json.bindings[key];
+        var value = (_f = json.bindings[key]) === null || _f === void 0 ? void 0 : _f.code;
         if (key === '_spread' || key === '_forName') {
             continue;
         }

@@ -10,7 +10,8 @@ var src_generator_1 = require("./src-generator");
 exports.DIRECTIVES = {
     Show: function (node, blockFn) {
         return function () {
-            var expr = node.bindings.when;
+            var _a;
+            var expr = (_a = node.bindings.when) === null || _a === void 0 ? void 0 : _a.code;
             this.isJSX && this.emit('{');
             this.emit(expr, '?');
             blockFn();
@@ -20,7 +21,8 @@ exports.DIRECTIVES = {
     },
     For: function (node, blockFn) {
         return function () {
-            var expr = node.bindings.each;
+            var _a;
+            var expr = (_a = node.bindings.each) === null || _a === void 0 ? void 0 : _a.code;
             this.isJSX && this.emit('{');
             this.emit('(', expr, '||[]).map(', '(function(__value__){');
             this.emit('var state=Object.assign({},this,{', (0, src_generator_1.iteratorProperty)(expr), ':__value__==null?{}:__value__});');

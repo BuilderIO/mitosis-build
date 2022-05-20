@@ -27,10 +27,11 @@ var collectReactNativeStyles = function (json) {
     var styleMap = {};
     var componentIndexes = {};
     (0, traverse_1.default)(json).forEach(function (item) {
-        if (!(0, is_mitosis_node_1.isMitosisNode)(item) || typeof item.bindings.css !== 'string') {
+        var _a;
+        if (!(0, is_mitosis_node_1.isMitosisNode)(item) || typeof ((_a = item.bindings.css) === null || _a === void 0 ? void 0 : _a.code) !== 'string') {
             return;
         }
-        var value = json5_1.default.parse(item.bindings.css);
+        var value = json5_1.default.parse(item.bindings.css.code);
         delete item.bindings.css;
         if (!(0, lodash_1.size)(value)) {
             return;
@@ -61,7 +62,7 @@ var collectReactNativeStyles = function (json) {
         var index = (componentIndexes[componentName] =
             (componentIndexes[componentName] || 0) + 1);
         var className = "".concat(componentName).concat(index);
-        item.bindings.style = "styles.".concat(className);
+        item.bindings.style = { code: "styles.".concat(className) };
         styleMap[className] = value;
     });
     return styleMap;
@@ -73,14 +74,14 @@ function processReactNative() {
         json: {
             pre: function (json) {
                 (0, traverse_1.default)(json).forEach(function (node) {
-                    var _a, _b, _c;
+                    var _a, _b, _c, _d;
                     if ((0, is_mitosis_node_1.isMitosisNode)(node)) {
                         // TODO: handle TextInput, Image, etc
                         if (node.name.toLowerCase() === node.name) {
                             node.name = 'View';
                         }
                         if (((_a = node.properties._text) === null || _a === void 0 ? void 0 : _a.trim().length) ||
-                            ((_c = (_b = node.bindings._text) === null || _b === void 0 ? void 0 : _b.trim()) === null || _c === void 0 ? void 0 : _c.length)) {
+                            ((_d = (_c = (_b = node.bindings._text) === null || _b === void 0 ? void 0 : _b.code) === null || _c === void 0 ? void 0 : _c.trim()) === null || _d === void 0 ? void 0 : _d.length)) {
                             node.name = 'Text';
                         }
                         if (node.properties.class) {

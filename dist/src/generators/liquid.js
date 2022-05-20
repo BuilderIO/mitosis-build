@@ -35,6 +35,7 @@ var mappers = {
 };
 // TODO: spread support
 var blockToLiquid = function (json, options) {
+    var _a, _b, _c, _d, _e, _f;
     if (options === void 0) { options = {}; }
     if (mappers[json.name]) {
         return mappers[json.name](json, options);
@@ -43,19 +44,19 @@ var blockToLiquid = function (json, options) {
     if (json.properties._text) {
         return json.properties._text;
     }
-    if (json.bindings._text) {
-        if (!(0, exports.isValidLiquidBinding)(json.bindings._text)) {
+    if ((_a = json.bindings._text) === null || _a === void 0 ? void 0 : _a.code) {
+        if (!(0, exports.isValidLiquidBinding)(json.bindings._text.code)) {
             return '';
         }
-        return "{{".concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(json.bindings._text), "}}");
+        return "{{".concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(json.bindings._text.code), "}}");
     }
     var str = '';
     if (json.name === 'For') {
-        if (!((0, exports.isValidLiquidBinding)(json.bindings.each) &&
+        if (!((0, exports.isValidLiquidBinding)((_b = json.bindings.each) === null || _b === void 0 ? void 0 : _b.code) &&
             (0, exports.isValidLiquidBinding)(json.properties._forName))) {
             return str;
         }
-        str += "{% for ".concat(json.properties._forName, " in ").concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(json.bindings.each), " %}");
+        str += "{% for ".concat(json.properties._forName, " in ").concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)((_c = json.bindings.each) === null || _c === void 0 ? void 0 : _c.code), " %}");
         if (json.children) {
             str += json.children
                 .map(function (item) { return blockToLiquid(item, options); })
@@ -64,10 +65,10 @@ var blockToLiquid = function (json, options) {
         str += '{% endfor %}';
     }
     else if (json.name === 'Show') {
-        if (!(0, exports.isValidLiquidBinding)(json.bindings.when)) {
+        if (!(0, exports.isValidLiquidBinding)((_d = json.bindings.when) === null || _d === void 0 ? void 0 : _d.code)) {
             return str;
         }
-        str += "{% if ".concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(json.bindings.when), " %}");
+        str += "{% if ".concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)((_e = json.bindings.when) === null || _e === void 0 ? void 0 : _e.code), " %}");
         if (json.children) {
             str += json.children
                 .map(function (item) { return blockToLiquid(item, options); })
@@ -77,9 +78,9 @@ var blockToLiquid = function (json, options) {
     }
     else {
         str += "<".concat(json.name, " ");
-        if (json.bindings._spread === '_spread' &&
-            (0, exports.isValidLiquidBinding)(json.bindings._spread)) {
-            str += "\n          {% for _attr in ".concat(json.bindings._spread, " %}\n            {{ _attr[0] }}=\"{{ _attr[1] }}\"\n          {% endfor %}\n        ");
+        if (((_f = json.bindings._spread) === null || _f === void 0 ? void 0 : _f.code) === '_spread' &&
+            (0, exports.isValidLiquidBinding)(json.bindings._spread.code)) {
+            str += "\n          {% for _attr in ".concat(json.bindings._spread.code, " %}\n            {{ _attr[0] }}=\"{{ _attr[1] }}\"\n          {% endfor %}\n        ");
         }
         for (var key in json.properties) {
             var value = json.properties[key];
@@ -89,7 +90,7 @@ var blockToLiquid = function (json, options) {
             if (key === '_spread' || key === 'ref' || key === 'css') {
                 continue;
             }
-            var value = json.bindings[key];
+            var value = json.bindings[key].code;
             // TODO: proper babel transform to replace. Util for this
             var useValue = (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(value);
             if (key.startsWith('on')) {

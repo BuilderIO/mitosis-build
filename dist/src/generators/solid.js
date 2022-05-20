@@ -44,7 +44,7 @@ function processDynamicComponents(json, options) {
     (0, traverse_1.default)(json).forEach(function (node) {
         if ((0, is_mitosis_node_1.isMitosisNode)(node)) {
             if (node.name.includes('.')) {
-                node.bindings.component = node.name;
+                node.bindings.component.code = node.name;
                 node.name = 'Dynamic';
                 found = true;
             }
@@ -62,6 +62,7 @@ function getContextString(component, options) {
 // This should really be a preprocessor mapping the `class` attribute binding based on what other values have
 // to make this more pluggable
 var collectClassString = function (json) {
+    var _a, _b, _c;
     var staticClasses = [];
     var hasStaticClasses = Boolean(staticClasses.length);
     if (json.properties.class) {
@@ -73,21 +74,17 @@ var collectClassString = function (json) {
         delete json.properties.className;
     }
     var dynamicClasses = [];
-    if (typeof json.bindings.class === 'string') {
-        dynamicClasses.push(json.bindings.class);
+    if (typeof ((_a = json.bindings.class) === null || _a === void 0 ? void 0 : _a.code) === 'string') {
+        dynamicClasses.push(json.bindings.class.code);
         delete json.bindings.class;
     }
-    if (typeof json.bindings.className === 'string') {
-        dynamicClasses.push(json.bindings.className);
+    if (typeof ((_b = json.bindings.className) === null || _b === void 0 ? void 0 : _b.code) === 'string') {
+        dynamicClasses.push(json.bindings.className.code);
         delete json.bindings.className;
     }
-    if (typeof json.bindings.className === 'string') {
-        dynamicClasses.push(json.bindings.className);
-        delete json.bindings.className;
-    }
-    if (typeof json.bindings.css === 'string' &&
-        json.bindings.css.trim().length > 4) {
-        dynamicClasses.push("css(".concat(json.bindings.css, ")"));
+    if (typeof ((_c = json.bindings.css) === null || _c === void 0 ? void 0 : _c.code) === 'string' &&
+        json.bindings.css.code.trim().length > 4) {
+        dynamicClasses.push("css(".concat(json.bindings.css.code, ")"));
     }
     delete json.bindings.css;
     var staticClassesString = staticClasses.join(' ');
@@ -105,18 +102,19 @@ var collectClassString = function (json) {
     return null;
 };
 var blockToSolid = function (json, options) {
+    var _a, _b, _c;
     if (options === void 0) { options = {}; }
     if (json.properties._text) {
         return json.properties._text;
     }
-    if (json.bindings._text) {
-        return "{".concat(json.bindings._text, "}");
+    if ((_a = json.bindings._text) === null || _a === void 0 ? void 0 : _a.code) {
+        return "{".concat(json.bindings._text.code, "}");
     }
     if (json.name === 'For') {
         var needsWrapper = json.children.length !== 1;
         // The SolidJS `<For>` component has a special index() signal function.
         // https://www.solidjs.com/docs/latest#%3Cfor%3E
-        return "<For each={".concat(json.bindings.each, "}>\n    {(").concat(json.properties._forName, ", _index) => {\n      const index = _index();\n      return ").concat(needsWrapper ? '<>' : '').concat(json.children
+        return "<For each={".concat((_b = json.bindings.each) === null || _b === void 0 ? void 0 : _b.code, "}>\n    {(").concat(json.properties._forName, ", _index) => {\n      const index = _index();\n      return ").concat(needsWrapper ? '<>' : '').concat(json.children
             .filter(filter_empty_text_nodes_1.filterEmptyTextNodes)
             .map(function (child) { return blockToSolid(child, options); }), "}}\n      ").concat(needsWrapper ? '</>' : '', "\n    </For>");
     }
@@ -134,8 +132,8 @@ var blockToSolid = function (json, options) {
     if (classString) {
         str += " class=".concat(classString, " ");
     }
-    if (json.bindings._spread) {
-        str += " {...(".concat(json.bindings._spread, ")} ");
+    if ((_c = json.bindings._spread) === null || _c === void 0 ? void 0 : _c.code) {
+        str += " {...(".concat(json.bindings._spread.code, ")} ");
     }
     for (var key in json.properties) {
         var value = json.properties[key];
@@ -146,19 +144,21 @@ var blockToSolid = function (json, options) {
         if (key === '_spread' || key === '_forName') {
             continue;
         }
+        if (!(value === null || value === void 0 ? void 0 : value.code))
+            continue;
         if (key.startsWith('on')) {
             var useKey = key === 'onChange' && json.name === 'input' ? 'onInput' : key;
-            str += " ".concat(useKey, "={event => ").concat(value, "} ");
+            str += " ".concat(useKey, "={event => ").concat(value.code, "} ");
         }
         else {
-            var useValue = value;
+            var useValue = value.code;
             if (key === 'style') {
                 // Convert camelCase keys to kebab-case
                 // TODO: support more than top level objects, may need
                 // a runtime helper for expressions that are not a direct
                 // object literal, such as ternaries and other expression
                 // types
-                useValue = (0, babel_transform_1.babelTransformExpression)(value, {
+                useValue = (0, babel_transform_1.babelTransformExpression)(value.code, {
                     ObjectExpression: function (path) {
                         // TODO: limit to top level objects only
                         for (var _i = 0, _a = path.node.properties; _i < _a.length; _i++) {
@@ -212,7 +212,7 @@ function addProviderComponents(json, options) {
         json.children = [
             (0, create_mitosis_node_1.createMitosisNode)(__assign({ name: "".concat(name_1, ".Provider"), children: json.children }, (value && {
                 bindings: {
-                    value: (0, get_state_object_string_1.getMemberObjectString)(value),
+                    value: { code: (0, get_state_object_string_1.getMemberObjectString)(value) },
                 },
             }))),
         ];

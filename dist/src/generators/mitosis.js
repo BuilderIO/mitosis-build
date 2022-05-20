@@ -36,6 +36,7 @@ var isValidAttributeName = function (str) {
     return Boolean(str && /^[$a-z0-9\-_:]+$/i.test(str));
 };
 var blockToMitosis = function (json, toMitosisOptions) {
+    var _a, _b, _c, _d, _e;
     if (toMitosisOptions === void 0) { toMitosisOptions = {}; }
     var options = __assign({ format: exports.DEFAULT_FORMAT }, toMitosisOptions);
     if (options.format === 'react') {
@@ -48,18 +49,18 @@ var blockToMitosis = function (json, toMitosisOptions) {
     }
     if (json.name === 'For') {
         var needsWrapper = json.children.length !== 1;
-        return "<For each={".concat(json.bindings.each, "}>\n    {(").concat(json.properties._forName, ", index) =>\n      ").concat(needsWrapper ? '<>' : '', "\n        ").concat(json.children.map(function (child) { return (0, exports.blockToMitosis)(child, options); }), "}\n      ").concat(needsWrapper ? '</>' : '', "\n    </For>");
+        return "<For each={".concat((_a = json.bindings.each) === null || _a === void 0 ? void 0 : _a.code, "}>\n    {(").concat(json.properties._forName, ", index) =>\n      ").concat(needsWrapper ? '<>' : '', "\n        ").concat(json.children.map(function (child) { return (0, exports.blockToMitosis)(child, options); }), "}\n      ").concat(needsWrapper ? '</>' : '', "\n    </For>");
     }
     if (json.properties._text) {
         return json.properties._text;
     }
-    if (json.bindings._text) {
-        return "{".concat(json.bindings._text, "}");
+    if ((_b = json.bindings._text) === null || _b === void 0 ? void 0 : _b.code) {
+        return "{".concat((_c = json.bindings._text) === null || _c === void 0 ? void 0 : _c.code, "}");
     }
     var str = '';
     str += "<".concat(json.name, " ");
-    if (json.bindings._spread) {
-        str += " {...(".concat(json.bindings._spread, ")} ");
+    if ((_d = json.bindings._spread) === null || _d === void 0 ? void 0 : _d.code) {
+        str += " {...(".concat(json.bindings._spread.code, ")} ");
     }
     for (var key in json.properties) {
         var value = (json.properties[key] || '')
@@ -73,7 +74,7 @@ var blockToMitosis = function (json, toMitosisOptions) {
         }
     }
     for (var key in json.bindings) {
-        var value = json.bindings[key];
+        var value = (_e = json.bindings[key]) === null || _e === void 0 ? void 0 : _e.code;
         if (key === '_spread') {
             continue;
         }

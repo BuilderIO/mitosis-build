@@ -13,8 +13,9 @@ var is_mitosis_node_1 = require("./is-mitosis-node");
 var is_upper_case_1 = require("./is-upper-case");
 var object_hash_1 = __importDefault(require("object-hash"));
 var nodeHasStyles = function (node) {
-    return Boolean(typeof node.bindings.css === 'string' &&
-        node.bindings.css.trim().length > 6);
+    var _a;
+    return Boolean(typeof ((_a = node.bindings.css) === null || _a === void 0 ? void 0 : _a.code) === 'string' &&
+        node.bindings.css.code.trim().length > 6);
 };
 exports.nodeHasStyles = nodeHasStyles;
 var hasStyles = function (component) {
@@ -35,9 +36,10 @@ var collectStyledComponents = function (json) {
     var componentIndexes = {};
     var componentHashes = {};
     (0, traverse_1.default)(json).forEach(function (item) {
+        var _a;
         if ((0, is_mitosis_node_1.isMitosisNode)(item)) {
             if ((0, exports.nodeHasStyles)(item)) {
-                var value = (0, exports.parseCssObject)(item.bindings.css);
+                var value = (0, exports.parseCssObject)((_a = item.bindings.css) === null || _a === void 0 ? void 0 : _a.code);
                 delete item.bindings.css;
                 var normalizedNameProperty = item.properties.$name
                     ? (0, capitalize_1.capitalize)((0, lodash_1.camelCase)(item.properties.$name.replace(/[^a-z]/gi, '')))
@@ -94,9 +96,10 @@ var collectStyles = function (json, options) {
     var componentIndexes = {};
     var componentHashes = {};
     (0, traverse_1.default)(json).forEach(function (item) {
+        var _a;
         if ((0, is_mitosis_node_1.isMitosisNode)(item)) {
             if ((0, exports.nodeHasStyles)(item)) {
-                var value = (0, exports.parseCssObject)(item.bindings.css);
+                var value = (0, exports.parseCssObject)((_a = item.bindings.css) === null || _a === void 0 ? void 0 : _a.code);
                 delete item.bindings.css;
                 var componentName = item.properties.$name
                     ? (0, dash_case_1.dashCase)(item.properties.$name)

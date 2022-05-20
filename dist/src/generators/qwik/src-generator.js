@@ -231,7 +231,7 @@ var SrcBuilder = /** @class */ (function () {
         var _loop_1 = function (rawKey) {
             if (Object.prototype.hasOwnProperty.call(bindings, rawKey) &&
                 !ignoreKey(rawKey)) {
-                var binding_1 = bindings[rawKey];
+                var binding_1 = bindings[rawKey].code;
                 var key = lastProperty(rawKey);
                 if (binding_1 === props[key]) {
                     // HACK: workaround for the fact that sometimes the `bindings` have string literals
