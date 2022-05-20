@@ -365,9 +365,11 @@ var jsxElementToJson = function (node) {
                     return (0, create_mitosis_node_1.createMitosisNode)({
                         name: 'For',
                         bindings: {
-                            each: (0, generator_1.default)(node.expression.callee)
-                                .code // Remove .map or potentially ?.map
-                                .replace(/\??\.map$/, ''),
+                            each: {
+                                code: (0, generator_1.default)(node.expression.callee)
+                                    .code // Remove .map or potentially ?.map
+                                    .replace(/\??\.map$/, ''),
+                            },
                         },
                         scope: {
                             For: forArguments,
@@ -388,7 +390,7 @@ var jsxElementToJson = function (node) {
                 return (0, create_mitosis_node_1.createMitosisNode)({
                     name: 'Show',
                     bindings: {
-                        when: (0, generator_1.default)(node.expression.left).code,
+                        when: { code: (0, generator_1.default)(node.expression.left).code },
                     },
                     children: [jsxElementToJson(node.expression.right)],
                 });
@@ -405,7 +407,7 @@ var jsxElementToJson = function (node) {
                     else: jsxElementToJson(node.expression.alternate),
                 },
                 bindings: {
-                    when: (0, generator_1.default)(node.expression.test).code,
+                    when: { code: (0, generator_1.default)(node.expression.test).code },
                 },
                 children: [jsxElementToJson(node.expression.consequent)],
             });
@@ -413,7 +415,7 @@ var jsxElementToJson = function (node) {
         // TODO: support {foo ? bar : baz}
         return (0, create_mitosis_node_1.createMitosisNode)({
             bindings: {
-                _text: (0, generator_1.default)(node.expression).code,
+                _text: { code: (0, generator_1.default)(node.expression).code },
             },
         });
     }
@@ -441,7 +443,7 @@ var jsxElementToJson = function (node) {
                 else: elseValue || undefined,
             },
             bindings: {
-                when: whenValue || undefined,
+                when: { code: whenValue || undefined },
             },
             children: node.children
                 .map(function (item) { return jsxElementToJson(item); })
@@ -460,8 +462,10 @@ var jsxElementToJson = function (node) {
                 return (0, create_mitosis_node_1.createMitosisNode)({
                     name: 'For',
                     bindings: {
-                        each: (0, generator_1.default)(node.openingElement.attributes[0]
-                            .value.expression).code,
+                        each: {
+                            code: (0, generator_1.default)(node.openingElement
+                                .attributes[0].value.expression).code,
+                        },
                     },
                     scope: {
                         For: forArguments,
@@ -496,10 +500,13 @@ var jsxElementToJson = function (node) {
                 if (types.isJSXExpressionContainer(value)) {
                     var expression = value.expression;
                     if (types.isArrowFunctionExpression(expression)) {
-                        memo[key] = (0, generator_1.default)(expression.body).code;
+                        memo[key] = { code: (0, generator_1.default)(expression.body).code };
                     }
                     else {
-                        memo[key] = (0, generator_1.default)(expression).code;
+                        memo[key] = { code: (0, generator_1.default)(expression).code };
+                    }
+                    if (key === '_spread') {
+                        debugger;
                     }
                     return memo;
                 }
@@ -508,7 +515,9 @@ var jsxElementToJson = function (node) {
                 // TODO: potentially like Vue store bindings and properties as array of key value pairs
                 // too so can do this accurately when order matters. Also tempting to not support spread,
                 // as some frameworks do not support it (e.g. Angular) tho Angular may be the only one
-                memo._spread = types.stringLiteral((0, generator_1.default)(item.argument).code);
+                memo._spread = {
+                    code: types.stringLiteral((0, generator_1.default)(item.argument).code),
+                };
             }
             return memo;
         }, {}),
@@ -595,7 +604,9 @@ function mapReactIdentifiers(json) {
             for (var key in item.bindings) {
                 var value = item.bindings[key];
                 if (value) {
-                    item.bindings[key] = mapReactIdentifiersInExpression(value, stateProperties);
+                    item.bindings[key] = {
+                        code: mapReactIdentifiersInExpression(value.code, stateProperties),
+                    };
                 }
                 if (key === 'className') {
                     var currentValue = item.bindings[key];
@@ -624,9 +635,10 @@ var expressionToNode = function (str) {
  */
 function extractContextComponents(json) {
     (0, traverse_1.default)(json).forEach(function (item) {
+        var _a, _b;
         if ((0, is_mitosis_node_1.isMitosisNode)(item)) {
             if (item.name.endsWith('.Provider')) {
-                var value = item.bindings.value;
+                var value = (_b = (_a = item.bindings) === null || _a === void 0 ? void 0 : _a.value) === null || _b === void 0 ? void 0 : _b.code;
                 var name_2 = item.name.split('.')[0];
                 var refPath = (0, trace_reference_to_module_path_1.traceReferenceToModulePath)(json.imports, name_2);
                 json.context.set[refPath] = {

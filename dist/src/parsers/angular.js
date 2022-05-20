@@ -52,7 +52,9 @@ var angularTemplateNodeToMitosisNode = function (node, options) {
             return (0, create_mitosis_node_1.createMitosisNode)({
                 name: 'Show',
                 bindings: {
-                    when: transformBinding(ngIf.value.source, options),
+                    when: {
+                        code: transformBinding(ngIf.value.source, options),
+                    },
                 },
                 children: [
                     angularTemplateNodeToMitosisNode((0, lodash_1.omit)(node, 'templateAttrs'), options),
@@ -67,7 +69,7 @@ var angularTemplateNodeToMitosisNode = function (node, options) {
             return (0, create_mitosis_node_1.createMitosisNode)({
                 name: 'For',
                 bindings: {
-                    each: transformBinding(expression, options),
+                    each: { code: transformBinding(expression, options) },
                 },
                 properties: {
                     _forName: itemName,
@@ -83,13 +85,17 @@ var angularTemplateNodeToMitosisNode = function (node, options) {
         var bindings = {};
         for (var _i = 0, _a = node.inputs; _i < _a.length; _i++) {
             var input = _a[_i];
-            bindings[input.name] = transformBinding(input.value.source, options);
+            bindings[input.name] = {
+                code: transformBinding(input.value.source, options),
+            };
         }
         for (var _b = 0, _c = node.outputs; _b < _c.length; _b++) {
             var output = _c[_b];
-            bindings['on' + (0, capitalize_1.capitalize)(output.name)] = transformBinding(output.handler
-                .source // TODO: proper reference replace
-                .replace(/\$event/g, 'event'), options);
+            bindings['on' + (0, capitalize_1.capitalize)(output.name)] = {
+                code: transformBinding(output.handler
+                    .source // TODO: proper reference replace
+                    .replace(/\$event/g, 'event'), options),
+            };
         }
         for (var _d = 0, _e = node.attributes; _d < _e.length; _d++) {
             var attribute = _e[_d];

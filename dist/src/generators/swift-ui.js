@@ -30,27 +30,30 @@ var mappers = {
     },
     link: function () { return ''; },
     Image: function (json, options) {
-        return ("Image(".concat(processBinding(json.bindings.image, options) ||
+        var _a;
+        return ("Image(".concat(processBinding((_a = json.bindings.image) === null || _a === void 0 ? void 0 : _a.code, options) ||
             "\"".concat(json.properties.image, "\""), ")") +
             getStyleString(json, options) +
             getActionsString(json, options));
     },
     input: function (json, options) {
+        var _a, _b;
         var name = json.properties.$name;
         var str = "TextField(".concat(json.bindings.placeholder
-            ? processBinding(json.bindings.placeholder, options)
+            ? processBinding((_a = json.bindings.placeholder) === null || _a === void 0 ? void 0 : _a.code, options)
             : json.properties.placeholder
-                ? JSON.stringify(json.bindings.placeholder)
+                ? JSON.stringify(json.bindings.placeholder.code)
                 : '""', ", text: $").concat(name, ")") +
             getStyleString(json, options) +
             getActionsString(json, options);
         if (json.bindings.onChange) {
-            str += "\n        .onChange(of: ".concat(name, ") { ").concat(name, " in \n          ").concat(processBinding(wrapAction("var event = { target: { value: \"\\(".concat(name, ")\" } };\n              ").concat(json.bindings.onChange)), options), " \n        }");
+            str += "\n        .onChange(of: ".concat(name, ") { ").concat(name, " in \n          ").concat(processBinding(wrapAction("var event = { target: { value: \"\\(".concat(name, ")\" } };\n              ").concat((_b = json.bindings.onChange) === null || _b === void 0 ? void 0 : _b.code)), options), " \n        }");
         }
         return str;
     },
 };
 var blockToSwift = function (json, options) {
+    var _a, _b;
     if (mappers[json.name]) {
         return mappers[json.name](json, options);
     }
@@ -67,7 +70,7 @@ var blockToSwift = function (json, options) {
         return "Text(\"".concat(json.properties._text.trim().replace(/\s+/g, ' '), "\")");
     }
     if (json.bindings._text) {
-        return "Text(".concat(processBinding(json.bindings._text, options), ".toString())");
+        return "Text(".concat(processBinding(json.bindings._text.code, options), ".toString())");
     }
     var str = '';
     var children = json.children.filter(filter_empty_text_nodes_1.filterEmptyTextNodes);
@@ -91,12 +94,12 @@ var blockToSwift = function (json, options) {
         json.properties._ = placeholder || '';
     }
     if (json.name === 'For') {
-        str += "ForEach(".concat(processBinding(json.bindings.each, options), ", id: \\.self) { ").concat(json.properties._forName, " in ").concat(children
+        str += "ForEach(".concat(processBinding((_a = json.bindings.each) === null || _a === void 0 ? void 0 : _a.code, options), ", id: \\.self) { ").concat(json.properties._forName, " in ").concat(children
             .map(function (item) { return blockToSwift(item, options); })
             .join('\n'), " }");
     }
     else if (json.name === 'Show') {
-        str += "if ".concat(processBinding(json.bindings.when, options), " {\n      ").concat(children.map(function (item) { return blockToSwift(item, options); }).join('\n'), "\n    }");
+        str += "if ".concat(processBinding((_b = json.bindings.when) === null || _b === void 0 ? void 0 : _b.code, options), " {\n      ").concat(children.map(function (item) { return blockToSwift(item, options); }).join('\n'), "\n    }");
     }
     else {
         str += "".concat(name, "(");
@@ -151,7 +154,7 @@ var wrapAction = function (str) { return "(() => { ".concat(str, " })()"); };
 function getActionsString(json, options) {
     var str = '';
     if (json.bindings.onClick) {
-        str += "\n.onTapGesture {\n      ".concat(processBinding(wrapAction(json.bindings.onClick), options), "\n    }");
+        str += "\n.onTapGesture {\n      ".concat(processBinding(wrapAction(json.bindings.onClick.code), options), "\n    }");
     }
     return str;
 }
@@ -214,6 +217,7 @@ function mapDataForSwiftCompatability(json) {
     var inputIndex = 0;
     json.meta.inputNames = json.meta.inputNames || [];
     (0, traverse_1.default)(json).forEach(function (node) {
+        var _a;
         if ((0, is_mitosis_node_1.isMitosisNode)(node)) {
             if (node.name === 'input') {
                 if (!Object.keys(node.bindings).filter(function (item) { return item !== 'css'; }).length) {
@@ -222,7 +226,7 @@ function mapDataForSwiftCompatability(json) {
                 if (!node.properties.$name) {
                     node.properties.$name = "input".concat(++inputIndex);
                 }
-                json.meta.inputNames[node.properties.$name] = node.bindings.value || '';
+                json.meta.inputNames[node.properties.$name] = ((_a = node.bindings.value) === null || _a === void 0 ? void 0 : _a.code) || '';
             }
         }
     });

@@ -79,12 +79,13 @@ var generateSetElementAttributeCode = function (key, tagName, useValue, options,
 };
 var addUpdateAfterSet = function (json, options) {
     (0, traverse_1.default)(json).forEach(function (item) {
+        var _a;
         if ((0, is_mitosis_node_1.isMitosisNode)(item)) {
             for (var key in item.bindings) {
-                var value = item.bindings[key];
+                var value = (_a = item.bindings[key]) === null || _a === void 0 ? void 0 : _a.code;
                 var newValue = addUpdateAfterSetInCode(value, options);
                 if (newValue !== value) {
-                    item.bindings[key] = newValue;
+                    item.bindings[key] = { code: newValue };
                 }
             }
         }
@@ -176,7 +177,7 @@ var addOnChangeJs = function (id, options, code) {
 };
 // TODO: spread support
 var blockToHtml = function (json, options, blockOptions) {
-    var _a, _b, _c, _d, _e, _f, _g, _h;
+    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o;
     if (blockOptions === void 0) { blockOptions = {}; }
     var scopeVars = (blockOptions === null || blockOptions === void 0 ? void 0 : blockOptions.scopeVars) || [];
     var childComponents = (blockOptions === null || blockOptions === void 0 ? void 0 : blockOptions.childComponents) || [];
@@ -208,22 +209,22 @@ var blockToHtml = function (json, options, blockOptions) {
     if (json.properties._text) {
         return json.properties._text;
     }
-    if (json.bindings._text) {
+    if ((_h = json.bindings._text) === null || _h === void 0 ? void 0 : _h.code) {
         // TO-DO: textContent might be better performance-wise
-        addOnChangeJs(elId, options, "\n      ".concat(addScopeVars(scopeVars, json.bindings._text, function (scopeVar) {
+        addOnChangeJs(elId, options, "\n      ".concat(addScopeVars(scopeVars, json.bindings._text.code, function (scopeVar) {
             return "const ".concat(scopeVar, " = ").concat(options.format === 'class' ? 'this.' : '', "getContext(el, \"").concat(scopeVar, "\");");
-        }), "\n      ").concat(options.format === 'class' ? 'this.' : '', "renderTextNode(el, ").concat(json.bindings._text, ");"));
-        return "<template data-name=\"".concat(elId, "\"><!-- ").concat(json.bindings._text, " --></template>");
+        }), "\n      ").concat(options.format === 'class' ? 'this.' : '', "renderTextNode(el, ").concat(json.bindings._text.code, ");"));
+        return "<template data-name=\"".concat(elId, "\"><!-- ").concat((_j = json.bindings._text) === null || _j === void 0 ? void 0 : _j.code, " --></template>");
     }
     var str = '';
     if (json.name === 'For') {
-        var forArguments = ((_h = json === null || json === void 0 ? void 0 : json.scope) === null || _h === void 0 ? void 0 : _h.For) || [];
+        var forArguments = ((_k = json === null || json === void 0 ? void 0 : json.scope) === null || _k === void 0 ? void 0 : _k.For) || [];
         var localScopeVars_1 = __spreadArray(__spreadArray([], scopeVars, true), forArguments, true);
         var argsStr = forArguments.map(function (arg) { return "\"".concat(arg, "\""); }).join(',');
         addOnChangeJs(elId, options, 
         // TODO: be smarter about rendering, deleting old items and adding new ones by
         // querying dom potentially
-        "\n        let array = ".concat(json.bindings.each, ";\n        ").concat(options.format === 'class' ? 'this.' : '', "renderLoop(el, array, ").concat(argsStr, ");\n      "));
+        "\n        let array = ".concat((_l = json.bindings.each) === null || _l === void 0 ? void 0 : _l.code, ";\n        ").concat(options.format === 'class' ? 'this.' : '', "renderLoop(el, array, ").concat(argsStr, ");\n      "));
         // TODO: decide on how to handle this...
         str += "\n      <template data-name=\"".concat(elId, "\">");
         if (json.children) {
@@ -239,7 +240,7 @@ var blockToHtml = function (json, options, blockOptions) {
         str += '</template>';
     }
     else if (json.name === 'Show') {
-        var whenCondition = json.bindings.when.replace(/;$/, '');
+        var whenCondition = ((_m = json.bindings.when) === null || _m === void 0 ? void 0 : _m.code).replace(/;$/, '');
         addOnChangeJs(elId, options, "\n        ".concat(addScopeVars(scopeVars, whenCondition, function (scopeVar) {
             return "const ".concat(scopeVar, " = ").concat(options.format === 'class' ? 'this.' : '', "getContext(el, \"").concat(scopeVar, "\");");
         }), "\n        const whenCondition = ").concat(whenCondition, ";\n        if (whenCondition) {\n          ").concat(options.format === 'class' ? 'this.' : '', "showContent(el)\n        }\n      "));
@@ -285,7 +286,7 @@ var blockToHtml = function (json, options, blockOptions) {
             if (key === '_spread' || key === 'ref' || key === 'css') {
                 continue;
             }
-            var value = json.bindings[key];
+            var value = (_o = json.bindings[key]) === null || _o === void 0 ? void 0 : _o.code;
             // TODO: proper babel transform to replace. Util for this
             var useValue = value;
             if (key.startsWith('on')) {

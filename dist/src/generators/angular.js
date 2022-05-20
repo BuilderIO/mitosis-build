@@ -44,18 +44,18 @@ var mappers = {
     Slot: function (json, options, blockOptions) {
         return "<ng-content ".concat(Object.keys(json.bindings)
             .map(function (binding) {
-            var _a;
+            var _a, _b, _c;
             if (binding === 'name') {
-                var selector = (0, lodash_1.kebabCase)((_a = json.bindings.name) === null || _a === void 0 ? void 0 : _a.replace('props.slot', ''));
+                var selector = (0, lodash_1.kebabCase)((_b = (_a = json.bindings.name) === null || _a === void 0 ? void 0 : _a.code) === null || _b === void 0 ? void 0 : _b.replace('props.slot', ''));
                 return "select=\"[".concat(selector, "]\"");
             }
-            return "".concat(json.bindings[binding]);
+            return "".concat((_c = json.bindings[binding]) === null || _c === void 0 ? void 0 : _c.code);
         })
             .join('\n'), "></ng-content>");
     },
 };
 var blockToAngular = function (json, options, blockOptions) {
-    var _a;
+    var _a, _b, _c, _d, _e, _f, _g;
     if (options === void 0) { options = {}; }
     if (blockOptions === void 0) { blockOptions = {}; }
     var contextVars = (blockOptions === null || blockOptions === void 0 ? void 0 : blockOptions.contextVars) || [];
@@ -70,12 +70,12 @@ var blockToAngular = function (json, options, blockOptions) {
     if (json.properties._text) {
         return json.properties._text;
     }
-    if (/props\.slot/.test(json.bindings._text)) {
-        var selector = (0, lodash_1.kebabCase)((_a = json.bindings._text) === null || _a === void 0 ? void 0 : _a.replace('props.slot', ''));
+    if (/props\.slot/.test((_a = json.bindings._text) === null || _a === void 0 ? void 0 : _a.code)) {
+        var selector = (0, lodash_1.kebabCase)((_c = (_b = json.bindings._text) === null || _b === void 0 ? void 0 : _b.code) === null || _c === void 0 ? void 0 : _c.replace('props.slot', ''));
         return "<ng-content select=\"[".concat(selector, "]\"></ng-content>");
     }
-    if (json.bindings._text) {
-        return "{{".concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(json.bindings._text, {
+    if ((_d = json.bindings._text) === null || _d === void 0 ? void 0 : _d.code) {
+        return "{{".concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(json.bindings._text.code, {
             contextVars: contextVars,
             outputVars: outputVars,
         }), "}}");
@@ -83,7 +83,7 @@ var blockToAngular = function (json, options, blockOptions) {
     var str = '';
     var needsToRenderSlots = [];
     if (json.name === 'For') {
-        str += "<ng-container *ngFor=\"let ".concat(json.properties._forName, " of ").concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(json.bindings.each, {
+        str += "<ng-container *ngFor=\"let ".concat(json.properties._forName, " of ").concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)((_e = json.bindings.each) === null || _e === void 0 ? void 0 : _e.code, {
             contextVars: contextVars,
             outputVars: outputVars,
         }), "\">");
@@ -93,7 +93,7 @@ var blockToAngular = function (json, options, blockOptions) {
         str += "</ng-container>";
     }
     else if (json.name === 'Show') {
-        str += "<ng-container *ngIf=\"".concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(json.bindings.when, { contextVars: contextVars, outputVars: outputVars }), "\">");
+        str += "<ng-container *ngIf=\"".concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)((_f = json.bindings.when) === null || _f === void 0 ? void 0 : _f.code, { contextVars: contextVars, outputVars: outputVars }), "\">");
         str += json.children
             .map(function (item) { return (0, exports.blockToAngular)(item, options, blockOptions); })
             .join('\n');
@@ -129,7 +129,7 @@ var blockToAngular = function (json, options, blockOptions) {
             if (key.startsWith('$')) {
                 continue;
             }
-            var value = json.bindings[key];
+            var value = (_g = json.bindings[key]) === null || _g === void 0 ? void 0 : _g.code;
             // TODO: proper babel transform to replace. Util for this
             var useValue = (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(value, {
                 contextVars: contextVars,

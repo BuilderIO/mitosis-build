@@ -73,8 +73,8 @@ var mapRefs = function (component, mapper) {
             for (var _i = 0, _a = Object.keys(item.bindings); _i < _a.length; _i++) {
                 var key = _a[_i];
                 var value = item.bindings[key];
-                if (typeof value === 'string' && key !== 'ref') {
-                    item.bindings[key] = replaceRefsInString(value, refs, mapper);
+                if (typeof value === 'object' && key !== 'ref') {
+                    item.bindings[key].code = replaceRefsInString(value.code, refs, mapper);
                 }
             }
         }

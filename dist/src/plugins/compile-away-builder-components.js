@@ -99,7 +99,8 @@ exports.components = {
         }), components);
     },
     BuilderAccordion: function (node, context, components) {
-        var itemsJSON = node.bindings.items || '[]';
+        var _a;
+        var itemsJSON = ((_a = node.bindings.items) === null || _a === void 0 ? void 0 : _a.code) || '[]';
         var accordionItems = JSON5.parse(itemsJSON);
         var children = accordionItems.map(function (accordionItem) {
             var titleChildren = accordionItem.title.map(function (element) {
@@ -169,34 +170,43 @@ exports.components = {
         }), components);
     },
     CoreSection: function (node, context, components) {
+        var _a, _b;
         return wrapOutput(node, (0, create_mitosis_node_1.createMitosisNode)({
             name: 'section',
-            properties: __assign(__assign(__assign({}, node.properties), { $name: 'section' }), (node.bindings.lazyLoad === 'true' && {
+            properties: __assign(__assign(__assign({}, node.properties), { $name: 'section' }), (((_a = node.bindings.lazyLoad) === null || _a === void 0 ? void 0 : _a.code) === 'true' && {
                 lazyLoad: 'true',
             })),
             bindings: {
-                css: JSON.stringify({
-                    width: '100%',
-                    alignSelf: 'stretch',
-                    flexGrow: '1',
-                    boxSizing: 'border-box',
-                    maxWidth: "".concat((node.bindings.maxWidth && Number(node.bindings.maxWidth)) || 1200, "px"),
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'stretch',
-                    marginLeft: 'auto',
-                    marginRight: 'auto',
-                }),
+                css: {
+                    code: JSON.stringify({
+                        width: '100%',
+                        alignSelf: 'stretch',
+                        flexGrow: '1',
+                        boxSizing: 'border-box',
+                        maxWidth: "".concat((((_b = node.bindings.maxWidth) === null || _b === void 0 ? void 0 : _b.code) &&
+                            Number(node.bindings.maxWidth.code)) ||
+                            1200, "px"),
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'stretch',
+                        marginLeft: 'auto',
+                        marginRight: 'auto',
+                    }),
+                },
             },
             children: node.children,
         }), components);
     },
     Columns: function (node, context, components) {
         var _a;
-        var columns = node.children.filter(filter_empty_text_nodes_1.filterEmptyTextNodes).map(function (item) { return ({
-            width: parseFloat(item.properties.width || item.bindings.width || '0') || 0,
-            children: item.children,
-        }); });
+        var columns = node.children.filter(filter_empty_text_nodes_1.filterEmptyTextNodes).map(function (item) {
+            var _a;
+            return ({
+                width: parseFloat(item.properties.width || ((_a = item.bindings.width) === null || _a === void 0 ? void 0 : _a.code) || '0') ||
+                    0,
+                children: item.children,
+            });
+        });
         var gutterSize = (node.properties.getterSize && parseFloat(node.properties.getterSize)) ||
             20;
         function getWidth(index) {
@@ -213,16 +223,18 @@ exports.components = {
                 class: 'builder-columns',
             },
             bindings: {
-                css: JSON.stringify(__assign({ display: 'flex' }, (properties.stackColumnsAt === 'never'
-                    ? {}
-                    : (_a = {},
-                        _a["@media (max-width: ".concat(properties.stackColumnsAt !== 'tablet' ? 639 : 999, "px)")] = {
-                            flexDirection: properties.reverseColumnsWhenStacked === 'true'
-                                ? 'column-reverse'
-                                : 'column',
-                            alignItems: 'stretch',
-                        },
-                        _a)))),
+                css: {
+                    code: JSON.stringify(__assign({ display: 'flex' }, (properties.stackColumnsAt === 'never'
+                        ? {}
+                        : (_a = {},
+                            _a["@media (max-width: ".concat(properties.stackColumnsAt !== 'tablet' ? 639 : 999, "px)")] = {
+                                flexDirection: properties.reverseColumnsWhenStacked === 'true'
+                                    ? 'column-reverse'
+                                    : 'column',
+                                alignItems: 'stretch',
+                            },
+                            _a)))),
+                },
             },
             children: columns.map(function (col, index) {
                 var _a;
@@ -233,14 +245,16 @@ exports.components = {
                         class: 'builder-column',
                     },
                     bindings: {
-                        css: JSON.stringify(__assign({ display: 'flex', flexDirection: 'column', alignItems: 'stretch', lineHeight: 'normal', width: "".concat(getColumnWidth(index)), marginLeft: "".concat(index === 0 ? 0 : gutterSize, "px") }, (properties.stackColumnsAt === 'never'
-                            ? {}
-                            : (_a = {},
-                                _a["@media (max-width: ".concat(properties.stackColumnsAt !== 'tablet' ? 639 : 999, "px)")] = {
-                                    width: '100%',
-                                    marginLeft: 0,
-                                },
-                                _a)))),
+                        css: {
+                            code: JSON.stringify(__assign({ display: 'flex', flexDirection: 'column', alignItems: 'stretch', lineHeight: 'normal', width: "".concat(getColumnWidth(index)), marginLeft: "".concat(index === 0 ? 0 : gutterSize, "px") }, (properties.stackColumnsAt === 'never'
+                                ? {}
+                                : (_a = {},
+                                    _a["@media (max-width: ".concat(properties.stackColumnsAt !== 'tablet' ? 639 : 999, "px)")] = {
+                                        width: '100%',
+                                        marginLeft: 0,
+                                    },
+                                    _a)))),
+                        },
                     },
                     children: col.children,
                 });
@@ -248,17 +262,18 @@ exports.components = {
         }), components);
     },
     Image: function (node, context, components) {
-        var _a = node.properties, backgroundSize = _a.backgroundSize, backgroundPosition = _a.backgroundPosition;
+        var _a, _b, _c, _d, _e, _f;
+        var _g = node.properties, backgroundSize = _g.backgroundSize, backgroundPosition = _g.backgroundPosition;
         var srcset = node.properties.srcset;
-        var aspectRatio = node.bindings.aspectRatio
-            ? parseFloat(node.bindings.aspectRatio)
+        var aspectRatio = ((_a = node.bindings.aspectRatio) === null || _a === void 0 ? void 0 : _a.code)
+            ? parseFloat(node.bindings.aspectRatio.code)
             : null;
         if (typeof aspectRatio === 'number' && isNaN(aspectRatio)) {
             aspectRatio = null;
         }
         var image = node.properties.image;
         var srcSet = srcset || generateBuilderIoSrcSet(image);
-        var source = node.bindings.noWebp !== 'true' &&
+        var source = ((_b = node.bindings.noWebp) === null || _b === void 0 ? void 0 : _b.code) !== 'true' &&
             (0, create_mitosis_node_1.createMitosisNode)({
                 name: 'source',
                 properties: {
@@ -276,18 +291,20 @@ exports.components = {
                 srcset: srcSet || null,
             }),
             bindings: noUndefined({
-                loading: node.bindings.lazy ? '"lazy"' : undefined,
-                src: node.bindings.image,
-                sizes: node.bindings.sizes,
-                css: JSON.stringify(__assign({ objectFit: backgroundSize || 'cover', objectPosition: backgroundPosition || 'cover' }, (aspectRatio
-                    ? {
-                        position: 'absolute',
-                        height: '100%',
-                        width: '100%',
-                        top: '0',
-                        left: '0',
-                    }
-                    : {}))),
+                loading: { code: ((_c = node.bindings.lazy) === null || _c === void 0 ? void 0 : _c.code) && '"lazy"' },
+                src: { code: (_d = node.bindings.image) === null || _d === void 0 ? void 0 : _d.code },
+                sizes: { code: (_e = node.bindings.sizes) === null || _e === void 0 ? void 0 : _e.code },
+                css: {
+                    code: JSON.stringify(__assign({ objectFit: backgroundSize || 'cover', objectPosition: backgroundPosition || 'cover' }, (aspectRatio
+                        ? {
+                            position: 'absolute',
+                            height: '100%',
+                            width: '100%',
+                            top: '0',
+                            left: '0',
+                        }
+                        : {}))),
+                },
             }),
         });
         var picture = (0, create_mitosis_node_1.createMitosisNode)({
@@ -302,12 +319,14 @@ exports.components = {
                     class: 'builder-image-sizer',
                 },
                 bindings: {
-                    css: JSON.stringify({
-                        width: '100%',
-                        paddingTop: aspectRatio * 100 + '%',
-                        pointerEvents: 'none',
-                        fontSize: '0',
-                    }),
+                    css: {
+                        code: JSON.stringify({
+                            width: '100%',
+                            paddingTop: aspectRatio * 100 + '%',
+                            pointerEvents: 'none',
+                            fontSize: '0',
+                        }),
+                    },
                 },
             });
         var children = node.children &&
@@ -318,16 +337,18 @@ exports.components = {
                     $name: 'image-contents',
                 },
                 bindings: {
-                    css: JSON.stringify({
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'stretch',
-                        position: 'absolute',
-                        top: '0',
-                        left: '0',
-                        width: '100%',
-                        height: '100%',
-                    }),
+                    css: {
+                        code: JSON.stringify({
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'stretch',
+                            position: 'absolute',
+                            top: '0',
+                            left: '0',
+                            width: '100%',
+                            height: '100%',
+                        }),
+                    },
                 },
                 children: node.children,
             });
@@ -335,7 +356,7 @@ exports.components = {
         imgSizer && imageNodes.push(imgSizer);
         children && imageNodes.push(children);
         var href = node.properties.href;
-        var hrefBinding = node.bindings.href;
+        var hrefBinding = (_f = node.bindings.href) === null || _f === void 0 ? void 0 : _f.code;
         if (href || hrefBinding) {
             var aHref = (0, create_mitosis_node_1.createMitosisNode)({
                 name: 'a',
@@ -343,7 +364,7 @@ exports.components = {
                     href: href,
                 },
                 bindings: {
-                    href: hrefBinding,
+                    href: { code: hrefBinding },
                 },
                 children: imageNodes,
             });
@@ -354,8 +375,9 @@ exports.components = {
         }
     },
     Video: function (node, context, components) {
-        var aspectRatio = node.bindings.aspectRatio
-            ? parseFloat(node.bindings.aspectRatio)
+        var _a, _b, _c, _d, _e, _f, _g, _h;
+        var aspectRatio = ((_a = node.bindings.aspectRatio) === null || _a === void 0 ? void 0 : _a.code)
+            ? parseFloat(node.bindings.aspectRatio.code)
             : null;
         if (typeof aspectRatio === 'number' && isNaN(aspectRatio)) {
             aspectRatio = null;
@@ -374,20 +396,22 @@ exports.components = {
                 preload: node.properties.lazy ? 'none' : undefined,
             }),
             bindings: noUndefined({
-                poster: node.bindings.posterImage,
-                autoplay: node.bindings.autoPlay,
-                muted: node.bindings.muted,
-                controls: node.bindings.controls,
-                playsinline: node.bindings.playsInline,
-                loop: node.bindings.loop,
-                css: JSON.stringify({
-                    width: '100%',
-                    height: '100%',
-                    objectFit: node.properties.fit,
-                    objectPosition: node.properties.position,
-                    borderRadius: '1',
-                    position: aspectRatio ? 'absolute' : '',
-                }),
+                poster: { code: (_b = node.bindings.posterImage) === null || _b === void 0 ? void 0 : _b.code },
+                autoplay: { code: (_c = node.bindings.autoPlay) === null || _c === void 0 ? void 0 : _c.code },
+                muted: { code: (_d = node.bindings.muted) === null || _d === void 0 ? void 0 : _d.code },
+                controls: { code: (_e = node.bindings.controls) === null || _e === void 0 ? void 0 : _e.code },
+                playsinline: { code: (_f = node.bindings.playsInline) === null || _f === void 0 ? void 0 : _f.code },
+                loop: { code: (_g = node.bindings.loop) === null || _g === void 0 ? void 0 : _g.code },
+                css: {
+                    code: JSON.stringify({
+                        width: '100%',
+                        height: '100%',
+                        objectFit: node.properties.fit,
+                        objectPosition: node.properties.position,
+                        borderRadius: '1',
+                        position: aspectRatio ? 'absolute' : '',
+                    }),
+                },
             }),
             children: [
                 (0, create_mitosis_node_1.createMitosisNode)({
@@ -397,7 +421,7 @@ exports.components = {
                         src: node.properties.video,
                     },
                     bindings: {
-                        src: node.bindings.video,
+                        src: { code: (_h = node.bindings.video) === null || _h === void 0 ? void 0 : _h.code },
                     },
                 }),
             ],
@@ -409,12 +433,14 @@ exports.components = {
                     $name: 'builder-video-sizer',
                 },
                 bindings: {
-                    css: JSON.stringify({
-                        width: '100%',
-                        paddingTop: aspectRatio * 100 + '%',
-                        pointerEvents: 'none',
-                        fontSize: '0',
-                    }),
+                    css: {
+                        code: JSON.stringify({
+                            width: '100%',
+                            paddingTop: aspectRatio * 100 + '%',
+                            pointerEvents: 'none',
+                            fontSize: '0',
+                        }),
+                    },
                 },
             }));
         node.children &&
@@ -425,16 +451,18 @@ exports.components = {
                     $name: 'image-contents',
                 },
                 bindings: {
-                    css: JSON.stringify({
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'stretch',
-                        position: 'absolute',
-                        top: '0',
-                        left: '0',
-                        width: '100%',
-                        height: '100%',
-                    }),
+                    css: {
+                        code: JSON.stringify({
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'stretch',
+                            position: 'absolute',
+                            top: '0',
+                            left: '0',
+                            width: '100%',
+                            height: '100%',
+                        }),
+                    },
                 },
                 children: node.children,
             }));
@@ -444,7 +472,7 @@ exports.components = {
                 $name: 'video-container',
             },
             bindings: {
-                css: JSON.stringify({ position: 'relative' }),
+                css: { code: JSON.stringify({ position: 'relative' }) },
             },
             children: videoContainerNodes,
         });
@@ -509,7 +537,15 @@ function noUndefined(obj) {
         if (Object.prototype.hasOwnProperty.call(obj, key)) {
             var value = obj[key];
             if (value != null) {
-                cleanObj[key] = value;
+                if (typeof value == 'object') {
+                    var ret = noUndefined(value);
+                    if (Object.keys(ret).length) {
+                        cleanObj[key] = ret;
+                    }
+                }
+                else {
+                    cleanObj[key] = value;
+                }
             }
         }
     }

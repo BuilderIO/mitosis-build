@@ -63,17 +63,18 @@ var wrapInFragment = function (json) {
 };
 var NODE_MAPPERS = {
     Slot: function (json, options, parentSlots) {
+        var _a;
         if (!json.bindings.name) {
             // TODO: update MitosisNode for simple code
             var key = Object.keys(json.bindings).find(Boolean);
             if (key && parentSlots) {
                 var propKey = (0, lodash_1.camelCase)('Slot' + key[0].toUpperCase() + key.substring(1));
-                parentSlots.push({ key: propKey, value: json.bindings[key] });
+                parentSlots.push({ key: propKey, value: (_a = json.bindings[key]) === null || _a === void 0 ? void 0 : _a.code });
                 return '';
             }
             return "{".concat(processBinding('props.children', options), "}");
         }
-        var slotProp = processBinding(json.bindings.name, options).replace('name=', '');
+        var slotProp = processBinding(json.bindings.name.code, options).replace('name=', '');
         return "{".concat(slotProp, "}");
     },
     Fragment: function (json, options) {
@@ -83,17 +84,18 @@ var NODE_MAPPERS = {
             .join('\n')).concat(wrap ? '</>' : '');
     },
     For: function (json, options) {
-        var _a;
+        var _a, _b;
         var wrap = wrapInFragment(json);
         var forArguments = (((_a = json === null || json === void 0 ? void 0 : json.scope) === null || _a === void 0 ? void 0 : _a.For) || []).join(',');
-        return "{".concat(processBinding(json.bindings.each, options), "?.map((").concat(forArguments, ") => (\n      ").concat(wrap ? '<>' : '').concat(json.children
+        return "{".concat(processBinding((_b = json.bindings.each) === null || _b === void 0 ? void 0 : _b.code, options), "?.map((").concat(forArguments, ") => (\n      ").concat(wrap ? '<>' : '').concat(json.children
             .filter(filter_empty_text_nodes_1.filterEmptyTextNodes)
             .map(function (item) { return (0, exports.blockToReact)(item, options); })
             .join('\n')).concat(wrap ? '</>' : '', "\n    ))}");
     },
     Show: function (json, options) {
+        var _a;
         var wrap = wrapInFragment(json);
-        return "{".concat(processBinding(json.bindings.when, options), " ? (\n      ").concat(wrap ? '<>' : '').concat(json.children
+        return "{".concat(processBinding((_a = json.bindings.when) === null || _a === void 0 ? void 0 : _a.code, options), " ? (\n      ").concat(wrap ? '<>' : '').concat(json.children
             .filter(filter_empty_text_nodes_1.filterEmptyTextNodes)
             .map(function (item) { return (0, exports.blockToReact)(item, options); })
             .join('\n')).concat(wrap ? '</>' : '', "\n    ) : ").concat(!json.meta.else ? 'null' : (0, exports.blockToReact)(json.meta.else, options), "}");
@@ -109,6 +111,7 @@ var BINDING_MAPPERS = {
     },
 };
 var blockToReact = function (json, options, parentSlots) {
+    var _a, _b, _c;
     if (NODE_MAPPERS[json.name]) {
         return NODE_MAPPERS[json.name](json, options, parentSlots);
     }
@@ -119,8 +122,8 @@ var blockToReact = function (json, options, parentSlots) {
         }
         return text;
     }
-    if (json.bindings._text) {
-        var processed = processBinding(json.bindings._text, options);
+    if ((_a = json.bindings._text) === null || _a === void 0 ? void 0 : _a.code) {
+        var processed = processBinding(json.bindings._text.code, options);
         if (options.type === 'native') {
             return "<Text>{".concat(processed, "}</Text>");
         }
@@ -128,8 +131,8 @@ var blockToReact = function (json, options, parentSlots) {
     }
     var str = '';
     str += "<".concat(json.name, " ");
-    if (json.bindings._spread) {
-        str += " {...(".concat(processBinding(json.bindings._spread, options), ")} ");
+    if ((_b = json.bindings._spread) === null || _b === void 0 ? void 0 : _b.code) {
+        str += " {...(".concat(processBinding(json.bindings._spread.code, options), ")} ");
     }
     for (var key in json.properties) {
         var value = (json.properties[key] || '')
@@ -141,7 +144,7 @@ var blockToReact = function (json, options, parentSlots) {
         else if (BINDING_MAPPERS[key]) {
             var mapper = BINDING_MAPPERS[key];
             if (typeof mapper === 'function') {
-                var _a = mapper(key, value), newKey = _a[0], newValue = _a[1];
+                var _d = mapper(key, value), newKey = _d[0], newValue = _d[1];
                 str += " ".concat(newKey, "={").concat(newValue, "} ");
             }
             else {
@@ -155,7 +158,7 @@ var blockToReact = function (json, options, parentSlots) {
         }
     }
     for (var key in json.bindings) {
-        var value = String(json.bindings[key]);
+        var value = String((_c = json.bindings[key]) === null || _c === void 0 ? void 0 : _c.code);
         if (key === '_spread') {
             continue;
         }
@@ -176,7 +179,7 @@ var blockToReact = function (json, options, parentSlots) {
         else if (BINDING_MAPPERS[key]) {
             var mapper = BINDING_MAPPERS[key];
             if (typeof mapper === 'function') {
-                var _b = mapper(key, useBindingValue), newKey = _b[0], newValue = _b[1];
+                var _e = mapper(key, useBindingValue), newKey = _e[0], newValue = _e[1];
                 str += " ".concat(newKey, "={").concat(newValue, "} ");
             }
             else {
@@ -291,10 +294,13 @@ var updateStateSetters = function (json, options) {
     (0, traverse_1.default)(json).forEach(function (item) {
         if ((0, is_mitosis_node_1.isMitosisNode)(item)) {
             for (var key in item.bindings) {
-                var value = item.bindings[key];
-                var newValue = updateStateSettersInCode(value, options);
-                if (newValue !== value) {
-                    item.bindings[key] = newValue;
+                var values = item.bindings[key];
+                var newValue = updateStateSettersInCode(values === null || values === void 0 ? void 0 : values.code, options);
+                if (newValue !== (values === null || values === void 0 ? void 0 : values.code)) {
+                    item.bindings[key] = {
+                        code: newValue,
+                        arguments: values === null || values === void 0 ? void 0 : values.arguments,
+                    };
                 }
             }
         }
@@ -306,7 +312,9 @@ function addProviderComponents(json, options) {
         json.children = [
             (0, create_mitosis_node_1.createMitosisNode)(__assign({ name: "".concat(name_1, ".Provider"), children: json.children }, (value && {
                 bindings: {
-                    value: (0, get_state_object_string_1.getMemberObjectString)(value),
+                    value: {
+                        code: (0, get_state_object_string_1.getMemberObjectString)(value),
+                    },
                 },
             }))),
         ];

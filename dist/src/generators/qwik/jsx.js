@@ -38,11 +38,12 @@ function renderJSXNodes(file, directives, handlers, children, styles, parentSymb
             this.jsxBeginFragment(file.import(file.qwikModule, 'Fragment'));
         }
         children.forEach(function (child) {
+            var _a, _b;
             if (isEmptyTextNode(child))
                 return;
             if (isTextNode(child)) {
-                if (child.bindings._text !== undefined) {
-                    _this.jsxTextBinding(child.bindings._text);
+                if (((_a = child.bindings._text) === null || _a === void 0 ? void 0 : _a.code) !== undefined) {
+                    _this.jsxTextBinding(child.bindings._text.code);
                 }
                 else {
                     _this.isJSX
@@ -79,7 +80,7 @@ function renderJSXNodes(file, directives, handlers, children, styles, parentSymb
                         }
                     }
                     var props = child.properties;
-                    var css = child.bindings.css;
+                    var css = (_b = child.bindings.css) === null || _b === void 0 ? void 0 : _b.code;
                     var specialBindings = {};
                     if (css) {
                         props = __assign({}, props);
@@ -118,7 +119,9 @@ function isEmptyTextNode(child) {
     return ((_a = child.properties._text) === null || _a === void 0 ? void 0 : _a.trim()) == '';
 }
 function isTextNode(child) {
-    return (child.properties._text !== undefined || child.bindings._text !== undefined);
+    var _a;
+    return (child.properties._text !== undefined ||
+        ((_a = child.bindings._text) === null || _a === void 0 ? void 0 : _a.code) !== undefined);
 }
 /**
  * Rewrites bindings:
@@ -136,7 +139,7 @@ function rewriteHandlers(file, handlers, bindings, symbolBindings) {
     var outBindings = {};
     for (var key in bindings) {
         if (Object.prototype.hasOwnProperty.call(bindings, key)) {
-            var binding = bindings[key];
+            var binding = bindings[key].code;
             var handlerBlock = void 0;
             if (binding != null) {
                 if (key == 'css') {
@@ -153,7 +156,7 @@ function rewriteHandlers(file, handlers, bindings, symbolBindings) {
                 else if (symbolBindings && key.startsWith('symbol.data.')) {
                     symbolBindings[(0, src_generator_1.lastProperty)(key)] = binding;
                 }
-                outBindings[key] = binding;
+                outBindings[key] = { code: binding };
             }
         }
     }

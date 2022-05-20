@@ -31,7 +31,10 @@ export declare type MitosisNode = {
      * ```
      */
     bindings: {
-        [key: string]: string | undefined;
+        [key: string]: {
+            code: string | undefined;
+            arguments?: string[];
+        } | undefined;
     };
     children: MitosisNode[];
 };

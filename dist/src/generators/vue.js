@@ -81,8 +81,9 @@ var NODE_MAPPERS = {
         return json.children.map(function (item) { return (0, exports.blockToVue)(item, options); }).join('\n');
     },
     For: function (json, options) {
-        var keyValue = json.bindings.key || 'index';
-        var forValue = "(".concat(json.properties._forName, ", index) in ").concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(json.bindings.each));
+        var _a;
+        var keyValue = json.bindings.key || { code: 'index' };
+        var forValue = "(".concat(json.properties._forName, ", index) in ").concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)((_a = json.bindings.each) === null || _a === void 0 ? void 0 : _a.code));
         if (options.vueVersion >= 3) {
             // TODO: tmk key goes on different element (parent vs child) based on Vue 2 vs Vue 3
             return "<template :key=\"".concat(keyValue, "\" v-for=\"").concat(forValue, "\">\n        ").concat(json.children.map(function (item) { return (0, exports.blockToVue)(item, options); }).join('\n'), "\n      </template>");
@@ -97,7 +98,8 @@ var NODE_MAPPERS = {
         return (0, exports.blockToVue)(firstChild, options);
     },
     Show: function (json, options) {
-        var ifValue = (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(json.bindings.when);
+        var _a;
+        var ifValue = (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)((_a = json.bindings.when) === null || _a === void 0 ? void 0 : _a.code);
         if (options.vueVersion >= 3) {
             return "\n      <template v-if=\"".concat(ifValue, "\">\n        ").concat(json.children.map(function (item) { return (0, exports.blockToVue)(item, options); }).join('\n'), "\n      </template>\n      ").concat(!json.meta.else
                 ? ''
@@ -128,7 +130,7 @@ function processDynamicComponents(json, _options) {
     (0, traverse_1.default)(json).forEach(function (node) {
         if ((0, is_mitosis_node_1.isMitosisNode)(node)) {
             if (node.name.includes('.')) {
-                node.bindings.is = node.name;
+                node.bindings.is = { code: node.name };
                 node.name = 'component';
             }
         }
@@ -154,7 +156,7 @@ var stringifyBinding = function (node) {
             return '';
         }
         else if (key === 'class') {
-            return " :class=\"_classStringToObject(".concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(value, {
+            return " :class=\"_classStringToObject(".concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(value === null || value === void 0 ? void 0 : value.code, {
                 replaceWith: 'this.',
             }), ")\" ");
             // TODO: support dynamic classes as objects somehow like Vue requires
@@ -162,7 +164,7 @@ var stringifyBinding = function (node) {
         }
         else {
             // TODO: proper babel transform to replace. Util for this
-            var useValue = (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(value);
+            var useValue = (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(value === null || value === void 0 ? void 0 : value.code);
             if (key.startsWith('on')) {
                 var event_1 = key.replace('on', '').toLowerCase();
                 if (event_1 === 'change' && node.name === 'input') {
@@ -186,6 +188,7 @@ var stringifyBinding = function (node) {
     };
 };
 var blockToVue = function (node, options) {
+    var _a, _b;
     var nodeMapper = NODE_MAPPERS[node.name];
     if (nodeMapper) {
         return nodeMapper(node, options);
@@ -197,25 +200,28 @@ var blockToVue = function (node, options) {
         // Vue doesn't allow <style>...</style> in templates, but does support the synonymous
         // <component is="'style'">...</component>
         node.name = 'component';
-        node.bindings.is = "'style'";
+        node.bindings.is = { code: "'style'" };
     }
     if (node.properties._text) {
         return "".concat(node.properties._text);
     }
-    if (node.bindings._text) {
-        return "{{".concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(node.bindings._text), "}}");
+    if ((_a = node.bindings._text) === null || _a === void 0 ? void 0 : _a.code) {
+        return "{{".concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(node.bindings._text.code), "}}");
     }
     var str = '';
     str += "<".concat(node.name, " ");
-    if (node.bindings._spread) {
-        str += "v-bind=\"".concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(node.bindings._spread), "\"");
+    if ((_b = node.bindings._spread) === null || _b === void 0 ? void 0 : _b.code) {
+        str += "v-bind=\"".concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(node.bindings._spread.code), "\"");
     }
     for (var key in node.properties) {
         var value = node.properties[key];
         str += " ".concat(key, "=\"").concat(value, "\" ");
     }
     var stringifiedBindings = Object.entries(node.bindings)
-        .map(stringifyBinding(node))
+        .map(function (_a) {
+        var k = _a[0], v = _a[1];
+        return stringifyBinding(node)([k, v]);
+    })
         .join('');
     str += stringifiedBindings;
     if (jsx_1.selfClosingTags.has(node.name)) {
