@@ -188,7 +188,7 @@ var stringifyBinding = function (node) {
                 return " ref=\"".concat(useValue, "\" ");
             }
             else if (BINDING_MAPPERS[key]) {
-                return " ".concat(BINDING_MAPPERS[key], "=\"").concat(useValue, "\" ");
+                return " ".concat(BINDING_MAPPERS[key], "=\"").concat(useValue.replace(/"/g, "\\'"), "\" ");
             }
             else {
                 return " :".concat(key, "=\"").concat(useValue, "\" ");
