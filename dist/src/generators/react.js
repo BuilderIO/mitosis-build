@@ -106,7 +106,7 @@ var BINDING_MAPPERS = {
     innerHTML: function (_key, value) {
         return [
             'dangerouslySetInnerHTML',
-            JSON.stringify({ __html: value.replace(/\s+/g, ' ') }),
+            "{__html: ".concat(value.replace(/\s+/g, ' '), "}"),
         ];
     },
 };
