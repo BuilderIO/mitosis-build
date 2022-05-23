@@ -431,9 +431,9 @@ var jsxElementToJson = function (node) {
     if (nodeName === 'Show') {
         var whenAttr = node.openingElement.attributes.find(function (item) { return types.isJSXAttribute(item) && item.name.name === 'when'; });
         var elseAttr = node.openingElement.attributes.find(function (item) { return types.isJSXAttribute(item) && item.name.name === 'else'; });
-        var whenValue = whenAttr &&
-            types.isJSXExpressionContainer(whenAttr.value) &&
-            (0, generator_1.default)(whenAttr.value.expression).code;
+        var whenValue = whenAttr && types.isJSXExpressionContainer(whenAttr.value)
+            ? (0, generator_1.default)(whenAttr.value.expression).code
+            : undefined;
         var elseValue = elseAttr &&
             types.isJSXExpressionContainer(elseAttr.value) &&
             jsxElementToJson(elseAttr.value.expression);
@@ -442,9 +442,7 @@ var jsxElementToJson = function (node) {
             meta: {
                 else: elseValue || undefined,
             },
-            bindings: {
-                when: { code: whenValue || undefined },
-            },
+            bindings: __assign({}, (whenValue ? { when: { code: whenValue } } : {})),
             children: node.children
                 .map(function (item) { return jsxElementToJson(item); })
                 .filter(Boolean),

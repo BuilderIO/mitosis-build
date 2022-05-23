@@ -99,10 +99,7 @@ var setContextCode = function (json) {
         .join('\n');
 };
 var BINDINGS_MAPPER = {
-    innerHTML: function (json, options) {
-        var _a;
-        return "{@html ".concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)((_a = json.bindings.innerHTML) === null || _a === void 0 ? void 0 : _a.code), "}");
-    },
+    innerHTML: function (json, options) { var _a; return "{@html ".concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)((_a = json.bindings.innerHTML) === null || _a === void 0 ? void 0 : _a.code), "}"); },
 };
 var SVELTE_SPECIAL_TAGS = {
     COMPONENT: 'svelte:component',
