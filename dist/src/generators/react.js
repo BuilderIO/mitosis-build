@@ -167,7 +167,8 @@ var blockToReact = function (json, options, parentSlots) {
         }
         var useBindingValue = processBinding(value, options);
         if (key.startsWith('on')) {
-            str += " ".concat(key, "={event => ").concat(updateStateSettersInCode(useBindingValue, options), " } ");
+            var _e = json.bindings[key].arguments, cusArgs = _e === void 0 ? ['event'] : _e;
+            str += " ".concat(key, "={(").concat(cusArgs.join(','), ") => ").concat(updateStateSettersInCode(useBindingValue, options), " } ");
         }
         else if (key.startsWith('slot')) {
             // <Component slotProjected={<AnotherComponent />} />
@@ -179,7 +180,7 @@ var blockToReact = function (json, options, parentSlots) {
         else if (BINDING_MAPPERS[key]) {
             var mapper = BINDING_MAPPERS[key];
             if (typeof mapper === 'function') {
-                var _e = mapper(key, useBindingValue), newKey = _e[0], newValue = _e[1];
+                var _f = mapper(key, useBindingValue), newKey = _f[0], newValue = _f[1];
                 str += " ".concat(newKey, "={").concat(newValue, "} ");
             }
             else {

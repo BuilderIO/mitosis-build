@@ -140,25 +140,25 @@ var blockToSolid = function (json, options) {
         str += " ".concat(key, "=\"").concat(value, "\" ");
     }
     for (var key in json.bindings) {
-        var value = json.bindings[key];
+        var _d = json.bindings[key], code = _d.code, _e = _d.arguments, cusArg = _e === void 0 ? ['event'] : _e;
         if (key === '_spread' || key === '_forName') {
             continue;
         }
-        if (!(value === null || value === void 0 ? void 0 : value.code))
+        if (!code)
             continue;
         if (key.startsWith('on')) {
             var useKey = key === 'onChange' && json.name === 'input' ? 'onInput' : key;
-            str += " ".concat(useKey, "={event => ").concat(value.code, "} ");
+            str += " ".concat(useKey, "={(").concat(cusArg.join(','), ") => ").concat(code, "} ");
         }
         else {
-            var useValue = value.code;
+            var useValue = code;
             if (key === 'style') {
                 // Convert camelCase keys to kebab-case
                 // TODO: support more than top level objects, may need
                 // a runtime helper for expressions that are not a direct
                 // object literal, such as ternaries and other expression
                 // types
-                useValue = (0, babel_transform_1.babelTransformExpression)(value.code, {
+                useValue = (0, babel_transform_1.babelTransformExpression)(code, {
                     ObjectExpression: function (path) {
                         // TODO: limit to top level objects only
                         for (var _i = 0, _a = path.node.properties; _i < _a.length; _i++) {

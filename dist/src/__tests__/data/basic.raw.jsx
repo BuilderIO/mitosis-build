@@ -6,7 +6,7 @@ function MyBasicComponent() {
         name: 'Steve',
     });
     return (<div>
-      <input value={state.name} onChange={function (event) { return (state.name = event.target.value); }}/>
+      <input value={state.name} onChange={function (myEvent) { return (state.name = myEvent.target.value); }}/>
       Hello! I can run in React, Vue, Solid, or Liquid!
     </div>);
 }

@@ -500,13 +500,18 @@ var jsxElementToJson = function (node) {
                 if (types.isJSXExpressionContainer(value)) {
                     var expression = value.expression;
                     if (types.isArrowFunctionExpression(expression)) {
-                        memo[key] = { code: (0, generator_1.default)(expression.body).code };
+                        if (key.startsWith('on')) {
+                            memo[key] = {
+                                code: (0, generator_1.default)(expression.body).code,
+                                arguments: expression.params.map(function (node) { return node === null || node === void 0 ? void 0 : node.name; }),
+                            };
+                        }
+                        else {
+                            memo[key] = { code: (0, generator_1.default)(expression.body).code };
+                        }
                     }
                     else {
                         memo[key] = { code: (0, generator_1.default)(expression).code };
-                    }
-                    if (key === '_spread') {
-                        debugger;
                     }
                     return memo;
                 }
@@ -600,6 +605,7 @@ function mapReactIdentifiers(json) {
         }
     }
     (0, traverse_1.default)(json).forEach(function (item) {
+        var _a;
         if ((0, is_mitosis_node_1.isMitosisNode)(item)) {
             for (var key in item.bindings) {
                 var value = item.bindings[key];
@@ -607,6 +613,9 @@ function mapReactIdentifiers(json) {
                     item.bindings[key] = {
                         code: mapReactIdentifiersInExpression(value.code, stateProperties),
                     };
+                    if ((_a = value.arguments) === null || _a === void 0 ? void 0 : _a.length) {
+                        item.bindings[key].arguments = value.arguments;
+                    }
                 }
                 if (key === 'className') {
                     var currentValue = item.bindings[key];

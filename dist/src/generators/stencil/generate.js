@@ -26,7 +26,7 @@ var collect_styles_1 = require("../../helpers/collect-styles");
 var indent_1 = require("../../helpers/indent");
 var map_refs_1 = require("../../helpers/map-refs");
 var blockToStencil = function (json, options) {
-    var _a, _b, _c, _d, _e, _f;
+    var _a, _b, _c, _d, _e;
     if (options === void 0) { options = {}; }
     if (json.properties._text) {
         return json.properties._text;
@@ -62,19 +62,19 @@ var blockToStencil = function (json, options) {
         str += " ".concat(key, "=\"").concat(value, "\" ");
     }
     for (var key in json.bindings) {
-        var value = (_f = json.bindings[key]) === null || _f === void 0 ? void 0 : _f.code;
+        var _f = json.bindings[key], code = _f.code, _g = _f.arguments, cusArgs = _g === void 0 ? ['event'] : _g;
         if (key === '_spread' || key === '_forName') {
             continue;
         }
         if (key === 'ref') {
-            str += " ref={(el) => this.".concat(value, " = el} ");
+            str += " ref={(el) => this.".concat(code, " = el} ");
         }
         else if (key.startsWith('on')) {
             var useKey = key === 'onChange' && json.name === 'input' ? 'onInput' : key;
-            str += " ".concat(useKey, "={event => ").concat(processBinding(value), "} ");
+            str += " ".concat(useKey, "={").concat(cusArgs.join(','), " => ").concat(processBinding(code), "} ");
         }
         else {
-            str += " ".concat(key, "={").concat(processBinding(value), "} ");
+            str += " ".concat(key, "={").concat(processBinding(code), "} ");
         }
     }
     if (jsx_1.selfClosingTags.has(json.name)) {

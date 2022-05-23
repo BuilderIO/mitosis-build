@@ -55,7 +55,7 @@ var mappers = {
     },
 };
 var blockToAngular = function (json, options, blockOptions) {
-    var _a, _b, _c, _d, _e, _f, _g;
+    var _a, _b, _c, _d, _e, _f;
     if (options === void 0) { options = {}; }
     if (blockOptions === void 0) { blockOptions = {}; }
     var contextVars = (blockOptions === null || blockOptions === void 0 ? void 0 : blockOptions.contextVars) || [];
@@ -129,9 +129,9 @@ var blockToAngular = function (json, options, blockOptions) {
             if (key.startsWith('$')) {
                 continue;
             }
-            var value = (_g = json.bindings[key]) === null || _g === void 0 ? void 0 : _g.code;
+            var _g = json.bindings[key], code = _g.code, _h = _g.arguments, cusArgs = _h === void 0 ? ['event'] : _h;
             // TODO: proper babel transform to replace. Util for this
-            var useValue = (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(value, {
+            var useValue = (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(code, {
                 contextVars: contextVars,
                 outputVars: outputVars,
             });
@@ -142,7 +142,7 @@ var blockToAngular = function (json, options, blockOptions) {
                     event_1 = 'input';
                 }
                 // TODO: proper babel transform to replace. Util for this
-                var finalValue = (0, remove_surrounding_block_1.removeSurroundingBlock)(useValue.replace(/event\./g, '$event.'));
+                var finalValue = (0, remove_surrounding_block_1.removeSurroundingBlock)(useValue.replace(new RegExp("".concat(cusArgs[0], "\\."), 'g'), '$event.'));
                 str += " (".concat(event_1, ")=\"").concat(finalValue, "\" ");
             }
             else if (key === 'className') {
