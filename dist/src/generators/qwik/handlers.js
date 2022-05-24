@@ -61,7 +61,7 @@ function renderHandler(file, symbol, code) {
         body.unshift((0, component_1.renderUseLexicalScope)(file));
     }
     file.exportConst(symbol, function () {
-        this.emit([(0, src_generator_1.arrowFnBlock)(['event'], [code])]);
+        this.emit([(0, src_generator_1.arrowFnBlock)(['event'], body)]);
     });
 }
 function stripBlock(block) {

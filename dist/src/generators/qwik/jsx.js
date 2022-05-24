@@ -65,6 +65,7 @@ function renderJSXNodes(file, directives, handlers, children, styles, parentSymb
                     _this.emit(directive(child, function () {
                         return renderJSXNodes(file, directives, handlers, child.children, styles, {}, false).call(_this);
                     }));
+                    !_this.isJSX && _this.emit(',');
                 }
                 else {
                     if (typeof directive == 'string') {
