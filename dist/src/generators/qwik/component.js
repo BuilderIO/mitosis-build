@@ -72,34 +72,30 @@ function addComponent(fileSet, component, opts) {
         if (_opts.isRoot) {
             var symbolName = componentName + '_styles';
             getCommonStyles(fileSet).symbolName = symbolName;
-            useStyles = generateStyles(componentFile, fileSet.low, symbolName, false);
+            useStyles = generateStyles(onRenderFile, fileSet.low, symbolName, false);
         }
     }
     else {
         if (styles.size) {
             var symbolName = componentName + '_styles';
             onRenderFile.exportConst(symbolName, (0, styles_1.renderStyles)(styles));
-            useStyles = generateStyles(componentFile, onRenderFile, symbolName, true);
+            useStyles = generateStyles(onRenderFile, onRenderFile, symbolName, true);
         }
     }
-    addComponentOnMount(componentFile, onRenderFile, componentName, component, useStyles);
-    componentFile.exportConst(componentName, (0, src_generator_1.invoke)(componentFile.import(componentFile.qwikModule, 'componentQrl'), [generateQrl(componentFile, componentName + '_onMount')], ['any', 'any']));
     var directives = new Map();
-    onRenderFile.exportConst(componentName + '_onRender', (0, src_generator_1.arrowFnBlock)([], [
-        renderUseLexicalScope(onRenderFile),
-        function () {
-            return this.emit('return ', (0, jsx_1.renderJSXNodes)(onRenderFile, directives, handlers, component.children, styles, {}), ';');
-        },
-    ]));
+    addComponentOnMount(onRenderFile, function () {
+        return this.emit('return ', (0, jsx_1.renderJSXNodes)(onRenderFile, directives, handlers, component.children, styles, {}), ';');
+    }, componentName, component, useStyles);
+    componentFile.exportConst(componentName, (0, src_generator_1.invoke)(componentFile.import(componentFile.qwikModule, 'componentQrl'), [generateQrl(componentFile, onRenderFile, componentName + '_onMount')], ['any', 'any']));
     directives.forEach(function (code, name) {
         fileSet.med.import(fileSet.med.qwikModule, 'h');
         fileSet.med.exportConst(name, code, true);
     });
 }
 exports.addComponent = addComponent;
-function generateStyles(componentFile, styleFile, symbol, scoped) {
+function generateStyles(fromFile, dstFile, symbol, scoped) {
     return function () {
-        this.emit((0, src_generator_1.invoke)(componentFile.import(componentFile.qwikModule, scoped ? 'withScopedStylesQrl' : 'useStylesQrl'), [generateQrl(styleFile, symbol)]), ';');
+        this.emit((0, src_generator_1.invoke)(fromFile.import(fromFile.qwikModule, scoped ? 'withScopedStylesQrl' : 'useStylesQrl'), [generateQrl(fromFile, dstFile, symbol)]), ';');
     };
 }
 function renderUseLexicalScope(file) {
@@ -116,7 +112,7 @@ function addCommonStyles(fileSet) {
     }
 }
 exports.addCommonStyles = addCommonStyles;
-function addComponentOnMount(componentFile, onRenderFile, componentName, component, useStyles) {
+function addComponentOnMount(componentFile, onRenderEmit, componentName, component, useStyles) {
     var inputInitializer = [];
     if (component.inputs) {
         component.inputs.forEach(function (input) {
@@ -132,16 +128,15 @@ function addComponentOnMount(componentFile, onRenderFile, componentName, compone
                 (0, src_generator_1.iif)((_a = component.hooks.onMount) === null || _a === void 0 ? void 0 : _a.code),
                 ';',
                 useStyles,
-                'return ',
-                generateQrl(onRenderFile, componentName + '_onRender', ['state']),
+                onRenderEmit,
                 ';}'], false));
         }));
     });
 }
-function generateQrl(componentFile, componentName, capture) {
+function generateQrl(fromFile, dstFile, componentName, capture) {
     if (capture === void 0) { capture = []; }
-    return (0, src_generator_1.invoke)(componentFile.import(componentFile.qwikModule, 'qrl'), [
-        componentFile.toQrlChunk(),
+    return (0, src_generator_1.invoke)(fromFile.import(fromFile.qwikModule, 'qrl'), [
+        dstFile.toQrlChunk(),
         (0, src_generator_1.quote)(componentName),
         "[".concat(capture.join(','), "]"),
     ]);

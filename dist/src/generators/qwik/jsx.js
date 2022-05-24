@@ -21,6 +21,7 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.renderJSXNodes = void 0;
+var is_mitosis_node_1 = require("../../helpers/is-mitosis-node");
 var directives_1 = require("./directives");
 var src_generator_1 = require("./src-generator");
 function renderJSXNodes(file, directives, handlers, children, styles, parentSymbolBindings, root) {
@@ -31,10 +32,9 @@ function renderJSXNodes(file, directives, handlers, children, styles, parentSymb
             return;
         if (root)
             this.emit('(');
-        var needsFragment = root && children.length > 1;
+        var needsFragment = root && (children.length > 1 || isInlinedDirective(children[0]));
         file.import(file.qwikModule, 'h');
         if (needsFragment) {
-            file.import(file.qwikModule, 'Fragment');
             this.jsxBeginFragment(file.import(file.qwikModule, 'Fragment'));
         }
         children.forEach(function (child) {
@@ -43,7 +43,14 @@ function renderJSXNodes(file, directives, handlers, children, styles, parentSymb
                 return;
             if (isTextNode(child)) {
                 if (((_a = child.bindings._text) === null || _a === void 0 ? void 0 : _a.code) !== undefined) {
-                    _this.jsxTextBinding(child.bindings._text.code);
+                    if (child.bindings._text.code == 'props.children') {
+                        _this.file.import(_this.file.qwikModule, 'Slot');
+                        _this.jsxBegin('Slot', {}, {});
+                        _this.jsxEnd('Slot');
+                    }
+                    else {
+                        _this.jsxTextBinding(child.bindings._text.code);
+                    }
                 }
                 else {
                     _this.isJSX
@@ -90,7 +97,9 @@ function renderJSXNodes(file, directives, handlers, children, styles, parentSymb
                             // special case for Images. We want to make sure that we include the maxWidth in a srcset
                             specialBindings.srcsetSizes = Number.parseInt(imageMaxWidth);
                         }
-                        props.class = addClass(styleProps.CLASS_NAME, props.class);
+                        if (styleProps === null || styleProps === void 0 ? void 0 : styleProps.CLASS_NAME) {
+                            props.class = addClass(styleProps.CLASS_NAME, props.class);
+                        }
                     }
                     var symbolBindings = {};
                     var bindings = rewriteHandlers(file, handlers, child.bindings, symbolBindings);
@@ -161,4 +170,7 @@ function rewriteHandlers(file, handlers, bindings, symbolBindings) {
         }
     }
     return outBindings;
+}
+function isInlinedDirective(node) {
+    return ((0, is_mitosis_node_1.isMitosisNode)(node) && node.name == 'Show') || node.name == 'For';
 }
