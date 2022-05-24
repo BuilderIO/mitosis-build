@@ -23,11 +23,12 @@ export declare class File {
     toString(): string;
 }
 export declare class SrcBuilder {
+    file: File;
     isTypeScript: boolean;
     isModule: boolean;
     isJSX: boolean;
     buf: string[];
-    constructor(options: SrcBuilderOptions);
+    constructor(file: File, options: SrcBuilderOptions);
     import(module: string, symbols: string[]): this;
     emit(...values: any[]): this;
     private push;
