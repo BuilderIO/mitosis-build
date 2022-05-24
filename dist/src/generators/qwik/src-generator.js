@@ -263,17 +263,19 @@ var SrcBuilder = /** @class */ (function () {
             this.emit('},');
         }
         function emitJsxProp(key, value) {
-            if (self.isJSX) {
-                self.emit(' ', key, '=');
-                if (typeof value == 'string' && value.startsWith('"')) {
-                    self.emit(value);
+            if (value) {
+                if (self.isJSX) {
+                    self.emit(' ', key, '=');
+                    if (typeof value == 'string' && value.startsWith('"')) {
+                        self.emit(value);
+                    }
+                    else {
+                        self.emit('{', value, '}');
+                    }
                 }
                 else {
-                    self.emit('{', value, '}');
+                    self.emit(possiblyQuotePropertyName(key), ':', value, ',');
                 }
-            }
-            else {
-                self.emit(possiblyQuotePropertyName(key), ':', value, ',');
             }
         }
     };
