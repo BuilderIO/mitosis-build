@@ -56,12 +56,13 @@ function Image(props) {
             srcset: undefined,
         };
         if (isBuilderIoImage) {
-            image = updateQueryParam(image, 'format', 'webp');
+            var webpImage_1 = updateQueryParam(image, 'format', 'webp');
             var srcset = ['100', '200', '400', '800', '1200', '1600', '2000']
                 .concat(props.srcsetSizes ? String(props.srcsetSizes).split(' ') : [])
                 .map(function (size) {
-                return updateQueryParam(image, 'width', size) + ' ' + size + 'w';
+                return updateQueryParam(webpImage_1, 'width', size) + ' ' + size + 'w';
             })
+                .concat([image])
                 .join(', ');
             imgProps.srcset = srcset;
             jsx = jsx = [
