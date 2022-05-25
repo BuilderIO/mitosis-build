@@ -236,7 +236,7 @@ var componentToAngular = function (options) {
         if (options.plugins) {
             json = (0, plugins_1.runPostJsonPlugins)(json, options.plugins);
         }
-        var css = (0, collect_styles_1.collectCss)(json);
+        var css = (0, collect_styles_1.collectCss)(json, { classProperty: 'className' });
         if (options.prettier !== false) {
             css = tryFormat(css, 'css');
         }

@@ -64,7 +64,6 @@ function getContextString(component, options) {
 var collectClassString = function (json) {
     var _a, _b, _c;
     var staticClasses = [];
-    var hasStaticClasses = Boolean(staticClasses.length);
     if (json.properties.class) {
         staticClasses.push(json.properties.class);
         delete json.properties.class;
@@ -87,6 +86,7 @@ var collectClassString = function (json) {
         dynamicClasses.push("css(".concat(json.bindings.css.code, ")"));
     }
     delete json.bindings.css;
+    var hasStaticClasses = Boolean(staticClasses.length);
     var staticClassesString = staticClasses.join(' ');
     var dynamicClassesString = dynamicClasses.join(" + ' ' + ");
     var hasDynamicClasses = Boolean(dynamicClasses.length);

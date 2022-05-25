@@ -139,9 +139,9 @@ var blockToReact = function (json, options, parentSlots) {
             .replace(/"/g, '&quot;')
             .replace(/\n/g, '\\n');
         if (key === 'class') {
-            str += " className=\"".concat(value, "\" ");
+            continue;
         }
-        else if (BINDING_MAPPERS[key]) {
+        if (BINDING_MAPPERS[key]) {
             var mapper = BINDING_MAPPERS[key];
             if (typeof mapper === 'function') {
                 var _d = mapper(key, value), newKey = _d[0], newValue = _d[1];
@@ -423,7 +423,8 @@ var _componentToReact = function (json, options, isSubComponent) {
     if (options.plugins) {
         json = (0, plugins_1.runPostJsonPlugins)(json, options.plugins);
     }
-    var css = stylesType === 'styled-jsx' && (0, collect_styles_1.collectCss)(json, { classProperty: 'class' });
+    var css = stylesType === 'styled-jsx' &&
+        (0, collect_styles_1.collectCss)(json, { classProperty: 'className' });
     var styledComponentsCode = stylesType === 'styled-components' &&
         componentHasStyles &&
         (0, collect_styles_1.collectStyledComponents)(json);

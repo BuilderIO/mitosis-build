@@ -276,7 +276,12 @@ var blockToHtml = function (json, options, blockOptions) {
             var value = (json.properties[key] || '')
                 .replace(/"/g, '&quot;')
                 .replace(/\n/g, '\\n');
-            str += " ".concat(key, "=\"").concat(value, "\" ");
+            if (key === 'className') {
+                str += " class=\"".concat(value, "\" ");
+            }
+            else {
+                str += " ".concat(key, "=\"").concat(value, "\" ");
+            }
         }
         // batch all local vars within the bindings
         var batchScopeVars_1 = {};
