@@ -5,7 +5,9 @@ function MyBasicComponent() {
     var state = (0, mitosis_1.useState)({
         name: 'Steve',
     });
-    return (<div>
+    return (<div class="test" css={{
+            padding: '10px',
+        }}>
       <input value={state.name} onChange={function (myEvent) { return (state.name = myEvent.target.value); }}/>
       Hello! I can run in React, Vue, Solid, or Liquid!
     </div>);

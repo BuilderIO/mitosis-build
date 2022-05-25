@@ -224,6 +224,9 @@ var blockToVue = function (node, options) {
     }
     for (var key in node.properties) {
         var value = node.properties[key];
+        if (key === 'className') {
+            continue;
+        }
         str += " ".concat(key, "=\"").concat(value, "\" ");
     }
     var stringifiedBindings = Object.entries(node.bindings)
