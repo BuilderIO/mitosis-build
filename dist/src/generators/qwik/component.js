@@ -124,9 +124,11 @@ function addComponentOnMount(componentFile, onRenderEmit, componentName, compone
         var _this = this;
         this.emit((0, src_generator_1.arrowFnValue)(['state'], function () {
             var _a;
-            return _this.emit.apply(_this, __spreadArray(__spreadArray(['{'], inputInitializer, false), ['typeof __STATE__==="object"&&Object.assign(state,__STATE__[state.serverStateId]);',
+            return _this.emit.apply(_this, __spreadArray(__spreadArray(['{',
+                'if(!state.__INIT__){',
+                'state.__INIT__=true;'], inputInitializer, false), ['typeof __STATE__==="object"&&Object.assign(state,__STATE__[state.serverStateId]);',
                 (0, src_generator_1.iif)((_a = component.hooks.onMount) === null || _a === void 0 ? void 0 : _a.code),
-                ';',
+                '}',
                 useStyles,
                 onRenderEmit,
                 ';}'], false));
