@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.styleMapToCss = exports.collectCss = exports.collectStyles = exports.parseCssObject = exports.collectStyledComponents = exports.hasStyles = exports.nodeHasStyles = void 0;
+exports.collectCss = exports.collectStyledComponents = exports.hasStyles = void 0;
 var json5_1 = __importDefault(require("json5"));
 var lodash_1 = require("lodash");
 var traverse_1 = __importDefault(require("traverse"));
@@ -17,12 +17,11 @@ var nodeHasStyles = function (node) {
     return Boolean(typeof ((_a = node.bindings.css) === null || _a === void 0 ? void 0 : _a.code) === 'string' &&
         node.bindings.css.code.trim().length > 6);
 };
-exports.nodeHasStyles = nodeHasStyles;
 var hasStyles = function (component) {
     var hasStyles = false;
     (0, traverse_1.default)(component).forEach(function (item) {
         if ((0, is_mitosis_node_1.isMitosisNode)(item)) {
-            if ((0, exports.nodeHasStyles)(item)) {
+            if (nodeHasStyles(item)) {
                 hasStyles = true;
                 this.stop();
             }
@@ -38,8 +37,8 @@ var collectStyledComponents = function (json) {
     (0, traverse_1.default)(json).forEach(function (item) {
         var _a;
         if ((0, is_mitosis_node_1.isMitosisNode)(item)) {
-            if ((0, exports.nodeHasStyles)(item)) {
-                var value = (0, exports.parseCssObject)((_a = item.bindings.css) === null || _a === void 0 ? void 0 : _a.code);
+            if (nodeHasStyles(item)) {
+                var value = parseCssObject((_a = item.bindings.css) === null || _a === void 0 ? void 0 : _a.code);
                 delete item.bindings.css;
                 var normalizedNameProperty = item.properties.$name
                     ? (0, capitalize_1.capitalize)((0, lodash_1.camelCase)(item.properties.$name.replace(/[^a-z]/gi, '')))
@@ -61,11 +60,11 @@ var collectStyledComponents = function (json) {
                 if (!componentHashes[componentName]) {
                     componentHashes[componentName] = stylesHash;
                 }
-                str += "".concat((0, exports.styleMapToCss)(styles), "\n");
+                str += "".concat(styleMapToCss(styles), "\n");
                 var nestedSelectors = getNestedSelectors(value);
                 for (var nestedSelector in nestedSelectors) {
                     var value_1 = nestedSelectors[nestedSelector];
-                    str += "".concat(nestedSelector, " { ").concat((0, exports.styleMapToCss)(value_1), " }");
+                    str += "".concat(nestedSelector, " { ").concat(styleMapToCss(value_1), " }");
                 }
                 var prefix = (0, is_upper_case_1.isUpperCase)(item.name[0])
                     ? "styled(".concat(item.name, ")`")
@@ -88,7 +87,6 @@ var parseCssObject = function (css) {
         throw e;
     }
 };
-exports.parseCssObject = parseCssObject;
 var collectStyles = function (json, options) {
     if (options === void 0) { options = {}; }
     var styleMap = {};
@@ -99,8 +97,8 @@ var collectStyles = function (json, options) {
     (0, traverse_1.default)(json).forEach(function (item) {
         var _a;
         if ((0, is_mitosis_node_1.isMitosisNode)(item)) {
-            if ((0, exports.nodeHasStyles)(item)) {
-                var value = (0, exports.parseCssObject)((_a = item.bindings.css) === null || _a === void 0 ? void 0 : _a.code);
+            if (nodeHasStyles(item)) {
+                var value = parseCssObject((_a = item.bindings.css) === null || _a === void 0 ? void 0 : _a.code);
                 delete item.bindings.css;
                 var componentName = item.properties.$name
                     ? (0, dash_case_1.dashCase)(item.properties.$name)
@@ -147,10 +145,9 @@ var collectStyles = function (json, options) {
     });
     return styleMap;
 };
-exports.collectStyles = collectStyles;
 var collectCss = function (json, options) {
     if (options === void 0) { options = {}; }
-    var styles = (0, exports.collectStyles)(json, options);
+    var styles = collectStyles(json, options);
     // TODO create and use a root selector
     return classStyleMapToCss(styles);
 };
@@ -165,18 +162,18 @@ var classStyleMapToCss = function (map) {
     var str = '';
     for (var key in map) {
         var styles = getStylesOnly(map[key]);
-        str += ".".concat(key, " { ").concat((0, exports.styleMapToCss)(styles), " }");
+        str += ".".concat(key, " { ").concat(styleMapToCss(styles), " }");
         var nestedSelectors = getNestedSelectors(map[key]);
         for (var nestedSelector in nestedSelectors) {
             var value = nestedSelectors[nestedSelector];
             if (nestedSelector.startsWith('@')) {
-                str += "".concat(nestedSelector, " { .").concat(key, " { ").concat((0, exports.styleMapToCss)(value), " } }");
+                str += "".concat(nestedSelector, " { .").concat(key, " { ").concat(styleMapToCss(value), " } }");
             }
             else {
                 var useSelector = nestedSelector.includes('&')
                     ? nestedSelector.replace(/&/g, ".".concat(key))
                     : ".".concat(key, " ").concat(nestedSelector);
-                str += "".concat(useSelector, " { ").concat((0, exports.styleMapToCss)(value), " }");
+                str += "".concat(useSelector, " { ").concat(styleMapToCss(value), " }");
             }
         }
     }
@@ -195,4 +192,3 @@ var styleMapToCss = function (map) {
     }
     return str;
 };
-exports.styleMapToCss = styleMapToCss;

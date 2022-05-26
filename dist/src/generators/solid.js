@@ -44,7 +44,7 @@ function processDynamicComponents(json, options) {
     (0, traverse_1.default)(json).forEach(function (node) {
         if ((0, is_mitosis_node_1.isMitosisNode)(node)) {
             if (node.name.includes('.')) {
-                node.bindings.component.code = node.name;
+                node.bindings.component = { code: node.name };
                 node.name = 'Dynamic';
                 found = true;
             }
