@@ -85,7 +85,7 @@ var addUpdateAfterSet = function (json, options) {
                 var value = (_a = item.bindings[key]) === null || _a === void 0 ? void 0 : _a.code;
                 var newValue = addUpdateAfterSetInCode(value, options);
                 if (newValue !== value) {
-                    item.bindings[key] = { code: newValue };
+                    item.bindings[key].code = newValue;
                 }
             }
         }
@@ -177,7 +177,7 @@ var addOnChangeJs = function (id, options, code) {
 };
 // TODO: spread support
 var blockToHtml = function (json, options, blockOptions) {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o;
+    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p;
     if (blockOptions === void 0) { blockOptions = {}; }
     var scopeVars = (blockOptions === null || blockOptions === void 0 ? void 0 : blockOptions.scopeVars) || [];
     var childComponents = (blockOptions === null || blockOptions === void 0 ? void 0 : blockOptions.childComponents) || [];
@@ -276,7 +276,12 @@ var blockToHtml = function (json, options, blockOptions) {
             var value = (json.properties[key] || '')
                 .replace(/"/g, '&quot;')
                 .replace(/\n/g, '\\n');
-            str += " ".concat(key, "=\"").concat(value, "\" ");
+            if (key === 'className') {
+                str += " class=\"".concat(value, "\" ");
+            }
+            else {
+                str += " ".concat(key, "=\"").concat(value, "\" ");
+            }
         }
         // batch all local vars within the bindings
         var batchScopeVars_1 = {};
@@ -287,6 +292,7 @@ var blockToHtml = function (json, options, blockOptions) {
                 continue;
             }
             var value = (_o = json.bindings[key]) === null || _o === void 0 ? void 0 : _o.code;
+            var cusArg = ((_p = json.bindings[key]) === null || _p === void 0 ? void 0 : _p.arguments) || ['event'];
             // TODO: proper babel transform to replace. Util for this
             var useValue = value;
             if (key.startsWith('on')) {
@@ -297,8 +303,8 @@ var blockToHtml = function (json, options, blockOptions) {
                 var fnName = (0, lodash_1.camelCase)("on-".concat(elId, "-").concat(event_1));
                 var codeContent = (0, remove_surrounding_block_1.removeSurroundingBlock)(updateReferencesInCode(useValue, options));
                 options.js += "\n          // Event handler for '".concat(event_1, "' event on ").concat(elId, "\n          ").concat(options.format === 'class'
-                    ? "this.".concat(fnName, " = (event) => {")
-                    : "function ".concat(fnName, " (event) {"), "\n              ").concat(addScopeVars(scopeVars, codeContent, function (scopeVar) {
+                    ? "this.".concat(fnName, " = (").concat(cusArg.join(','), ") => {")
+                    : "function ".concat(fnName, " (").concat(cusArg.join(','), ") {"), "\n              ").concat(addScopeVars(scopeVars, codeContent, function (scopeVar) {
                     return "const ".concat(scopeVar, " = ").concat(options.format === 'class' ? 'this.' : '', "getContext(event.currentTarget, \"").concat(scopeVar, "\");");
                 }), "\n            ").concat(codeContent, "\n          }\n        ");
                 var fnIdentifier = "".concat(options.format === 'class' ? 'this.' : '').concat(fnName);

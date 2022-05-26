@@ -8,7 +8,7 @@ var File = /** @class */ (function () {
         this.exports = new Map();
         this.filename = filename;
         this.options = options;
-        this.src = new SrcBuilder(this.options);
+        this.src = new SrcBuilder(this, this.options);
         this.qwikModule = qwikModule;
         this.qrlPrefix = qrlPrefix;
     }
@@ -48,7 +48,7 @@ var File = /** @class */ (function () {
     };
     File.prototype.toString = function () {
         var _this = this;
-        var srcImports = new SrcBuilder(this.options);
+        var srcImports = new SrcBuilder(this, this.options);
         var imports = this.imports.imports;
         var modules = Array.from(imports.keys()).sort();
         modules.forEach(function (module) {
@@ -83,8 +83,9 @@ function removeExt(filename) {
 }
 var spaces = [''];
 var SrcBuilder = /** @class */ (function () {
-    function SrcBuilder(options) {
+    function SrcBuilder(file, options) {
         this.buf = [];
+        this.file = file;
         this.isTypeScript = options.isTypeScript;
         this.isModule = options.isModule;
         this.isJSX = options.isJSX;
@@ -225,7 +226,7 @@ var SrcBuilder = /** @class */ (function () {
             if (Object.prototype.hasOwnProperty.call(props, key) &&
                 !ignoreKey(key) &&
                 !Object.prototype.hasOwnProperty.call(bindings, key)) {
-                emitJsxProp(possiblyQuotePropertyName(key), quote(props[key]));
+                emitJsxProp(key, quote(props[key]));
             }
         }
         var _loop_1 = function (rawKey) {
@@ -233,7 +234,7 @@ var SrcBuilder = /** @class */ (function () {
                 !ignoreKey(rawKey)) {
                 var binding_1 = bindings[rawKey].code;
                 var key = lastProperty(rawKey);
-                if (binding_1 === props[key]) {
+                if (binding_1 != null && binding_1 === props[key]) {
                     // HACK: workaround for the fact that sometimes the `bindings` have string literals
                     // We assume that when the binding content equals prop content.
                     binding_1 = quote(binding_1);
@@ -248,7 +249,7 @@ var SrcBuilder = /** @class */ (function () {
                     });
                 }
                 else {
-                    emitJsxProp(possiblyQuotePropertyName(key), binding_1);
+                    emitJsxProp(key, binding_1);
                 }
             }
         };
@@ -262,17 +263,19 @@ var SrcBuilder = /** @class */ (function () {
             this.emit('},');
         }
         function emitJsxProp(key, value) {
-            if (self.isJSX) {
-                self.emit(' ', key, '=');
-                if (typeof value == 'string' && value.startsWith('"')) {
-                    self.emit(value);
+            if (value) {
+                if (self.isJSX) {
+                    self.emit(' ', key, '=');
+                    if (typeof value == 'string' && value.startsWith('"')) {
+                        self.emit(value);
+                    }
+                    else {
+                        self.emit('{', value, '}');
+                    }
                 }
                 else {
-                    self.emit('{', value, '}');
+                    self.emit(possiblyQuotePropertyName(key), ':', value, ',');
                 }
-            }
-            else {
-                self.emit(key, ':', value, ',');
             }
         }
     };

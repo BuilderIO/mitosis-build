@@ -106,7 +106,7 @@ var BINDING_MAPPERS = {
     innerHTML: function (_key, value) {
         return [
             'dangerouslySetInnerHTML',
-            JSON.stringify({ __html: value.replace(/\s+/g, ' ') }),
+            "{__html: ".concat(value.replace(/\s+/g, ' '), "}"),
         ];
     },
 };
@@ -139,9 +139,9 @@ var blockToReact = function (json, options, parentSlots) {
             .replace(/"/g, '&quot;')
             .replace(/\n/g, '\\n');
         if (key === 'class') {
-            str += " className=\"".concat(value, "\" ");
+            continue;
         }
-        else if (BINDING_MAPPERS[key]) {
+        if (BINDING_MAPPERS[key]) {
             var mapper = BINDING_MAPPERS[key];
             if (typeof mapper === 'function') {
                 var _d = mapper(key, value), newKey = _d[0], newValue = _d[1];
@@ -167,7 +167,8 @@ var blockToReact = function (json, options, parentSlots) {
         }
         var useBindingValue = processBinding(value, options);
         if (key.startsWith('on')) {
-            str += " ".concat(key, "={event => ").concat(updateStateSettersInCode(useBindingValue, options), " } ");
+            var _e = json.bindings[key].arguments, cusArgs = _e === void 0 ? ['event'] : _e;
+            str += " ".concat(key, "={(").concat(cusArgs.join(','), ") => ").concat(updateStateSettersInCode(useBindingValue, options), " } ");
         }
         else if (key.startsWith('slot')) {
             // <Component slotProjected={<AnotherComponent />} />
@@ -179,7 +180,7 @@ var blockToReact = function (json, options, parentSlots) {
         else if (BINDING_MAPPERS[key]) {
             var mapper = BINDING_MAPPERS[key];
             if (typeof mapper === 'function') {
-                var _e = mapper(key, useBindingValue), newKey = _e[0], newValue = _e[1];
+                var _f = mapper(key, useBindingValue), newKey = _f[0], newValue = _f[1];
                 str += " ".concat(newKey, "={").concat(newValue, "} ");
             }
             else {
@@ -422,7 +423,8 @@ var _componentToReact = function (json, options, isSubComponent) {
     if (options.plugins) {
         json = (0, plugins_1.runPostJsonPlugins)(json, options.plugins);
     }
-    var css = stylesType === 'styled-jsx' && (0, collect_styles_1.collectCss)(json, { classProperty: 'class' });
+    var css = stylesType === 'styled-jsx' &&
+        (0, collect_styles_1.collectCss)(json, { classProperty: 'className' });
     var styledComponentsCode = stylesType === 'styled-components' &&
         componentHasStyles &&
         (0, collect_styles_1.collectStyledComponents)(json);

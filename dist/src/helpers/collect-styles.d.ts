@@ -1,7 +1,5 @@
 import * as CSS from 'csstype';
-import { MitosisNode } from '../types/mitosis-node';
 import { MitosisComponent } from '../types/mitosis-component';
-export declare const nodeHasStyles: (node: MitosisNode) => boolean;
 export declare const hasStyles: (component: MitosisComponent) => boolean;
 /**
  * e.g.:
@@ -14,7 +12,7 @@ export declare const hasStyles: (component: MitosisComponent) => boolean;
  *  }
  * }
  */
-export declare type StyleMap = {
+declare type StyleMap = {
     [className: string]: CSS.Properties | StyleMap;
 };
 /**
@@ -28,8 +26,5 @@ declare type CollectStyleOptions = {
     prefix?: string;
 };
 export declare const collectStyledComponents: (json: MitosisComponent) => string;
-export declare const parseCssObject: (css: string) => any;
-export declare const collectStyles: (json: MitosisComponent, options?: CollectStyleOptions) => ClassStyleMap;
 export declare const collectCss: (json: MitosisComponent, options?: CollectStyleOptions) => string;
-export declare const styleMapToCss: (map: StyleMap) => string;
 export {};

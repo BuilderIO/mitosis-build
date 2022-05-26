@@ -99,10 +99,7 @@ var setContextCode = function (json) {
         .join('\n');
 };
 var BINDINGS_MAPPER = {
-    innerHTML: function (json, options) {
-        var _a;
-        return "{@html ".concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)((_a = json.bindings.innerHTML) === null || _a === void 0 ? void 0 : _a.code), "}");
-    },
+    innerHTML: function (json, options) { var _a; return "{@html ".concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)((_a = json.bindings.innerHTML) === null || _a === void 0 ? void 0 : _a.code), "}"); },
 };
 var SVELTE_SPECIAL_TAGS = {
     COMPONENT: 'svelte:component',
@@ -165,7 +162,7 @@ var blockToSvelte = function (_a) {
         if (key === '_spread') {
             continue;
         }
-        var value = json.bindings[key].code;
+        var _e = json.bindings[key], value = _e.code, _f = _e.arguments, cusArgs = _f === void 0 ? ['event'] : _f;
         // TODO: proper babel transform to replace. Util for this
         var useValue = (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(value, {
             includeState: options.stateType === 'variables',
@@ -173,7 +170,7 @@ var blockToSvelte = function (_a) {
         if (key.startsWith('on')) {
             var event_1 = key.replace('on', '').toLowerCase();
             // TODO: handle quotes in event handler values
-            str += " on:".concat(event_1, "=\"{event => ").concat((0, remove_surrounding_block_1.removeSurroundingBlock)(useValue), "}\" ");
+            str += " on:".concat(event_1, "=\"{").concat(cusArgs.join(','), " => ").concat((0, remove_surrounding_block_1.removeSurroundingBlock)(useValue), "}\" ");
         }
         else if (key === 'ref') {
             str += " bind:this={".concat(useValue, "} ");

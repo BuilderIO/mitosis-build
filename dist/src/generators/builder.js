@@ -57,8 +57,7 @@ var componentMappers = __assign(__assign({}, (!builder_1.symbolBlocksAsChildren
     : {
         Symbol: function (node, options) {
             var child = node.children[0];
-            var symbolOptions = (node.bindings.symbol &&
-                json5_1.default.parse(node.bindings.symbol.code)) ||
+            var symbolOptions = (node.bindings.symbol && json5_1.default.parse(node.bindings.symbol.code)) ||
                 {};
             if (child) {
                 (0, lodash_1.set)(symbolOptions, 'content.data.blocks', child.children.map(function (item) { return (0, exports.blockToBuilder)(item, options); }));
@@ -225,9 +224,7 @@ var blockToBuilder = function (json, options, _internalOptions) {
             actions: actions,
         }, properties: thisIsComponent
             ? undefined
-            : omitMetaProperties(json.properties), bindings: thisIsComponent
-            ? builderBindings
-            : (0, lodash_1.omit)(bindings, 'css'), actions: actions, children: json.children
+            : omitMetaProperties(json.properties), bindings: thisIsComponent ? builderBindings : (0, lodash_1.omit)(bindings, 'css'), actions: actions, children: json.children
             .filter(filter_empty_text_nodes_1.filterEmptyTextNodes)
             .map(function (child) { return (0, exports.blockToBuilder)(child, options); }) }), options);
 };

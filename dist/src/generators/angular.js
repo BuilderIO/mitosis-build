@@ -54,8 +54,12 @@ var mappers = {
             .join('\n'), "></ng-content>");
     },
 };
+// TODO: Maybe in the future allow defining `string | function` as values
+var BINDINGS_MAPPER = {
+    innerHTML: 'innerHTML',
+};
 var blockToAngular = function (json, options, blockOptions) {
-    var _a, _b, _c, _d, _e, _f, _g;
+    var _a, _b, _c, _d, _e, _f;
     if (options === void 0) { options = {}; }
     if (blockOptions === void 0) { blockOptions = {}; }
     var contextVars = (blockOptions === null || blockOptions === void 0 ? void 0 : blockOptions.contextVars) || [];
@@ -129,9 +133,9 @@ var blockToAngular = function (json, options, blockOptions) {
             if (key.startsWith('$')) {
                 continue;
             }
-            var value = (_g = json.bindings[key]) === null || _g === void 0 ? void 0 : _g.code;
+            var _g = json.bindings[key], code = _g.code, _h = _g.arguments, cusArgs = _h === void 0 ? ['event'] : _h;
             // TODO: proper babel transform to replace. Util for this
-            var useValue = (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(value, {
+            var useValue = (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(code, {
                 contextVars: contextVars,
                 outputVars: outputVars,
             });
@@ -142,7 +146,7 @@ var blockToAngular = function (json, options, blockOptions) {
                     event_1 = 'input';
                 }
                 // TODO: proper babel transform to replace. Util for this
-                var finalValue = (0, remove_surrounding_block_1.removeSurroundingBlock)(useValue.replace(/event\./g, '$event.'));
+                var finalValue = (0, remove_surrounding_block_1.removeSurroundingBlock)(useValue.replace(new RegExp("".concat(cusArgs[0], "\\."), 'g'), '$event.'));
                 str += " (".concat(event_1, ")=\"").concat(finalValue, "\" ");
             }
             else if (key === 'className') {
@@ -156,8 +160,11 @@ var blockToAngular = function (json, options, blockOptions) {
                     key.replace('slot', '').substring(1);
                 needsToRenderSlots.push("".concat(useValue.replace(/(\/\>)|\>/, " ".concat(lowercaseKey, ">"))));
             }
+            else if (BINDINGS_MAPPER[key]) {
+                str += " [".concat(BINDINGS_MAPPER[key], "]=\"").concat(useValue.replace(/"/g, "\\'"), "\"  ");
+            }
             else {
-                str += " [".concat(key, "]=\"").concat(useValue, "\" ");
+                str += " [".concat(key, "]='").concat(useValue, "' ");
             }
         }
         if (jsx_1.selfClosingTags.has(json.name)) {
@@ -229,7 +236,7 @@ var componentToAngular = function (options) {
         if (options.plugins) {
             json = (0, plugins_1.runPostJsonPlugins)(json, options.plugins);
         }
-        var css = (0, collect_styles_1.collectCss)(json);
+        var css = (0, collect_styles_1.collectCss)(json, { classProperty: 'className' });
         if (options.prettier !== false) {
             css = tryFormat(css, 'css');
         }

@@ -55,30 +55,14 @@ function renderHandlers(file, componentName, children) {
 }
 exports.renderHandlers = renderHandlers;
 function renderHandler(file, symbol, code) {
-    var body = [wrapWithUse(file, code)];
+    var body = [code];
     var shouldRenderStateRestore = code.indexOf('state') !== -1;
     if (shouldRenderStateRestore) {
         body.unshift((0, component_1.renderUseLexicalScope)(file));
     }
     file.exportConst(symbol, function () {
-        this.emit([(0, src_generator_1.arrowFnBlock)([], body)]);
+        this.emit([(0, src_generator_1.arrowFnBlock)(['event'], body)]);
     });
-}
-function wrapWithUse(file, code) {
-    var needsEvent = !!code.match(/\bevent\b/);
-    if (needsEvent) {
-        return function () {
-            this.emit('{');
-            needsEvent &&
-                this.emit('const event=', (0, src_generator_1.invoke)(file.import(file.qwikModule, 'useEvent'), []), ';');
-            var blockContent = stripBlock(code);
-            this.emit(blockContent);
-            this.emit('}');
-        };
-    }
-    else {
-        return code;
-    }
 }
 function stripBlock(block) {
     return block.substring(1, block.length - 1).trim();

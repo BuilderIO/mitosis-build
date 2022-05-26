@@ -32,7 +32,7 @@ export declare type MitosisNode = {
      */
     bindings: {
         [key: string]: {
-            code: string | undefined;
+            code: string;
             arguments?: string[];
         } | undefined;
     };

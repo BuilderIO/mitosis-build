@@ -166,20 +166,29 @@ var stringifyBinding = function (node) {
             // TODO: proper babel transform to replace. Util for this
             var useValue = (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(value === null || value === void 0 ? void 0 : value.code);
             if (key.startsWith('on')) {
+                var _b = value.arguments, cusArgs = _b === void 0 ? ['event'] : _b;
                 var event_1 = key.replace('on', '').toLowerCase();
                 if (event_1 === 'change' && node.name === 'input') {
                     event_1 = 'input';
                 }
+                var isAssignmentExpression = useValue.includes('=');
                 // TODO: proper babel transform to replace. Util for this
-                return " @".concat(event_1, "=\"").concat((0, remove_surrounding_block_1.removeSurroundingBlock)(useValue
-                    // TODO: proper reference parse and replacing
-                    .replace(/event\./g, '$event.')), "\" ");
+                if (isAssignmentExpression) {
+                    return " @".concat(event_1, "=\"").concat((0, remove_surrounding_block_1.removeSurroundingBlock)(useValue
+                        // TODO: proper reference parse and replacing
+                        .replace(new RegExp("".concat(cusArgs[0], "\\."), 'g'), '$event.')), "\" ");
+                }
+                else {
+                    return " @".concat(event_1, "=\"").concat((0, remove_surrounding_block_1.removeSurroundingBlock)(useValue
+                        // TODO: proper reference parse and replacing
+                        .replace(new RegExp("".concat(cusArgs[0]), 'g'), '$event')), "\" ");
+                }
             }
             else if (key === 'ref') {
                 return " ref=\"".concat(useValue, "\" ");
             }
             else if (BINDING_MAPPERS[key]) {
-                return " ".concat(BINDING_MAPPERS[key], "=\"").concat(useValue, "\" ");
+                return " ".concat(BINDING_MAPPERS[key], "=\"").concat(useValue.replace(/"/g, "\\'"), "\" ");
             }
             else {
                 return " :".concat(key, "=\"").concat(useValue, "\" ");
@@ -215,6 +224,9 @@ var blockToVue = function (node, options) {
     }
     for (var key in node.properties) {
         var value = node.properties[key];
+        if (key === 'className') {
+            continue;
+        }
         str += " ".concat(key, "=\"").concat(value, "\" ");
     }
     var stringifiedBindings = Object.entries(node.bindings)

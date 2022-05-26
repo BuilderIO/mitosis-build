@@ -44,7 +44,7 @@ function processDynamicComponents(json, options) {
     (0, traverse_1.default)(json).forEach(function (node) {
         if ((0, is_mitosis_node_1.isMitosisNode)(node)) {
             if (node.name.includes('.')) {
-                node.bindings.component.code = node.name;
+                node.bindings.component = { code: node.name };
                 node.name = 'Dynamic';
                 found = true;
             }
@@ -64,7 +64,6 @@ function getContextString(component, options) {
 var collectClassString = function (json) {
     var _a, _b, _c;
     var staticClasses = [];
-    var hasStaticClasses = Boolean(staticClasses.length);
     if (json.properties.class) {
         staticClasses.push(json.properties.class);
         delete json.properties.class;
@@ -87,6 +86,7 @@ var collectClassString = function (json) {
         dynamicClasses.push("css(".concat(json.bindings.css.code, ")"));
     }
     delete json.bindings.css;
+    var hasStaticClasses = Boolean(staticClasses.length);
     var staticClassesString = staticClasses.join(' ');
     var dynamicClassesString = dynamicClasses.join(" + ' ' + ");
     var hasDynamicClasses = Boolean(dynamicClasses.length);
@@ -140,25 +140,25 @@ var blockToSolid = function (json, options) {
         str += " ".concat(key, "=\"").concat(value, "\" ");
     }
     for (var key in json.bindings) {
-        var value = json.bindings[key];
+        var _d = json.bindings[key], code = _d.code, _e = _d.arguments, cusArg = _e === void 0 ? ['event'] : _e;
         if (key === '_spread' || key === '_forName') {
             continue;
         }
-        if (!(value === null || value === void 0 ? void 0 : value.code))
+        if (!code)
             continue;
         if (key.startsWith('on')) {
             var useKey = key === 'onChange' && json.name === 'input' ? 'onInput' : key;
-            str += " ".concat(useKey, "={event => ").concat(value.code, "} ");
+            str += " ".concat(useKey, "={(").concat(cusArg.join(','), ") => ").concat(code, "} ");
         }
         else {
-            var useValue = value.code;
+            var useValue = code;
             if (key === 'style') {
                 // Convert camelCase keys to kebab-case
                 // TODO: support more than top level objects, may need
                 // a runtime helper for expressions that are not a direct
                 // object literal, such as ternaries and other expression
                 // types
-                useValue = (0, babel_transform_1.babelTransformExpression)(value.code, {
+                useValue = (0, babel_transform_1.babelTransformExpression)(code, {
                     ObjectExpression: function (path) {
                         // TODO: limit to top level objects only
                         for (var _i = 0, _a = path.node.properties; _i < _a.length; _i++) {
