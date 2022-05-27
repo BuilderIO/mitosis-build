@@ -22,7 +22,6 @@ export declare type ClassStyleMap = {
     [key: string]: StyleMap;
 };
 declare type CollectStyleOptions = {
-    classProperty?: 'class' | 'className';
     prefix?: string;
 };
 export declare const collectStyledComponents: (json: MitosisComponent) => string;

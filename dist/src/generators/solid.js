@@ -86,9 +86,9 @@ var collectClassString = function (json) {
         dynamicClasses.push("css(".concat(json.bindings.css.code, ")"));
     }
     delete json.bindings.css;
-    var hasStaticClasses = Boolean(staticClasses.length);
     var staticClassesString = staticClasses.join(' ');
     var dynamicClassesString = dynamicClasses.join(" + ' ' + ");
+    var hasStaticClasses = Boolean(staticClasses.length);
     var hasDynamicClasses = Boolean(dynamicClasses.length);
     if (hasStaticClasses && !hasDynamicClasses) {
         return "\"".concat(staticClassesString, "\"");

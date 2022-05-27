@@ -103,17 +103,6 @@ var getChildComponents = function (json, options) {
     });
     return childComponents;
 };
-var replaceClassname = function (json, options) {
-    (0, traverse_1.default)(json).forEach(function (node) {
-        if ((0, is_mitosis_node_1.isMitosisNode)(node)) {
-            if (node.properties.className) {
-                // Change className to class in the HTML elements
-                node.properties.class = node.properties.className;
-                delete node.properties.className;
-            }
-        }
-    });
-};
 var getScopeVars = function (parentScopeVars, value) {
     return parentScopeVars.filter(function (scopeVar) {
         if (typeof value === 'boolean') {
@@ -276,12 +265,7 @@ var blockToHtml = function (json, options, blockOptions) {
             var value = (json.properties[key] || '')
                 .replace(/"/g, '&quot;')
                 .replace(/\n/g, '\\n');
-            if (key === 'className') {
-                str += " class=\"".concat(value, "\" ");
-            }
-            else {
-                str += " ".concat(key, "=\"").concat(value, "\" ");
-            }
+            str += " ".concat(key, "=\"").concat(value, "\" ");
         }
         // batch all local vars within the bindings
         var batchScopeVars_1 = {};
@@ -506,7 +490,6 @@ var componentToCustomElement = function (options) {
         if (options.plugins) {
             json = (0, plugins_1.runPreJsonPlugins)(json, options.plugins);
         }
-        replaceClassname(json, useOptions);
         var childComponents = getChildComponents(json, useOptions);
         var componentHasProps = (0, has_props_1.hasProps)(json);
         var props = (0, get_props_1.getProps)(json);
