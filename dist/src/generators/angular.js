@@ -119,7 +119,12 @@ var blockToAngular = function (json, options, blockOptions) {
                 continue;
             }
             var value = json.properties[key];
-            str += " ".concat(key, "=\"").concat(value, "\" ");
+            if (key === 'className') {
+                str += " class=\"".concat(value, "\" ");
+            }
+            else {
+                str += " ".concat(key, "=\"").concat(value, "\" ");
+            }
         }
         for (var key in json.bindings) {
             if (key === '_spread') {
@@ -144,7 +149,7 @@ var blockToAngular = function (json, options, blockOptions) {
                 var finalValue = (0, remove_surrounding_block_1.removeSurroundingBlock)(useValue.replace(new RegExp("".concat(cusArgs[0], "\\."), 'g'), '$event.'));
                 str += " (".concat(event_1, ")=\"").concat(finalValue, "\" ");
             }
-            else if (key === 'class') {
+            else if (key === 'className') {
                 str += " [class]=\"".concat(useValue, "\" ");
             }
             else if (key === 'ref') {
@@ -231,7 +236,7 @@ var componentToAngular = function (options) {
         if (options.plugins) {
             json = (0, plugins_1.runPostJsonPlugins)(json, options.plugins);
         }
-        var css = (0, collect_styles_1.collectCss)(json);
+        var css = (0, collect_styles_1.collectCss)(json, { classProperty: 'className' });
         if (options.prettier !== false) {
             css = tryFormat(css, 'css');
         }

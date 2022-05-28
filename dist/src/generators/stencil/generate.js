@@ -111,7 +111,7 @@ var componentToStencil = function (options) {
             json = (0, plugins_1.runPreJsonPlugins)(json, options.plugins);
         }
         var props = (0, get_props_1.getProps)(component);
-        var css = (0, collect_styles_1.collectCss)(json);
+        var css = (0, collect_styles_1.collectCss)(json, { classProperty: 'class' });
         (0, map_refs_1.mapRefs)(component, function (refName) { return "this.".concat(refName); });
         if (options.plugins) {
             json = (0, plugins_1.runPostJsonPlugins)(json, options.plugins);

@@ -262,8 +262,8 @@ exports.components = {
         }), components);
     },
     Image: function (node, context, components) {
-        var _a, _b, _c, _d, _e, _f;
-        var _g = node.properties, backgroundSize = _g.backgroundSize, backgroundPosition = _g.backgroundPosition;
+        var _a, _b, _c, _d, _e, _f, _g;
+        var _h = node.properties, backgroundSize = _h.backgroundSize, backgroundPosition = _h.backgroundPosition;
         var srcset = node.properties.srcset;
         var aspectRatio = ((_a = node.bindings.aspectRatio) === null || _a === void 0 ? void 0 : _a.code)
             ? parseFloat(node.bindings.aspectRatio.code)
@@ -285,15 +285,14 @@ exports.components = {
             name: 'img',
             properties: noUndefined({
                 $name: 'image',
-                loading: node.properties.lazy ? 'lazy' : undefined,
+                loading: 'lazy',
                 src: node.properties.image,
                 sizes: node.properties.sizes,
                 srcset: srcSet || null,
             }),
             bindings: noUndefined({
-                loading: { code: ((_c = node.bindings.lazy) === null || _c === void 0 ? void 0 : _c.code) && '"lazy"' },
-                src: { code: (_d = node.bindings.image) === null || _d === void 0 ? void 0 : _d.code },
-                sizes: { code: (_e = node.bindings.sizes) === null || _e === void 0 ? void 0 : _e.code },
+                src: ((_c = node.bindings.image) === null || _c === void 0 ? void 0 : _c.code) && { code: (_d = node.bindings.image) === null || _d === void 0 ? void 0 : _d.code },
+                sizes: ((_e = node.bindings.sizes) === null || _e === void 0 ? void 0 : _e.code) && { code: (_f = node.bindings.sizes) === null || _f === void 0 ? void 0 : _f.code },
                 css: {
                     code: JSON.stringify(__assign({ objectFit: backgroundSize || 'cover', objectPosition: backgroundPosition || 'cover' }, (aspectRatio
                         ? {
@@ -356,16 +355,18 @@ exports.components = {
         imgSizer && imageNodes.push(imgSizer);
         children && imageNodes.push(children);
         var href = node.properties.href;
-        var hrefBinding = (_f = node.bindings.href) === null || _f === void 0 ? void 0 : _f.code;
+        var hrefBinding = (_g = node.bindings.href) === null || _g === void 0 ? void 0 : _g.code;
         if (href || hrefBinding) {
             var aHref = (0, create_mitosis_node_1.createMitosisNode)({
                 name: 'a',
                 properties: {
                     href: href,
                 },
-                bindings: {
-                    href: { code: hrefBinding },
-                },
+                bindings: hrefBinding
+                    ? {
+                        href: { code: hrefBinding },
+                    }
+                    : undefined,
                 children: imageNodes,
             });
             return wrapOutput(node, aHref, components);
@@ -375,7 +376,7 @@ exports.components = {
         }
     },
     Video: function (node, context, components) {
-        var _a, _b, _c, _d, _e, _f, _g, _h;
+        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q;
         var aspectRatio = ((_a = node.bindings.aspectRatio) === null || _a === void 0 ? void 0 : _a.code)
             ? parseFloat(node.bindings.aspectRatio.code)
             : null;
@@ -396,12 +397,22 @@ exports.components = {
                 preload: node.properties.lazy ? 'none' : undefined,
             }),
             bindings: noUndefined({
-                poster: { code: (_b = node.bindings.posterImage) === null || _b === void 0 ? void 0 : _b.code },
-                autoplay: { code: (_c = node.bindings.autoPlay) === null || _c === void 0 ? void 0 : _c.code },
-                muted: { code: (_d = node.bindings.muted) === null || _d === void 0 ? void 0 : _d.code },
-                controls: { code: (_e = node.bindings.controls) === null || _e === void 0 ? void 0 : _e.code },
-                playsinline: { code: (_f = node.bindings.playsInline) === null || _f === void 0 ? void 0 : _f.code },
-                loop: { code: (_g = node.bindings.loop) === null || _g === void 0 ? void 0 : _g.code },
+                poster: ((_b = node.bindings.posterImage) === null || _b === void 0 ? void 0 : _b.code) && {
+                    code: (_c = node.bindings.posterImage) === null || _c === void 0 ? void 0 : _c.code,
+                },
+                autoplay: ((_d = node.bindings.autoPlay) === null || _d === void 0 ? void 0 : _d.code) && {
+                    code: (_e = node.bindings.autoPlay) === null || _e === void 0 ? void 0 : _e.code,
+                },
+                muted: ((_f = node.bindings.muted) === null || _f === void 0 ? void 0 : _f.code) && {
+                    code: (_g = node.bindings.muted) === null || _g === void 0 ? void 0 : _g.code,
+                },
+                controls: ((_h = node.bindings.controls) === null || _h === void 0 ? void 0 : _h.code) && {
+                    code: (_j = node.bindings.controls) === null || _j === void 0 ? void 0 : _j.code,
+                },
+                playsinline: ((_k = node.bindings.playsInline) === null || _k === void 0 ? void 0 : _k.code) && {
+                    code: (_l = node.bindings.playsInline) === null || _l === void 0 ? void 0 : _l.code,
+                },
+                loop: ((_m = node.bindings.loop) === null || _m === void 0 ? void 0 : _m.code) && { code: (_o = node.bindings.loop) === null || _o === void 0 ? void 0 : _o.code },
                 css: {
                     code: JSON.stringify({
                         width: '100%',
@@ -420,9 +431,11 @@ exports.components = {
                         type: 'video/mp4',
                         src: node.properties.video,
                     },
-                    bindings: {
-                        src: { code: (_h = node.bindings.video) === null || _h === void 0 ? void 0 : _h.code },
-                    },
+                    bindings: noUndefined({
+                        src: ((_p = node.bindings.video) === null || _p === void 0 ? void 0 : _p.code) && {
+                            code: (_q = node.bindings.video) === null || _q === void 0 ? void 0 : _q.code,
+                        },
+                    }),
                 }),
             ],
         }));

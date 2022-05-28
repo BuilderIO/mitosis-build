@@ -90,6 +90,8 @@ var parseCssObject = function (css) {
 var collectStyles = function (json, options) {
     if (options === void 0) { options = {}; }
     var styleMap = {};
+    var classProperty = options.classProperty || 'class';
+    var possibleClasses = ['class', 'className'];
     var componentIndexes = {};
     var componentHashes = {};
     (0, traverse_1.default)(json).forEach(function (item) {
@@ -103,12 +105,22 @@ var collectStyles = function (json, options) {
                     : /^h\d$/.test(item.name || '') // don't dashcase h1 into h-1
                         ? item.name
                         : (0, dash_case_1.dashCase)(item.name || 'div');
+                var existedClass = possibleClasses
+                    .map(function (prop) { return item.properties[prop]; })
+                    .filter(Boolean)
+                    .join(' ');
                 var stylesHash = (0, object_hash_1.default)(value);
                 if (componentHashes[componentName] === stylesHash) {
                     var className_1 = "".concat(componentName).concat(options.prefix ? "-".concat(options.prefix) : '');
-                    item.properties.class = "".concat(item.properties.class || '', " ").concat(className_1)
+                    item.properties[classProperty] = "".concat(existedClass, " ").concat(className_1)
                         .trim()
                         .replace(/\s{2,}/g, ' ');
+                    if (classProperty === 'className') {
+                        delete item.properties.class;
+                    }
+                    else {
+                        delete item.properties.className;
+                    }
                     return;
                 }
                 if (!componentHashes[componentName]) {
@@ -117,9 +129,15 @@ var collectStyles = function (json, options) {
                 var index = (componentIndexes[componentName] =
                     (componentIndexes[componentName] || 0) + 1);
                 var className = "".concat(componentName).concat(options.prefix ? "-".concat(options.prefix) : '').concat(index === 1 ? '' : "-".concat(index));
-                item.properties.class = "".concat(item.properties.class || '', " ").concat(className)
+                item.properties[classProperty] = "".concat(existedClass, " ").concat(className)
                     .trim()
                     .replace(/\s{2,}/g, ' ');
+                if (classProperty === 'className') {
+                    delete item.properties.class;
+                }
+                else {
+                    delete item.properties.className;
+                }
                 styleMap[className] = value;
             }
             delete item.bindings.css;

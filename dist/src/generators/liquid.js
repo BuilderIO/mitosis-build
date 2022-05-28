@@ -84,7 +84,12 @@ var blockToLiquid = function (json, options) {
         }
         for (var key in json.properties) {
             var value = json.properties[key];
-            str += " ".concat(key, "=\"").concat(value, "\" ");
+            if (key === 'className') {
+                str += " class=\"".concat(value, "\" ");
+            }
+            else {
+                str += " ".concat(key, "=\"").concat(value, "\" ");
+            }
         }
         for (var key in json.bindings) {
             if (key === '_spread' || key === 'ref' || key === 'css') {
@@ -122,7 +127,7 @@ var componentToLiquid = function (options) {
         if (options.plugins) {
             json = (0, plugins_1.runPreJsonPlugins)(json, options.plugins);
         }
-        var css = (0, collect_styles_1.collectCss)(json);
+        var css = (0, collect_styles_1.collectCss)(json, { classProperty: 'className' });
         (0, strip_meta_properties_1.stripMetaProperties)(json);
         if (options.plugins) {
             json = (0, plugins_1.runPostJsonPlugins)(json, options.plugins);

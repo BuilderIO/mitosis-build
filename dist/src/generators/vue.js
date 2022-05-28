@@ -62,6 +62,9 @@ var filter_empty_text_nodes_1 = require("../helpers/filter-empty-text-nodes");
 var process_http_requests_1 = require("../helpers/process-http-requests");
 var patterns_1 = require("../helpers/patterns");
 var method_literal_prefix_1 = require("../constants/method-literal-prefix");
+function encodeQuotes(string) {
+    return string.replace(/"/g, '&quot;');
+}
 function getContextNames(json) {
     return Object.keys(json.context.get);
 }
@@ -86,7 +89,7 @@ var NODE_MAPPERS = {
         var forValue = "(".concat(json.properties._forName, ", index) in ").concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)((_a = json.bindings.each) === null || _a === void 0 ? void 0 : _a.code));
         if (options.vueVersion >= 3) {
             // TODO: tmk key goes on different element (parent vs child) based on Vue 2 vs Vue 3
-            return "<template :key=\"".concat(keyValue, "\" v-for=\"").concat(forValue, "\">\n        ").concat(json.children.map(function (item) { return (0, exports.blockToVue)(item, options); }).join('\n'), "\n      </template>");
+            return "<template :key=\"".concat(encodeQuotes((keyValue === null || keyValue === void 0 ? void 0 : keyValue.code) || 'index'), "\" v-for=\"").concat(encodeQuotes(forValue), "\">\n        ").concat(json.children.map(function (item) { return (0, exports.blockToVue)(item, options); }).join('\n'), "\n      </template>");
         }
         // Vue 2 can only handle one root element
         var firstChild = json.children.filter(filter_empty_text_nodes_1.filterEmptyTextNodes)[0];
@@ -101,7 +104,7 @@ var NODE_MAPPERS = {
         var _a;
         var ifValue = (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)((_a = json.bindings.when) === null || _a === void 0 ? void 0 : _a.code);
         if (options.vueVersion >= 3) {
-            return "\n      <template v-if=\"".concat(ifValue, "\">\n        ").concat(json.children.map(function (item) { return (0, exports.blockToVue)(item, options); }).join('\n'), "\n      </template>\n      ").concat(!json.meta.else
+            return "\n      <template v-if=\"".concat(encodeQuotes(ifValue), "\">\n        ").concat(json.children.map(function (item) { return (0, exports.blockToVue)(item, options); }).join('\n'), "\n      </template>\n      ").concat(!json.meta.else
                 ? ''
                 : "\n        <template v-else>\n          ".concat((0, exports.blockToVue)(json.meta.else, options), "\n        </template>\n      "), "\n      ");
         }
@@ -174,24 +177,24 @@ var stringifyBinding = function (node) {
                 var isAssignmentExpression = useValue.includes('=');
                 // TODO: proper babel transform to replace. Util for this
                 if (isAssignmentExpression) {
-                    return " @".concat(event_1, "=\"").concat((0, remove_surrounding_block_1.removeSurroundingBlock)(useValue
+                    return " @".concat(event_1, "=\"").concat(encodeQuotes((0, remove_surrounding_block_1.removeSurroundingBlock)(useValue
                         // TODO: proper reference parse and replacing
-                        .replace(new RegExp("".concat(cusArgs[0], "\\."), 'g'), '$event.')), "\" ");
+                        .replace(new RegExp("".concat(cusArgs[0], "\\."), 'g'), '$event.'))), "\" ");
                 }
                 else {
-                    return " @".concat(event_1, "=\"").concat((0, remove_surrounding_block_1.removeSurroundingBlock)(useValue
+                    return " @".concat(event_1, "=\"").concat(encodeQuotes((0, remove_surrounding_block_1.removeSurroundingBlock)(useValue
                         // TODO: proper reference parse and replacing
-                        .replace(new RegExp("".concat(cusArgs[0]), 'g'), '$event')), "\" ");
+                        .replace(new RegExp("".concat(cusArgs[0]), 'g'), '$event'))), "\" ");
                 }
             }
             else if (key === 'ref') {
-                return " ref=\"".concat(useValue, "\" ");
+                return " ref=\"".concat(encodeQuotes(useValue), "\" ");
             }
             else if (BINDING_MAPPERS[key]) {
-                return " ".concat(BINDING_MAPPERS[key], "=\"").concat(useValue.replace(/"/g, "\\'"), "\" ");
+                return " ".concat(BINDING_MAPPERS[key], "=\"").concat(encodeQuotes(useValue.replace(/"/g, "\\'")), "\" ");
             }
             else {
-                return " :".concat(key, "=\"").concat(useValue, "\" ");
+                return " :".concat(key, "=\"").concat(encodeQuotes(useValue), "\" ");
             }
         }
     };
@@ -220,11 +223,16 @@ var blockToVue = function (node, options) {
     var str = '';
     str += "<".concat(node.name, " ");
     if ((_b = node.bindings._spread) === null || _b === void 0 ? void 0 : _b.code) {
-        str += "v-bind=\"".concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(node.bindings._spread.code), "\"");
+        str += "v-bind=\"".concat(encodeQuotes((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(node.bindings._spread.code)), "\"");
     }
     for (var key in node.properties) {
         var value = node.properties[key];
-        str += " ".concat(key, "=\"").concat(value, "\" ");
+        if (key === 'className') {
+            continue;
+        }
+        if (typeof value === 'string') {
+            str += " ".concat(key, "=\"").concat(encodeQuotes(value), "\" ");
+        }
     }
     var stringifiedBindings = Object.entries(node.bindings)
         .map(function (_a) {
@@ -246,7 +254,7 @@ exports.blockToVue = blockToVue;
 function getContextInjectString(component, options) {
     var str = '{';
     for (var key in component.context.get) {
-        str += "\n      ".concat(key, ": \"").concat(component.context.get[key].name, "\",\n    ");
+        str += "\n      ".concat(key, ": \"").concat(encodeQuotes(component.context.get[key].name), "\",\n    ");
     }
     str += '}';
     return str;
