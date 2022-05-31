@@ -40,18 +40,8 @@ export declare const builderContentToMitosisComponent: (builderContent: BuilderC
         inputs: import("..").MitosisComponentInput[];
         state: import("../types/json").JSONObject;
         context: {
-            get: {
-                [key: string]: {
-                    name: string;
-                    path: string;
-                };
-            };
-            set: {
-                [key: string]: {
-                    name: string;
-                    value?: import("../types/json").JSONObject | undefined;
-                };
-            };
+            get: import("..").ContextGet;
+            set: import("..").ContextSet;
         };
         hooks: {
             init?: import("..").extendedHook | undefined;
@@ -74,18 +64,8 @@ export declare const builderContentToMitosisComponent: (builderContent: BuilderC
     inputs: import("..").MitosisComponentInput[];
     state: import("../types/json").JSONObject;
     context: {
-        get: {
-            [key: string]: {
-                name: string;
-                path: string;
-            };
-        };
-        set: {
-            [key: string]: {
-                name: string;
-                value?: import("../types/json").JSONObject | undefined;
-            };
-        };
+        get: import("..").ContextGet;
+        set: import("..").ContextSet;
     };
     hooks: {
         init?: import("..").extendedHook | undefined;

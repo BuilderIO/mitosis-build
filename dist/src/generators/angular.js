@@ -80,7 +80,8 @@ var blockToAngular = function (json, options, blockOptions) {
     }
     if ((_d = json.bindings._text) === null || _d === void 0 ? void 0 : _d.code) {
         return "{{".concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(json.bindings._text.code, {
-            contextVars: contextVars,
+            // the context is the class
+            contextVars: [],
             outputVars: outputVars,
         }), "}}");
     }
@@ -141,7 +142,12 @@ var blockToAngular = function (json, options, blockOptions) {
                     event_1 = 'input';
                 }
                 // TODO: proper babel transform to replace. Util for this
-                var finalValue = (0, remove_surrounding_block_1.removeSurroundingBlock)(useValue.replace(new RegExp("".concat(cusArgs[0], "\\."), 'g'), '$event.'));
+                var eventName = cusArgs[0];
+                var regexp = new RegExp('(^|\\n|\\r| |;|\\(|\\[|!)' +
+                    eventName +
+                    '(\\?\\.|\\.|\\(| |;|\\)|$)', 'g');
+                var replacer = '$1$event$2';
+                var finalValue = (0, remove_surrounding_block_1.removeSurroundingBlock)(useValue.replace(regexp, replacer));
                 str += " (".concat(event_1, ")=\"").concat(finalValue, "\" ");
             }
             else if (key === 'class') {
@@ -182,7 +188,7 @@ exports.blockToAngular = blockToAngular;
 var componentToAngular = function (options) {
     if (options === void 0) { options = {}; }
     return function (_a) {
-        var _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m;
+        var _b, _c, _d, _e, _f, _g, _h, _j, _k, _l;
         var component = _a.component;
         // Make a copy we can safely mutate, similar to babel's toolchain
         var json = (0, fast_clone_1.fastClone)(component);
@@ -225,7 +231,7 @@ var componentToAngular = function (options) {
             }
             return "@Output() ".concat(variableName, " = new EventEmitter()");
         });
-        var hasOnInit = Boolean(((_e = component.hooks) === null || _e === void 0 ? void 0 : _e.onInit) || ((_f = component.hooks) === null || _f === void 0 ? void 0 : _f.onMount));
+        var hasOnMount = Boolean((_e = component.hooks) === null || _e === void 0 ? void 0 : _e.onMount);
         var refs = Array.from((0, get_refs_1.getRefs)(json));
         (0, map_refs_1.mapRefs)(json, function (refName) { return "this.".concat(refName, ".nativeElement"); });
         if (options.plugins) {
@@ -258,28 +264,28 @@ var componentToAngular = function (options) {
                 });
             },
         });
-        var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    import { ", " ", " Component ", "", " } from '@angular/core';\n    ", "\n\n    @Component({\n      selector: '", "',\n      template: `\n        ", "\n      `,\n      ", "\n    })\n    export default class ", " {\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n    }\n  "], ["\n    import { ", " ", " Component ", "", " } from '@angular/core';\n    ", "\n\n    @Component({\n      selector: '", "',\n      template: \\`\n        ", "\n      \\`,\n      ", "\n    })\n    export default class ", " {\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n    }\n  "])), outputs.length ? 'Output, EventEmitter, \n' : '', ((_g = options === null || options === void 0 ? void 0 : options.experimental) === null || _g === void 0 ? void 0 : _g.inject) ? 'Inject, forwardRef,' : '', refs.length ? ', ViewChild, ElementRef' : '', props.size ? ', Input' : '', (0, render_imports_1.renderPreComponent)(json), (0, lodash_1.kebabCase)(json.name || 'my-component'), (0, indent_1.indent)(template, 8).replace(/`/g, '\\`').replace(/\$\{/g, '\\${'), css.length
+        var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    import { ", " ", " Component ", "", " } from '@angular/core';\n    ", "\n\n    @Component({\n      selector: '", "',\n      template: `\n        ", "\n      `,\n      ", "\n    })\n    export default class ", " {\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      constructor(\n", ") {\n        ", "\n      }\n\n      ", "\n\n      ", "\n\n      ", "\n\n    }\n  "], ["\n    import { ", " ", " Component ", "", " } from '@angular/core';\n    ", "\n\n    @Component({\n      selector: '", "',\n      template: \\`\n        ", "\n      \\`,\n      ", "\n    })\n    export default class ", " {\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      constructor(\\n", ") {\n        ", "\n      }\n\n      ", "\n\n      ", "\n\n      ", "\n\n    }\n  "])), outputs.length ? 'Output, EventEmitter, \n' : '', ((_f = options === null || options === void 0 ? void 0 : options.experimental) === null || _f === void 0 ? void 0 : _f.inject) ? 'Inject, forwardRef,' : '', refs.length ? ', ViewChild, ElementRef' : '', props.size ? ', Input' : '', (0, render_imports_1.renderPreComponent)(json), (0, lodash_1.kebabCase)(json.name || 'my-component'), (0, indent_1.indent)(template, 8).replace(/`/g, '\\`').replace(/\$\{/g, '\\${'), css.length
             ? "styles: [\n        `".concat((0, indent_1.indent)(css, 8), "`\n      ],")
             : '', component.name, outputs.join('\n'), Array.from(props)
             .filter(function (item) { return !item.startsWith('slot'); })
             .map(function (item) { return "@Input() ".concat(item, ": any"); })
             .join('\n'), refs
             .map(function (refName) { return "@ViewChild('".concat(refName, "') ").concat(refName, ": ElementRef"); })
-            .join('\n'), dataString, !hasInjectable ? '' : "constructor(\n".concat(injectables.join(',\n'), ") {}"), !hasOnInit
+            .join('\n'), dataString, injectables.join(',\n'), !((_g = component.hooks) === null || _g === void 0 ? void 0 : _g.onInit)
             ? ''
-            : "ngOnInit() {\n              ".concat(!((_h = component.hooks) === null || _h === void 0 ? void 0 : _h.onInit)
+            : "\n          ".concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)((_h = component.hooks.onInit) === null || _h === void 0 ? void 0 : _h.code, {
+                replaceWith: 'this.',
+                contextVars: contextVars,
+                outputVars: outputVars,
+            }), "\n          "), !hasOnMount
+            ? ''
+            : "ngOnInit() {\n              \n              ".concat(!((_j = component.hooks) === null || _j === void 0 ? void 0 : _j.onMount)
                 ? ''
-                : "\n                ".concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)((_j = component.hooks.onInit) === null || _j === void 0 ? void 0 : _j.code, {
+                : "\n                ".concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)((_k = component.hooks.onMount) === null || _k === void 0 ? void 0 : _k.code, {
                     replaceWith: 'this.',
                     contextVars: contextVars,
                     outputVars: outputVars,
-                }), "\n                "), "\n              ").concat(!((_k = component.hooks) === null || _k === void 0 ? void 0 : _k.onMount)
-                ? ''
-                : "\n                ".concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)((_l = component.hooks.onMount) === null || _l === void 0 ? void 0 : _l.code, {
-                    replaceWith: 'this.',
-                    contextVars: contextVars,
-                    outputVars: outputVars,
-                }), "\n                "), "\n            }"), !((_m = component.hooks.onUpdate) === null || _m === void 0 ? void 0 : _m.length)
+                }), "\n                "), "\n            }"), !((_l = component.hooks.onUpdate) === null || _l === void 0 ? void 0 : _l.length)
             ? ''
             : "ngAfterContentChecked() {\n              ".concat(component.hooks.onUpdate.reduce(function (code, hook) {
                 code += (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(hook.code, {

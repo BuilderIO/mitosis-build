@@ -15,18 +15,19 @@ var stripStateAndPropsRefs = function (code, options) {
     var replacer = options.replaceWith || '';
     var contextVars = (options === null || options === void 0 ? void 0 : options.contextVars) || [];
     var outputVars = (options === null || options === void 0 ? void 0 : options.outputVars) || [];
+    var context = (options === null || options === void 0 ? void 0 : options.context) || 'this.';
     if (contextVars.length) {
         contextVars.forEach(function (_var) {
             newCode = newCode.replace(
             // determine expression edge cases
-            new RegExp('( |;|(\\())' + _var, 'g'), '$1this.' + _var);
+            new RegExp('(^|\\n|\\r| |;|\\(|\\[|!)' + _var + '(\\?\\.|\\.|\\(| |;|\\)|$)', 'g'), '$1' + context + _var + '$2');
         });
     }
     if (outputVars.length) {
         outputVars.forEach(function (_var) {
             // determine expression edge cases onMessage( to this.onMessage.emit(
             var regexp = '( |;|\\()(props\\.?)' + _var + '\\(';
-            var replacer = '$1this.' + _var + '.emit(';
+            var replacer = '$1' + context + _var + '.emit(';
             newCode = newCode.replace(new RegExp(regexp, 'g'), replacer);
         });
     }

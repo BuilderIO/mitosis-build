@@ -5,6 +5,7 @@ export interface ToReactOptions extends BaseTranspilerOptions {
     stateType?: 'useState' | 'mobx' | 'valtio' | 'solid' | 'builder';
     format?: 'lite' | 'safe';
     type?: 'dom' | 'native';
+    experimental?: any;
 }
 export declare const blockToReact: (json: MitosisNode, options: ToReactOptions, parentSlots?: any[] | undefined) => string;
 export declare const componentToReact: (reactOptions?: ToReactOptions) => Transpiler;

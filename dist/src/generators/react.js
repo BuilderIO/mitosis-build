@@ -310,15 +310,17 @@ var updateStateSetters = function (json, options) {
 function addProviderComponents(json, options) {
     for (var key in json.context.set) {
         var _a = json.context.set[key], name_1 = _a.name, value = _a.value;
-        json.children = [
-            (0, create_mitosis_node_1.createMitosisNode)(__assign({ name: "".concat(name_1, ".Provider"), children: json.children }, (value && {
-                bindings: {
-                    value: {
-                        code: (0, get_state_object_string_1.getMemberObjectString)(value),
+        if (value) {
+            json.children = [
+                (0, create_mitosis_node_1.createMitosisNode)(__assign({ name: "".concat(name_1, ".Provider"), children: json.children }, (value && {
+                    bindings: {
+                        value: {
+                            code: (0, get_state_object_string_1.getMemberObjectString)(value),
+                        },
                     },
-                },
-            }))),
-        ];
+                }))),
+            ];
+        }
     }
 }
 var updateStateSettersInCode = function (value, options) {
@@ -463,7 +465,7 @@ var _componentToReact = function (json, options, isSubComponent) {
         ? "import { useMutable } from 'react-solid-state';"
         : '', stateType === 'mobx' && hasState
         ? "import { useLocalObservable } from 'mobx-react-lite';"
-        : '', (0, render_imports_1.renderPreComponent)(json), isSubComponent ? '' : 'export default ', json.name || 'MyComponent', hasState
+        : '', (0, render_imports_1.renderPreComponent)(json), isSubComponent ? '' : 'export default ', json.name || 'MyComponent', getRefsString(json), hasState
         ? stateType === 'mobx'
             ? "const state = useLocalObservable(() => (".concat((0, get_state_object_string_1.getStateObjectStringFromComponent)(json), "));")
             : stateType === 'useState'
@@ -473,8 +475,8 @@ var _componentToReact = function (json, options, isSubComponent) {
                     : stateType === 'builder'
                         ? "var state = useBuilderState(".concat((0, get_state_object_string_1.getStateObjectStringFromComponent)(json), ");")
                         : "const state = useLocalProxy(".concat((0, get_state_object_string_1.getStateObjectStringFromComponent)(json), ");")
-        : '', getContextString(json, options), getRefsString(json), getInitCode(json, options), ((_d = json.hooks.onInit) === null || _d === void 0 ? void 0 : _d.code)
-        ? "useEffect(() => {\n            ".concat(processBinding(updateStateSettersInCode(json.hooks.onInit.code, options), options), "\n          }, [])")
+        : '', getContextString(json, options), getInitCode(json, options), ((_d = json.hooks.onInit) === null || _d === void 0 ? void 0 : _d.code)
+        ? "\n          useEffect(() => {\n            ".concat(processBinding(updateStateSettersInCode(json.hooks.onInit.code, options), options), "\n          })\n          ")
         : '', ((_e = json.hooks.onMount) === null || _e === void 0 ? void 0 : _e.code)
         ? "useEffect(() => {\n            ".concat(processBinding(updateStateSettersInCode(json.hooks.onMount.code, options), options), "\n          }, [])")
         : '', ((_f = json.hooks.onUpdate) === null || _f === void 0 ? void 0 : _f.length)

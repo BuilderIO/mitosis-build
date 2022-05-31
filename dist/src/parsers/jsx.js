@@ -191,12 +191,22 @@ var componentFunctionToJson = function (node, context) {
                             var key = keyNode.name;
                             var keyPath = (0, trace_reference_to_module_path_1.traceReferenceToModulePath)(context.builder.component.imports, key);
                             var valueNode = expression.arguments[1];
-                            setContext[keyPath] = {
-                                name: keyNode.name,
-                                value: valueNode && types.isObjectExpression(valueNode)
-                                    ? (0, exports.parseStateObject)(valueNode)
-                                    : undefined,
-                            };
+                            if (valueNode) {
+                                if (types.isObjectExpression(valueNode)) {
+                                    var value = (0, exports.parseStateObject)(valueNode);
+                                    setContext[keyPath] = {
+                                        name: keyNode.name,
+                                        value: value,
+                                    };
+                                }
+                                else {
+                                    var ref = (0, generator_1.default)(valueNode).code;
+                                    setContext[keyPath] = {
+                                        name: keyNode.name,
+                                        ref: ref,
+                                    };
+                                }
+                            }
                         }
                     }
                     else if (expression.callee.name === 'onMount' ||
@@ -318,6 +328,14 @@ var componentFunctionToJson = function (node, context) {
                                 accessedContext[varName] = {
                                     name: name_1,
                                     path: (0, trace_reference_to_module_path_1.traceReferenceToModulePath)(context.builder.component.imports, name_1),
+                                };
+                            }
+                            else {
+                                var varName = declaration.id.name;
+                                var name_2 = (0, generator_1.default)(firstArg).code;
+                                accessedContext[varName] = {
+                                    name: name_2,
+                                    path: '',
                                 };
                             }
                         }
@@ -658,10 +676,10 @@ function extractContextComponents(json) {
         if ((0, is_mitosis_node_1.isMitosisNode)(item)) {
             if (item.name.endsWith('.Provider')) {
                 var value = (_b = (_a = item.bindings) === null || _a === void 0 ? void 0 : _a.value) === null || _b === void 0 ? void 0 : _b.code;
-                var name_2 = item.name.split('.')[0];
-                var refPath = (0, trace_reference_to_module_path_1.traceReferenceToModulePath)(json.imports, name_2);
+                var name_3 = item.name.split('.')[0];
+                var refPath = (0, trace_reference_to_module_path_1.traceReferenceToModulePath)(json.imports, name_3);
                 json.context.set[refPath] = {
-                    name: name_2,
+                    name: name_3,
                     value: value
                         ? (0, exports.parseStateObject)(expressionToNode(value))
                         : undefined,
@@ -731,8 +749,8 @@ function parseJsx(jsx, options) {
                     FunctionDeclaration: function (path, context) {
                         var node = path.node;
                         if (types.isIdentifier(node.id)) {
-                            var name_3 = node.id.name;
-                            if (name_3[0].toUpperCase() === name_3[0]) {
+                            var name_4 = node.id.name;
+                            if (name_4[0].toUpperCase() === name_4[0]) {
                                 path.replaceWith(jsonToAst(componentFunctionToJson(node, context)));
                             }
                         }

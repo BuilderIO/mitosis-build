@@ -390,6 +390,7 @@ var isHtmlAttribute = function (attr, tagName) {
     if (/role|aria-/.test(attr)) {
         return true;
     }
-    return __spreadArray(__spreadArray([], exports.htmlElementAttributes['*'], true), (exports.htmlElementAttributes[tagName] || []), true).find(function (attribute) { return attr === attribute; });
+    var getAttr = __spreadArray(__spreadArray([], exports.htmlElementAttributes['*'], true), (exports.htmlElementAttributes[tagName] || []), true).find(function (attribute) { return attr === attribute; });
+    return Boolean(getAttr);
 };
 exports.isHtmlAttribute = isHtmlAttribute;
