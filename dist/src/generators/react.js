@@ -414,7 +414,7 @@ var _componentToReact = function (json, options, isSubComponent) {
     }
     var refs = (0, get_refs_1.getRefs)(json);
     var hasState = Boolean(Object.keys(json.state).length);
-    (0, map_refs_1.mapRefs)(json, function (refName) { return "".concat(refName, ".current"); });
+    (0, map_refs_1.mapRefs)(json, function (refName) { return "".concat(refName, "?.current"); });
     var stylesType = options.stylesType || 'emotion';
     var stateType = options.stateType || 'mobx';
     if (stateType === 'builder') {
