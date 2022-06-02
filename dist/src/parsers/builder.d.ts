@@ -27,7 +27,7 @@ export declare function extractStateHook(code: string): {
     state: any;
 };
 export declare function convertExportDefaultToReturn(code: string): string;
-export declare const createBuilderElement: (options?: Partial<BuilderElement> | undefined) => BuilderElement;
+export declare const createBuilderElement: (options?: Partial<BuilderElement>) => BuilderElement;
 export declare const isBuilderElement: (el: unknown) => el is BuilderElement;
 export declare const builderContentToMitosisComponent: (builderContent: BuilderContent, options?: BuilderToMitosisOptions) => {
     subComponents: {

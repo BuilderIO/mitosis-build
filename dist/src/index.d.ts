@@ -12,7 +12,7 @@ export declare const setContext: <T = {
     [key: string]: any;
 }>(key: Context<T>, value: Partial<T>) => void;
 export declare const onMount: (fn: () => any) => any;
-export declare const onUpdate: (fn: () => any, deps?: any[] | undefined) => any;
+export declare const onUpdate: (fn: () => any, deps?: any[]) => any;
 export declare const onCreate: (fn: () => any) => any;
 export declare const onInit: (fn: () => any) => any;
 export declare const onUnMount: (fn: () => any) => any;
