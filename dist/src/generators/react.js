@@ -401,7 +401,7 @@ var componentToReact = function (reactOptions) {
 };
 exports.componentToReact = componentToReact;
 var _componentToReact = function (json, options, isSubComponent) {
-    var _a, _b, _c, _d, _e, _f, _g;
+    var _a, _b, _c, _d, _e, _f, _g, _h;
     if (isSubComponent === void 0) { isSubComponent = false; }
     (0, process_http_requests_1.processHttpRequests)(json);
     (0, handle_missing_state_1.handleMissingState)(json);
@@ -444,7 +444,8 @@ var _componentToReact = function (json, options, isSubComponent) {
     }
     if (((_a = json.hooks.onMount) === null || _a === void 0 ? void 0 : _a.code) ||
         ((_b = json.hooks.onUnMount) === null || _b === void 0 ? void 0 : _b.code) ||
-        ((_c = json.hooks.onUpdate) === null || _c === void 0 ? void 0 : _c.length)) {
+        ((_c = json.hooks.onUpdate) === null || _c === void 0 ? void 0 : _c.length) ||
+        ((_d = json.hooks.onInit) === null || _d === void 0 ? void 0 : _d.code)) {
         reactLibImports.add('useEffect');
     }
     var wrap = wrapInFragment(json) ||
@@ -475,17 +476,17 @@ var _componentToReact = function (json, options, isSubComponent) {
                     : stateType === 'builder'
                         ? "var state = useBuilderState(".concat((0, get_state_object_string_1.getStateObjectStringFromComponent)(json), ");")
                         : "const state = useLocalProxy(".concat((0, get_state_object_string_1.getStateObjectStringFromComponent)(json), ");")
-        : '', getContextString(json, options), getInitCode(json, options), ((_d = json.hooks.onInit) === null || _d === void 0 ? void 0 : _d.code)
+        : '', getContextString(json, options), getInitCode(json, options), ((_e = json.hooks.onInit) === null || _e === void 0 ? void 0 : _e.code)
         ? "\n          useEffect(() => {\n            ".concat(processBinding(updateStateSettersInCode(json.hooks.onInit.code, options), options), "\n          })\n          ")
-        : '', ((_e = json.hooks.onMount) === null || _e === void 0 ? void 0 : _e.code)
+        : '', ((_f = json.hooks.onMount) === null || _f === void 0 ? void 0 : _f.code)
         ? "useEffect(() => {\n            ".concat(processBinding(updateStateSettersInCode(json.hooks.onMount.code, options), options), "\n          }, [])")
-        : '', ((_f = json.hooks.onUpdate) === null || _f === void 0 ? void 0 : _f.length)
+        : '', ((_g = json.hooks.onUpdate) === null || _g === void 0 ? void 0 : _g.length)
         ? json.hooks.onUpdate
             .map(function (hook) { return "useEffect(() => {\n            ".concat(processBinding(updateStateSettersInCode(hook.code, options), options), "\n          }, \n          ").concat(hook.deps
             ? processBinding(updateStateSettersInCode(hook.deps, options), options)
             : '', ")"); })
             .join(';')
-        : '', ((_g = json.hooks.onUnMount) === null || _g === void 0 ? void 0 : _g.code)
+        : '', ((_h = json.hooks.onUnMount) === null || _h === void 0 ? void 0 : _h.code)
         ? "useEffect(() => {\n            return () => {\n              ".concat(processBinding(updateStateSettersInCode(json.hooks.onUnMount.code, options), options), "\n            }\n          }, [])")
         : '', wrap ? '<>' : '', json.children.map(function (item) { return (0, exports.blockToReact)(item, options); }).join('\n'), componentHasStyles && stylesType === 'styled-jsx'
         ? "<style jsx>{`".concat(css, "`}</style>")
