@@ -232,7 +232,8 @@ var SrcBuilder = /** @class */ (function () {
         var _loop_1 = function (rawKey) {
             if (Object.prototype.hasOwnProperty.call(bindings, rawKey) &&
                 !ignoreKey(rawKey)) {
-                var binding_1 = bindings[rawKey].code;
+                var binding_1 = bindings[rawKey];
+                binding_1 = (binding_1 && binding_1.code) || binding_1;
                 var key = lastProperty(rawKey);
                 if (binding_1 != null && binding_1 === props[key]) {
                     // HACK: workaround for the fact that sometimes the `bindings` have string literals
@@ -392,7 +393,17 @@ function arrowFnValue(args, expression) {
     };
 }
 exports.arrowFnValue = arrowFnValue;
+var _virtual_index = '_virtual_index;';
+var return_virtual_index = 'return _virtual_index;';
 function iif(code) {
+    if (!code)
+        return;
+    code = code.trim();
+    if (code.endsWith(_virtual_index) && !code.endsWith(return_virtual_index)) {
+        code =
+            code.substr(0, code.length - _virtual_index.length) +
+                return_virtual_index;
+    }
     return function () {
         code && this.emit('(()=>{', code, '})()');
     };

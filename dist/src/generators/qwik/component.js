@@ -117,7 +117,7 @@ function addComponentOnMount(componentFile, onRenderEmit, componentName, compone
     if (component.inputs) {
         component.inputs.forEach(function (input) {
             input.defaultValue !== undefined &&
-                inputInitializer.push('if(state.', input.name, '===undefined)state.', input.name, '=', JSON.stringify(input.defaultValue), ';');
+                inputInitializer.push('if(!state.hasOwnProperty("', input.name, '"))state.', input.name, '=', JSON.stringify(input.defaultValue), ';');
         });
     }
     componentFile.exportConst(componentName + '_onMount', function () {
