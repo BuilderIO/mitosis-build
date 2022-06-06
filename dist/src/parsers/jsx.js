@@ -59,6 +59,7 @@ var create_mitosis_component_1 = require("../helpers/create-mitosis-component");
 var create_mitosis_node_1 = require("../helpers/create-mitosis-node");
 var is_mitosis_node_1 = require("../helpers/is-mitosis-node");
 var replace_idenifiers_1 = require("../helpers/replace-idenifiers");
+var get_bindings_1 = require("../helpers/get-bindings");
 var replace_new_lines_in_strings_1 = require("../helpers/replace-new-lines-in-strings");
 var json_1 = require("../helpers/json");
 var jsxPlugin = require('@babel/plugin-syntax-jsx');
@@ -353,6 +354,17 @@ var componentFunctionToJson = function (node, context) {
         if (types.isJSXElement(value) || types.isJSXFragment(value)) {
             children.push(jsxElementToJson(value));
         }
+    }
+    var localExports = context.builder.component.exports;
+    if (localExports) {
+        var bindingsCode_1 = (0, get_bindings_1.getBindingsCode)(children);
+        Object.keys(localExports).forEach(function (name) {
+            var found = bindingsCode_1.find(function (code) {
+                return code.match(new RegExp("\\b".concat(name, "\\b")));
+            });
+            localExports[name].usedInLocal = Boolean(found);
+        });
+        context.builder.component.exports = localExports;
     }
     return (0, create_mitosis_component_1.createMitosisComponent)(__assign(__assign({}, context.builder.component), { name: (_a = node.id) === null || _a === void 0 ? void 0 : _a.name, state: state, children: children, hooks: hooks, context: {
             get: accessedContext,
@@ -697,6 +709,14 @@ function extractContextComponents(json) {
 var isImportOrDefaultExport = function (node) {
     return types.isExportDefaultDeclaration(node) || types.isImportDeclaration(node);
 };
+var isTypeOrInterface = function (node) {
+    return types.isTSTypeAliasDeclaration(node) ||
+        types.isTSInterfaceDeclaration(node) ||
+        (types.isExportNamedDeclaration(node) &&
+            types.isTSTypeAliasDeclaration(node.declaration)) ||
+        (types.isExportNamedDeclaration(node) &&
+            types.isTSInterfaceDeclaration(node.declaration));
+};
 /**
  * This function takes the raw string from a Mitosis component, and converts it into a JSON that can be processed by
  * each generator function.
@@ -732,6 +752,35 @@ function parseJsx(jsx, options) {
                         var keepStatements = path.node.body.filter(function (statement) {
                             return isImportOrDefaultExport(statement);
                         });
+                        var exportsOrLocalVariables = path.node.body.filter(function (statement) {
+                            return !isImportOrDefaultExport(statement) &&
+                                !isTypeOrInterface(statement) &&
+                                !types.isExpressionStatement(statement);
+                        });
+                        context.builder.component.exports = exportsOrLocalVariables.reduce(function (pre, node) {
+                            var name, isFunction;
+                            if (babel.types.isExportNamedDeclaration(node) &&
+                                babel.types.isVariableDeclaration(node.declaration) &&
+                                babel.types.isIdentifier(node.declaration.declarations[0].id)) {
+                                name = node.declaration.declarations[0].id.name;
+                                isFunction = babel.types.isFunction(node.declaration.declarations[0].init);
+                            }
+                            else if (babel.types.isVariableDeclaration(node) &&
+                                babel.types.isIdentifier(node.declarations[0].id)) {
+                                name = node.declarations[0].id.name;
+                                isFunction = babel.types.isFunction(node.declarations[0].init);
+                            }
+                            if (name) {
+                                pre[name] = {
+                                    code: (0, generator_1.default)(node).code,
+                                    isFunction: isFunction,
+                                };
+                            }
+                            else {
+                                console.warn('export statement without name', node);
+                            }
+                            return pre;
+                        }, {});
                         var cutStatements = path.node.body.filter(function (statement) { return !isImportOrDefaultExport(statement); });
                         subComponentFunctions = path.node.body
                             .filter(function (node) {
