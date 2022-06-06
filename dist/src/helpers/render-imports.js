@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.renderExportAndLocal = exports.renderPreComponent = void 0;
+exports.renderPreComponent = void 0;
 var getStarImport = function (_a) {
     var theImport = _a.theImport;
     for (var key in theImport.imports) {
@@ -96,11 +96,5 @@ var renderImports = function (_a) {
     }
     return importString;
 };
-var renderPreComponent = function (component, target) { return "\n    ".concat(renderImports({ imports: component.imports, target: target }), "\n    ").concat((0, exports.renderExportAndLocal)(component), "\n    ").concat(component.hooks.preComponent || '', "\n  "); };
+var renderPreComponent = function (component, target) { return "\n    ".concat(renderImports({ imports: component.imports, target: target }), "\n    ").concat(component.hooks.preComponent || '', "\n  "); };
 exports.renderPreComponent = renderPreComponent;
-var renderExportAndLocal = function (component) {
-    return Object.keys(component.exports || {})
-        .map(function (key) { return component.exports[key].code; })
-        .join('\n');
-};
-exports.renderExportAndLocal = renderExportAndLocal;

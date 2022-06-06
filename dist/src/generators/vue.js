@@ -328,21 +328,6 @@ var componentToVue = function (userOptions) {
         var css = (0, collect_styles_1.collectCss)(component, {
             prefix: (_c = (_b = options.cssNamespace) === null || _b === void 0 ? void 0 : _b.call(options)) !== null && _c !== void 0 ? _c : undefined,
         });
-        var localExports = component.exports;
-        var localVarAsData = [];
-        var localVarAsFunc = [];
-        if (localExports) {
-            Object.keys(localExports).forEach(function (key) {
-                if (localExports[key].usedInLocal) {
-                    if (localExports[key].isFunction) {
-                        localVarAsFunc.push(key);
-                    }
-                    else {
-                        localVarAsData.push(key);
-                    }
-                }
-            });
-        }
         var dataString = (0, get_state_object_string_1.getStateObjectStringFromComponent)(component, {
             data: true,
             functions: false,
@@ -380,9 +365,6 @@ var componentToVue = function (userOptions) {
             // Don't include component imports
             .filter(function (key) { return !componentsUsed.includes(key); })
             .join(','), "}"));
-        if (localVarAsData.length) {
-            dataString = dataString.replace(/}$/, "".concat(localVarAsData.join(','), "}"));
-        }
         var elementProps = (0, get_props_1.getProps)(component);
         (0, strip_meta_properties_1.stripMetaProperties)(component);
         var template = component.children
@@ -391,9 +373,6 @@ var componentToVue = function (userOptions) {
         var includeClassMapHelper = template.includes('_classStringToObject');
         if (includeClassMapHelper) {
             functionsString = functionsString.replace(/}\s*$/, "_classStringToObject(str) {\n        const obj = {};\n        if (typeof str !== 'string') { return obj }\n        const classNames = str.trim().split(/\\s+/); \n        for (const name of classNames) {\n          obj[name] = true;\n        } \n        return obj;\n      }  }");
-        }
-        if (localVarAsFunc.length) {
-            functionsString = functionsString.replace(/}\s*$/, "".concat(localVarAsFunc.join(','), "}"));
         }
         var onUpdateWithDeps = ((_d = component.hooks.onUpdate) === null || _d === void 0 ? void 0 : _d.filter(function (hook) { var _a; return (_a = hook.deps) === null || _a === void 0 ? void 0 : _a.length; })) || [];
         var onUpdateWithoutDeps = ((_e = component.hooks.onUpdate) === null || _e === void 0 ? void 0 : _e.filter(function (hook) { var _a; return !((_a = hook.deps) === null || _a === void 0 ? void 0 : _a.length); })) || [];
