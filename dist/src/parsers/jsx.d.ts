@@ -8,6 +8,7 @@ export declare const METADATA_HOOK_NAME = "useMetadata";
 declare type ParseMitosisOptions = {
     format: 'react' | 'simple';
     jsonHookNames?: string[];
+    compileAwayPackages?: string[];
 };
 /**
  * This function takes the raw string from a Mitosis component, and converts it into a JSON that can be processed by

@@ -12,5 +12,5 @@ var __assign = (this && this.__assign) || function () {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.createMitosisComponent = void 0;
-var createMitosisComponent = function (options) { return (__assign({ '@type': '@builder.io/mitosis/component', imports: [], exports: {}, inputs: [], meta: {}, state: {}, children: [], hooks: {}, context: { get: {}, set: {} }, name: (options === null || options === void 0 ? void 0 : options.name) || 'MyComponent', subComponents: [] }, options)); };
+var createMitosisComponent = function (options) { return (__assign({ '@type': '@builder.io/mitosis/component', imports: [], exports: {}, inputs: [], meta: {}, refs: {}, state: {}, children: [], hooks: {}, context: { get: {}, set: {} }, name: (options === null || options === void 0 ? void 0 : options.name) || 'MyComponent', subComponents: [] }, options)); };
 exports.createMitosisComponent = createMitosisComponent;

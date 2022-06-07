@@ -44,6 +44,12 @@ export declare const builderContentToMitosisComponent: (builderContent: BuilderC
             get: import("..").ContextGet;
             set: import("..").ContextSet;
         };
+        refs: {
+            [useRef: string]: {
+                typeParameter?: string | undefined;
+                argument: string;
+            };
+        };
         hooks: {
             init?: import("..").extendedHook | undefined;
             onInit?: import("..").extendedHook | undefined;
@@ -71,6 +77,12 @@ export declare const builderContentToMitosisComponent: (builderContent: BuilderC
     context: {
         get: import("..").ContextGet;
         set: import("..").ContextSet;
+    };
+    refs: {
+        [useRef: string]: {
+            typeParameter?: string | undefined;
+            argument: string;
+        };
     };
     hooks: {
         init?: import("..").extendedHook | undefined;

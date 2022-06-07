@@ -242,7 +242,7 @@ function FormComponent(props) {
             }
         },
     });
-    var formRef = (0, mitosis_1.useRef)();
+    var formRef = (0, mitosis_1.useRef)(null);
     return (<form validate={props.validate} ref={formRef} action={!props.sendWithJs && props.action} method={props.method} name={props.name} onSubmit={function (event) { return state.onSubmit(event); }} {...props.attributes}>
       <mitosis_1.Show when={props.builderBlock && props.builderBlock.children}>
         <mitosis_1.For each={(_a = props.builderBlock) === null || _a === void 0 ? void 0 : _a.children}>

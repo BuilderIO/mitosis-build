@@ -71,6 +71,12 @@ export declare type MitosisComponent = {
         get: ContextGet;
         set: ContextSet;
     };
+    refs: {
+        [useRef: string]: {
+            typeParameter?: string;
+            argument: string;
+        };
+    };
     hooks: {
         init?: extendedHook;
         onInit?: extendedHook;

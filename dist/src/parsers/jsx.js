@@ -194,6 +194,7 @@ var componentFunctionToJson = function (node, context) {
     var state = {};
     var accessedContext = {};
     var setContext = {};
+    var refs = {};
     for (var _i = 0, _b = node.body.body; _i < _b.length; _i++) {
         var item = _b[_i];
         if (types.isExpressionStatement(item)) {
@@ -356,6 +357,19 @@ var componentFunctionToJson = function (node, context) {
                             }
                         }
                     }
+                    else if (init.callee.name === 'useRef') {
+                        if (types.isIdentifier(declaration.id)) {
+                            var firstArg = init.arguments[0];
+                            var varName = declaration.id.name;
+                            refs[varName] = {
+                                argument: (0, generator_1.default)(firstArg).code,
+                            };
+                            // Typescript Parameter
+                            if (types.isTSTypeParameterInstantiation(init.typeParameters)) {
+                                refs[varName].typeParameter = (0, generator_1.default)(init.typeParameters.params[0]).code;
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -381,7 +395,7 @@ var componentFunctionToJson = function (node, context) {
         });
         context.builder.component.exports = localExports;
     }
-    return (0, create_mitosis_component_1.createMitosisComponent)(__assign(__assign({}, context.builder.component), { name: (_a = node.id) === null || _a === void 0 ? void 0 : _a.name, state: state, children: children, hooks: hooks, context: {
+    return (0, create_mitosis_component_1.createMitosisComponent)(__assign(__assign({}, context.builder.component), { name: (_a = node.id) === null || _a === void 0 ? void 0 : _a.name, state: state, children: children, refs: refs, hooks: hooks, context: {
             get: accessedContext,
             set: setContext,
         }, propsTypeRef: getPropsTypeRef(node) }));
@@ -834,7 +848,12 @@ function parseJsx(jsx, options) {
                     },
                     ImportDeclaration: function (path, context) {
                         // @builder.io/mitosis or React imports compile away
-                        if (['react', '@builder.io/mitosis', '@emotion/react'].includes(path.node.source.value)) {
+                        var customPackages = (options === null || options === void 0 ? void 0 : options.compileAwayPackages) || [];
+                        if (__spreadArray([
+                            'react',
+                            '@builder.io/mitosis',
+                            '@emotion/react'
+                        ], customPackages, true).includes(path.node.source.value)) {
                             path.remove();
                             return;
                         }

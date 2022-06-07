@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 var mitosis_1 = require("@builder.io/mitosis");
 function CustomCode(props) {
-    var elem = (0, mitosis_1.useRef)();
+    var elem = (0, mitosis_1.useRef)(null);
     var state = (0, mitosis_1.useState)({
         scriptsInserted: [],
         scriptsRun: [],

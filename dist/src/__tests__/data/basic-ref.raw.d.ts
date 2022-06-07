@@ -1,4 +1,4 @@
 export interface Props {
     showInput: boolean;
 }
-export default function MyMasicRefComponent(props: Props): JSX.Element;
+export default function MyBasicRefComponent(props: Props): JSX.Element;

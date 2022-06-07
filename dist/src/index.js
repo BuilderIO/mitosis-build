@@ -19,7 +19,7 @@ __exportStar(require("./flow"), exports);
 // These compile away
 var useState = function (obj) { return obj; };
 exports.useState = useState;
-var useRef = function () { return null; };
+var useRef = function (obj) { return obj; };
 exports.useRef = useRef;
 var useContext = function (key) {
     return null;

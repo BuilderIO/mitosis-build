@@ -44,6 +44,7 @@ var is_component_1 = require("../helpers/is-component");
 var is_mitosis_node_1 = require("../helpers/is-mitosis-node");
 var is_html_attribute_1 = require("../helpers/is-html-attribute");
 var get_props_1 = require("../helpers/get-props");
+var get_props_ref_1 = require("../helpers/get-props-ref");
 var get_prop_functions_1 = require("../helpers/get-prop-functions");
 var jsx_1 = require("../parsers/jsx");
 var strip_state_and_props_refs_1 = require("../helpers/strip-state-and-props-refs");
@@ -506,14 +507,20 @@ var componentToCustomElement = function (options) {
         if (options.plugins) {
             json = (0, plugins_1.runPreJsonPlugins)(json, options.plugins);
         }
+        var _15 = (0, get_props_ref_1.getPropsRef)(json, true), forwardProp = _15[0], hasPropRef = _15[1];
         var contextVars = Object.keys(((_b = json === null || json === void 0 ? void 0 : json.context) === null || _b === void 0 ? void 0 : _b.get) || {});
         var childComponents = getChildComponents(json, useOptions);
         var componentHasProps = (0, has_props_1.hasProps)(json);
         var componentHasStatefulDom = (0, has_stateful_dom_1.hasStatefulDom)(json);
         var props = (0, get_props_1.getProps)(json);
+        // prevent jsx props from showing up as @Input
+        if (hasPropRef) {
+            props.delete(forwardProp);
+        }
         var outputs = (0, get_prop_functions_1.getPropFunctions)(json);
-        var refs = Array.from((0, get_refs_1.getRefs)(json));
-        (0, map_refs_1.mapRefs)(json, function (refName) { return "self.".concat(refName); });
+        var domRefs = (0, get_refs_1.getRefs)(json);
+        var jsRefs = Object.keys(json.refs).filter(function (ref) { return !domRefs.has(ref); });
+        (0, map_refs_1.mapRefs)(json, function (refName) { return "self._".concat(refName); });
         var context = contextVars.map(function (variableName) {
             var _a, _b, _c;
             var token = (_a = json === null || json === void 0 ? void 0 : json.context) === null || _a === void 0 ? void 0 : _a.get[variableName].name;
@@ -524,7 +531,7 @@ var componentToCustomElement = function (options) {
         });
         var setContext = [];
         for (var key in json.context.set) {
-            var _15 = json.context.set[key], name_1 = _15.name, value = _15.value, ref = _15.ref;
+            var _16 = json.context.set[key], name_1 = _16.name, value = _16.value, ref = _16.ref;
             setContext.push({ name: name_1, value: value, ref: ref });
         }
         addUpdateAfterSet(json, useOptions);
@@ -589,9 +596,11 @@ var componentToCustomElement = function (options) {
         }
         var str = "\n      ".concat((0, render_imports_1.renderPreComponent)(json), "\n      /**\n       * Usage:\n       * \n       *  <").concat(kebabName, "></").concat(kebabName, ">\n       * \n       */\n      class ").concat(ComponentName, " extends ").concat(((_j = useOptions === null || useOptions === void 0 ? void 0 : useOptions.experimental) === null || _j === void 0 ? void 0 : _j.classExtends)
             ? (_k = useOptions === null || useOptions === void 0 ? void 0 : useOptions.experimental) === null || _k === void 0 ? void 0 : _k.classExtends(json, useOptions)
-            : 'HTMLElement', " {\n        ").concat(refs.map(function (ref) {
-            return "\n        get ".concat(ref, "() {\n          return this._root.querySelector(\"[data-ref='").concat(ComponentName, "-").concat(ref, "']\")\n        }\n            ");
-        }), "\n\n        get _root() {\n          return this.shadowRoot || this;\n        }\n\n        constructor() {\n          super();\n          const self = this;\n          ").concat(
+            : 'HTMLElement', " {\n        ").concat(Array.from(domRefs)
+            .map(function (ref) {
+            return "\n        get _".concat(ref, "() {\n          return this._root.querySelector(\"[data-ref='").concat(ComponentName, "-").concat(ref, "']\")\n        }\n            ");
+        })
+            .join('\n'), "\n\n        get _root() {\n          return this.shadowRoot || this;\n        }\n\n        constructor() {\n          super();\n          const self = this;\n          ").concat(
         // TODO: more than one context not injector
         setContext.length === 1 && ((_l = setContext === null || setContext === void 0 ? void 0 : setContext[0]) === null || _l === void 0 ? void 0 : _l.ref)
             ? "this.context = ".concat(setContext[0].ref)
@@ -622,7 +631,14 @@ var componentToCustomElement = function (options) {
                 return updateReferencesInCode((hook === null || hook === void 0 ? void 0 : hook.deps) || '[]', useOptions);
             }).join(','), "];\n            "), "\n\n          // used to keep track of all nodes created by show/for\n          this.nodesToDestroy = [];\n          // batch updates\n          this.pendingUpdate = false;\n          ").concat(((_r = useOptions === null || useOptions === void 0 ? void 0 : useOptions.experimental) === null || _r === void 0 ? void 0 : _r.componentConstructor)
             ? (_s = useOptions === null || useOptions === void 0 ? void 0 : useOptions.experimental) === null || _s === void 0 ? void 0 : _s.componentConstructor(json, useOptions)
-            : '', "\n\n          ").concat(useOptions.js, "\n\n          if (").concat((_t = json.meta.useMetadata) === null || _t === void 0 ? void 0 : _t.isAttachedToShadowDom, ") {\n            this.attachShadow({ mode: 'open' })\n          }\n        }\n\n\n        ").concat(!((_u = json.hooks.onUnMount) === null || _u === void 0 ? void 0 : _u.code)
+            : '', "\n\n          ").concat(useOptions.js, "\n\n          ").concat(jsRefs
+            .map(function (ref) {
+            var _a;
+            // const typeParameter = json['refs'][ref]?.typeParameter || '';
+            var argument = ((_a = json['refs'][ref]) === null || _a === void 0 ? void 0 : _a.argument) || 'null';
+            return "this._".concat(ref, " = ").concat(argument);
+        })
+            .join('\n'), "\n\n          if (").concat((_t = json.meta.useMetadata) === null || _t === void 0 ? void 0 : _t.isAttachedToShadowDom, ") {\n            this.attachShadow({ mode: 'open' })\n          }\n        }\n\n\n        ").concat(!((_u = json.hooks.onUnMount) === null || _u === void 0 ? void 0 : _u.code)
             ? ''
             : "\n          disconnectedCallback() {\n            ".concat(((_v = useOptions === null || useOptions === void 0 ? void 0 : useOptions.experimental) === null || _v === void 0 ? void 0 : _v.disconnectedCallback)
                 ? (_w = useOptions === null || useOptions === void 0 ? void 0 : useOptions.experimental) === null || _w === void 0 ? void 0 : _w.disconnectedCallback(json, useOptions)
