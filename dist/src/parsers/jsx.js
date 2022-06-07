@@ -173,6 +173,21 @@ var parseCodeJson = function (node) {
     var code = (0, generator_1.default)(node).code;
     return (0, json_1.tryParseJson)(code);
 };
+var getPropsTypeRef = function (node) {
+    var param = node.params[0];
+    // TODO: component function params name must be props
+    if (babel.types.isIdentifier(param) &&
+        param.name === 'props' &&
+        babel.types.isTSTypeAnnotation(param.typeAnnotation)) {
+        var paramIdentifier = babel.types.variableDeclaration('let', [
+            babel.types.variableDeclarator(param),
+        ]);
+        return (0, generator_1.default)(paramIdentifier)
+            .code.replace(/^let\sprops:\s+/, '')
+            .replace(/;/g, '');
+    }
+    return undefined;
+};
 var componentFunctionToJson = function (node, context) {
     var _a;
     var hooks = {};
@@ -369,7 +384,7 @@ var componentFunctionToJson = function (node, context) {
     return (0, create_mitosis_component_1.createMitosisComponent)(__assign(__assign({}, context.builder.component), { name: (_a = node.id) === null || _a === void 0 ? void 0 : _a.name, state: state, children: children, hooks: hooks, context: {
             get: accessedContext,
             set: setContext,
-        } }));
+        }, propsTypeRef: getPropsTypeRef(node) }));
 };
 var jsxElementToJson = function (node) {
     if (types.isJSXText(node)) {
@@ -717,6 +732,18 @@ var isTypeOrInterface = function (node) {
         (types.isExportNamedDeclaration(node) &&
             types.isTSInterfaceDeclaration(node.declaration));
 };
+var collectTypes = function (node, context) {
+    var typeStr = (0, generator_1.default)(node).code;
+    var _a = context.builder.component.types, types = _a === void 0 ? [] : _a;
+    types.push(typeStr);
+    context.builder.component.types = types.filter(Boolean);
+};
+var collectInterfaces = function (node, context) {
+    var interfaceStr = (0, generator_1.default)(node).code;
+    var _a = context.builder.component.interfaces, interfaces = _a === void 0 ? [] : _a;
+    interfaces.push(interfaceStr);
+    context.builder.component.interfaces = interfaces.filter(Boolean);
+};
 /**
  * This function takes the raw string from a Mitosis component, and converts it into a JSON that can be processed by
  * each generator function.
@@ -750,7 +777,8 @@ function parseJsx(jsx, options) {
                             component: (0, create_mitosis_component_1.createMitosisComponent)(),
                         };
                         var keepStatements = path.node.body.filter(function (statement) {
-                            return isImportOrDefaultExport(statement);
+                            return isImportOrDefaultExport(statement) ||
+                                isTypeOrInterface(statement);
                         });
                         var exportsOrLocalVariables = path.node.body.filter(function (statement) {
                             return !isImportOrDefaultExport(statement) &&
@@ -835,6 +863,22 @@ function parseJsx(jsx, options) {
                     JSXElement: function (path) {
                         var node = path.node;
                         path.replaceWith(jsonToAst(jsxElementToJson(node)));
+                    },
+                    ExportNamedDeclaration: function (path, context) {
+                        var node = path.node;
+                        var newTypeStr = (0, generator_1.default)(node).code;
+                        if (babel.types.isTSInterfaceDeclaration(node.declaration)) {
+                            collectInterfaces(path.node, context);
+                        }
+                        if (babel.types.isTSTypeAliasDeclaration(node.declaration)) {
+                            collectTypes(path.node, context);
+                        }
+                    },
+                    TSTypeAliasDeclaration: function (path, context) {
+                        collectTypes(path.node, context);
+                    },
+                    TSInterfaceDeclaration: function (path, context) {
+                        collectInterfaces(path.node, context);
                     },
                 },
             }); },

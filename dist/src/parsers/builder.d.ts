@@ -55,6 +55,9 @@ export declare const builderContentToMitosisComponent: (builderContent: BuilderC
         };
         children: MitosisNode[];
         subComponents: import("..").MitosisComponent[];
+        types?: string[] | undefined;
+        interfaces?: string[] | undefined;
+        propsTypeRef?: string | undefined;
     }[];
     '@type': "@builder.io/mitosis/component";
     name: string;
@@ -79,5 +82,8 @@ export declare const builderContentToMitosisComponent: (builderContent: BuilderC
         onUpdate?: import("..").extendedHook[] | undefined;
     };
     children: MitosisNode[];
+    types?: string[] | undefined;
+    interfaces?: string[] | undefined;
+    propsTypeRef?: string | undefined;
 };
 export {};

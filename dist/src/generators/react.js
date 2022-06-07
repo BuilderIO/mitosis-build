@@ -401,7 +401,7 @@ var componentToReact = function (reactOptions) {
 };
 exports.componentToReact = componentToReact;
 var _componentToReact = function (json, options, isSubComponent) {
-    var _a, _b, _c, _d, _e, _f, _g, _h;
+    var _a, _b, _c, _d, _e, _f, _g, _h, _j;
     if (isSubComponent === void 0) { isSubComponent = false; }
     (0, process_http_requests_1.processHttpRequests)(json);
     (0, handle_missing_state_1.handleMissingState)(json);
@@ -454,7 +454,11 @@ var _componentToReact = function (json, options, isSubComponent) {
     var nativeStyles = stylesType === 'react-native' &&
         componentHasStyles &&
         (0, react_native_1.collectReactNativeStyles)(json);
-    var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n  ", "\n  ", "\n  ", "\n  ", "\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "function ", "(props) {\n      ", "\n      ", "\n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      return (\n        ", "\n        ", "\n        ", "\n        ", "\n      );\n    }\n\n    ", "\n\n    ", "\n  "], ["\n  ", "\n  ", "\n  ", "\n  ", "\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "function ", "(props) {\n      ", "\n      ", "\n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      return (\n        ", "\n        ", "\n        ", "\n        ", "\n      );\n    }\n\n    ", "\n\n    ", "\n  "])), options.type !== 'native'
+    var propsArgs = 'props';
+    if (json.propsTypeRef) {
+        propsArgs = "props: ".concat(json.propsTypeRef);
+    }
+    var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n  ", "\n  ", "\n  ", "\n  ", "\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "function ", "(", ") {\n      ", "\n      ", "\n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      return (\n        ", "\n        ", "\n        ", "\n        ", "\n      );\n    }\n\n    ", "\n\n    ", "\n  "], ["\n  ", "\n  ", "\n  ", "\n  ", "\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "function ", "(", ") {\n      ", "\n      ", "\n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      return (\n        ", "\n        ", "\n        ", "\n        ", "\n      );\n    }\n\n    ", "\n\n    ", "\n  "])), options.type !== 'native'
         ? ''
         : "\n  import * as React from 'react';\n  import { View, StyleSheet, Image, Text } from 'react-native';\n  ", styledComponentsCode ? "import styled from 'styled-components';\n" : '', reactLibImports.size
         ? "import { ".concat(Array.from(reactLibImports).join(', '), " } from 'react'")
@@ -466,7 +470,7 @@ var _componentToReact = function (json, options, isSubComponent) {
         ? "import { useMutable } from 'react-solid-state';"
         : '', stateType === 'mobx' && hasState
         ? "import { useLocalObservable } from 'mobx-react-lite';"
-        : '', (0, render_imports_1.renderPreComponent)(json), isSubComponent ? '' : 'export default ', json.name || 'MyComponent', getRefsString(json), hasState
+        : '', json.types ? json.types.join('\n') : '', json.interfaces ? (_e = json.interfaces) === null || _e === void 0 ? void 0 : _e.join('\n') : '', (0, render_imports_1.renderPreComponent)(json), isSubComponent ? '' : 'export default ', json.name || 'MyComponent', propsArgs, getRefsString(json), hasState
         ? stateType === 'mobx'
             ? "const state = useLocalObservable(() => (".concat((0, get_state_object_string_1.getStateObjectStringFromComponent)(json), "));")
             : stateType === 'useState'
@@ -476,17 +480,17 @@ var _componentToReact = function (json, options, isSubComponent) {
                     : stateType === 'builder'
                         ? "var state = useBuilderState(".concat((0, get_state_object_string_1.getStateObjectStringFromComponent)(json), ");")
                         : "const state = useLocalProxy(".concat((0, get_state_object_string_1.getStateObjectStringFromComponent)(json), ");")
-        : '', getContextString(json, options), getInitCode(json, options), ((_e = json.hooks.onInit) === null || _e === void 0 ? void 0 : _e.code)
+        : '', getContextString(json, options), getInitCode(json, options), ((_f = json.hooks.onInit) === null || _f === void 0 ? void 0 : _f.code)
         ? "\n          useEffect(() => {\n            ".concat(processBinding(updateStateSettersInCode(json.hooks.onInit.code, options), options), "\n          })\n          ")
-        : '', ((_f = json.hooks.onMount) === null || _f === void 0 ? void 0 : _f.code)
+        : '', ((_g = json.hooks.onMount) === null || _g === void 0 ? void 0 : _g.code)
         ? "useEffect(() => {\n            ".concat(processBinding(updateStateSettersInCode(json.hooks.onMount.code, options), options), "\n          }, [])")
-        : '', ((_g = json.hooks.onUpdate) === null || _g === void 0 ? void 0 : _g.length)
+        : '', ((_h = json.hooks.onUpdate) === null || _h === void 0 ? void 0 : _h.length)
         ? json.hooks.onUpdate
             .map(function (hook) { return "useEffect(() => {\n            ".concat(processBinding(updateStateSettersInCode(hook.code, options), options), "\n          }, \n          ").concat(hook.deps
             ? processBinding(updateStateSettersInCode(hook.deps, options), options)
             : '', ")"); })
             .join(';')
-        : '', ((_h = json.hooks.onUnMount) === null || _h === void 0 ? void 0 : _h.code)
+        : '', ((_j = json.hooks.onUnMount) === null || _j === void 0 ? void 0 : _j.code)
         ? "useEffect(() => {\n            return () => {\n              ".concat(processBinding(updateStateSettersInCode(json.hooks.onUnMount.code, options), options), "\n            }\n          }, [])")
         : '', wrap ? '<>' : '', json.children.map(function (item) { return (0, exports.blockToReact)(item, options); }).join('\n'), componentHasStyles && stylesType === 'styled-jsx'
         ? "<style jsx>{`".concat(css, "`}</style>")
