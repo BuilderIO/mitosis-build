@@ -440,6 +440,9 @@ var _componentToReact = function (json, options, isSubComponent) {
         var meta = (_b = json.meta.useMetadata) === null || _b === void 0 ? void 0 : _b.forwardRef;
         options.forwardRef = meta || forwardRef;
     }
+    var forwardRefType = json.propsTypeRef && forwardRef && json.propsTypeRef !== 'any'
+        ? "".concat(json.propsTypeRef, "[\"").concat(forwardRef, "\"]")
+        : undefined;
     var stylesType = options.stylesType || 'emotion';
     var stateType = options.stateType || 'mobx';
     if (stateType === 'builder') {
@@ -499,7 +502,9 @@ var _componentToReact = function (json, options, isSubComponent) {
         ? "import { useMutable } from 'react-solid-state';"
         : '', stateType === 'mobx' && hasState
         ? "import { useLocalObservable } from 'mobx-react-lite';"
-        : '', json.types ? json.types.join('\n') : '', json.interfaces ? (_g = json.interfaces) === null || _g === void 0 ? void 0 : _g.join('\n') : '', (0, render_imports_1.renderPreComponent)(json), isSubComponent ? '' : 'export default ', isForwardRef ? 'forwardRef(' : '', json.name || 'MyComponent', propsArgs, isForwardRef ? ", ".concat(options.forwardRef) : '', hasStateArgument ? '' : refsString, hasState
+        : '', json.types ? json.types.join('\n') : '', json.interfaces ? (_g = json.interfaces) === null || _g === void 0 ? void 0 : _g.join('\n') : '', (0, render_imports_1.renderPreComponent)(json), isSubComponent ? '' : 'export default ', isForwardRef
+        ? "forwardRef".concat(forwardRefType ? "<".concat(forwardRefType, ">") : '', "(")
+        : '', json.name || 'MyComponent', propsArgs, isForwardRef ? ", ".concat(options.forwardRef) : '', hasStateArgument ? '' : refsString, hasState
         ? stateType === 'mobx'
             ? "const state = useLocalObservable(() => (".concat((0, get_state_object_string_1.getStateObjectStringFromComponent)(json), "));")
             : stateType === 'useState'
