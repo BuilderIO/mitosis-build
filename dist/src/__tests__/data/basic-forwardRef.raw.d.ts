@@ -1,5 +1,5 @@
 export interface Props {
     showInput: boolean;
-    inputRef: any;
+    inputRef: HTMLInputElement;
 }
 export default function MyBasicForwardRefComponent(props: Props): JSX.Element;
