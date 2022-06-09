@@ -238,7 +238,7 @@ var SrcBuilder = /** @class */ (function () {
                         ? binding_1.code
                         : binding_1;
                 var key = lastProperty(rawKey);
-                if (!binding_1) {
+                if (!binding_1 && rawKey in props) {
                     binding_1 = quote(props[rawKey]);
                 }
                 else if (binding_1 != null && binding_1 === props[key]) {
