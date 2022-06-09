@@ -208,12 +208,22 @@ exports.blockToSvelte = blockToSvelte;
  * when easily identified, for more idiomatic svelte code
  */
 var useBindValue = function (json, options) {
+    function normalizeStr(str) {
+        return str
+            .trim()
+            .replace(/\n|\r/g, '')
+            .replace(/^{/, '')
+            .replace(/}$/, '')
+            .replace(/;$/, '')
+            .replace(/\s+/g, '');
+    }
     (0, traverse_1.default)(json).forEach(function (item) {
         if ((0, is_mitosis_node_1.isMitosisNode)(item)) {
             var _a = item.bindings, value = _a.value, onChange = _a.onChange;
             if (value && onChange) {
-                if (onChange.code.replace(/\s+/g, '') ===
-                    "".concat(value.code, "=event.target.value")) {
+                var _b = onChange.arguments, cusArgs = _b === void 0 ? ['event'] : _b;
+                if (normalizeStr(onChange.code) ===
+                    "".concat(normalizeStr(value.code), "=").concat(cusArgs[0], ".target.value")) {
                     delete item.bindings.value;
                     delete item.bindings.onChange;
                     item.bindings['bind:value'] = value;

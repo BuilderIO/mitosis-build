@@ -59,6 +59,7 @@ var create_mitosis_component_1 = require("../helpers/create-mitosis-component");
 var create_mitosis_node_1 = require("../helpers/create-mitosis-node");
 var is_mitosis_node_1 = require("../helpers/is-mitosis-node");
 var replace_idenifiers_1 = require("../helpers/replace-idenifiers");
+var get_bindings_1 = require("../helpers/get-bindings");
 var replace_new_lines_in_strings_1 = require("../helpers/replace-new-lines-in-strings");
 var json_1 = require("../helpers/json");
 var jsxPlugin = require('@babel/plugin-syntax-jsx');
@@ -172,12 +173,28 @@ var parseCodeJson = function (node) {
     var code = (0, generator_1.default)(node).code;
     return (0, json_1.tryParseJson)(code);
 };
+var getPropsTypeRef = function (node) {
+    var param = node.params[0];
+    // TODO: component function params name must be props
+    if (babel.types.isIdentifier(param) &&
+        param.name === 'props' &&
+        babel.types.isTSTypeAnnotation(param.typeAnnotation)) {
+        var paramIdentifier = babel.types.variableDeclaration('let', [
+            babel.types.variableDeclarator(param),
+        ]);
+        return (0, generator_1.default)(paramIdentifier)
+            .code.replace(/^let\sprops:\s+/, '')
+            .replace(/;/g, '');
+    }
+    return undefined;
+};
 var componentFunctionToJson = function (node, context) {
     var _a;
     var hooks = {};
     var state = {};
     var accessedContext = {};
     var setContext = {};
+    var refs = {};
     for (var _i = 0, _b = node.body.body; _i < _b.length; _i++) {
         var item = _b[_i];
         if (types.isExpressionStatement(item)) {
@@ -340,6 +357,19 @@ var componentFunctionToJson = function (node, context) {
                             }
                         }
                     }
+                    else if (init.callee.name === 'useRef') {
+                        if (types.isIdentifier(declaration.id)) {
+                            var firstArg = init.arguments[0];
+                            var varName = declaration.id.name;
+                            refs[varName] = {
+                                argument: (0, generator_1.default)(firstArg).code,
+                            };
+                            // Typescript Parameter
+                            if (types.isTSTypeParameterInstantiation(init.typeParameters)) {
+                                refs[varName].typeParameter = (0, generator_1.default)(init.typeParameters.params[0]).code;
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -354,10 +384,21 @@ var componentFunctionToJson = function (node, context) {
             children.push(jsxElementToJson(value));
         }
     }
-    return (0, create_mitosis_component_1.createMitosisComponent)(__assign(__assign({}, context.builder.component), { name: (_a = node.id) === null || _a === void 0 ? void 0 : _a.name, state: state, children: children, hooks: hooks, context: {
+    var localExports = context.builder.component.exports;
+    if (localExports) {
+        var bindingsCode_1 = (0, get_bindings_1.getBindingsCode)(children);
+        Object.keys(localExports).forEach(function (name) {
+            var found = bindingsCode_1.find(function (code) {
+                return code.match(new RegExp("\\b".concat(name, "\\b")));
+            });
+            localExports[name].usedInLocal = Boolean(found);
+        });
+        context.builder.component.exports = localExports;
+    }
+    return (0, create_mitosis_component_1.createMitosisComponent)(__assign(__assign({}, context.builder.component), { name: (_a = node.id) === null || _a === void 0 ? void 0 : _a.name, state: state, children: children, refs: refs, hooks: hooks, context: {
             get: accessedContext,
             set: setContext,
-        } }));
+        }, propsTypeRef: getPropsTypeRef(node) }));
 };
 var jsxElementToJson = function (node) {
     if (types.isJSXText(node)) {
@@ -697,6 +738,26 @@ function extractContextComponents(json) {
 var isImportOrDefaultExport = function (node) {
     return types.isExportDefaultDeclaration(node) || types.isImportDeclaration(node);
 };
+var isTypeOrInterface = function (node) {
+    return types.isTSTypeAliasDeclaration(node) ||
+        types.isTSInterfaceDeclaration(node) ||
+        (types.isExportNamedDeclaration(node) &&
+            types.isTSTypeAliasDeclaration(node.declaration)) ||
+        (types.isExportNamedDeclaration(node) &&
+            types.isTSInterfaceDeclaration(node.declaration));
+};
+var collectTypes = function (node, context) {
+    var typeStr = (0, generator_1.default)(node).code;
+    var _a = context.builder.component.types, types = _a === void 0 ? [] : _a;
+    types.push(typeStr);
+    context.builder.component.types = types.filter(Boolean);
+};
+var collectInterfaces = function (node, context) {
+    var interfaceStr = (0, generator_1.default)(node).code;
+    var _a = context.builder.component.interfaces, interfaces = _a === void 0 ? [] : _a;
+    interfaces.push(interfaceStr);
+    context.builder.component.interfaces = interfaces.filter(Boolean);
+};
 /**
  * This function takes the raw string from a Mitosis component, and converts it into a JSON that can be processed by
  * each generator function.
@@ -730,8 +791,38 @@ function parseJsx(jsx, options) {
                             component: (0, create_mitosis_component_1.createMitosisComponent)(),
                         };
                         var keepStatements = path.node.body.filter(function (statement) {
-                            return isImportOrDefaultExport(statement);
+                            return isImportOrDefaultExport(statement) ||
+                                isTypeOrInterface(statement);
                         });
+                        var exportsOrLocalVariables = path.node.body.filter(function (statement) {
+                            return !isImportOrDefaultExport(statement) &&
+                                !isTypeOrInterface(statement) &&
+                                !types.isExpressionStatement(statement);
+                        });
+                        context.builder.component.exports = exportsOrLocalVariables.reduce(function (pre, node) {
+                            var name, isFunction;
+                            if (babel.types.isExportNamedDeclaration(node) &&
+                                babel.types.isVariableDeclaration(node.declaration) &&
+                                babel.types.isIdentifier(node.declaration.declarations[0].id)) {
+                                name = node.declaration.declarations[0].id.name;
+                                isFunction = babel.types.isFunction(node.declaration.declarations[0].init);
+                            }
+                            else if (babel.types.isVariableDeclaration(node) &&
+                                babel.types.isIdentifier(node.declarations[0].id)) {
+                                name = node.declarations[0].id.name;
+                                isFunction = babel.types.isFunction(node.declarations[0].init);
+                            }
+                            if (name) {
+                                pre[name] = {
+                                    code: (0, generator_1.default)(node).code,
+                                    isFunction: isFunction,
+                                };
+                            }
+                            else {
+                                console.warn('export statement without name', node);
+                            }
+                            return pre;
+                        }, {});
                         var cutStatements = path.node.body.filter(function (statement) { return !isImportOrDefaultExport(statement); });
                         subComponentFunctions = path.node.body
                             .filter(function (node) {
@@ -757,7 +848,12 @@ function parseJsx(jsx, options) {
                     },
                     ImportDeclaration: function (path, context) {
                         // @builder.io/mitosis or React imports compile away
-                        if (['react', '@builder.io/mitosis', '@emotion/react'].includes(path.node.source.value)) {
+                        var customPackages = (options === null || options === void 0 ? void 0 : options.compileAwayPackages) || [];
+                        if (__spreadArray([
+                            'react',
+                            '@builder.io/mitosis',
+                            '@emotion/react'
+                        ], customPackages, true).includes(path.node.source.value)) {
                             path.remove();
                             return;
                         }
@@ -786,6 +882,22 @@ function parseJsx(jsx, options) {
                     JSXElement: function (path) {
                         var node = path.node;
                         path.replaceWith(jsonToAst(jsxElementToJson(node)));
+                    },
+                    ExportNamedDeclaration: function (path, context) {
+                        var node = path.node;
+                        var newTypeStr = (0, generator_1.default)(node).code;
+                        if (babel.types.isTSInterfaceDeclaration(node.declaration)) {
+                            collectInterfaces(path.node, context);
+                        }
+                        if (babel.types.isTSTypeAliasDeclaration(node.declaration)) {
+                            collectTypes(path.node, context);
+                        }
+                    },
+                    TSTypeAliasDeclaration: function (path, context) {
+                        collectTypes(path.node, context);
+                    },
+                    TSInterfaceDeclaration: function (path, context) {
+                        collectInterfaces(path.node, context);
                     },
                 },
             }); },

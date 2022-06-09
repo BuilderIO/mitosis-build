@@ -59,7 +59,10 @@ var replaceRefsInString = function (code, refs, mapper) {
     });
 };
 var mapRefs = function (component, mapper) {
-    var refs = Array.from((0, get_refs_1.getRefs)(component));
+    var refSet = (0, get_refs_1.getRefs)(component);
+    // grab refs not used for bindings
+    Object.keys(component.refs).forEach(function (ref) { return refSet.add(ref); });
+    var refs = Array.from(refSet);
     for (var _i = 0, _a = Object.keys(component.state); _i < _a.length; _i++) {
         var key = _a[_i];
         var value = component.state[key];

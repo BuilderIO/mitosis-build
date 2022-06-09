@@ -50,10 +50,18 @@ export declare type MitosisComponentInput = {
     name: string;
     defaultValue: any;
 };
+export declare type MitosisExport = {
+    [name: string]: {
+        code: string;
+        usedInLocal?: boolean;
+        isFunction?: boolean;
+    };
+};
 export declare type MitosisComponent = {
     '@type': '@builder.io/mitosis/component';
     name: string;
     imports: MitosisImport[];
+    exports?: MitosisExport;
     meta: JSONObject & {
         useMetadata?: JSONObject;
     };
@@ -62,6 +70,12 @@ export declare type MitosisComponent = {
     context: {
         get: ContextGet;
         set: ContextSet;
+    };
+    refs: {
+        [useRef: string]: {
+            typeParameter?: string;
+            argument: string;
+        };
     };
     hooks: {
         init?: extendedHook;
@@ -74,4 +88,7 @@ export declare type MitosisComponent = {
     };
     children: MitosisNode[];
     subComponents: MitosisComponent[];
+    types?: string[];
+    interfaces?: string[];
+    propsTypeRef?: string;
 };

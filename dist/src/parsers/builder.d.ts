@@ -34,6 +34,7 @@ export declare const builderContentToMitosisComponent: (builderContent: BuilderC
         name: string;
         '@type': "@builder.io/mitosis/component";
         imports: import("..").MitosisImport[];
+        exports?: import("..").MitosisExport | undefined;
         meta: import("../types/json").JSONObject & {
             useMetadata?: import("../types/json").JSONObject | undefined;
         };
@@ -42,6 +43,12 @@ export declare const builderContentToMitosisComponent: (builderContent: BuilderC
         context: {
             get: import("..").ContextGet;
             set: import("..").ContextSet;
+        };
+        refs: {
+            [useRef: string]: {
+                typeParameter?: string | undefined;
+                argument: string;
+            };
         };
         hooks: {
             init?: import("..").extendedHook | undefined;
@@ -54,10 +61,14 @@ export declare const builderContentToMitosisComponent: (builderContent: BuilderC
         };
         children: MitosisNode[];
         subComponents: import("..").MitosisComponent[];
+        types?: string[] | undefined;
+        interfaces?: string[] | undefined;
+        propsTypeRef?: string | undefined;
     }[];
     '@type': "@builder.io/mitosis/component";
     name: string;
     imports: import("..").MitosisImport[];
+    exports?: import("..").MitosisExport | undefined;
     meta: import("../types/json").JSONObject & {
         useMetadata?: import("../types/json").JSONObject | undefined;
     };
@@ -66,6 +77,12 @@ export declare const builderContentToMitosisComponent: (builderContent: BuilderC
     context: {
         get: import("..").ContextGet;
         set: import("..").ContextSet;
+    };
+    refs: {
+        [useRef: string]: {
+            typeParameter?: string | undefined;
+            argument: string;
+        };
     };
     hooks: {
         init?: import("..").extendedHook | undefined;
@@ -77,5 +94,8 @@ export declare const builderContentToMitosisComponent: (builderContent: BuilderC
         onUpdate?: import("..").extendedHook[] | undefined;
     };
     children: MitosisNode[];
+    types?: string[] | undefined;
+    interfaces?: string[] | undefined;
+    propsTypeRef?: string | undefined;
 };
 export {};

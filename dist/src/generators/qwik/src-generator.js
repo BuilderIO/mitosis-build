@@ -233,9 +233,15 @@ var SrcBuilder = /** @class */ (function () {
             if (Object.prototype.hasOwnProperty.call(bindings, rawKey) &&
                 !ignoreKey(rawKey)) {
                 var binding_1 = bindings[rawKey];
-                binding_1 = (binding_1 && binding_1.code) || binding_1;
+                binding_1 =
+                    binding_1 && typeof binding_1 == 'object' && 'code' in binding_1
+                        ? binding_1.code
+                        : binding_1;
                 var key = lastProperty(rawKey);
-                if (binding_1 != null && binding_1 === props[key]) {
+                if (!binding_1) {
+                    binding_1 = quote(props[rawKey]);
+                }
+                else if (binding_1 != null && binding_1 === props[key]) {
                     // HACK: workaround for the fact that sometimes the `bindings` have string literals
                     // We assume that when the binding content equals prop content.
                     binding_1 = quote(binding_1);
