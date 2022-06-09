@@ -232,9 +232,16 @@ var SrcBuilder = /** @class */ (function () {
         var _loop_1 = function (rawKey) {
             if (Object.prototype.hasOwnProperty.call(bindings, rawKey) &&
                 !ignoreKey(rawKey)) {
-                var binding_1 = bindings[rawKey].code;
+                var binding_1 = bindings[rawKey];
+                binding_1 =
+                    binding_1 && typeof binding_1 == 'object' && 'code' in binding_1
+                        ? binding_1.code
+                        : binding_1;
                 var key = lastProperty(rawKey);
-                if (binding_1 != null && binding_1 === props[key]) {
+                if (!binding_1 && rawKey in props) {
+                    binding_1 = quote(props[rawKey]);
+                }
+                else if (binding_1 != null && binding_1 === props[key]) {
                     // HACK: workaround for the fact that sometimes the `bindings` have string literals
                     // We assume that when the binding content equals prop content.
                     binding_1 = quote(binding_1);
@@ -392,7 +399,17 @@ function arrowFnValue(args, expression) {
     };
 }
 exports.arrowFnValue = arrowFnValue;
+var _virtual_index = '_virtual_index;';
+var return_virtual_index = 'return _virtual_index;';
 function iif(code) {
+    if (!code)
+        return;
+    code = code.trim();
+    if (code.endsWith(_virtual_index) && !code.endsWith(return_virtual_index)) {
+        code =
+            code.substr(0, code.length - _virtual_index.length) +
+                return_virtual_index;
+    }
     return function () {
         code && this.emit('(()=>{', code, '})()');
     };

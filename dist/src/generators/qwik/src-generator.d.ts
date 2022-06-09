@@ -59,7 +59,7 @@ export declare function quote(text: string): string;
 export declare function invoke(symbol: Symbol | string, args: any[], typeParameters?: string[]): (this: SrcBuilder) => void;
 export declare function arrowFnBlock(args: string[], statements: any[]): (this: SrcBuilder) => void;
 export declare function arrowFnValue(args: string[], expression: any): (this: SrcBuilder) => void;
-export declare function iif(code: any): (this: SrcBuilder) => void;
+export declare function iif(code: any): ((this: SrcBuilder) => void) | undefined;
 /**
  * Returns `true` if the code is a statement (rather than expression).
  *
