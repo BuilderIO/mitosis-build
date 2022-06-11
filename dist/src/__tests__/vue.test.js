@@ -24,6 +24,7 @@ var onUpdateWithDeps = require('./data/blocks/onUpdateWithDeps.raw');
 var onMount = require('./data/blocks/onMount.raw');
 var multipleOnUpdate = require('./data/blocks/multiple-onUpdate.raw');
 var multipleOnUpdateWithDeps = require('./data/blocks/multiple-onUpdateWithDeps.raw');
+var propsDestructure = require('./data/basic-props-destructure.raw');
 var path = 'test-path';
 describe('Vue', function () {
     test('Basic', function () {
@@ -133,6 +134,11 @@ describe('Vue', function () {
     });
     test('onMount & onUnMount', function () {
         var component = (0, jsx_1.parseJsx)(onMount);
+        var output = (0, vue_1.componentToVue)()({ component: component, path: path });
+        expect(output).toMatchSnapshot();
+    });
+    test('propsDestructure', function () {
+        var component = (0, jsx_1.parseJsx)(propsDestructure);
         var output = (0, vue_1.componentToVue)()({ component: component, path: path });
         expect(output).toMatchSnapshot();
     });

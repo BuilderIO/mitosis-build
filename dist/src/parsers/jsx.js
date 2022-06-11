@@ -758,6 +758,31 @@ var collectInterfaces = function (node, context) {
     interfaces.push(interfaceStr);
     context.builder.component.interfaces = interfaces.filter(Boolean);
 };
+function undoPropsDestructure(path) {
+    var node = path.node;
+    if (node.params.length && types.isObjectPattern(node.params[0])) {
+        var propsMap_1 = node.params[0].properties.reduce(function (pre, cur) {
+            if (types.isObjectProperty(cur) &&
+                types.isIdentifier(cur.key) &&
+                types.isIdentifier(cur.value)) {
+                pre[cur.value.name] = "props.".concat(cur.key.name);
+                return pre;
+            }
+            return pre;
+        }, {});
+        path.traverse({
+            JSXExpressionContainer: function (path) {
+                var node = path.node;
+                if (types.isIdentifier(node.expression)) {
+                    var name_4 = node.expression.name;
+                    if (propsMap_1[name_4]) {
+                        path.replaceWith(babel.types.jsxExpressionContainer(babel.types.identifier(propsMap_1[name_4])));
+                    }
+                }
+            },
+        });
+    }
+}
 /**
  * This function takes the raw string from a Mitosis component, and converts it into a JSON that can be processed by
  * each generator function.
@@ -839,9 +864,10 @@ function parseJsx(jsx, options) {
                     },
                     FunctionDeclaration: function (path, context) {
                         var node = path.node;
+                        undoPropsDestructure(path);
                         if (types.isIdentifier(node.id)) {
-                            var name_4 = node.id.name;
-                            if (name_4[0].toUpperCase() === name_4[0]) {
+                            var name_5 = node.id.name;
+                            if (name_5[0].toUpperCase() === name_5[0]) {
                                 path.replaceWith(jsonToAst(componentFunctionToJson(node, context)));
                             }
                         }
