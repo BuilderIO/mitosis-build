@@ -18,10 +18,14 @@ exports.useMetadata = exports.onError = exports.useDynamicTag = exports.onUnMoun
 __exportStar(require("./flow"), exports);
 // These compile away
 var useState = function (obj) {
-    throw Error('useState: Mitosis hook should have been compiled away');
+    throw new Error('useState: Mitosis hook should have been compiled away');
+    return obj;
 };
 exports.useState = useState;
-var useRef = function (obj) { return obj; };
+var useRef = function (obj) {
+    throw new Error('useRef: Mitosis hook should have been compiled away');
+    return obj;
+};
 exports.useRef = useRef;
 var useContext = function (key) {
     return null;
@@ -32,7 +36,8 @@ exports.createContext = createContext;
 var setContext = function (key, value) { };
 exports.setContext = setContext;
 var onMount = function (fn) {
-    throw Error('onMount: Mitosis hook should have been compiled away');
+    throw new Error('onMount: Mitosis hook should have been compiled away');
+    return null;
 };
 exports.onMount = onMount;
 var onUpdate = function (fn, deps) { return null; };
@@ -48,7 +53,8 @@ exports.useDynamicTag = useDynamicTag;
 var onError = function (fn) { return null; };
 exports.onError = onError;
 var useMetadata = function (obj) {
-    throw Error('useMetadata: Mitosis hook should have been compiled away');
+    throw new Error('useMetadata: Mitosis hook should have been compiled away');
+    return null;
 };
 exports.useMetadata = useMetadata;
 __exportStar(require("./parsers/jsx"), exports);
