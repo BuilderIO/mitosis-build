@@ -254,7 +254,7 @@ var componentToSolid = function (options) {
             ? "import { \n          ".concat(solidJSImports.map(function (item) { return item; }).join(', '), "\n         } from 'solid-js';")
             : '', !foundDynamicComponents ? '' : "import { Dynamic } from 'solid-js/web';", !hasState ? '' : "import { createMutable } from 'solid-js/store';", !componentHasStyles
             ? ''
-            : "import { css } from \"solid-styled-components\";", (0, render_imports_1.renderPreComponent)(json), json.name, !hasState ? '' : "const state = createMutable(".concat(stateString, ");"), refs, getContextString(json, options), !((_c = json.hooks.onMount) === null || _c === void 0 ? void 0 : _c.code)
+            : "import { css } from \"solid-styled-components\";", (0, render_imports_1.renderPreComponent)(json, 'solid'), json.name, !hasState ? '' : "const state = createMutable(".concat(stateString, ");"), refs, getContextString(json, options), !((_c = json.hooks.onMount) === null || _c === void 0 ? void 0 : _c.code)
             ? ''
             : "onMount(() => { ".concat(json.hooks.onMount.code, " })"), addWrapper ? '<>' : '', json.children
             .filter(filter_empty_text_nodes_1.filterEmptyTextNodes)

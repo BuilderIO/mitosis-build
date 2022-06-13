@@ -594,7 +594,7 @@ var componentToCustomElement = function (options) {
                 console.warn('Could not prettify', { string: html }, err);
             }
         }
-        var str = "\n      ".concat(json.types ? json.types.join('\n') : '', "\n      ").concat(json.interfaces ? (_j = json.interfaces) === null || _j === void 0 ? void 0 : _j.join('\n') : '', "\n      ").concat((0, render_imports_1.renderPreComponent)(json), "\n      /**\n       * Usage:\n       * \n       *  <").concat(kebabName, "></").concat(kebabName, ">\n       * \n       */\n      class ").concat(ComponentName, " extends ").concat(((_k = useOptions === null || useOptions === void 0 ? void 0 : useOptions.experimental) === null || _k === void 0 ? void 0 : _k.classExtends)
+        var str = "\n      ".concat(json.types ? json.types.join('\n') : '', "\n      ").concat(json.interfaces ? (_j = json.interfaces) === null || _j === void 0 ? void 0 : _j.join('\n') : '', "\n      ").concat((0, render_imports_1.renderPreComponent)(json, 'customElement'), "\n      /**\n       * Usage:\n       * \n       *  <").concat(kebabName, "></").concat(kebabName, ">\n       * \n       */\n      class ").concat(ComponentName, " extends ").concat(((_k = useOptions === null || useOptions === void 0 ? void 0 : useOptions.experimental) === null || _k === void 0 ? void 0 : _k.classExtends)
             ? (_l = useOptions === null || useOptions === void 0 ? void 0 : useOptions.experimental) === null || _l === void 0 ? void 0 : _l.classExtends(json, useOptions)
             : 'HTMLElement', " {\n        ").concat(Array.from(domRefs)
             .map(function (ref) {

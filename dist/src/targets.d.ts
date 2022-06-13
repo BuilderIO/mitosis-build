@@ -22,4 +22,5 @@ export declare const targets: {
     vue: (userOptions?: import("./generators/vue").ToVueOptions) => ({ component, path }: import(".").TranspilerArgs & {
         path: string;
     }) => string;
+    stencil: (options?: import("./generators/stencil").ToStencilOptions) => import(".").Transpiler;
 };

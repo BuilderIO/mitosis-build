@@ -13,6 +13,7 @@ var svelte_1 = require("./generators/svelte");
 var swift_ui_1 = require("./generators/swift-ui");
 var template_1 = require("./generators/template");
 var vue_1 = require("./generators/vue");
+var stencil_1 = require("./generators/stencil");
 exports.targets = {
     angular: angular_1.componentToAngular,
     builder: builder_1.componentToBuilder,
@@ -28,4 +29,5 @@ exports.targets = {
     template: template_1.componentToTemplate,
     webcomponent: html_1.componentToCustomElement,
     vue: vue_1.componentToVue,
+    stencil: stencil_1.componentToStencil,
 };

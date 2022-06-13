@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.renderExportAndLocal = exports.renderPreComponent = void 0;
+exports.renderExportAndLocal = exports.renderPreComponent = exports.renderImports = exports.renderImport = void 0;
 var getStarImport = function (_a) {
     var theImport = _a.theImport;
     for (var key in theImport.imports) {
@@ -27,6 +27,8 @@ var getFileExtensionForTarget = function (target) {
             return '.svelte';
         case 'solid':
             return '.jsx';
+        case 'vue':
+            return '.vue';
         // these `.lite` extensions are handled in the `transpile` step of the CLI.
         // TO-DO: consolidate file-extension renaming to one place.
         default:
@@ -43,9 +45,9 @@ var transformImportPath = function (theImport, target) {
     }
     return theImport.path;
 };
-var renderImport = function (_a) {
-    var theImport = _a.theImport, target = _a.target;
-    var importString = 'import ';
+var getImportedValues = function (_a) {
+    var theImport = _a.theImport;
+    var importString = '';
     var starImport = getStarImport({ theImport: theImport });
     if (starImport) {
         importString += " * as ".concat(starImport, " ");
@@ -75,28 +77,35 @@ var renderImport = function (_a) {
         }
         importString += ' } ';
     }
-    var path = transformImportPath(theImport, target);
-    importString += " from '".concat(path, "';");
     return importString;
 };
+var renderImport = function (_a) {
+    var theImport = _a.theImport, target = _a.target;
+    var importedValues = getImportedValues({ theImport: theImport });
+    var path = transformImportPath(theImport, target);
+    return "import ".concat(importedValues, " from '").concat(path, "';");
+};
+exports.renderImport = renderImport;
 var renderImports = function (_a) {
     var imports = _a.imports, target = _a.target;
-    var importString = '';
-    for (var _i = 0, imports_1 = imports; _i < imports_1.length; _i++) {
-        var theImport = imports_1[_i];
+    return imports
+        .filter(function (theImport) {
+        if (
         // Remove compile away components
-        if (theImport.path === '@builder.io/components') {
-            continue;
+        theImport.path === '@builder.io/components' ||
+            // TODO: Mitosis output needs this
+            theImport.path.startsWith('@builder.io/mitosis')) {
+            return false;
         }
-        // TODO: Mitosis output needs this
-        if (theImport.path.startsWith('@builder.io/mitosis')) {
-            continue;
+        else {
+            return true;
         }
-        importString += renderImport({ theImport: theImport, target: target }) + '\n';
-    }
-    return importString;
+    })
+        .map(function (theImport) { return (0, exports.renderImport)({ theImport: theImport, target: target }); })
+        .join('\n');
 };
-var renderPreComponent = function (component, target) { return "\n    ".concat(renderImports({ imports: component.imports, target: target }), "\n    ").concat((0, exports.renderExportAndLocal)(component), "\n    ").concat(component.hooks.preComponent || '', "\n  "); };
+exports.renderImports = renderImports;
+var renderPreComponent = function (component, target) { return "\n    ".concat((0, exports.renderImports)({ imports: component.imports, target: target }), "\n    ").concat((0, exports.renderExportAndLocal)(component), "\n    ").concat(component.hooks.preComponent || '', "\n  "); };
 exports.renderPreComponent = renderPreComponent;
 var renderExportAndLocal = function (component) {
     return Object.keys(component.exports || {})

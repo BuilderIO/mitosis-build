@@ -154,7 +154,7 @@ var componentToStencil = function (options) {
              *
              *    export default function ...
              */
-            , "',\n      ", "\n    })\n    export default class ", " {\n    \n      ", "\n\n        ", "\n        ", "\n      \n        ", "\n        ", "\n        ", "\n    \n      render() {\n        return (", "\n        \n          ", "\n\n        ", ")\n      }\n    }\n  "])), (0, render_imports_1.renderPreComponent)(json), 
+            , "',\n      ", "\n    })\n    export default class ", " {\n    \n      ", "\n\n        ", "\n        ", "\n      \n        ", "\n        ", "\n        ", "\n    \n      render() {\n        return (", "\n        \n          ", "\n\n        ", ")\n      }\n    }\n  "])), (0, render_imports_1.renderPreComponent)(json, 'stencil'), 
         /**
          * You can set the tagName in your Mitosis component as
          *

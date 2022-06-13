@@ -168,7 +168,7 @@ var componentToMitosis = function (toMitosisOptions) {
             ? ''
             : "import { ".concat(!hasState ? '' : 'useState, ', " ").concat(!refs.length ? '' : 'useRef, ', " ").concat(mitosisComponents.join(', '), " } from '@builder.io/mitosis';"), !otherComponents.length
             ? ''
-            : "import { ".concat(otherComponents.join(','), " } from '@components';"), json.types ? json.types.join('\n') : '', json.interfaces ? (_b = json.interfaces) === null || _b === void 0 ? void 0 : _b.join('\n') : '', (0, render_imports_1.renderPreComponent)(json), stringifiedUseMetadata !== '{}'
+            : "import { ".concat(otherComponents.join(','), " } from '@components';"), json.types ? json.types.join('\n') : '', json.interfaces ? (_b = json.interfaces) === null || _b === void 0 ? void 0 : _b.join('\n') : '', (0, render_imports_1.renderPreComponent)(json, 'mitosis'), stringifiedUseMetadata !== '{}'
             ? "".concat(jsx_1.METADATA_HOOK_NAME, "(").concat(stringifiedUseMetadata, ")")
             : '', component.name, !hasState
             ? ''

@@ -502,7 +502,7 @@ var _componentToReact = function (json, options, isSubComponent) {
         ? "import { useMutable } from 'react-solid-state';"
         : '', stateType === 'mobx' && hasState
         ? "import { useLocalObservable } from 'mobx-react-lite';"
-        : '', json.types ? json.types.join('\n') : '', json.interfaces ? (_g = json.interfaces) === null || _g === void 0 ? void 0 : _g.join('\n') : '', (0, render_imports_1.renderPreComponent)(json), isSubComponent ? '' : 'export default ', isForwardRef
+        : '', json.types ? json.types.join('\n') : '', json.interfaces ? (_g = json.interfaces) === null || _g === void 0 ? void 0 : _g.join('\n') : '', (0, render_imports_1.renderPreComponent)(json, 'react'), isSubComponent ? '' : 'export default ', isForwardRef
         ? "forwardRef".concat(forwardRefType ? "<".concat(forwardRefType, ">") : '', "(")
         : '', json.name || 'MyComponent', propsArgs, isForwardRef ? ", ".concat(options.forwardRef) : '', hasStateArgument ? '' : refsString, hasState
         ? stateType === 'mobx'
