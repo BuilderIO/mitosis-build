@@ -8,6 +8,9 @@ exports.DEFAULT_VALUES = {
 function MyBasicComponent() {
     var state = (0, mitosis_1.useState)({
         name: 'Steve',
+        underscore_fn_name: function () {
+            return 'bar';
+        },
     });
     return (<div class="test" css={{
             padding: '10px',

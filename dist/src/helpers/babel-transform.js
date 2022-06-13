@@ -98,7 +98,7 @@ var babelTransformExpression = function (code, visitor, type) {
             // Detect method fragments. These get passed sometimes and otherwise
             // generate compile errors. They are of the form `foo() { ... }`
             var isMethod = Boolean(!code.startsWith('function') &&
-                code.match(/^[a-z0-9]+\s*\([^\)]*\)\s*[\{:]/i));
+                code.match(/^[a-z0-9_]+\s*\([^\)]*\)\s*[\{:]/i));
             if (isMethod) {
                 useCode = "function ".concat(useCode);
             }
