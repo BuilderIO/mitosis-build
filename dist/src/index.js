@@ -17,7 +17,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.useMetadata = exports.onError = exports.useDynamicTag = exports.onUnMount = exports.onInit = exports.onCreate = exports.onUpdate = exports.onMount = exports.setContext = exports.createContext = exports.useContext = exports.useRef = exports.useState = void 0;
 __exportStar(require("./flow"), exports);
 // These compile away
-var useState = function (obj) { return obj; };
+var useState = function (obj) {
+    throw Error('useState: Mitosis hook should have been compiled away');
+};
 exports.useState = useState;
 var useRef = function (obj) { return obj; };
 exports.useRef = useRef;
@@ -29,7 +31,9 @@ var createContext = function (value) { return null; };
 exports.createContext = createContext;
 var setContext = function (key, value) { };
 exports.setContext = setContext;
-var onMount = function (fn) { return null; };
+var onMount = function (fn) {
+    throw Error('onMount: Mitosis hook should have been compiled away');
+};
 exports.onMount = onMount;
 var onUpdate = function (fn, deps) { return null; };
 exports.onUpdate = onUpdate;
@@ -43,7 +47,9 @@ var useDynamicTag = function (fn) { return null; };
 exports.useDynamicTag = useDynamicTag;
 var onError = function (fn) { return null; };
 exports.onError = onError;
-var useMetadata = function (obj) { return null; };
+var useMetadata = function (obj) {
+    throw Error('useMetadata: Mitosis hook should have been compiled away');
+};
 exports.useMetadata = useMetadata;
 __exportStar(require("./parsers/jsx"), exports);
 __exportStar(require("./parsers/builder"), exports);
