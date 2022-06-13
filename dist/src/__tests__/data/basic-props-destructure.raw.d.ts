@@ -1,1 +1,4 @@
-export default function MyBasicComponent(props: any): JSX.Element;
+export default function MyBasicComponent({ children: c, type }: {
+    children: any;
+    type: any;
+}): JSX.Element;
