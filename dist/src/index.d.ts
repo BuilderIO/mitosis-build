@@ -18,7 +18,7 @@ export declare const onInit: (fn: () => any) => any;
 export declare const onUnMount: (fn: () => any) => any;
 export declare const useDynamicTag: (fn: () => any) => any;
 export declare const onError: (fn: () => any) => any;
-export declare const useMetadata: (obj: object) => null;
+export declare const useMetadata: (obj: object) => any;
 export * from './parsers/jsx';
 export * from './parsers/builder';
 export * from './parsers/angular';
