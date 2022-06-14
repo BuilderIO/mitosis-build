@@ -5,7 +5,7 @@ var mitosis_1 = require("@builder.io/mitosis");
     outputs: ['onMessage', 'onEvent'],
 });
 function MyBasicOutputsComponent(props) {
-    var state = (0, mitosis_1.useState)({
+    var state = (0, mitosis_1.useStore)({
         name: 'PatrickJS',
     });
     (0, mitosis_1.onMount)(function () {

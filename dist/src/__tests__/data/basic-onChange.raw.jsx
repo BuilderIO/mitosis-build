@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 var mitosis_1 = require("@builder.io/mitosis");
 function MyBasicComponent() {
-    var state = (0, mitosis_1.useState)({
+    var state = (0, mitosis_1.useStore)({
         name: 'Steve',
     });
     return (<div class="test" css={{

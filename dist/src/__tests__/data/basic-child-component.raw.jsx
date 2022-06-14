@@ -7,7 +7,7 @@ var mitosis_1 = require("@builder.io/mitosis");
 var basic_raw_1 = __importDefault(require("./basic.raw"));
 var basic_onMount_update_raw_1 = __importDefault(require("./basic-onMount-update.raw"));
 function MyBasicChildComponent() {
-    var state = (0, mitosis_1.useState)({
+    var state = (0, mitosis_1.useStore)({
         name: 'Steve',
         dev: 'PatrickJS',
     });

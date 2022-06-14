@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 var mitosis_1 = require("@builder.io/mitosis");
 function Column(props) {
-    var state = (0, mitosis_1.useState)({
+    var state = (0, mitosis_1.useStore)({
         getColumns: function () {
             return props.columns || [];
         },

@@ -6,7 +6,7 @@ exports.defaultValues = {
     name: 'PatrickJS',
 };
 function OnInit(props) {
-    var state = (0, mitosis_1.useState)({
+    var state = (0, mitosis_1.useStore)({
         // name: props.name
         // name: defaultValues.name || props.name,
         name: '',

@@ -7,7 +7,7 @@ exports.gettersToFunctions = void 0;
 var method_literal_prefix_1 = require("../constants/method-literal-prefix");
 var traverse_1 = __importDefault(require("traverse"));
 /**
- * Map getters like `useState({ get foo() { ... }})` from `state.foo` to `foo()`
+ * Map getters like `useStore({ get foo() { ... }})` from `state.foo` to `foo()`
  */
 var gettersToFunctions = function (json) {
     var getterKeys = Object.keys(json.state).filter(function (item) {

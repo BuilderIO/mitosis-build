@@ -14,12 +14,14 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.useMetadata = exports.onError = exports.useDynamicTag = exports.onUnMount = exports.onInit = exports.onCreate = exports.onUpdate = exports.onMount = exports.setContext = exports.createContext = exports.useContext = exports.useRef = exports.useState = void 0;
+exports.useMetadata = exports.onError = exports.useDynamicTag = exports.onUnMount = exports.onInit = exports.onCreate = exports.onUpdate = exports.onMount = exports.setContext = exports.createContext = exports.useContext = exports.useRef = exports.useState = exports.useStore = void 0;
 __exportStar(require("./flow"), exports);
 // These compile away
+var useStore = function (obj) { return obj; };
+exports.useStore = useStore;
 var useState = function (obj) {
     throw new Error('useState: Mitosis hook should have been compiled away');
-    return obj;
+    return null;
 };
 exports.useState = useState;
 var useRef = function (obj) {

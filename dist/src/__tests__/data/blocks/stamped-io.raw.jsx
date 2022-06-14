@@ -4,7 +4,7 @@ var mitosis_1 = require("@builder.io/mitosis");
 var lodash_1 = require("lodash");
 var lodash_2 = require("lodash");
 function SmileReviews(props) {
-    var state = (0, mitosis_1.useState)({
+    var state = (0, mitosis_1.useStore)({
         reviews: [],
         name: 'test',
         showReviewPrompt: false,
