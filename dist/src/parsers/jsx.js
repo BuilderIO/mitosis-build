@@ -62,6 +62,7 @@ var replace_idenifiers_1 = require("../helpers/replace-idenifiers");
 var get_bindings_1 = require("../helpers/get-bindings");
 var replace_new_lines_in_strings_1 = require("../helpers/replace-new-lines-in-strings");
 var json_1 = require("../helpers/json");
+var hooks_1 = require("../constants/hooks");
 var jsxPlugin = require('@babel/plugin-syntax-jsx');
 var tsPreset = require('@babel/preset-typescript');
 exports.selfClosingTags = new Set([
@@ -329,14 +330,14 @@ var componentFunctionToJson = function (node, context) {
                 // Legacy format, like:
                 // const state = useStore({...})
                 else if (types.isIdentifier(init.callee)) {
-                    if (init.callee.name === 'useState' ||
-                        init.callee.name === 'useStore') {
+                    if (init.callee.name === hooks_1.HOOKS.STATE ||
+                        init.callee.name === hooks_1.HOOKS.STORE) {
                         var firstArg = init.arguments[0];
                         if (types.isObjectExpression(firstArg)) {
                             Object.assign(state, (0, exports.parseStateObject)(firstArg));
                         }
                     }
-                    else if (init.callee.name === 'useContext') {
+                    else if (init.callee.name === hooks_1.HOOKS.CONTEXT) {
                         var firstArg = init.arguments[0];
                         if (types.isVariableDeclarator(declaration) &&
                             types.isIdentifier(declaration.id)) {
@@ -358,7 +359,7 @@ var componentFunctionToJson = function (node, context) {
                             }
                         }
                     }
-                    else if (init.callee.name === 'useRef') {
+                    else if (init.callee.name === hooks_1.HOOKS.REF) {
                         if (types.isIdentifier(declaration.id)) {
                             var firstArg = init.arguments[0];
                             var varName = declaration.id.name;
