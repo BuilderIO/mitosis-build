@@ -1,7 +1,7 @@
 export * from './flow';
 export declare type Context<T> = {};
-export declare const useState: <T>(value: T) => [T, (value: T) => void];
 export declare const useStore: <T>(obj: T) => T;
+export declare const useState: <T>(obj: T) => [T, (value: T) => void];
 export declare const useRef: <T>(obj?: void | T | null | undefined) => T;
 export declare const useContext: <T = {
     [key: string]: any;
@@ -19,7 +19,7 @@ export declare const onInit: (fn: () => any) => any;
 export declare const onUnMount: (fn: () => any) => any;
 export declare const useDynamicTag: (fn: () => any) => any;
 export declare const onError: (fn: () => any) => any;
-export declare const useMetadata: (obj: object) => null;
+export declare const useMetadata: (obj: object) => any;
 export * from './parsers/jsx';
 export * from './parsers/builder';
 export * from './parsers/angular';

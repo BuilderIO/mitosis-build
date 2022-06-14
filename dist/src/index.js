@@ -14,13 +14,20 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.useMetadata = exports.onError = exports.useDynamicTag = exports.onUnMount = exports.onInit = exports.onCreate = exports.onUpdate = exports.onMount = exports.setContext = exports.createContext = exports.useContext = exports.useRef = exports.useStore = exports.useState = void 0;
+exports.useMetadata = exports.onError = exports.useDynamicTag = exports.onUnMount = exports.onInit = exports.onCreate = exports.onUpdate = exports.onMount = exports.setContext = exports.createContext = exports.useContext = exports.useRef = exports.useState = exports.useStore = void 0;
 __exportStar(require("./flow"), exports);
 // These compile away
-exports.useState = null;
 var useStore = function (obj) { return obj; };
 exports.useStore = useStore;
-var useRef = function (obj) { return obj; };
+var useState = function (obj) {
+    throw new Error('useState: Mitosis hook should have been compiled away');
+    return null;
+};
+exports.useState = useState;
+var useRef = function (obj) {
+    throw new Error('useRef: Mitosis hook should have been compiled away');
+    return obj;
+};
 exports.useRef = useRef;
 var useContext = function (key) {
     return null;
@@ -30,7 +37,10 @@ var createContext = function (value) { return null; };
 exports.createContext = createContext;
 var setContext = function (key, value) { };
 exports.setContext = setContext;
-var onMount = function (fn) { return null; };
+var onMount = function (fn) {
+    throw new Error('onMount: Mitosis hook should have been compiled away');
+    return null;
+};
 exports.onMount = onMount;
 var onUpdate = function (fn, deps) { return null; };
 exports.onUpdate = onUpdate;
@@ -44,7 +54,10 @@ var useDynamicTag = function (fn) { return null; };
 exports.useDynamicTag = useDynamicTag;
 var onError = function (fn) { return null; };
 exports.onError = onError;
-var useMetadata = function (obj) { return null; };
+var useMetadata = function (obj) {
+    throw new Error('useMetadata: Mitosis hook should have been compiled away');
+    return null;
+};
 exports.useMetadata = useMetadata;
 __exportStar(require("./parsers/jsx"), exports);
 __exportStar(require("./parsers/builder"), exports);
