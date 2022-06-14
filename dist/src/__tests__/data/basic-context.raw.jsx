@@ -5,7 +5,7 @@ var injection_js_1 = require("@dummy/injection-js");
 function MyBasicComponent() {
     (0, mitosis_1.setContext)(injection_js_1.Injector, (0, injection_js_1.createInjector)());
     var myService = (0, mitosis_1.useContext)(injection_js_1.MyService);
-    var state = (0, mitosis_1.useState)({
+    var state = (0, mitosis_1.useStore)({
         name: 'PatrickJS',
     });
     (0, mitosis_1.onInit)(function () {

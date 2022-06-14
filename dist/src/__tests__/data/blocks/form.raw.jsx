@@ -44,7 +44,7 @@ var _fake_3 = require("@fake");
 var _fake_4 = require("@fake");
 function FormComponent(props) {
     var _a;
-    var state = (0, mitosis_1.useState)({
+    var state = (0, mitosis_1.useStore)({
         state: 'unsubmitted',
         // TODO: separate response and error?
         responseData: null,

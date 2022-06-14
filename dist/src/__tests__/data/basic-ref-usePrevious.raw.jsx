@@ -15,7 +15,7 @@ function usePrevious(value) {
 }
 exports.usePrevious = usePrevious;
 function MyPreviousComponent(props) {
-    var state = (0, mitosis_1.useState)({
+    var state = (0, mitosis_1.useStore)({
         count: 0,
     });
     var prevCount = (0, mitosis_1.useRef)(state.count);

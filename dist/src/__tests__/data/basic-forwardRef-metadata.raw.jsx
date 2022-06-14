@@ -5,7 +5,7 @@ var mitosis_1 = require("@builder.io/mitosis");
     forwardRef: 'inputRef',
 });
 function MyBasicForwardRefComponent(props) {
-    var state = (0, mitosis_1.useState)({
+    var state = (0, mitosis_1.useStore)({
         name: 'PatrickJS',
     });
     return (<div>

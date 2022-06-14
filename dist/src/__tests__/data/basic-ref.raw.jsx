@@ -4,7 +4,7 @@ var mitosis_1 = require("@builder.io/mitosis");
 function MyBasicRefComponent(props) {
     var inputRef = (0, mitosis_1.useRef)(null);
     var inputNoArgRef = (0, mitosis_1.useRef)(null);
-    var state = (0, mitosis_1.useState)({
+    var state = (0, mitosis_1.useStore)({
         name: 'PatrickJS',
     });
     function onBlur() {

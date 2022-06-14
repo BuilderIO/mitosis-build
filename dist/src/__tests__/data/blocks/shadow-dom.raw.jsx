@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var mitosis_1 = require("@builder.io/mitosis");
 (0, mitosis_1.useMetadata)({ isAttachedToShadowDom: true });
 function SmileReviews(props) {
-    var state = (0, mitosis_1.useState)({
+    var state = (0, mitosis_1.useStore)({
         reviews: [],
         name: 'test',
         showReviewPrompt: false,

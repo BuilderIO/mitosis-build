@@ -10,7 +10,7 @@ function Text(props) {
         !(((_b = (_a = props.builderBlock) === null || _a === void 0 ? void 0 : _a.bindings) === null || _b === void 0 ? void 0 : _b['component.options.text']) ||
             ((_d = (_c = props.builderBlock) === null || _c === void 0 ? void 0 : _c.bindings) === null || _d === void 0 ? void 0 : _d['options.text']) ||
             ((_f = (_e = props.builderBlock) === null || _e === void 0 ? void 0 : _e.bindings) === null || _f === void 0 ? void 0 : _f['text']));
-    var state = (0, mitosis_1.useState)({ name: 'Decadef20' });
+    var state = (0, mitosis_1.useStore)({ name: 'Decadef20' });
     // TODO: Add back dynamic `direction` CSS prop when we add support for some
     //       sort of dynamic CSS
     // css={{ direction: props.rtlMode ? 'rtl' : 'ltr' }}

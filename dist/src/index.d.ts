@@ -1,6 +1,7 @@
 export * from './flow';
 export declare type Context<T> = {};
-export declare const useState: <T>(obj: T) => T;
+export declare const useState: <T>(value: T) => [T, (value: T) => void];
+export declare const useStore: <T>(obj: T) => T;
 export declare const useRef: <T>(obj?: void | T | null | undefined) => T;
 export declare const useContext: <T = {
     [key: string]: any;
