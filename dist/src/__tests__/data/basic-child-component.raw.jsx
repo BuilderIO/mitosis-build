@@ -12,7 +12,6 @@ function MyBasicChildComponent() {
         dev: 'PatrickJS',
     });
     return (<div>
-      {/*// @ts-ignore */}
       <basic_raw_1.default id={state.dev}/>
       <div>
         <basic_onMount_update_raw_1.default hi={state.name} bye={state.dev}/>

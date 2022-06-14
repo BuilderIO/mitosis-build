@@ -10,9 +10,15 @@ function MultipleOnUpdateWithDeps() {
     });
     (0, mitosis_1.onUpdate)(function () {
         console.log('Runs when a or b changes', state.a, state.b);
+        if (state.a === 'a') {
+            state.a = 'b';
+        }
     }, [state.a, state.b]);
     (0, mitosis_1.onUpdate)(function () {
         console.log('Runs when c or d changes', state.c, state.d);
+        if (state.a === 'a') {
+            state.a = 'b';
+        }
     }, [state.c, state.d]);
     return <div />;
 }

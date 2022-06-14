@@ -5,7 +5,7 @@ var mitosis_1 = require("@builder.io/mitosis");
 exports.DEFAULT_VALUES = {
     name: 'Steve',
 };
-function MyBasicComponent() {
+function MyBasicComponent(props) {
     var state = (0, mitosis_1.useStore)({
         name: 'Steve',
         underscore_fn_name: function () {
