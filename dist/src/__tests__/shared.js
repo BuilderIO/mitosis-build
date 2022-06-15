@@ -50,6 +50,7 @@ var propsType = require('./data/types/component-props-type.raw');
 var propsInterface = require('./data/types/component-props-interface.raw');
 var preserveTyping = require('./data/types/preserve-typing.raw');
 var propsDestructure = require('./data/basic-props-destructure.raw');
+var preserveExportOrLocalStatement = require('./data/basic-preserve-export-or-local-statement.raw');
 var path = 'test-path';
 var BASIC_TESTS = {
     ContentSlotJSX: contentSlotJsx,
@@ -92,6 +93,7 @@ var BASIC_TESTS = {
     className: classNameJsx,
     'Image State': imageState,
     'Basic OnMount Update': basicOnMountUpdate,
+    preserveExportOrLocalStatement: preserveExportOrLocalStatement,
 };
 var MULTI_ON_UPDATE_TESTS = {
     multipleOnUpdate: multipleOnUpdate,

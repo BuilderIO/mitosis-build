@@ -827,17 +827,29 @@ function parseJsx(jsx, options) {
                                 !types.isExpressionStatement(statement);
                         });
                         context.builder.component.exports = exportsOrLocalVariables.reduce(function (pre, node) {
+                            var _a, _b;
                             var name, isFunction;
-                            if (babel.types.isExportNamedDeclaration(node) &&
-                                babel.types.isVariableDeclaration(node.declaration) &&
-                                babel.types.isIdentifier(node.declaration.declarations[0].id)) {
-                                name = node.declaration.declarations[0].id.name;
-                                isFunction = babel.types.isFunction(node.declaration.declarations[0].init);
+                            if (babel.types.isExportNamedDeclaration(node)) {
+                                if (babel.types.isVariableDeclaration(node.declaration) &&
+                                    babel.types.isIdentifier(node.declaration.declarations[0].id)) {
+                                    name = node.declaration.declarations[0].id.name;
+                                    isFunction = babel.types.isFunction(node.declaration.declarations[0].init);
+                                }
+                                if (babel.types.isFunctionDeclaration(node.declaration)) {
+                                    name = (_a = node.declaration.id) === null || _a === void 0 ? void 0 : _a.name;
+                                    isFunction = true;
+                                }
                             }
-                            else if (babel.types.isVariableDeclaration(node) &&
-                                babel.types.isIdentifier(node.declarations[0].id)) {
-                                name = node.declarations[0].id.name;
-                                isFunction = babel.types.isFunction(node.declarations[0].init);
+                            else {
+                                if (babel.types.isVariableDeclaration(node) &&
+                                    babel.types.isIdentifier(node.declarations[0].id)) {
+                                    name = node.declarations[0].id.name;
+                                    isFunction = babel.types.isFunction(node.declarations[0].init);
+                                }
+                                if (babel.types.isFunctionDeclaration(node)) {
+                                    name = (_b = node.id) === null || _b === void 0 ? void 0 : _b.name;
+                                    isFunction = true;
+                                }
                             }
                             if (name) {
                                 pre[name] = {
@@ -846,7 +858,7 @@ function parseJsx(jsx, options) {
                                 };
                             }
                             else {
-                                console.warn('export statement without name', node);
+                                console.warn('Could not parse export or variable: ignoring node', node);
                             }
                             return pre;
                         }, {});
