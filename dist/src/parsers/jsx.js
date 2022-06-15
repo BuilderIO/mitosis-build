@@ -83,7 +83,7 @@ exports.selfClosingTags = new Set([
 ]);
 var types = babel.types;
 var arrayToAst = function (array) {
-    return types.arrayExpression(array.map(function (item) { return jsonToAst(item); }));
+    return types.arrayExpression(array.map(jsonToAst));
 };
 var jsonToAst = function (json) {
     if (types.isNode(json)) {
@@ -113,6 +113,7 @@ var jsonToAst = function (json) {
 };
 var jsonObjectToAst = function (json) {
     if (!json) {
+        // TO-DO: This looks concerning...
         return json;
     }
     var properties = [];
