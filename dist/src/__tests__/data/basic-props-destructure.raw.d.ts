@@ -1,4 +1,6 @@
-export default function MyBasicComponent({ children: c, type }: {
+declare type Props = {
     children: any;
-    type: any;
-}): JSX.Element;
+    type: string;
+};
+export default function MyBasicComponent({ children: c, type }: Props): JSX.Element;
+export {};

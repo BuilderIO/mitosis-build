@@ -760,10 +760,18 @@ var collectInterfaces = function (node, context) {
     interfaces.push(interfaceStr);
     context.builder.component.interfaces = interfaces.filter(Boolean);
 };
+var beforeParse = function (path) {
+    path.traverse({
+        FunctionDeclaration: function (path) {
+            undoPropsDestructure(path);
+        },
+    });
+};
 function undoPropsDestructure(path) {
     var node = path.node;
     if (node.params.length && types.isObjectPattern(node.params[0])) {
-        var propsMap_1 = node.params[0].properties.reduce(function (pre, cur) {
+        var param = node.params[0];
+        var propsMap_1 = param.properties.reduce(function (pre, cur) {
             if (types.isObjectProperty(cur) &&
                 types.isIdentifier(cur.key) &&
                 types.isIdentifier(cur.value)) {
@@ -772,6 +780,12 @@ function undoPropsDestructure(path) {
             }
             return pre;
         }, {});
+        if (param.typeAnnotation) {
+            node.params = [
+                __assign(__assign({}, babel.types.identifier('props')), { typeAnnotation: param.typeAnnotation }),
+            ];
+            path.replaceWith(node);
+        }
         path.traverse({
             JSXExpressionContainer: function (path) {
                 var node = path.node;
@@ -814,6 +828,7 @@ function parseJsx(jsx, options) {
                         if (context.builder) {
                             return;
                         }
+                        beforeParse(path);
                         context.builder = {
                             component: (0, create_mitosis_component_1.createMitosisComponent)(),
                         };
@@ -878,7 +893,6 @@ function parseJsx(jsx, options) {
                     },
                     FunctionDeclaration: function (path, context) {
                         var node = path.node;
-                        undoPropsDestructure(path);
                         if (types.isIdentifier(node.id)) {
                             var name_5 = node.id.name;
                             if (name_5[0].toUpperCase() === name_5[0]) {
