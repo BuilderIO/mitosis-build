@@ -12,13 +12,13 @@ export const MyComponent_onMount = (state) => {
     if (!state.hasOwnProperty("myState")) state.myState = "initialValue";
     typeof __STATE__ === "object" &&
       Object.assign(state, __STATE__[state.serverStateId]);
-    undefined;
   }
   withScopedStylesQrl(qrl("./med.js", "MyComponent_styles", []));
   return h(
     Fragment,
     null,
     h(Image, {
+      "builder-id": "builder-fa4480d2f48a44a7a2e98cf07c54927b",
       image:
         "https://cdn.builder.io/api/v1/image/assets%2F23dfd7cef1104af59f281d58ec525923%2F4ecf7b7554464b0183ab8250f67e797b?width=1160",
       backgroundSize: "cover",

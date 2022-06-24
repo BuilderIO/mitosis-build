@@ -6,7 +6,6 @@ exports.Todo_onMount = (state) => {
     state.__INIT__ = true;
     typeof __STATE__ === "object" &&
       Object.assign(state, __STATE__[state.serverStateId]);
-    undefined;
   }
   return h(
     "li",

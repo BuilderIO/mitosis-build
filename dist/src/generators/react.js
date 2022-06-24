@@ -59,9 +59,7 @@ var react_native_1 = require("./react-native");
 var isRootShowNode = function (json) {
     return json.children.length === 1 && ['Show'].includes(json.children[0].name);
 };
-var wrapInFragment = function (json) {
-    return json.children.length !== 1;
-};
+var wrapInFragment = function (json) { return json.children.length !== 1; };
 var NODE_MAPPERS = {
     Slot: function (json, options, parentSlots) {
         var _a;
@@ -116,10 +114,7 @@ var BINDING_MAPPERS = {
         return [ref, value];
     },
     innerHTML: function (_key, value) {
-        return [
-            'dangerouslySetInnerHTML',
-            "{__html: ".concat(value.replace(/\s+/g, ' '), "}"),
-        ];
+        return ['dangerouslySetInnerHTML', "{__html: ".concat(value.replace(/\s+/g, ' '), "}")];
     },
 };
 var blockToReact = function (json, options, parentSlots) {
@@ -147,9 +142,7 @@ var blockToReact = function (json, options, parentSlots) {
         str += " {...(".concat(processBinding(json.bindings._spread.code, options), ")} ");
     }
     for (var key in json.properties) {
-        var value = (json.properties[key] || '')
-            .replace(/"/g, '&quot;')
-            .replace(/\n/g, '\\n');
+        var value = (json.properties[key] || '').replace(/"/g, '&quot;').replace(/\n/g, '\\n');
         if (key === 'class') {
             str += " className=\"".concat(value, "\" ");
         }
@@ -354,7 +347,9 @@ var updateStateSettersInCode = function (value, options) {
                     if (node.left.object.name === 'state') {
                         // TODO: ultimately support other property access like strings
                         var propertyName = node.left.property.name;
-                        path.replaceWith(core_1.types.callExpression(core_1.types.identifier("set".concat((0, capitalize_1.capitalize)(propertyName))), [node.right]));
+                        path.replaceWith(core_1.types.callExpression(core_1.types.identifier("set".concat((0, capitalize_1.capitalize)(propertyName))), [
+                            node.right,
+                        ]));
                     }
                 }
             }
@@ -388,9 +383,7 @@ var componentToReact = function (reactOptions) {
         var str = _componentToReact(json, options);
         str +=
             '\n\n\n' +
-                json.subComponents
-                    .map(function (item) { return _componentToReact(item, options, true); })
-                    .join('\n\n\n');
+                json.subComponents.map(function (item) { return _componentToReact(item, options, true); }).join('\n\n\n');
         if (options.plugins) {
             str = (0, plugins_1.runPreCodePlugins)(str, options.plugins);
         }
@@ -454,9 +447,7 @@ var _componentToReact = function (json, options, isSubComponent) {
         json = (0, plugins_1.runPostJsonPlugins)(json, options.plugins);
     }
     var css = stylesType === 'styled-jsx' && (0, collect_styles_1.collectCss)(json);
-    var styledComponentsCode = stylesType === 'styled-components' &&
-        componentHasStyles &&
-        (0, collect_styles_1.collectStyledComponents)(json);
+    var styledComponentsCode = stylesType === 'styled-components' && componentHasStyles && (0, collect_styles_1.collectStyledComponents)(json);
     if (options.format !== 'lite') {
         (0, strip_meta_properties_1.stripMetaProperties)(json);
     }
@@ -483,28 +474,18 @@ var _componentToReact = function (json, options, isSubComponent) {
         (componentHasStyles && stylesType === 'styled-jsx') ||
         isRootShowNode(json);
     var _o = getRefsString(json, allRefs, options), hasStateArgument = _o[0], refsString = _o[1];
-    var nativeStyles = stylesType === 'react-native' &&
-        componentHasStyles &&
-        (0, react_native_1.collectReactNativeStyles)(json);
+    var nativeStyles = stylesType === 'react-native' && componentHasStyles && (0, react_native_1.collectReactNativeStyles)(json);
     var propsArgs = 'props';
     if (json.propsTypeRef) {
         propsArgs = "props: ".concat(json.propsTypeRef);
     }
     var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n  ", "\n  ", "\n  ", "\n  ", "\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "", "function ", "(", "", ") {\n    ", "\n      ", "\n      ", "\n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      return (\n        ", "\n        ", "\n        ", "\n        ", "\n      );\n    }", "\n\n    ", "\n\n    ", "\n  "], ["\n  ", "\n  ", "\n  ", "\n  ", "\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "", "function ", "(", "", ") {\n    ", "\n      ", "\n      ", "\n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      return (\n        ", "\n        ", "\n        ", "\n        ", "\n      );\n    }", "\n\n    ", "\n\n    ", "\n  "])), options.type !== 'native'
         ? ''
-        : "\n  import * as React from 'react';\n  import { View, StyleSheet, Image, Text } from 'react-native';\n  ", styledComponentsCode ? "import styled from 'styled-components';\n" : '', reactLibImports.size
-        ? "import { ".concat(Array.from(reactLibImports).join(', '), " } from 'react'")
-        : '', componentHasStyles && stylesType === 'emotion' && options.format !== 'lite'
+        : "\n  import * as React from 'react';\n  import { View, StyleSheet, Image, Text } from 'react-native';\n  ", styledComponentsCode ? "import styled from 'styled-components';\n" : '', reactLibImports.size ? "import { ".concat(Array.from(reactLibImports).join(', '), " } from 'react'") : '', componentHasStyles && stylesType === 'emotion' && options.format !== 'lite'
         ? "/** @jsx jsx */\n    import { jsx } from '@emotion/react'".trim()
-        : '', hasState && stateType === 'valtio'
-        ? "import { useLocalProxy } from 'valtio/utils';"
-        : '', hasState && stateType === 'solid'
-        ? "import { useMutable } from 'react-solid-state';"
-        : '', stateType === 'mobx' && hasState
+        : '', hasState && stateType === 'valtio' ? "import { useLocalProxy } from 'valtio/utils';" : '', hasState && stateType === 'solid' ? "import { useMutable } from 'react-solid-state';" : '', stateType === 'mobx' && hasState
         ? "import { useLocalObservable } from 'mobx-react-lite';"
-        : '', json.types ? json.types.join('\n') : '', json.interfaces ? (_g = json.interfaces) === null || _g === void 0 ? void 0 : _g.join('\n') : '', (0, render_imports_1.renderPreComponent)(json, 'react'), isSubComponent ? '' : 'export default ', isForwardRef
-        ? "forwardRef".concat(forwardRefType ? "<".concat(forwardRefType, ">") : '', "(")
-        : '', json.name || 'MyComponent', propsArgs, isForwardRef ? ", ".concat(options.forwardRef) : '', hasStateArgument ? '' : refsString, hasState
+        : '', json.types ? json.types.join('\n') : '', json.interfaces ? (_g = json.interfaces) === null || _g === void 0 ? void 0 : _g.join('\n') : '', (0, render_imports_1.renderPreComponent)({ component: json, target: 'react' }), isSubComponent ? '' : 'export default ', isForwardRef ? "forwardRef".concat(forwardRefType ? "<".concat(forwardRefType, ">") : '', "(") : '', json.name || 'MyComponent', propsArgs, isForwardRef ? ", ".concat(options.forwardRef) : '', hasStateArgument ? '' : refsString, hasState
         ? stateType === 'mobx'
             ? "const state = useLocalObservable(() => (".concat((0, get_state_object_string_1.getStateObjectStringFromComponent)(json), "));")
             : stateType === 'useState'
@@ -520,15 +501,11 @@ var _componentToReact = function (json, options, isSubComponent) {
         ? "useEffect(() => {\n            ".concat(processBinding(updateStateSettersInCode(json.hooks.onMount.code, options), options), "\n          }, [])")
         : '', ((_k = json.hooks.onUpdate) === null || _k === void 0 ? void 0 : _k.length)
         ? json.hooks.onUpdate
-            .map(function (hook) { return "useEffect(() => {\n            ".concat(processBinding(updateStateSettersInCode(hook.code, options), options), "\n          }, \n          ").concat(hook.deps
-            ? processBinding(updateStateSettersInCode(hook.deps, options), options)
-            : '', ")"); })
+            .map(function (hook) { return "useEffect(() => {\n            ".concat(processBinding(updateStateSettersInCode(hook.code, options), options), "\n          }, \n          ").concat(hook.deps ? processBinding(updateStateSettersInCode(hook.deps, options), options) : '', ")"); })
             .join(';')
         : '', ((_l = json.hooks.onUnMount) === null || _l === void 0 ? void 0 : _l.code)
         ? "useEffect(() => {\n            return () => {\n              ".concat(processBinding(updateStateSettersInCode(json.hooks.onUnMount.code, options), options), "\n            }\n          }, [])")
-        : '', wrap ? '<>' : '', json.children.map(function (item) { return (0, exports.blockToReact)(item, options); }).join('\n'), componentHasStyles && stylesType === 'styled-jsx'
-        ? "<style jsx>{`".concat(css, "`}</style>")
-        : '', wrap ? '</>' : '', isForwardRef ? ')' : '', !nativeStyles
+        : '', wrap ? '<>' : '', json.children.map(function (item) { return (0, exports.blockToReact)(item, options); }).join('\n'), componentHasStyles && stylesType === 'styled-jsx' ? "<style jsx>{`".concat(css, "`}</style>") : '', wrap ? '</>' : '', isForwardRef ? ')' : '', !nativeStyles
         ? ''
         : "\n      const styles = StyleSheet.create(".concat(json5_1.default.stringify(nativeStyles), ");\n    "), styledComponentsCode ? styledComponentsCode : '');
     str = (0, replace_new_lines_in_strings_1.stripNewlinesInStrings)(str);

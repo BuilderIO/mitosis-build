@@ -1,4 +1,4 @@
-import { Transpiler } from '..';
+import { Transpiler } from '../types/transpiler';
 export declare type ToSwiftOptions = {
     prettier?: boolean;
 };

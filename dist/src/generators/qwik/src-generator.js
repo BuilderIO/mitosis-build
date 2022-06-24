@@ -60,17 +60,26 @@ var File = /** @class */ (function () {
         });
         var source = srcImports.toString() + this.src.toString();
         if (this.options.isPretty) {
-            source = (0, standalone_1.format)(source, {
-                parser: 'typescript',
-                plugins: [
-                    // To support running in browsers
-                    require('prettier/parser-typescript'),
-                    require('prettier/parser-postcss'),
-                    require('prettier/parser-html'),
-                    require('prettier/parser-babel'),
-                ],
-                htmlWhitespaceSensitivity: 'ignore',
-            });
+            try {
+                source = (0, standalone_1.format)(source, {
+                    parser: 'typescript',
+                    plugins: [
+                        // To support running in browsers
+                        require('prettier/parser-typescript'),
+                        require('prettier/parser-postcss'),
+                        require('prettier/parser-html'),
+                        require('prettier/parser-babel'),
+                    ],
+                    htmlWhitespaceSensitivity: 'ignore',
+                });
+            }
+            catch (e) {
+                throw new Error(e +
+                    '\n' +
+                    '========================================================================\n' +
+                    source +
+                    '\n\n========================================================================');
+            }
         }
         return source;
     };
@@ -157,6 +166,7 @@ var SrcBuilder = /** @class */ (function () {
             value.startsWith(':') ||
             value.startsWith(']') ||
             value.startsWith('}') ||
+            value.startsWith(',') ||
             value.startsWith('?')) {
             // clear last ',' or ';';
             var index = this.buf.length - 1;
@@ -230,13 +240,10 @@ var SrcBuilder = /** @class */ (function () {
             }
         }
         var _loop_1 = function (rawKey) {
-            if (Object.prototype.hasOwnProperty.call(bindings, rawKey) &&
-                !ignoreKey(rawKey)) {
+            if (Object.prototype.hasOwnProperty.call(bindings, rawKey) && !ignoreKey(rawKey)) {
                 var binding_1 = bindings[rawKey];
                 binding_1 =
-                    binding_1 && typeof binding_1 == 'object' && 'code' in binding_1
-                        ? binding_1.code
-                        : binding_1;
+                    binding_1 && typeof binding_1 == 'object' && 'code' in binding_1 ? binding_1.code : binding_1;
                 var key = lastProperty(rawKey);
                 if (!binding_1 && rawKey in props) {
                     binding_1 = quote(props[rawKey]);
@@ -356,7 +363,6 @@ function ignoreKey(key) {
         key.startsWith('_') ||
         key == 'code' ||
         key == '' ||
-        key == 'builder-id' ||
         key.indexOf('.') !== -1);
 }
 var Block = /** @class */ (function () {
@@ -406,9 +412,7 @@ function iif(code) {
         return;
     code = code.trim();
     if (code.endsWith(_virtual_index) && !code.endsWith(return_virtual_index)) {
-        code =
-            code.substr(0, code.length - _virtual_index.length) +
-                return_virtual_index;
+        code = code.substr(0, code.length - _virtual_index.length) + return_virtual_index;
     }
     return function () {
         code && this.emit('(()=>{', code, '})()');

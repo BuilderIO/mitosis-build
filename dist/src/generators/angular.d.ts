@@ -1,5 +1,5 @@
 import { MitosisNode } from '../types/mitosis-node';
-import { BaseTranspilerOptions, Transpiler } from '../types/config';
+import { BaseTranspilerOptions, Transpiler } from '../types/transpiler';
 export interface ToAngularOptions extends BaseTranspilerOptions {
 }
 interface AngularBlockOptions {

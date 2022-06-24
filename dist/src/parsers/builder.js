@@ -50,6 +50,7 @@ var create_mitosis_component_1 = require("../helpers/create-mitosis-component");
 var create_mitosis_node_1 = require("../helpers/create-mitosis-node");
 var jsx_1 = require("./jsx");
 var parsers_1 = require("../helpers/parsers");
+var __1 = require("..");
 // Omit some superflous styles that can come from Builder's web importer
 var styleOmitList = [
     'backgroundRepeatX',
@@ -59,7 +60,9 @@ var styleOmitList = [
 ];
 var getCssFromBlock = function (block) {
     var _a;
-    var blockSizes = Object.keys(block.responsiveStyles || {}).filter(function (size) { return media_sizes_1.sizeNames.includes(size); });
+    var blockSizes = Object.keys(block.responsiveStyles || {}).filter(function (size) {
+        return media_sizes_1.sizeNames.includes(size);
+    });
     var css = {};
     for (var _i = 0, blockSizes_1 = blockSizes; _i < blockSizes_1.length; _i++) {
         var size = blockSizes_1[_i];
@@ -266,9 +269,7 @@ var componentMappers = __assign(__assign({ Symbol: function (block, options) {
                         (0, create_mitosis_node_1.createMitosisNode)({
                             // TODO: the Builder generator side of this converting to blocks
                             name: 'BuilderSymbolContents',
-                            children: blocks.map(function (item) {
-                                return (0, exports.builderElementToMitosisNode)(item, options);
-                            }),
+                            children: blocks.map(function (item) { return (0, exports.builderElementToMitosisNode)(item, options); }),
                         }),
                     ],
             });
@@ -287,9 +288,7 @@ var componentMappers = __assign(__assign({ Symbol: function (block, options) {
                 properties: {
                     link: col.link,
                 },
-            })), { children: col.blocks.map(function (col) {
-                    return (0, exports.builderElementToMitosisNode)(col, options);
-                }) }));
+            })), { children: col.blocks.map(function (col) { return (0, exports.builderElementToMitosisNode)(col, options); }) }));
         });
         return node;
     }, 'Shopify:For': function (block, options) {
@@ -301,9 +300,7 @@ var componentMappers = __assign(__assign({ Symbol: function (block, options) {
             properties: {
                 _forName: block.component.options.repeat.itemName,
             },
-            children: (block.children || []).map(function (child) {
-                return (0, exports.builderElementToMitosisNode)(child, options);
-            }),
+            children: (block.children || []).map(function (child) { return (0, exports.builderElementToMitosisNode)(child, options); }),
         });
     }, Text: function (block, options) {
         var _a, _b;
@@ -389,9 +386,7 @@ var builderElementToMitosisNode = function (block, options, _internalOptions) {
                 bindings: {
                     when: { code: wrapBindingIfNeeded(showBinding, options) },
                 },
-                children: ((_d = block.children) === null || _d === void 0 ? void 0 : _d.map(function (child) {
-                    return (0, exports.builderElementToMitosisNode)(child, options);
-                })) || [],
+                children: ((_d = block.children) === null || _d === void 0 ? void 0 : _d.map(function (child) { return (0, exports.builderElementToMitosisNode)(child, options); })) || [],
             });
         }
         else {
@@ -421,14 +416,11 @@ var builderElementToMitosisNode = function (block, options, _internalOptions) {
                 properties: {
                     _forName: ((_h = block.repeat) === null || _h === void 0 ? void 0 : _h.itemName) || 'item',
                 },
-                children: ((_j = block.children) === null || _j === void 0 ? void 0 : _j.map(function (child) {
-                    return (0, exports.builderElementToMitosisNode)(child, options);
-                })) || [],
+                children: ((_j = block.children) === null || _j === void 0 ? void 0 : _j.map(function (child) { return (0, exports.builderElementToMitosisNode)(child, options); })) || [],
             });
         }
         else {
-            var useBlock = ((_k = block.component) === null || _k === void 0 ? void 0 : _k.name) === 'Core:Fragment' &&
-                ((_l = block.children) === null || _l === void 0 ? void 0 : _l.length) === 1
+            var useBlock = ((_k = block.component) === null || _k === void 0 ? void 0 : _k.name) === 'Core:Fragment' && ((_l = block.children) === null || _l === void 0 ? void 0 : _l.length) === 1
                 ? block.children[0]
                 : block;
             return (0, create_mitosis_node_1.createMitosisNode)({
@@ -441,15 +433,11 @@ var builderElementToMitosisNode = function (block, options, _internalOptions) {
                 properties: {
                     _forName: ((_o = block.repeat) === null || _o === void 0 ? void 0 : _o.itemName) || 'item',
                 },
-                children: [
-                    (0, exports.builderElementToMitosisNode)((0, lodash_1.omit)(useBlock, 'repeat'), options),
-                ],
+                children: [(0, exports.builderElementToMitosisNode)((0, lodash_1.omit)(useBlock, 'repeat'), options)],
             });
         }
     }
-    var mapper = !_internalOptions.skipMapper &&
-        block.component &&
-        componentMappers[block.component.name];
+    var mapper = !_internalOptions.skipMapper && block.component && componentMappers[block.component.name];
     if (mapper) {
         return mapper(block, options);
     }
@@ -500,8 +488,7 @@ var builderElementToMitosisNode = function (block, options, _internalOptions) {
     var styleString = getStyleStringFromBlock(block, options);
     var actionBindings = getActionBindingsFromBlock(block, options);
     for (var binding in blockBindings) {
-        if (binding.startsWith('component.options') ||
-            binding.startsWith('options')) {
+        if (binding.startsWith('component.options') || binding.startsWith('options')) {
             var value = blockBindings[binding];
             var useKey = binding.replace(/^(component\.options\.|options\.)/, '');
             bindings[useKey] = { code: value };
@@ -535,9 +522,7 @@ var builderElementToMitosisNode = function (block, options, _internalOptions) {
             })),
         });
     }
-    node.children = (block.children || []).map(function (item) {
-        return (0, exports.builderElementToMitosisNode)(item, options);
-    });
+    node.children = (block.children || []).map(function (item) { return (0, exports.builderElementToMitosisNode)(item, options); });
     return node;
 };
 exports.builderElementToMitosisNode = builderElementToMitosisNode;
@@ -572,8 +557,7 @@ function extractStateHook(code) {
             var expression = statement.expression;
             // Check for useState
             if (types.isCallExpression(expression)) {
-                if (types.isIdentifier(expression.callee) &&
-                    expression.callee.name === 'useState') {
+                if (types.isIdentifier(expression.callee) && expression.callee.name === 'useState') {
                     var arg = expression.arguments[0];
                     if (types.isObjectExpression(arg)) {
                         state = (0, jsx_1.parseStateObject)(arg);
@@ -655,7 +639,7 @@ function extractSymbols(json) {
         subComponents: subComponents,
     };
 }
-var createBuilderElement = function (options) { return (__assign({ '@type': '@builder.io/sdk:Element', id: 'builder-' + Math.random().toString(36).split('.')[1] }, options)); };
+var createBuilderElement = function (options) { return (__assign({ '@type': '@builder.io/sdk:Element', id: 'builder-' + (0, __1.hashCodeAsString)(options) }, options)); };
 exports.createBuilderElement = createBuilderElement;
 var isBuilderElement = function (el) {
     return (el === null || el === void 0 ? void 0 : el['@type']) === '@builder.io/sdk:Element';
@@ -705,8 +689,7 @@ var builderContentPartToMitosisComponent = function (builderContent, options) {
             defaultValue: input.defaultValue,
         }); }),
         state: (parsed === null || parsed === void 0 ? void 0 : parsed.state) || __assign(__assign({}, state), (_f = builderContent.data) === null || _f === void 0 ? void 0 : _f.state),
-        hooks: __assign({}, ((((_g = parsed === null || parsed === void 0 ? void 0 : parsed.hooks.onMount) === null || _g === void 0 ? void 0 : _g.code) ||
-            (customCode && { code: customCode })) && {
+        hooks: __assign({}, ((((_g = parsed === null || parsed === void 0 ? void 0 : parsed.hooks.onMount) === null || _g === void 0 ? void 0 : _g.code) || (customCode && { code: customCode })) && {
             onMount: (parsed === null || parsed === void 0 ? void 0 : parsed.hooks.onMount) || { code: customCode },
         })),
         children: (((_h = builderContent.data) === null || _h === void 0 ? void 0 : _h.blocks) || [])

@@ -24,9 +24,7 @@ function SmileReviews(props) {
         });
     });
     return (<div data-user={state.name}>
-      <button onClick={function () { return (state.showReviewPrompt = true); }}>
-        Write a review
-      </button>
+      <button onClick={function () { return (state.showReviewPrompt = true); }}>Write a review</button>
       <mitosis_1.Show when={state.showReviewPrompt}>
         <input placeholder="Email"/>
 

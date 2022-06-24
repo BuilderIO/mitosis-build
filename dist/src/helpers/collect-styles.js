@@ -14,8 +14,7 @@ var is_upper_case_1 = require("./is-upper-case");
 var object_hash_1 = __importDefault(require("object-hash"));
 var nodeHasStyles = function (node) {
     var _a;
-    return Boolean(typeof ((_a = node.bindings.css) === null || _a === void 0 ? void 0 : _a.code) === 'string' &&
-        node.bindings.css.code.trim().length > 6);
+    return Boolean(typeof ((_a = node.bindings.css) === null || _a === void 0 ? void 0 : _a.code) === 'string' && node.bindings.css.code.trim().length > 6);
 };
 var hasStyles = function (component) {
     var hasStyles = false;

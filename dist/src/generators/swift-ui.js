@@ -24,15 +24,12 @@ var scrolls = function (json) {
 };
 var mappers = {
     Fragment: function (json, options) {
-        return "".concat(json.children
-            .map(function (item) { return blockToSwift(item, options); })
-            .join('\n'));
+        return "".concat(json.children.map(function (item) { return blockToSwift(item, options); }).join('\n'));
     },
     link: function () { return ''; },
     Image: function (json, options) {
         var _a;
-        return ("Image(".concat(processBinding((_a = json.bindings.image) === null || _a === void 0 ? void 0 : _a.code, options) ||
-            "\"".concat(json.properties.image, "\""), ")") +
+        return ("Image(".concat(processBinding((_a = json.bindings.image) === null || _a === void 0 ? void 0 : _a.code, options) || "\"".concat(json.properties.image, "\""), ")") +
             getStyleString(json, options) +
             getActionsString(json, options));
     },
@@ -140,9 +137,7 @@ var blockToSwift = function (json, options) {
         str += ")";
         str += " {";
         if (json.children) {
-            str += json.children
-                .map(function (item) { return blockToSwift(item, options); })
-                .join('\n');
+            str += json.children.map(function (item) { return blockToSwift(item, options); }).join('\n');
         }
         str += "}";
         str += getStyleString(json, options);
@@ -226,7 +221,8 @@ function mapDataForSwiftCompatability(json) {
                 if (!node.properties.$name) {
                     node.properties.$name = "input".concat(++inputIndex);
                 }
-                json.meta.inputNames[node.properties.$name] = ((_a = node.bindings.value) === null || _a === void 0 ? void 0 : _a.code) || '';
+                json.meta.inputNames[node.properties.$name] =
+                    ((_a = node.bindings.value) === null || _a === void 0 ? void 0 : _a.code) || '';
             }
         }
     });
@@ -249,9 +245,7 @@ var componentToSwift = function (options) {
         var json = (0, fast_clone_1.fastClone)(component);
         mapDataForSwiftCompatability(json);
         var hasDyanmicData = componentHasDynamicData(json);
-        var children = json.children
-            .map(function (item) { return blockToSwift(item, options); })
-            .join('\n');
+        var children = json.children.map(function (item) { return blockToSwift(item, options); }).join('\n');
         var hasInputNames = Object.keys(json.meta.inputNames || {}).length > 0;
         var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    import SwiftUI\n    ", "\n\n    struct ", ": View {\n      ", "\n\n      var body: some View {\n        VStack {\n          ", "\n        }", "\n      }\n    }\n  "], ["\n    import SwiftUI\n    ", "\n\n    struct ", ": View {\n      ", "\n\n      var body: some View {\n        VStack {\n          ", "\n        }", "\n      }\n    }\n  "])), !hasDyanmicData
             ? ''

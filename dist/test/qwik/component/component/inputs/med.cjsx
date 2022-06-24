@@ -10,7 +10,6 @@ exports.MyComponent_onMount = (state) => {
     if (!state.hasOwnProperty("data")) state.data = 0;
     typeof __STATE__ === "object" &&
       Object.assign(state, __STATE__[state.serverStateId]);
-    undefined;
   }
   withScopedStylesQrl(qrl("./med.js", "MyComponent_styles", []));
   return (
@@ -29,6 +28,7 @@ exports.MyComponent_onMount = (state) => {
         ></div>
       </div>
       <CoreButton
+        builder-id="builder-6f8fe6a1d2284f2890ae97657eed084a"
         text="Something else"
         class="c9nzze9"
         onClickQrl={qrl("./high.js", "MyComponent_onClick_0", [state])}

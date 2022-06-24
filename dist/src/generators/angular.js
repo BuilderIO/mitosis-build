@@ -93,16 +93,15 @@ var blockToAngular = function (json, options, blockOptions) {
             contextVars: contextVars,
             outputVars: outputVars,
         }), "\">");
-        str += json.children
-            .map(function (item) { return (0, exports.blockToAngular)(item, options, blockOptions); })
-            .join('\n');
+        str += json.children.map(function (item) { return (0, exports.blockToAngular)(item, options, blockOptions); }).join('\n');
         str += "</ng-container>";
     }
     else if (json.name === 'Show') {
-        str += "<ng-container *ngIf=\"".concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)((_f = json.bindings.when) === null || _f === void 0 ? void 0 : _f.code, { contextVars: contextVars, outputVars: outputVars }), "\">");
-        str += json.children
-            .map(function (item) { return (0, exports.blockToAngular)(item, options, blockOptions); })
-            .join('\n');
+        str += "<ng-container *ngIf=\"".concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)((_f = json.bindings.when) === null || _f === void 0 ? void 0 : _f.code, {
+            contextVars: contextVars,
+            outputVars: outputVars,
+        }), "\">");
+        str += json.children.map(function (item) { return (0, exports.blockToAngular)(item, options, blockOptions); }).join('\n');
         str += "</ng-container>";
     }
     else {
@@ -138,15 +137,12 @@ var blockToAngular = function (json, options, blockOptions) {
             });
             if (key.startsWith('on')) {
                 var event_1 = key.replace('on', '').toLowerCase();
-                if (event_1 === 'change' &&
-                    json.name === 'input' /* todo: other tags */) {
+                if (event_1 === 'change' && json.name === 'input' /* todo: other tags */) {
                     event_1 = 'input';
                 }
                 // TODO: proper babel transform to replace. Util for this
                 var eventName = cusArgs[0];
-                var regexp = new RegExp('(^|\\n|\\r| |;|\\(|\\[|!)' +
-                    eventName +
-                    '(\\?\\.|\\.|\\(| |;|\\)|$)', 'g');
+                var regexp = new RegExp('(^|\\n|\\r| |;|\\(|\\[|!)' + eventName + '(\\?\\.|\\.|\\(| |;|\\)|$)', 'g');
                 var replacer = '$1$event$2';
                 var finalValue = (0, remove_surrounding_block_1.removeSurroundingBlock)(useValue.replace(regexp, replacer));
                 str += " (".concat(event_1, ")=\"").concat(finalValue, "\" ");
@@ -158,8 +154,7 @@ var blockToAngular = function (json, options, blockOptions) {
                 str += " #".concat(useValue, " ");
             }
             else if (key.startsWith('slot')) {
-                var lowercaseKey = key.replace('slot', '')[0].toLowerCase() +
-                    key.replace('slot', '').substring(1);
+                var lowercaseKey = key.replace('slot', '')[0].toLowerCase() + key.replace('slot', '').substring(1);
                 needsToRenderSlots.push("".concat(useValue.replace(/(\/\>)|\>/, " ".concat(lowercaseKey, ">"))));
             }
             else if (BINDINGS_MAPPER[key]) {
@@ -177,9 +172,7 @@ var blockToAngular = function (json, options, blockOptions) {
             str += needsToRenderSlots.map(function (el) { return el; }).join('');
         }
         if (json.children) {
-            str += json.children
-                .map(function (item) { return (0, exports.blockToAngular)(item, options, blockOptions); })
-                .join('\n');
+            str += json.children.map(function (item) { return (0, exports.blockToAngular)(item, options, blockOptions); }).join('\n');
         }
         str += "</".concat(elSelector, ">");
     }
@@ -280,7 +273,7 @@ var componentToAngular = function (options) {
                 });
             },
         });
-        var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    import { ", " ", " Component ", "", " } from '@angular/core';\n\n    ", "\n    ", "\n    ", "\n\n    @Component({\n      selector: '", "',\n      template: `\n        ", "\n      `,\n      ", "\n    })\n    export default class ", " {\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n    }\n  "], ["\n    import { ", " ", " Component ", "", " } from '@angular/core';\n\n    ", "\n    ", "\n    ", "\n\n    @Component({\n      selector: '", "',\n      template: \\`\n        ", "\n      \\`,\n      ", "\n    })\n    export default class ", " {\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n    }\n  "])), outputs.length ? 'Output, EventEmitter, \n' : '', ((_g = options === null || options === void 0 ? void 0 : options.experimental) === null || _g === void 0 ? void 0 : _g.inject) ? 'Inject, forwardRef,' : '', domRefs.size ? ', ViewChild, ElementRef' : '', props.size ? ', Input' : '', json.types ? json.types.join('\n') : '', json.interfaces ? (_h = json.interfaces) === null || _h === void 0 ? void 0 : _h.join('\n') : '', (0, render_imports_1.renderPreComponent)(json, 'angular'), (0, lodash_1.kebabCase)(json.name || 'my-component'), (0, indent_1.indent)(template, 8).replace(/`/g, '\\`').replace(/\$\{/g, '\\${'), css.length
+        var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    import { ", " ", " Component ", "", " } from '@angular/core';\n\n    ", "\n    ", "\n    ", "\n\n    @Component({\n      selector: '", "',\n      template: `\n        ", "\n      `,\n      ", "\n    })\n    export default class ", " {\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n    }\n  "], ["\n    import { ", " ", " Component ", "", " } from '@angular/core';\n\n    ", "\n    ", "\n    ", "\n\n    @Component({\n      selector: '", "',\n      template: \\`\n        ", "\n      \\`,\n      ", "\n    })\n    export default class ", " {\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n    }\n  "])), outputs.length ? 'Output, EventEmitter, \n' : '', ((_g = options === null || options === void 0 ? void 0 : options.experimental) === null || _g === void 0 ? void 0 : _g.inject) ? 'Inject, forwardRef,' : '', domRefs.size ? ', ViewChild, ElementRef' : '', props.size ? ', Input' : '', json.types ? json.types.join('\n') : '', json.interfaces ? (_h = json.interfaces) === null || _h === void 0 ? void 0 : _h.join('\n') : '', (0, render_imports_1.renderPreComponent)({ component: json, target: 'angular' }), (0, lodash_1.kebabCase)(json.name || 'my-component'), (0, indent_1.indent)(template, 8).replace(/`/g, '\\`').replace(/\$\{/g, '\\${'), css.length
             ? "styles: [\n        `".concat((0, indent_1.indent)(css, 8), "`\n      ],")
             : '', component.name, localExportVars.join('\n'), Array.from(props)
             .filter(function (item) { return !item.startsWith('slot') && item !== 'children'; })

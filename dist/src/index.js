@@ -29,11 +29,11 @@ var useRef = function (obj) {
     return obj;
 };
 exports.useRef = useRef;
-var useContext = function (key) {
+var useContext = function (key) { return null; };
+exports.useContext = useContext;
+var createContext = function (value) {
     return null;
 };
-exports.useContext = useContext;
-var createContext = function (value) { return null; };
 exports.createContext = createContext;
 var setContext = function (key, value) { };
 exports.setContext = setContext;
@@ -88,6 +88,7 @@ __exportStar(require("./helpers/is-mitosis-node"), exports);
 __exportStar(require("./types/mitosis-node"), exports);
 __exportStar(require("./types/mitosis-component"), exports);
 __exportStar(require("./types/config"), exports);
+__exportStar(require("./types/transpiler"), exports);
 __exportStar(require("./plugins/compile-away-builder-components"), exports);
 __exportStar(require("./plugins/compile-away-components"), exports);
 __exportStar(require("./plugins/map-styles"), exports);

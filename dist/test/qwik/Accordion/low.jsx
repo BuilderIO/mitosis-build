@@ -5,11 +5,11 @@ export const MyComponent_onMount = (state) => {
     state.__INIT__ = true;
     typeof __STATE__ === "object" &&
       Object.assign(state, __STATE__[state.serverStateId]);
-    undefined;
   }
   withScopedStylesQrl(qrl("./low.js", "MyComponent_styles", []));
   return (
     <div
+      builder-id="builder-bb2f62792e464d73b7cb89258027f356"
       gridRowWidth="25%"
       class="csw5022"
       items={[
@@ -171,14 +171,20 @@ export const MyComponent_onMount = (state) => {
       <div>
         <div builder="accordion">
           <div builder="accordion-title">
-            <div class="csanagh">
+            <div
+              builder-id="builder-5fed2723c1cc4fb39e9d22b9c54ef179"
+              class="csanagh"
+            >
               <div class="crwdrpw">
                 <div innerHTML="<p>Item 1</p>" class="builder-text"></div>
               </div>
             </div>
           </div>
           <div builder="accordion-detail">
-            <div class="c4qyc1p">
+            <div
+              builder-id="builder-18279a99b32240f19aa21d3f4b015cc9"
+              class="c4qyc1p"
+            >
               <div class="ctcw2m4">
                 <div
                   innerHTML="<p>Item 1 content</p>"
@@ -190,14 +196,20 @@ export const MyComponent_onMount = (state) => {
         </div>
         <div builder="accordion">
           <div builder="accordion-title">
-            <div class="csanagh">
+            <div
+              builder-id="builder-2a93def22a354cf7aa193c20d1ad6def"
+              class="csanagh"
+            >
               <div class="crwdrpw">
                 <div innerHTML="<p>Item 2</p>" class="builder-text"></div>
               </div>
             </div>
           </div>
           <div builder="accordion-detail">
-            <div class="c4qyc1p">
+            <div
+              builder-id="builder-fd6ef41da6d040328fbd8b0801611fe5"
+              class="c4qyc1p"
+            >
               <div class="ctcw2m4">
                 <div
                   innerHTML="<p>Item 2 content</p>"

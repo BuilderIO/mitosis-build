@@ -9,7 +9,6 @@ exports.MyComponent_onMount = (state) => {
     if (!state.hasOwnProperty("hiliteTitle")) state.hiliteTitle = true;
     typeof __STATE__ === "object" &&
       Object.assign(state, __STATE__[state.serverStateId]);
-    undefined;
   }
   withScopedStylesQrl(qrl("./low.js", "MyComponent_styles", []));
   return h(

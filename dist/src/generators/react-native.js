@@ -44,8 +44,7 @@ var collectReactNativeStyles = function (json) {
                 delete value[key];
                 continue;
             }
-            if (stylePropertiesThatMustBeNumber.has(key) &&
-                typeof propertyValue !== 'number') {
+            if (stylePropertiesThatMustBeNumber.has(key) && typeof propertyValue !== 'number') {
                 console.warn("Style key ".concat(key, " must be a number, but had value `").concat(propertyValue, "`"));
                 delete value[key];
                 continue;
@@ -59,8 +58,7 @@ var collectReactNativeStyles = function (json) {
             }
         }
         var componentName = (0, lodash_1.camelCase)(item.name || 'view');
-        var index = (componentIndexes[componentName] =
-            (componentIndexes[componentName] || 0) + 1);
+        var index = (componentIndexes[componentName] = (componentIndexes[componentName] || 0) + 1);
         var className = "".concat(componentName).concat(index);
         item.bindings.style = { code: "styles.".concat(className) };
         styleMap[className] = value;
@@ -80,8 +78,7 @@ function processReactNative() {
                         if (node.name.toLowerCase() === node.name) {
                             node.name = 'View';
                         }
-                        if (((_a = node.properties._text) === null || _a === void 0 ? void 0 : _a.trim().length) ||
-                            ((_d = (_c = (_b = node.bindings._text) === null || _b === void 0 ? void 0 : _b.code) === null || _c === void 0 ? void 0 : _c.trim()) === null || _d === void 0 ? void 0 : _d.length)) {
+                        if (((_a = node.properties._text) === null || _a === void 0 ? void 0 : _a.trim().length) || ((_d = (_c = (_b = node.bindings._text) === null || _b === void 0 ? void 0 : _b.code) === null || _c === void 0 ? void 0 : _c.trim()) === null || _d === void 0 ? void 0 : _d.length)) {
                             node.name = 'Text';
                         }
                         if (node.properties.class) {

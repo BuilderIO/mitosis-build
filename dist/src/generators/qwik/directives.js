@@ -32,6 +32,14 @@ exports.DIRECTIVES = {
             this.isJSX && this.emit('}');
         };
     },
+    Host: function (node, blockFn) {
+        return function () {
+            var host = this.file.import(this.file.qwikModule, 'Host').name;
+            this.jsxBegin(host, node.properties, {});
+            blockFn();
+            this.jsxEnd(host);
+        };
+    },
     Image: (0, minify_1.minify)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["", ""], ["", ""])), Image),
     CoreButton: (0, minify_1.minify)(templateObject_2 || (templateObject_2 = __makeTemplateObject(["", ""], ["", ""])), CoreButton),
     __passThroughProps__: (0, minify_1.minify)(templateObject_3 || (templateObject_3 = __makeTemplateObject(["", ""], ["", ""])), __passThroughProps__),
@@ -45,10 +53,7 @@ function Image(props) {
         var isPixel = (_a = props.builderBlock) === null || _a === void 0 ? void 0 : _a.id.startsWith('builder-pixel-');
         var imgProps = {
             src: props.image,
-            style: "object-fit:".concat(props.backgroundSize || 'cover', ";object-position:").concat(props.backgroundPosition || 'center', ";") +
-                (props.aspectRatio
-                    ? 'position:absolute;height:100%;width:100%;top:0;left:0'
-                    : ''),
+            style: "object-fit:".concat(props.backgroundSize || 'cover', ";object-position:").concat(props.backgroundPosition || 'center', ";") + (props.aspectRatio ? 'position:absolute;height:100%;width:100%;top:0;left:0' : ''),
             sizes: props.sizes,
             alt: props.altText,
             role: !props.altText ? 'presentation' : undefined,
@@ -75,8 +80,7 @@ function Image(props) {
         else {
             jsx = [h('img', imgProps, jsx)];
         }
-        if (props.aspectRatio &&
-            !(props.fitContent && props.children && props.children.length)) {
+        if (props.aspectRatio && !(props.fitContent && props.children && props.children.length)) {
             var sizingDiv = h('div', {
                 class: 'builder-image-sizer',
                 style: "width:100%;padding-top:".concat((props.aspectRatio || 1) * 100, "%;pointer-events:none;font-size:0"),

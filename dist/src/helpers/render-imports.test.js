@@ -9,7 +9,11 @@ describe('renderImport', function () {
                 path: '../render-blocks.lite',
             },
         ];
-        var output = (0, render_imports_1.renderImport)({ theImport: data[0], target: 'vue' });
-        expect(output).toBe("import  RenderBlocks,  {  }  from '../render-blocks.vue';");
+        var output = (0, render_imports_1.renderImport)({
+            theImport: data[0],
+            target: 'vue',
+            asyncComponentImports: false,
+        });
+        expect(output).toMatchSnapshot();
     });
 });

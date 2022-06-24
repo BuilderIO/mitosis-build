@@ -16,12 +16,14 @@ exports.Component000012_onMount = (state) => {
       };
     typeof __STATE__ === "object" &&
       Object.assign(state, __STATE__[state.serverStateId]);
-    undefined;
   }
   withScopedStylesQrl(qrl("./low.js", "Component000012_styles", []));
   return h(
     "div",
-    { class: "cv6ku2d" },
+    {
+      "builder-id": "builder-d2b6ee30433348ffa51a17334b8b6c73",
+      class: "cv6ku2d",
+    },
     (state.hits || []).map(
       function (__value__) {
         var state = Object.assign({}, this, {
@@ -29,8 +31,12 @@ exports.Component000012_onMount = (state) => {
         });
         return h(
           "div",
-          { class: "c3j7e6c" },
+          {
+            "builder-id": "builder-cc43bc95cde743a59b269cb0157b99cd",
+            class: "c3j7e6c",
+          },
           h(Component000013, {
+            "builder-id": "builder-cx8eewmyu3",
             altText: "",
             serverStateId: "woo8b6",
             title: state.hitsItem.name,

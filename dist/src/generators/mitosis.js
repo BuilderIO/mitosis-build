@@ -72,9 +72,7 @@ var blockToMitosis = function (json, toMitosisOptions) {
         str += " {...(".concat(json.bindings._spread.code, ")} ");
     }
     for (var key in json.properties) {
-        var value = (json.properties[key] || '')
-            .replace(/"/g, '&quot;')
-            .replace(/\n/g, '\\n');
+        var value = (json.properties[key] || '').replace(/"/g, '&quot;').replace(/\n/g, '\\n');
         if (!isValidAttributeName(key)) {
             console.warn('Skipping invalid attribute name:', key);
         }
@@ -109,9 +107,7 @@ var blockToMitosis = function (json, toMitosisOptions) {
     }
     str += '>';
     if (json.children) {
-        str += json.children
-            .map(function (item) { return (0, exports.blockToMitosis)(item, options); })
-            .join('\n');
+        str += json.children.map(function (item) { return (0, exports.blockToMitosis)(item, options); }).join('\n');
     }
     str += "</".concat(json.name, ">");
     return str;
@@ -147,18 +143,14 @@ var componentToMitosis = function (toMitosisOptions) {
         var json = (0, fast_clone_1.fastClone)(component);
         var domRefs = (0, get_refs_1.getRefs)(component);
         // grab refs not used for bindings
-        var jsRefs = Object.keys(component.refs).filter(function (ref) {
-            return domRefs.has(ref);
-        });
+        var jsRefs = Object.keys(component.refs).filter(function (ref) { return domRefs.has(ref); });
         var refs = __spreadArray(__spreadArray([], jsRefs, true), Array.from(domRefs), true);
         (0, map_refs_1.mapRefs)(json, function (refName) {
             return "".concat(refName).concat(domRefs.has(refName) ? ".current" : '');
         });
         var addWrapper = json.children.length !== 1;
         var components = Array.from((0, get_components_1.getComponents)(json));
-        var mitosisComponents = components.filter(function (item) {
-            return mitosisCoreComponents.includes(item);
-        });
+        var mitosisComponents = components.filter(function (item) { return mitosisCoreComponents.includes(item); });
         var otherComponents = components.filter(function (item) { return !mitosisCoreComponents.includes(item); });
         var hasState = Boolean(Object.keys(component.state).length);
         var needsMitosisCoreImport = Boolean(hasState || refs.length || mitosisComponents.length);
@@ -166,17 +158,7 @@ var componentToMitosis = function (toMitosisOptions) {
         // TODO: smart only pull in imports as needed
         var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    ", "\n    ", "\n    ", "\n    ", "\n\n    ", "\n\n    ", "\n\n    export default function ", "(props) {\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      return (", "\n        ", "\n        ", ")\n    }\n\n  "], ["\n    ", "\n    ", "\n    ", "\n    ", "\n\n    ", "\n\n    ", "\n\n    export default function ", "(props) {\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      return (", "\n        ", "\n        ", ")\n    }\n\n  "])), !needsMitosisCoreImport
             ? ''
-            : "import { ".concat(!hasState ? '' : 'useStore, ', " ").concat(!refs.length ? '' : 'useRef, ', " ").concat(mitosisComponents.join(', '), " } from '@builder.io/mitosis';"), !otherComponents.length
-            ? ''
-            : "import { ".concat(otherComponents.join(','), " } from '@components';"), json.types ? json.types.join('\n') : '', json.interfaces ? (_b = json.interfaces) === null || _b === void 0 ? void 0 : _b.join('\n') : '', (0, render_imports_1.renderPreComponent)(json, 'mitosis'), stringifiedUseMetadata !== '{}'
-            ? "".concat(jsx_1.METADATA_HOOK_NAME, "(").concat(stringifiedUseMetadata, ")")
-            : '', component.name, !hasState
-            ? ''
-            : "const state = useStore(".concat((0, get_state_object_string_1.getStateObjectStringFromComponent)(json), ");"), getRefsString(json, refs), !((_c = json.hooks.onMount) === null || _c === void 0 ? void 0 : _c.code)
-            ? ''
-            : "onMount(() => { ".concat(json.hooks.onMount.code, " })"), !((_d = json.hooks.onUnMount) === null || _d === void 0 ? void 0 : _d.code)
-            ? ''
-            : "onUnMount(() => { ".concat(json.hooks.onUnMount.code, " })"), addWrapper ? '<>' : '', json.children.map(function (item) { return (0, exports.blockToMitosis)(item, options); }).join('\n'), addWrapper ? '</>' : '');
+            : "import { ".concat(!hasState ? '' : 'useStore, ', " ").concat(!refs.length ? '' : 'useRef, ', " ").concat(mitosisComponents.join(', '), " } from '@builder.io/mitosis';"), !otherComponents.length ? '' : "import { ".concat(otherComponents.join(','), " } from '@components';"), json.types ? json.types.join('\n') : '', json.interfaces ? (_b = json.interfaces) === null || _b === void 0 ? void 0 : _b.join('\n') : '', (0, render_imports_1.renderPreComponent)({ component: json, target: 'mitosis' }), stringifiedUseMetadata !== '{}' ? "".concat(jsx_1.METADATA_HOOK_NAME, "(").concat(stringifiedUseMetadata, ")") : '', component.name, !hasState ? '' : "const state = useStore(".concat((0, get_state_object_string_1.getStateObjectStringFromComponent)(json), ");"), getRefsString(json, refs), !((_c = json.hooks.onMount) === null || _c === void 0 ? void 0 : _c.code) ? '' : "onMount(() => { ".concat(json.hooks.onMount.code, " })"), !((_d = json.hooks.onUnMount) === null || _d === void 0 ? void 0 : _d.code) ? '' : "onUnMount(() => { ".concat(json.hooks.onUnMount.code, " })"), addWrapper ? '<>' : '', json.children.map(function (item) { return (0, exports.blockToMitosis)(item, options); }).join('\n'), addWrapper ? '</>' : '');
         if (options.prettier !== false) {
             try {
                 str = (0, standalone_1.format)(str, {

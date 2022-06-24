@@ -1,4 +1,4 @@
-import { BaseTranspilerOptions, Transpiler } from '../types/config';
+import { BaseTranspilerOptions, Transpiler } from '../types/transpiler';
 import { MitosisNode } from '../types/mitosis-node';
 export interface ToReactOptions extends BaseTranspilerOptions {
     stylesType?: 'emotion' | 'styled-components' | 'styled-jsx' | 'react-native';

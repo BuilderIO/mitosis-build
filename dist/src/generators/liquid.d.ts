@@ -1,4 +1,4 @@
-import { BaseTranspilerOptions, Transpiler } from '../types/config';
+import { BaseTranspilerOptions, Transpiler } from '../types/transpiler';
 export interface ToLiquidOptions extends BaseTranspilerOptions {
     reactive?: boolean;
 }

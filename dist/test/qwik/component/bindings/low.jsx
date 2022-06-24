@@ -7,13 +7,12 @@ export const ComponentD187055AF171488FAD843ACF045D6BF7_onMount = (state) => {
     if (!state.hasOwnProperty("title")) state.title = "default-title";
     typeof __STATE__ === "object" &&
       Object.assign(state, __STATE__[state.serverStateId]);
-    undefined;
   }
   withScopedStylesQrl(
     qrl("./low.js", "ComponentD187055AF171488FAD843ACF045D6BF7_styles", [])
   );
   return (
-    <div class="cj49hqu">
+    <div builder-id="builder-139a8479536b4c4f9c2738e724ed0952" class="cj49hqu">
       <div class="cjrqfb1">
         <div
           class="builder-text"
@@ -69,16 +68,24 @@ export const MyComponent_onMount = (state) => {
   withScopedStylesQrl(qrl("./low.js", "MyComponent_styles", []));
   return (
     <>
-      <div class="c713ty2">
+      <div
+        builder-id="builder-50b2438beaa4498b985eb9d8a7659afa"
+        class="c713ty2"
+      >
         <ComponentD187055AF171488FAD843ACF045D6BF7
+          builder-id="builder-h3uut6"
           title="First title from parent"
-          serverStateId="woo8b6"
+          serverStateId="w8x6w6"
         ></ComponentD187055AF171488FAD843ACF045D6BF7>
       </div>
-      <div class="c713ty2">
+      <div
+        builder-id="builder-33f427415bef4725b0c9fcd4fed325f2"
+        class="c713ty2"
+      >
         <ComponentD187055AF171488FAD843ACF045D6BF7
+          builder-id="builder-bfxc0y"
           title="Second title from parent"
-          serverStateId="woo8b6"
+          serverStateId="w8x6w6"
         ></ComponentD187055AF171488FAD843ACF045D6BF7>
       </div>
     </>

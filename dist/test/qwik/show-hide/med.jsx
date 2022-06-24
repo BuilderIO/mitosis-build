@@ -12,12 +12,12 @@ export const MyComponent_onMount = (state) => {
     if (!state.hasOwnProperty("visible")) state.visible = false;
     typeof __STATE__ === "object" &&
       Object.assign(state, __STATE__[state.serverStateId]);
-    undefined;
   }
   withScopedStylesQrl(qrl("./med.js", "MyComponent_styles", []));
   return (
     <>
       <CoreButton
+        builder-id="builder-7ac4d7c20b01404ca338b2f4c59b3f82"
         text="Toggle"
         class="c9nzze9"
         onClickQrl={qrl("./high.js", "MyComponent_onClick_0", [state])}
@@ -47,6 +47,7 @@ export const MyComponent_onMount = (state) => {
         ></div>
       </div>
       <Image
+        builder-id="builder-e42f7b40d40a442ea72dac7a1ceb2021"
         image="https://cdn.builder.io/api/v1/image/assets%2F23dfd7cef1104af59f281d58ec525923%2F4ecf7b7554464b0183ab8250f67e797b?width=1160"
         backgroundSize="cover"
         backgroundPosition="center"
