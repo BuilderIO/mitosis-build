@@ -43,8 +43,7 @@ function parseCode(code) {
 exports.parseCode = parseCode;
 var isCodeBodyExpression = function (body) {
     return body.length == 1 &&
-        (babel.types.isExpression(body[0]) ||
-            babel.types.isExpressionStatement(body[0]));
+        (babel.types.isExpression(body[0]) || babel.types.isExpressionStatement(body[0]));
 };
 exports.isCodeBodyExpression = isCodeBodyExpression;
 /**

@@ -1,11 +1,13 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.renderExportAndLocal = exports.renderPreComponent = exports.renderImports = exports.renderImport = void 0;
+var DEFAULT_IMPORT = 'default';
+var STAR_IMPORT = '*';
 var getStarImport = function (_a) {
     var theImport = _a.theImport;
     for (var key in theImport.imports) {
         var value = theImport.imports[key];
-        if (value === '*') {
+        if (value === STAR_IMPORT) {
             return key;
         }
     }
@@ -15,7 +17,7 @@ var getDefaultImport = function (_a) {
     var theImport = _a.theImport;
     for (var key in theImport.imports) {
         var value = theImport.imports[key];
-        if (value === 'default') {
+        if (value === DEFAULT_IMPORT) {
             return key;
         }
     }
@@ -28,6 +30,8 @@ var getFileExtensionForTarget = function (target) {
         case 'solid':
             return '.jsx';
         case 'vue':
+        case 'vue2':
+        case 'vue3':
             return '.vue';
         // these `.lite` extensions are handled in the `transpile` step of the CLI.
         // TO-DO: consolidate file-extension renaming to one place.
@@ -35,59 +39,74 @@ var getFileExtensionForTarget = function (target) {
             return '.lite';
     }
 };
+var checkIsComponentImport = function (theImport) {
+    return theImport.path.endsWith('.lite') && !theImport.path.endsWith('.context.lite');
+};
 var transformImportPath = function (theImport, target) {
     // We need to drop the `.lite` from context files, because the context generator does so as well.
     if (theImport.path.endsWith('.context.lite')) {
         return theImport.path.replace('.lite', '');
     }
-    if (theImport.path.endsWith('.lite')) {
+    if (checkIsComponentImport(theImport)) {
         return theImport.path.replace('.lite', getFileExtensionForTarget(target));
     }
     return theImport.path;
 };
-var getImportedValues = function (_a) {
+var getNamedImports = function (_a) {
     var theImport = _a.theImport;
-    var importString = '';
-    var starImport = getStarImport({ theImport: theImport });
-    if (starImport) {
-        importString += " * as ".concat(starImport, " ");
+    var namedImports = Object.entries(theImport.imports)
+        .filter(function (_a) {
+        var value = _a[1];
+        return ![DEFAULT_IMPORT, STAR_IMPORT].includes(value);
+    })
+        .map(function (_a) {
+        var key = _a[0], value = _a[1];
+        return key !== value ? "".concat(value, " as ").concat(key) : value;
+    });
+    if (namedImports.length > 0) {
+        return "{ ".concat(namedImports.join(', '), " }");
     }
     else {
-        var defaultImport = getDefaultImport({ theImport: theImport });
-        if (defaultImport) {
-            importString += " ".concat(defaultImport, ", ");
-        }
-        importString += ' { ';
-        var firstAdded = false;
-        for (var key in theImport.imports) {
-            var value = theImport.imports[key];
-            if (['default', '*'].includes(value)) {
-                continue;
-            }
-            if (firstAdded) {
-                importString += ' , ';
-            }
-            else {
-                firstAdded = true;
-            }
-            importString += " ".concat(value, " ");
-            if (key !== value) {
-                importString += " as ".concat(key, " ");
-            }
-        }
-        importString += ' } ';
+        return null;
     }
-    return importString;
+};
+var getImportedValues = function (_a) {
+    var theImport = _a.theImport;
+    var starImport = getStarImport({ theImport: theImport });
+    var defaultImport = getDefaultImport({ theImport: theImport });
+    var namedImports = getNamedImports({ theImport: theImport });
+    return { starImport: starImport, defaultImport: defaultImport, namedImports: namedImports };
+};
+var getImportValue = function (_a) {
+    var defaultImport = _a.defaultImport, namedImports = _a.namedImports, starImport = _a.starImport;
+    if (starImport) {
+        return " * as ".concat(starImport, " ");
+    }
+    else {
+        return [defaultImport, namedImports].filter(Boolean).join(', ');
+    }
 };
 var renderImport = function (_a) {
-    var theImport = _a.theImport, target = _a.target;
+    var theImport = _a.theImport, target = _a.target, asyncComponentImports = _a.asyncComponentImports;
     var importedValues = getImportedValues({ theImport: theImport });
     var path = transformImportPath(theImport, target);
-    return "import ".concat(importedValues, " from '").concat(path, "';");
+    var importValue = getImportValue(importedValues);
+    var isComponentImport = checkIsComponentImport(theImport);
+    var shouldBeAsyncImport = asyncComponentImports && isComponentImport;
+    if (shouldBeAsyncImport) {
+        var isVueImport = target === 'vue';
+        if (isVueImport && importedValues.namedImports) {
+            console.warn('Vue: Async Component imports cannot include named imports. Dropping async import. This might break your code.');
+        }
+        else {
+            return "const ".concat(importValue, " = () => import('").concat(path, "')");
+        }
+    }
+    return "import ".concat(importValue, " from '").concat(path, "';");
 };
 exports.renderImport = renderImport;
 var renderImports = function (_a) {
-    var imports = _a.imports, target = _a.target;
+    var imports = _a.imports, target = _a.target, asyncComponentImports = _a.asyncComponentImports;
     return imports
         .filter(function (theImport) {
         if (
@@ -101,11 +120,18 @@ var renderImports = function (_a) {
             return true;
         }
     })
-        .map(function (theImport) { return (0, exports.renderImport)({ theImport: theImport, target: target }); })
+        .map(function (theImport) { return (0, exports.renderImport)({ theImport: theImport, target: target, asyncComponentImports: asyncComponentImports }); })
         .join('\n');
 };
 exports.renderImports = renderImports;
-var renderPreComponent = function (component, target) { return "\n    ".concat((0, exports.renderImports)({ imports: component.imports, target: target }), "\n    ").concat((0, exports.renderExportAndLocal)(component), "\n    ").concat(component.hooks.preComponent || '', "\n  "); };
+var renderPreComponent = function (_a) {
+    var component = _a.component, target = _a.target, _b = _a.asyncComponentImports, asyncComponentImports = _b === void 0 ? false : _b;
+    return "\n    ".concat((0, exports.renderImports)({
+        imports: component.imports,
+        target: target,
+        asyncComponentImports: asyncComponentImports,
+    }), "\n    ").concat((0, exports.renderExportAndLocal)(component), "\n    ").concat(component.hooks.preComponent || '', "\n  ");
+};
 exports.renderPreComponent = renderPreComponent;
 var renderExportAndLocal = function (component) {
     return Object.keys(component.exports || {})

@@ -24,11 +24,7 @@ function Embed(props) {
                         document.head.appendChild(newScript);
                     }
                     else if (!script.type ||
-                        [
-                            'text/javascript',
-                            'application/javascript',
-                            'application/ecmascript',
-                        ].includes(script.type)) {
+                        ['text/javascript', 'application/javascript', 'application/ecmascript'].includes(script.type)) {
                         if (state.scriptsRun.includes(script.innerText)) {
                             continue;
                         }

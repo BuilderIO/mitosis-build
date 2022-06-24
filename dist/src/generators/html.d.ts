@@ -1,4 +1,4 @@
-import { BaseTranspilerOptions, Transpiler } from '../types/config';
+import { BaseTranspilerOptions, Transpiler } from '../types/transpiler';
 export interface ToHtmlOptions extends BaseTranspilerOptions {
     format?: 'class' | 'script';
     prefix?: string;

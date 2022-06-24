@@ -1,11 +1,17 @@
 import { MitosisNode } from '../types/mitosis-node';
-import { BaseTranspilerOptions, TranspilerArgs } from '../types/config';
-export interface ToVueOptions extends BaseTranspilerOptions {
-    vueVersion?: 2 | 3;
+import { BaseTranspilerOptions, Transpiler } from '../types/transpiler';
+import { OmitObj } from '../helpers/typescript';
+export declare type VueVersion = 2 | 3;
+interface VueVersionOpt {
+    vueVersion: VueVersion;
+}
+export interface ToVueOptions extends BaseTranspilerOptions, VueVersionOpt {
     cssNamespace?: () => string;
     namePrefix?: (path: string) => string;
+    asyncComponentImports?: boolean;
 }
 export declare const blockToVue: (node: MitosisNode, options: ToVueOptions) => string;
-export declare const componentToVue: (userOptions?: ToVueOptions) => ({ component, path }: TranspilerArgs & {
-    path: string;
-}) => string;
+declare type VueOptsWithoutVersion = OmitObj<ToVueOptions, VueVersionOpt>;
+export declare const componentToVue2: (vueOptions?: VueOptsWithoutVersion) => Transpiler;
+export declare const componentToVue3: (vueOptions?: VueOptsWithoutVersion) => Transpiler;
+export {};

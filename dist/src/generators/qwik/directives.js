@@ -45,10 +45,7 @@ function Image(props) {
         var isPixel = (_a = props.builderBlock) === null || _a === void 0 ? void 0 : _a.id.startsWith('builder-pixel-');
         var imgProps = {
             src: props.image,
-            style: "object-fit:".concat(props.backgroundSize || 'cover', ";object-position:").concat(props.backgroundPosition || 'center', ";") +
-                (props.aspectRatio
-                    ? 'position:absolute;height:100%;width:100%;top:0;left:0'
-                    : ''),
+            style: "object-fit:".concat(props.backgroundSize || 'cover', ";object-position:").concat(props.backgroundPosition || 'center', ";") + (props.aspectRatio ? 'position:absolute;height:100%;width:100%;top:0;left:0' : ''),
             sizes: props.sizes,
             alt: props.altText,
             role: !props.altText ? 'presentation' : undefined,
@@ -75,8 +72,7 @@ function Image(props) {
         else {
             jsx = [h('img', imgProps, jsx)];
         }
-        if (props.aspectRatio &&
-            !(props.fitContent && props.children && props.children.length)) {
+        if (props.aspectRatio && !(props.fitContent && props.children && props.children.length)) {
             var sizingDiv = h('div', {
                 class: 'builder-image-sizer',
                 style: "width:100%;padding-top:".concat((props.aspectRatio || 1) * 100, "%;pointer-events:none;font-size:0"),

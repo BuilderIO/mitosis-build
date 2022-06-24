@@ -60,8 +60,7 @@ function renderStyles(styles) {
         styles.forEach(function (styles) {
             _this.emit('.', styles.CLASS_NAME, /*'.🏷️�', WS,*/ '{');
             for (var key in styles) {
-                if (key !== 'CLASS_NAME' &&
-                    Object.prototype.hasOwnProperty.call(styles, key)) {
+                if (key !== 'CLASS_NAME' && Object.prototype.hasOwnProperty.call(styles, key)) {
                     var value = styles[key];
                     if (value && typeof value == 'object') {
                         mediaStyles.push(styles.CLASS_NAME, key, value);

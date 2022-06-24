@@ -15,7 +15,7 @@ function Image(props) {
         },
     });
     function isBrowser() {
-        return (typeof window !== 'undefined' && window.navigator.product != 'ReactNative');
+        return typeof window !== 'undefined' && window.navigator.product != 'ReactNative';
     }
     var _a = (0, mitosis_1.useState)(false), load = _a[0], setLoad = _a[1];
     (0, mitosis_1.onMount)(function () {

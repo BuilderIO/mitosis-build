@@ -28,9 +28,7 @@ var isValidLiquidBinding = function (str) {
 exports.isValidLiquidBinding = isValidLiquidBinding;
 var mappers = {
     Fragment: function (json, options) {
-        return "<div>".concat(json.children
-            .map(function (item) { return blockToLiquid(item, options); })
-            .join('\n'), "</div>");
+        return "<div>".concat(json.children.map(function (item) { return blockToLiquid(item, options); }).join('\n'), "</div>");
     },
 };
 // TODO: spread support
@@ -58,9 +56,7 @@ var blockToLiquid = function (json, options) {
         }
         str += "{% for ".concat(json.properties._forName, " in ").concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)((_c = json.bindings.each) === null || _c === void 0 ? void 0 : _c.code), " %}");
         if (json.children) {
-            str += json.children
-                .map(function (item) { return blockToLiquid(item, options); })
-                .join('\n');
+            str += json.children.map(function (item) { return blockToLiquid(item, options); }).join('\n');
         }
         str += '{% endfor %}';
     }
@@ -70,9 +66,7 @@ var blockToLiquid = function (json, options) {
         }
         str += "{% if ".concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)((_e = json.bindings.when) === null || _e === void 0 ? void 0 : _e.code), " %}");
         if (json.children) {
-            str += json.children
-                .map(function (item) { return blockToLiquid(item, options); })
-                .join('\n');
+            str += json.children.map(function (item) { return blockToLiquid(item, options); }).join('\n');
         }
         str += '{% endif %}';
     }
@@ -105,9 +99,7 @@ var blockToLiquid = function (json, options) {
         }
         str += '>';
         if (json.children) {
-            str += json.children
-                .map(function (item) { return blockToLiquid(item, options); })
-                .join('\n');
+            str += json.children.map(function (item) { return blockToLiquid(item, options); }).join('\n');
         }
         str += "</".concat(json.name, ">");
     }

@@ -173,9 +173,7 @@ var getConditionalAttr = function (value, noEnd) {
             ? (_a = statement.match(/context\.(shopify\.)?liquid\.condition\("([^"]*)"/)) === null || _a === void 0 ? void 0 : _a[2]
             : '';
         var index = statement.indexOf('&&');
-        var branchValue = index > -1
-            ? getConditionalAttr(statement.substr(index + 2), true)
-            : getValue(statement);
+        var branchValue = index > -1 ? getConditionalAttr(statement.substr(index + 2), true) : getValue(statement);
         if (expression) {
             return "{% ".concat(expression, " ").concat(condition, " %} ").concat(branchValue);
         }
@@ -239,9 +237,7 @@ function blockToLiquid(json, options) {
     var bindings = __assign(__assign({}, block.bindings), (_a = block.code) === null || _a === void 0 ? void 0 : _a.bindings);
     var hasInvalidHide = bindings.hide && !(0, liquid_1.isValidLiquidBinding)(bindings.hide);
     var hasInvalidShow = bindings.show && !(0, liquid_1.isValidLiquidBinding)(bindings.show);
-    var hasInvalidRepeat = block.repeat &&
-        block.repeat.collection &&
-        !(0, liquid_1.isValidLiquidBinding)(block.repeat.collection);
+    var hasInvalidRepeat = block.repeat && block.repeat.collection && !(0, liquid_1.isValidLiquidBinding)(block.repeat.collection);
     if (hasInvalidHide || hasInvalidShow || hasInvalidRepeat) {
         return '';
     }
@@ -271,13 +267,10 @@ function blockToLiquid(json, options) {
                 if (!block.properties) {
                     block.properties = {};
                 }
-                var name_1 = key.startsWith('properties.')
-                    ? key.replace(/^\s*properties\s*\./, '')
-                    : key;
+                var name_1 = key.startsWith('properties.') ? key.replace(/^\s*properties\s*\./, '') : key;
                 (0, lodash_1.set)(block.properties, name_1, valueString);
             }
-            else if (key.startsWith('component.options.') ||
-                key.startsWith('options.')) {
+            else if (key.startsWith('component.options.') || key.startsWith('options.')) {
                 var name_2 = key.replace(/^.*?options\./, '');
                 if (!block.component) {
                     continue;
@@ -329,8 +322,7 @@ function blockToLiquid(json, options) {
     if (block.component && !componentInfo) {
         console.warn("Could not find component: ".concat(block.component.name));
     }
-    var collectionName = block.repeat &&
-        (0, lodash_1.last)((block.repeat.collection || '').trim().split('(')[0].trim().split('.'));
+    var collectionName = block.repeat && (0, lodash_1.last)((block.repeat.collection || '').trim().split('(')[0].trim().split('.'));
     if (collectionName) {
         collectionName = convertBinding(collectionName, options);
     }
@@ -340,16 +332,10 @@ function blockToLiquid(json, options) {
         (0, liquid_1.isValidLiquidBinding)(block.repeat.collection)
         ? "{% for ".concat(block.repeat.itemName || collectionName + '_item', " in ").concat(convertBinding(block.repeat.collection, options), " %}")
         : '', "\n    ").concat(!options.static && bindings.hide
-        ? "{% unless  ".concat(!(0, liquid_1.isValidLiquidBinding)(bindings.hide)
-            ? 'false'
-            : convertBinding(bindings.hide, options), " %}")
+        ? "{% unless  ".concat(!(0, liquid_1.isValidLiquidBinding)(bindings.hide) ? 'false' : convertBinding(bindings.hide, options), " %}")
         : '', "\n    ").concat(!options.static && bindings.show
-        ? "{% if  ".concat(!(0, liquid_1.isValidLiquidBinding)(bindings.show)
-            ? 'false'
-            : convertBinding(bindings.show, options), " %}")
-        : '', "\n    ").concat(!options.static && bindings.hide ? '{% endunless %}' : '', "\n    ").concat(!options.static && bindings.show ? '{% endif %}' : '', "\n    ").concat(!options.static && block.repeat && block.repeat.collection
-        ? '{% endfor %}'
-        : '', "\n  ");
+        ? "{% if  ".concat(!(0, liquid_1.isValidLiquidBinding)(bindings.show) ? 'false' : convertBinding(bindings.show, options), " %}")
+        : '', "\n    ").concat(!options.static && bindings.hide ? '{% endunless %}' : '', "\n    ").concat(!options.static && bindings.show ? '{% endif %}' : '', "\n    ").concat(!options.static && block.repeat && block.repeat.collection ? '{% endfor %}' : '', "\n  ");
 }
 exports.blockToLiquid = blockToLiquid;
 // TODO: make these core functions and share with react, vue, etc
@@ -501,14 +487,10 @@ var liquidBindingTemplate = function (str) {
         : "liquid.get(\"".concat(str.replace(/\n+/g, ' ').replace(/"/g, '\\"'), "\")");
 };
 var liquidRenderTemplate = function (str) {
-    return isSimpleLiquidBinding(str)
-        ? str
-        : "liquid(\"".concat(str.replace(/\n+/g, ' ').replace(/"/g, '\\"'), "\")");
+    return isSimpleLiquidBinding(str) ? str : "liquid(\"".concat(str.replace(/\n+/g, ' ').replace(/"/g, '\\"'), "\")");
 };
 var liquidConditionTemplate = function (str) {
-    return isSimpleLiquidBinding(str)
-        ? str
-        : "liquid(\"".concat(str.replace(/\n+/g, ' ').replace(/"/g, '\\"'), "\")");
+    return isSimpleLiquidBinding(str) ? str : "liquid(\"".concat(str.replace(/\n+/g, ' ').replace(/"/g, '\\"'), "\")");
 };
 var isIfTemplate = function (template) {
     return template.token.type === 'tag' && template.token.name === 'if';
@@ -531,19 +513,13 @@ var isCaseTemplate = function (template) {
 var isOutputTemplate = function (template) {
     return template.token.type === 'output';
 };
-var isElement = function (node) {
-    return node.type === 1;
-};
+var isElement = function (node) { return node.type === 1; };
 var isTextNode = function (node) {
     return node.type === 3 || node.type === 2;
 };
 // Custom common HTML symbol encoding so not to confuse with actual encoded HTML
-var htmlEncode = function (html) {
-    return html.replace(/'/g, '_APOS_').replace(/"/g, '_QUOT_');
-};
-var htmlDecode = function (html) {
-    return html.replace(/_APOS_/g, "'").replace(/_QUOT_/g, '"');
-};
+var htmlEncode = function (html) { return html.replace(/'/g, '_APOS_').replace(/"/g, '_QUOT_'); };
+var htmlDecode = function (html) { return html.replace(/_APOS_/g, "'").replace(/_QUOT_/g, '"'); };
 var createHtmlAttribute = function (attribute, attributeValue) {
     if (attributeValue === void 0) { attributeValue = null; }
     var encodedValue = '';
@@ -557,14 +533,10 @@ var parseArgList = function (args) {
     return args
         // find all the string arguments (wrapped with ' or "), then replace any commas
         // this allows us to split the args on "," without worrying about breaking any strings
-        .replace(/('[^']*'|"[^"]*")/g, function (str) {
-        return str.replace(/,/g, COMMA_TOKEN);
-    })
+        .replace(/('[^']*'|"[^"]*")/g, function (str) { return str.replace(/,/g, COMMA_TOKEN); })
         .split(',')
         // now that we the arg list is broken up, we can re-add the escaped commas to each item
-        .map(function (item) {
-        return item.replace(new RegExp(COMMA_TOKEN, 'g'), ',').trim();
-    });
+        .map(function (item) { return item.replace(new RegExp(COMMA_TOKEN, 'g'), ',').trim(); });
 };
 var errorLinesRe = /\((\d*):(\d*)\)/;
 var getErrorInfo = function (message) {
@@ -576,7 +548,7 @@ var getErrorInfo = function (message) {
 };
 var getSubstringTill = function (col, line, str) {
     var lines = str.split('\n');
-    return (lines.slice(0, line - 1).join('\n') + lines[line - 1].substring(0, col - 1));
+    return lines.slice(0, line - 1).join('\n') + lines[line - 1].substring(0, col - 1);
 };
 var transpileUnlessToIf = function (unlessTemplate) {
     var cond = unlessTemplate.impl.cond;
@@ -654,8 +626,7 @@ var parsedLiquidToHtml = function (templates, options) { return __awaiter(void 0
                         index++;
                         return [3 /*break*/, 2];
                     case 10:
-                        if (!(psuedoTemplate.impl.elseTemplates &&
-                            psuedoTemplate.impl.elseTemplates.length)) return [3 /*break*/, 17];
+                        if (!(psuedoTemplate.impl.elseTemplates && psuedoTemplate.impl.elseTemplates.length)) return [3 /*break*/, 17];
                         html += createHtmlAttribute('else', {
                             fullRaw: '{% else %}',
                         });
@@ -821,11 +792,9 @@ var parsedLiquidToHtml = function (templates, options) { return __awaiter(void 0
                     case 46:
                         if (!(name_4 === 'capture')) return [3 /*break*/, 47];
                         rawExpression = '';
-                        for (_s = 0, _t = template.impl
-                            .templates; _s < _t.length; _s++) {
+                        for (_s = 0, _t = template.impl.templates; _s < _t.length; _s++) {
                             templateToken = _t[_s];
-                            if (templateToken.name === 'raw' &&
-                                ((_a = templateToken.impl) === null || _a === void 0 ? void 0 : _a.tokens)) {
+                            if (templateToken.name === 'raw' && ((_a = templateToken.impl) === null || _a === void 0 ? void 0 : _a.tokens)) {
                                 for (_u = 0, _v = templateToken.impl.tokens; _u < _v.length; _u++) {
                                     rawToken = _v[_u];
                                     rawExpression += rawToken.raw;
@@ -898,10 +867,7 @@ var parsedLiquidToHtml = function (templates, options) { return __awaiter(void 0
                         return [4 /*yield*/, getShopifyAsset("sections/".concat(path, ".liquid"), options)];
                     case 56:
                         currentAsset = _10.sent();
-                        if (!(currentAsset &&
-                            !(0, lodash_1.isError)(currentAsset) &&
-                            themeSettings &&
-                            !(0, lodash_1.isError)(themeSettings))) return [3 /*break*/, 62];
+                        if (!(currentAsset && !(0, lodash_1.isError)(currentAsset) && themeSettings && !(0, lodash_1.isError)(themeSettings))) return [3 /*break*/, 62];
                         schemaObject = {};
                         schemaDefault = currentAsset.match(/{%-? schema -?%}([\s\S]*?){%-? endschema -?%}/);
                         defaultSchemaObject_1 = {};
@@ -921,8 +887,7 @@ var parsedLiquidToHtml = function (templates, options) { return __awaiter(void 0
                             themeSettings.current.sections[path] = {};
                         }
                         sectionSettingsState = Object.assign({}, defaultSchemaObject_1, themeSettings.current.sections[path].settings);
-                        themeSettings.current.sections[path].settings =
-                            sectionSettingsState;
+                        themeSettings.current.sections[path].settings = sectionSettingsState;
                         if (!(options.importSections === false)) return [3 /*break*/, 57];
                         html += serializeBlock(__assign(__assign({ layerName: "".concat(humanCase(path.replace('-template', '')), " section"), component: {
                                 name: 'Shopify:SectionRef',
@@ -933,8 +898,7 @@ var parsedLiquidToHtml = function (templates, options) { return __awaiter(void 0
                             properties: {
                                 'data-slot': 'shopify:productPage',
                             },
-                        })), ((path === 'collection-template' ||
-                            path === 'collection') && {
+                        })), ((path === 'collection-template' || path === 'collection') && {
                             properties: {
                                 'data-slot': 'shopify:collectionPage',
                             },
@@ -1135,9 +1099,7 @@ var parsedLiquidToHtml = function (templates, options) { return __awaiter(void 0
 }); };
 exports.parsedLiquidToHtml = parsedLiquidToHtml;
 var flattenExpressions = function (conditionsArray, value) {
-    return (conditionsArray
-        .map(function (c) { return (c.negate ? "".concat(c.expression, " {% else %}") : c.expression); })
-        .join(' ') +
+    return (conditionsArray.map(function (c) { return (c.negate ? "".concat(c.expression, " {% else %}") : c.expression); }).join(' ') +
         value +
         conditionsArray.map(function () { return "{% endif %}"; }));
 };
@@ -1177,8 +1139,7 @@ function processInnerTemplates(templates, options, priorConditions, overrideHash
                                 if (node.type === 'text') {
                                     result += node.value;
                                 }
-                                else if ((0, lodash_1.isNull)(node.endSourceSpan) &&
-                                    !selfCloseTags.has(node.name)) {
+                                else if ((0, lodash_1.isNull)(node.endSourceSpan) && !selfCloseTags.has(node.name)) {
                                     var block = {
                                         tagName: node.name,
                                         bindings: {},
@@ -1222,8 +1183,7 @@ function processInnerTemplates(templates, options, priorConditions, overrideHash
                             }
                         }
                         catch (error) {
-                            if (error instanceof Error &&
-                                error.message.includes('Unexpected closing tag')) {
+                            if (error instanceof Error && error.message.includes('Unexpected closing tag')) {
                                 // template.str have an unclosed tag, extract all valid text and
                                 // replace the invlalid endtag with htmlattr
                                 var _d = getErrorInfo(error.message), col = _d.col, line = _d.line;
@@ -1231,8 +1191,7 @@ function processInnerTemplates(templates, options, priorConditions, overrideHash
                                 var preErrorTag = getSubstringTill(Number(col), Number(line), str);
                                 result += preErrorTag;
                                 result += createHtmlAttribute('endopencondtag', {
-                                    hash: overrideHash ||
-                                        (priorConditions.length > 0 && (0, object_hash_1.default)(priorConditions)),
+                                    hash: overrideHash || (priorConditions.length > 0 && (0, object_hash_1.default)(priorConditions)),
                                 });
                                 // 3 is length of </>
                                 var leftovers = str.substring(preErrorTag.length + errorTag.length + 4);
@@ -1303,9 +1262,7 @@ var htmlNodeToBuilder = function (node, index, parentArray, options) { return __
                 element = el(__assign(__assign({}, parsedBlock), (children.length > 0 && { children: children })));
                 if ((_f = parsedBlock.meta) === null || _f === void 0 ? void 0 : _f.psuedoNode) {
                     psuedoNode = (_g = parsedBlock.meta) === null || _g === void 0 ? void 0 : _g.psuedoNode;
-                    (element.properties = {}),
-                        (element.bindings = {}),
-                        delete parsedBlock.meta.psuedoNode;
+                    (element.properties = {}), (element.bindings = {}), delete parsedBlock.meta.psuedoNode;
                 }
                 else {
                     return [2 /*return*/, element];
@@ -1366,18 +1323,9 @@ var htmlNodeToBuilder = function (node, index, parentArray, options) { return __
                     parsed = parseTag(text);
                     text = '';
                 }
-                parsedOutput = parsed &&
-                    parsed.value &&
-                    parsed.name === 'output' &&
-                    JSON.parse(parsed.value);
-                parsedFor = parsed &&
-                    parsed.value &&
-                    parsed.name === 'for' &&
-                    JSON.parse(parsed.value);
-                parsedIf = parsed &&
-                    parsed.value &&
-                    parsed.name === 'if' &&
-                    JSON.parse(parsed.value);
+                parsedOutput = parsed && parsed.value && parsed.name === 'output' && JSON.parse(parsed.value);
+                parsedFor = parsed && parsed.value && parsed.name === 'for' && JSON.parse(parsed.value);
+                parsedIf = parsed && parsed.value && parsed.name === 'if' && JSON.parse(parsed.value);
                 parsedValue = parsedOutput;
                 return [4 /*yield*/, getTranslation(parsedValue, options)];
             case 12:
@@ -1606,9 +1554,7 @@ var htmlToAst = function (html) {
 };
 exports.htmlToAst = htmlToAst;
 var isBuilderElement = function (el) {
-    return Boolean(el &&
-        typeof el === 'object' &&
-        el['@type'] === '@builder.io/sdk:Element');
+    return Boolean(el && typeof el === 'object' && el['@type'] === '@builder.io/sdk:Element');
 };
 var isBuilderElementArray = function (obj) {
     return Boolean(obj && Array.isArray(obj) && obj[0] && isBuilderElement(obj[0]));
@@ -1699,9 +1645,7 @@ var postProcessHtmlAstNodes = function (nodes) {
                 this.update(__assign(__assign({}, current), { name: current.name.replace(bindingsPlaceholder, '') }));
             }
             else if (current) {
-                var prop = Object.keys(current).find(function (key) {
-                    return key.startsWith(bindingsPlaceholder);
-                });
+                var prop = Object.keys(current).find(function (key) { return key.startsWith(bindingsPlaceholder); });
                 if (prop) {
                     this.update(__assign(__assign({}, (0, lodash_1.omit)(current, prop)), (_a = {}, _a[prop === null || prop === void 0 ? void 0 : prop.replace(bindingsPlaceholder, '')] = current[prop], _a)));
                 }
@@ -1803,9 +1747,7 @@ var matchConditionalTagsWithEndings = function (nodes) {
                 if (!isOpenConditionalTag(node) || this_1.key === 'conditionalTags') {
                     return { value: void 0 };
                 }
-                var conditionalTags = [
-                    (0, lodash_1.omit)(node, 'children'),
-                ];
+                var conditionalTags = [(0, lodash_1.omit)(node, 'children')];
                 var tag = node;
                 var originalIndex = node.meta.originalIndex;
                 var branchIndex = node.meta.branchIndex;
@@ -1830,11 +1772,7 @@ var matchConditionalTagsWithEndings = function (nodes) {
                     endTag =
                         current
                             .slice(currentIndex + 1)
-                            .findIndex(function (el) {
-                            var _a, _b;
-                            return isCondition(el) &&
-                                ((_a = el.component) === null || _a === void 0 ? void 0 : _a.options.hash) === ((_b = node.component) === null || _b === void 0 ? void 0 : _b.options.hash);
-                        }) + 1;
+                            .findIndex(function (el) { var _a, _b; return isCondition(el) && ((_a = el.component) === null || _a === void 0 ? void 0 : _a.options.hash) === ((_b = node.component) === null || _b === void 0 ? void 0 : _b.options.hash); }) + 1;
                     if (endTag === 0) {
                         throw Error("no endTag for a conditional ".concat((_a = node.component) === null || _a === void 0 ? void 0 : _a.options.hash));
                     }
@@ -1961,13 +1899,7 @@ var postProcessBuilderTree = function (nodes, options) { return __awaiter(void 0
                     var _j = tempNodeInfo(item), name_9 = _j.name, value = _j.value;
                     var parsedValue = value && (0, lodash_1.attempt)(function () { return JSON.parse(value); });
                     if (name_9) {
-                        var isBlockStart = [
-                            'for',
-                            'if',
-                            'unless',
-                            'paginate',
-                            'form',
-                        ].includes(name_9);
+                        var isBlockStart = ['for', 'if', 'unless', 'paginate', 'form'].includes(name_9);
                         if (isBlockStart) {
                             var parent_2 = current;
                             // Could be fucked.... could have no close tag... or be in wrong palce...
@@ -1998,9 +1930,7 @@ var postProcessBuilderTree = function (nodes, options) { return __awaiter(void 0
                             else {
                                 updated = true;
                                 var skip_2 = 0;
-                                var midTags = nextSiblings
-                                    .slice(0, parent_2.indexOf(endTag))
-                                    .filter(function (el) {
+                                var midTags = nextSiblings.slice(0, parent_2.indexOf(endTag)).filter(function (el) {
                                     var siblingName = tempNodeInfo(el).name;
                                     if ('if' === siblingName || siblingName === 'unless') {
                                         skip_2++;
@@ -2016,8 +1946,7 @@ var postProcessBuilderTree = function (nodes, options) { return __awaiter(void 0
                                             return false;
                                         }
                                     }
-                                    if (!skip_2 &&
-                                        ['else', 'elsif'].includes(siblingName)) {
+                                    if (!skip_2 && ['else', 'elsif'].includes(siblingName)) {
                                         return true;
                                     }
                                     return false;
@@ -2090,8 +2019,7 @@ var postProcessBuilderTree = function (nodes, options) { return __awaiter(void 0
                                         }
                                         var parsedValue_3 = info.value && JSON.parse(info.value);
                                         var args = parseArgList(parsedValue_3.args);
-                                        options_2.type = (_f = args
-                                            .shift()) === null || _f === void 0 ? void 0 : _f.replace(/"/g, '').replace(/'/g, '');
+                                        options_2.type = (_f = args.shift()) === null || _f === void 0 ? void 0 : _f.replace(/"/g, '').replace(/'/g, '');
                                         options_2.parameter = null;
                                         options_2.customAttributes = null;
                                         if (args.length && !args[0].includes(':')) {
@@ -2173,9 +2101,7 @@ var htmlAstToBuilder = function (nodes, options) { return __awaiter(void 0, void
                 _b = lodash_1.flatten;
                 return [4 /*yield*/, Promise.all(nodes
                         .filter(function (node) { return isTextNode(node) || isElement(node); })
-                        .map(function (node, index, nodes) {
-                        return (0, exports.htmlNodeToBuilder)(node, index, nodes, options);
-                    }))];
+                        .map(function (node, index, nodes) { return (0, exports.htmlNodeToBuilder)(node, index, nodes, options); }))];
             case 1:
                 els = _a.apply(void 0, [_b.apply(void 0, [_c.sent()])]);
                 return [2 /*return*/, els];
@@ -2243,12 +2169,8 @@ var htmlDebugNodeString = function (el) {
             properties.push(['@' + property, String(value)]);
         }
     }
-    return "<".concat(tagName, " ").concat(properties.reduce(function (memo, tuple) {
-        return memo + " ".concat(tuple[0], "=\"").concat((tuple[1] || '').replace(/"/g, '`'), "\"");
-    }, ''), "\n    ").concat(el.children && el.children.length
-        ? ">".concat(el.children
-            .map(function (child) { return htmlDebugNodeString(child); })
-            .join('\n'), "</").concat(tagName, ">")
+    return "<".concat(tagName, " ").concat(properties.reduce(function (memo, tuple) { return memo + " ".concat(tuple[0], "=\"").concat((tuple[1] || '').replace(/"/g, '`'), "\""); }, ''), "\n    ").concat(el.children && el.children.length
+        ? ">".concat(el.children.map(function (child) { return htmlDebugNodeString(child); }).join('\n'), "</").concat(tagName, ">")
         : '/>', "\n  ");
 };
 /**
@@ -2277,9 +2199,7 @@ var preprocessLiquid = function (liquid, options) {
                         match = matchedCaptureGroup[0], capturedVariableName = matchedCaptureGroup[1], capturedContents = matchedCaptureGroup[2];
                         capturedContentsHasLiquid = capturedContents === null || capturedContents === void 0 ? void 0 : capturedContents.match(/\{%/gim);
                         capturedContentContainsCaptureTag = capturedContents === null || capturedContents === void 0 ? void 0 : capturedContents.match(/{%-?\s*capture/gim);
-                        if (capturedVariableName &&
-                            capturedContentsHasLiquid &&
-                            !capturedContentContainsCaptureTag) {
+                        if (capturedVariableName && capturedContentsHasLiquid && !capturedContentContainsCaptureTag) {
                             // We want to find a replace any instances of the captured variable in the template, i.e. {{ my_variable }}
                             allCaptureGroupMatches.push({
                                 match: match,
@@ -2314,21 +2234,13 @@ var preprocessLiquid = function (liquid, options) {
                     }
                     includesWithRegex = /{%-?\s*include\s*([\S]+?)\s*with\s*([\S]+?)\s*-?%}/gi;
                     processedLiquid = processedLiquid.replace(includesWithRegex, function (fullIncludesMatch, templateName, withMatch) {
-                        var templateNameCleaned = templateName
-                            .trim()
-                            .replace(/'/g, '')
-                            .replace(/"/g, '');
+                        var templateNameCleaned = templateName.trim().replace(/'/g, '').replace(/"/g, '');
                         return "{% include '".concat(templateNameCleaned, "', ").concat(templateNameCleaned, ": ").concat(withMatch, " %}");
                     });
                     includesWithAndValuesRegex = /{%-?\s*include\s*([\S]+?)\s*with\s*(([\S]+?:\s*[\S]+?,?\s*)+)-?%}/gi;
                     processedLiquid = processedLiquid.replace(includesWithAndValuesRegex, function (fullIncludesMatch, templateName, allKeysAndValues) {
-                        var templateNameCleaned = templateName
-                            .trim()
-                            .replace(/'/g, '')
-                            .replace(/"/g, '');
-                        var allKeysAndValuesCleaned = allKeysAndValues
-                            .trim()
-                            .replace(/\s+/g, ' ');
+                        var templateNameCleaned = templateName.trim().replace(/'/g, '').replace(/"/g, '');
+                        var allKeysAndValuesCleaned = allKeysAndValues.trim().replace(/\s+/g, ' ');
                         return "{% include '".concat(templateNameCleaned, "', ").concat(allKeysAndValuesCleaned, " %}");
                     });
                     templateContainsRegex = /{%-?(.+?)template\s+contains\s+(.+?)-?%}/gi;
@@ -2351,8 +2263,7 @@ var preprocessLiquid = function (liquid, options) {
                     themeAsset = _e.sent();
                     themeSettings = typeof themeAsset === 'string' && (0, lodash_1.attempt)(function () { return JSON.parse(themeAsset); });
                     if (themeSettings && !(0, lodash_1.isError)(themeSettings)) {
-                        contentForIndexTemplates = ((_b = themeSettings.current) === null || _b === void 0 ? void 0 : _b.content_for_index) ||
-                            ((_d = (_c = themeSettings.presets) === null || _c === void 0 ? void 0 : _c.Default) === null || _d === void 0 ? void 0 : _d.content_for_index);
+                        contentForIndexTemplates = ((_b = themeSettings.current) === null || _b === void 0 ? void 0 : _b.content_for_index) || ((_d = (_c = themeSettings.presets) === null || _c === void 0 ? void 0 : _c.Default) === null || _d === void 0 ? void 0 : _d.content_for_index);
                         if (contentForIndexTemplates.length) {
                             contentForIndexLiquidStrings_1 = contentForIndexTemplates.map(function (template) { return "{% section '".concat(template, "' %}"); });
                             contentForIndexRegex = /{{\s*content_for_index\s*}}/gi;
@@ -2396,17 +2307,13 @@ var liquidToBuilder = function (liquid, options) {
                 case 3:
                     themeAsset = _a.sent();
                     themeSettings = typeof themeAsset === 'string' && (0, lodash_1.attempt)(function () { return JSON.parse(themeAsset); });
-                    if (themeSettings &&
-                        !(0, lodash_1.isError)(themeSettings) &&
-                        options.importSections !== false) {
+                    if (themeSettings && !(0, lodash_1.isError)(themeSettings) && options.importSections !== false) {
                         serialized = serializeBlock({
                             layerName: "Theme Settings",
                             component: {
                                 name: 'Shopify:ThemeProvider',
                                 options: {
-                                    shopifyMetafields: [
-                                        { path: 'state.settings', as: '_theme_settings' },
-                                    ],
+                                    shopifyMetafields: [{ path: 'state.settings', as: '_theme_settings' }],
                                     state: {
                                         settings: mapArrays((0, lodash_1.omit)(themeSettings.current, 'sections')),
                                     },
@@ -2505,9 +2412,7 @@ var bindingsFromAttrs = function (node, bindings, properties, options) { return 
                 getConditionalValue = function (conditions, value, defaultValue) {
                     return conditions.length > 0
                         ? "/*start*/".concat(conditions
-                            .map(function (c) {
-                            return "".concat(c.negate ? '!' : '').concat(liquidConditionTemplate(c.expression));
-                        })
+                            .map(function (c) { return "".concat(c.negate ? '!' : '').concat(liquidConditionTemplate(c.expression)); })
                             .join('&&') + " ? ".concat(value, " : (").concat(defaultValue, ")"), "/*end*/")
                         : value;
                 };
@@ -2528,9 +2433,7 @@ var bindingsFromAttrs = function (node, bindings, properties, options) { return 
                                 stuff = JSON.parse(htmlDecode(value));
                                 if (!(key === '[if]')) return [3 /*break*/, 3];
                                 jump = getIndexOfClosingTag(i + 1, ['[endif]']);
-                                return [4 /*yield*/, parseAttrsInRange(i + 1, jump, conditions.concat([
-                                        { expression: stuff.cond, negate: stuff.negate },
-                                    ]))];
+                                return [4 /*yield*/, parseAttrsInRange(i + 1, jump, conditions.concat([{ expression: stuff.cond, negate: stuff.negate }]))];
                             case 2:
                                 _b.sent();
                                 return [3 /*break*/, 9];
@@ -2563,8 +2466,7 @@ var bindingsFromAttrs = function (node, bindings, properties, options) { return 
                                 // Remove trailing semi-colon because the liquid render function does not know how to handle it
                                 liquidStr = liquidStr === null || liquidStr === void 0 ? void 0 : liquidStr.replace(/;$/, '');
                                 useKey = key;
-                                if ((keyForImage == key ||
-                                    (!keyForImage && (key === 'src' || key === 'data-src'))) &&
+                                if ((keyForImage == key || (!keyForImage && (key === 'src' || key === 'data-src'))) &&
                                     node.tag === 'img') {
                                     useKey = 'component.options.image';
                                     keyForImage = key;

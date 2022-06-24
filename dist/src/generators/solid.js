@@ -81,8 +81,7 @@ var collectClassString = function (json) {
         dynamicClasses.push(json.bindings.className.code);
         delete json.bindings.className;
     }
-    if (typeof ((_c = json.bindings.css) === null || _c === void 0 ? void 0 : _c.code) === 'string' &&
-        json.bindings.css.code.trim().length > 4) {
+    if (typeof ((_c = json.bindings.css) === null || _c === void 0 ? void 0 : _c.code) === 'string' && json.bindings.css.code.trim().length > 4) {
         dynamicClasses.push("css(".concat(json.bindings.css.code, ")"));
     }
     delete json.bindings.css;
@@ -164,8 +163,7 @@ var blockToSolid = function (json, options) {
                         for (var _i = 0, _a = path.node.properties; _i < _a.length; _i++) {
                             var property = _a[_i];
                             if (core_1.types.isObjectProperty(property)) {
-                                if (core_1.types.isIdentifier(property.key) ||
-                                    core_1.types.isStringLiteral(property.key)) {
+                                if (core_1.types.isIdentifier(property.key) || core_1.types.isStringLiteral(property.key)) {
                                     var key_1 = core_1.types.isIdentifier(property.key)
                                         ? property.key.name
                                         : property.key.value;
@@ -252,11 +250,7 @@ var componentToSolid = function (options) {
         ].filter(Boolean);
         var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n\n    function ", "(props) {\n      ", "\n      \n      ", "\n      ", "\n\n      ", "\n\n      return (", "\n        ", "\n        ", ")\n    }\n\n    export default ", ";\n  "], ["\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n\n    function ", "(props) {\n      ", "\n      \n      ", "\n      ", "\n\n      ", "\n\n      return (", "\n        ", "\n        ", ")\n    }\n\n    export default ", ";\n  "])), solidJSImports.length > 0
             ? "import { \n          ".concat(solidJSImports.map(function (item) { return item; }).join(', '), "\n         } from 'solid-js';")
-            : '', !foundDynamicComponents ? '' : "import { Dynamic } from 'solid-js/web';", !hasState ? '' : "import { createMutable } from 'solid-js/store';", !componentHasStyles
-            ? ''
-            : "import { css } from \"solid-styled-components\";", (0, render_imports_1.renderPreComponent)(json, 'solid'), json.name, !hasState ? '' : "const state = createMutable(".concat(stateString, ");"), refs, getContextString(json, options), !((_c = json.hooks.onMount) === null || _c === void 0 ? void 0 : _c.code)
-            ? ''
-            : "onMount(() => { ".concat(json.hooks.onMount.code, " })"), addWrapper ? '<>' : '', json.children
+            : '', !foundDynamicComponents ? '' : "import { Dynamic } from 'solid-js/web';", !hasState ? '' : "import { createMutable } from 'solid-js/store';", !componentHasStyles ? '' : "import { css } from \"solid-styled-components\";", (0, render_imports_1.renderPreComponent)({ component: json, target: 'solid' }), json.name, !hasState ? '' : "const state = createMutable(".concat(stateString, ");"), refs, getContextString(json, options), !((_c = json.hooks.onMount) === null || _c === void 0 ? void 0 : _c.code) ? '' : "onMount(() => { ".concat(json.hooks.onMount.code, " })"), addWrapper ? '<>' : '', json.children
             .filter(filter_empty_text_nodes_1.filterEmptyTextNodes)
             .map(function (item) { return blockToSolid(item, options); })
             .join('\n'), addWrapper ? '</>' : '', json.name);

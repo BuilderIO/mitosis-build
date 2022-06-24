@@ -19,8 +19,8 @@ export declare const targets: {
     swift: (options?: import("./generators/swift-ui").ToSwiftOptions) => import(".").Transpiler;
     template: (options?: import("./generators/template").ToTemplateOptions) => import(".").Transpiler;
     webcomponent: (options?: import("./generators/html").ToHtmlOptions) => import(".").Transpiler;
-    vue: (userOptions?: import("./generators/vue").ToVueOptions) => ({ component, path }: import(".").TranspilerArgs & {
-        path: string;
-    }) => string;
+    vue: (vueOptions?: Omit<import("./generators/vue").ToVueOptions, "vueVersion"> | undefined) => import(".").Transpiler;
+    vue2: (vueOptions?: Omit<import("./generators/vue").ToVueOptions, "vueVersion"> | undefined) => import(".").Transpiler;
+    vue3: (vueOptions?: Omit<import("./generators/vue").ToVueOptions, "vueVersion"> | undefined) => import(".").Transpiler;
     stencil: (options?: import("./generators/stencil").ToStencilOptions) => import(".").Transpiler;
 };

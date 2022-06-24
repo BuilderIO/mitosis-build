@@ -38,7 +38,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.componentToVue = exports.blockToVue = void 0;
+exports.componentToVue3 = exports.componentToVue2 = exports.blockToVue = void 0;
 var dedent_1 = __importDefault(require("dedent"));
 var standalone_1 = require("prettier/standalone");
 var collect_styles_1 = require("../helpers/collect-styles");
@@ -265,9 +265,7 @@ function getContextProvideString(component, options) {
         var _a = component.context.set[key], value = _a.value, name_1 = _a.name;
         str += "\n      ".concat(name_1, ": ").concat(value
             ? (0, get_state_object_string_1.getMemberObjectString)(value, {
-                valueMapper: function (code) {
-                    return (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(code, { replaceWith: '_this.' });
-                },
+                valueMapper: function (code) { return (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(code, { replaceWith: '_this.' }); },
             })
             : null, ",\n    ");
     }
@@ -299,16 +297,33 @@ var onUpdatePlugin = function (options) { return ({
 }); };
 var BASE_OPTIONS = {
     plugins: [onUpdatePlugin],
+    vueVersion: 2,
 };
 var mergeOptions = function (_a, _b) {
     var _c = _a.plugins, pluginsA = _c === void 0 ? [] : _c, a = __rest(_a, ["plugins"]);
     var _d = _b.plugins, pluginsB = _d === void 0 ? [] : _d, b = __rest(_b, ["plugins"]);
     return (__assign(__assign(__assign({}, a), b), { plugins: __spreadArray(__spreadArray([], pluginsA, true), pluginsB, true) }));
 };
+var generateComponentImport = function (options) {
+    return function (componentName) {
+        var key = (0, lodash_1.kebabCase)(componentName);
+        if (options.vueVersion >= 3 && options.asyncComponentImports) {
+            return "'".concat(key, "': defineAsyncComponent(").concat(componentName, ")");
+        }
+        else {
+            return "'".concat(key, "': ").concat(componentName);
+        }
+    };
+};
+var generateComponents = function (componentsUsed, options) {
+    if (componentsUsed.length === 0) {
+        return '';
+    }
+    else {
+        return "components: { ".concat(componentsUsed.map(generateComponentImport(options)).join(','), " },");
+    }
+};
 var componentToVue = function (userOptions) {
-    if (userOptions === void 0) { userOptions = {}; }
-    // hack while we migrate all other transpilers to receive/handle path
-    // TO-DO: use `Transpiler` once possible
     return function (_a) {
         var _b, _c, _d, _e, _f, _g, _h;
         var component = _a.component, path = _a.path;
@@ -352,9 +367,7 @@ var componentToVue = function (userOptions) {
             data: false,
             getters: true,
             functions: false,
-            valueMapper: function (code) {
-                return processBinding(code.replace(patterns_1.GETTER, ''), options, component);
-            },
+            valueMapper: function (code) { return processBinding(code.replace(patterns_1.GETTER, ''), options, component); },
         });
         var functionsString = (0, get_state_object_string_1.getStateObjectStringFromComponent)(component, {
             data: false,
@@ -365,11 +378,7 @@ var componentToVue = function (userOptions) {
         var blocksString = JSON.stringify(component.children);
         // Component references to include in `component: { YourComponent, ... }
         var componentsUsed = Array.from((0, get_components_used_1.getComponentsUsed)(component))
-            .filter(function (name) {
-            return name.length &&
-                !name.includes('.') &&
-                name[0].toUpperCase() === name[0];
-        })
+            .filter(function (name) { return name.length && !name.includes('.') && name[0].toUpperCase() === name[0]; })
             // Strip out components that compile away
             .filter(function (name) { return !['For', 'Show', 'Fragment', component.name].includes(name); });
         // Append refs to data as { foo, bar, etc }
@@ -385,9 +394,7 @@ var componentToVue = function (userOptions) {
         }
         var elementProps = (0, get_props_1.getProps)(component);
         (0, strip_meta_properties_1.stripMetaProperties)(component);
-        var template = component.children
-            .map(function (item) { return (0, exports.blockToVue)(item, options); })
-            .join('\n');
+        var template = component.children.map(function (item) { return (0, exports.blockToVue)(item, options); }).join('\n');
         var includeClassMapHelper = template.includes('_classStringToObject');
         if (includeClassMapHelper) {
             functionsString = functionsString.replace(/}\s*$/, "_classStringToObject(str) {\n        const obj = {};\n        if (typeof str !== 'string') { return obj }\n        const classNames = str.trim().split(/\\s+/); \n        for (const name of classNames) {\n          obj[name] = true;\n        } \n        return obj;\n      }  }");
@@ -397,17 +404,13 @@ var componentToVue = function (userOptions) {
         }
         var onUpdateWithDeps = ((_d = component.hooks.onUpdate) === null || _d === void 0 ? void 0 : _d.filter(function (hook) { var _a; return (_a = hook.deps) === null || _a === void 0 ? void 0 : _a.length; })) || [];
         var onUpdateWithoutDeps = ((_e = component.hooks.onUpdate) === null || _e === void 0 ? void 0 : _e.filter(function (hook) { var _a; return !((_a = hook.deps) === null || _a === void 0 ? void 0 : _a.length); })) || [];
-        var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    <template>\n      ", "\n    </template>\n    <script>\n      ", "\n\n      export default {\n        ", "\n        ", "\n        ", "\n        ", "\n\n        ", "\n        ", "\n\n        ", "\n        ", "\n        ", "\n        ", "\n\n        ", "\n        ", "\n      }\n    </script>\n    ", "\n  "], ["\n    <template>\n      ", "\n    </template>\n    <script>\n      ", "\n\n      export default {\n        ", "\n        ", "\n        ", "\n        ", "\n\n        ", "\n        ", "\n\n        ", "\n        ", "\n        ", "\n        ", "\n\n        ", "\n        ", "\n      }\n    </script>\n    ", "\n  "])), template, (0, render_imports_1.renderPreComponent)(component, 'vue'), !component.name
+        var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    <template>\n      ", "\n    </template>\n    <script>\n    ", "\n      ", "\n\n      export default {\n        ", "\n        ", "\n        ", "\n        ", "\n\n        ", "\n        ", "\n\n        ", "\n        ", "\n        ", "\n        ", "\n\n        ", "\n        ", "\n      }\n    </script>\n    ", "\n  "], ["\n    <template>\n      ", "\n    </template>\n    <script>\n    ", "\n      ", "\n\n      export default {\n        ", "\n        ", "\n        ", "\n        ", "\n\n        ", "\n        ", "\n\n        ", "\n        ", "\n        ", "\n        ", "\n\n        ", "\n        ", "\n      }\n    </script>\n    ", "\n  "])), template, options.vueVersion >= 3 ? 'import { defineAsyncComponent } from "vue"' : '', (0, render_imports_1.renderPreComponent)({
+            component: component,
+            target: 'vue',
+            asyncComponentImports: options.asyncComponentImports,
+        }), !component.name
             ? ''
-            : "name: '".concat(((_f = options.namePrefix) === null || _f === void 0 ? void 0 : _f.call(options, path))
-                ? ((_g = options.namePrefix) === null || _g === void 0 ? void 0 : _g.call(options, path)) + '-'
-                : '').concat((0, lodash_1.kebabCase)(component.name), "',"), !componentsUsed.length
-            ? ''
-            : "components: { ".concat(componentsUsed
-                .map(function (componentName) {
-                return "'".concat((0, lodash_1.kebabCase)(componentName), "': async () => ").concat(componentName);
-            })
-                .join(','), " },"), elementProps.size
+            : "name: '".concat(path && ((_f = options.namePrefix) === null || _f === void 0 ? void 0 : _f.call(options, path)) ? ((_g = options.namePrefix) === null || _g === void 0 ? void 0 : _g.call(options, path)) + '-' : '').concat((0, lodash_1.kebabCase)(component.name), "',"), generateComponents(componentsUsed, options), elementProps.size
             ? "props: ".concat(JSON.stringify(Array.from(elementProps).filter(function (prop) { return prop !== 'children' && prop !== 'class'; })), ",")
             : '', dataString.length < 4
             ? ''
@@ -468,7 +471,14 @@ var componentToVue = function (userOptions) {
         });
     };
 };
-exports.componentToVue = componentToVue;
+var componentToVue2 = function (vueOptions) {
+    return componentToVue(__assign(__assign({}, vueOptions), { vueVersion: 2 }));
+};
+exports.componentToVue2 = componentToVue2;
+var componentToVue3 = function (vueOptions) {
+    return componentToVue(__assign(__assign({}, vueOptions), { vueVersion: 3 }));
+};
+exports.componentToVue3 = componentToVue3;
 // Remove unused artifacts like empty script or style tags
 var removePatterns = [
     "<script>\nexport default {};\n</script>",
