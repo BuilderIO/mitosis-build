@@ -82,9 +82,7 @@ var blockToStencil = function (json, options) {
     }
     str += '>';
     if (json.children) {
-        str += json.children
-            .map(function (item) { return blockToStencil(item, options); })
-            .join('\n');
+        str += json.children.map(function (item) { return blockToStencil(item, options); }).join('\n');
     }
     str += "</".concat(json.name, ">");
     return str;
@@ -154,7 +152,7 @@ var componentToStencil = function (options) {
              *
              *    export default function ...
              */
-            , "',\n      ", "\n    })\n    export default class ", " {\n    \n      ", "\n\n        ", "\n        ", "\n      \n        ", "\n        ", "\n        ", "\n    \n      render() {\n        return (", "\n        \n          ", "\n\n        ", ")\n      }\n    }\n  "])), (0, render_imports_1.renderPreComponent)(json, 'stencil'), 
+            , "',\n      ", "\n    })\n    export default class ", " {\n    \n      ", "\n\n        ", "\n        ", "\n      \n        ", "\n        ", "\n        ", "\n    \n      render() {\n        return (", "\n        \n          ", "\n\n        ", ")\n      }\n    }\n  "])), (0, render_imports_1.renderPreComponent)({ component: json, target: 'stencil' }), 
         /**
          * You can set the tagName in your Mitosis component as
          *
@@ -174,11 +172,7 @@ var componentToStencil = function (options) {
             ? ''
             : "disconnectedCallback() { ".concat(processBinding(json.hooks.onUnMount.code), " }"), !((_e = json.hooks.onUpdate) === null || _e === void 0 ? void 0 : _e.length)
             ? ''
-            : json.hooks.onUpdate.map(function (hook) {
-                return "componentDidUpdate() { ".concat(processBinding(hook.code), " }");
-            }), wrap ? '<>' : '', json.children
-            .map(function (item) { return blockToStencil(item, options); })
-            .join('\n'), wrap ? '</>' : '');
+            : json.hooks.onUpdate.map(function (hook) { return "componentDidUpdate() { ".concat(processBinding(hook.code), " }"); }), wrap ? '<>' : '', json.children.map(function (item) { return blockToStencil(item, options); }).join('\n'), wrap ? '</>' : '');
         if (options.plugins) {
             str = (0, plugins_1.runPreCodePlugins)(str, options.plugins);
         }

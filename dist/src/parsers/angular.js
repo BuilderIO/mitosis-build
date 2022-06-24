@@ -19,10 +19,8 @@ var transformBinding = function (binding, _options) {
     return (0, babel_transform_1.babelTransformCode)(binding, {
         Identifier: function (path) {
             var name = path.node.name;
-            if ((core_1.types.isObjectProperty(path.parent) &&
-                path.parent.key === path.node) ||
-                (core_1.types.isMemberExpression(path.parent) &&
-                    path.parent.property === path.node)) {
+            if ((core_1.types.isObjectProperty(path.parent) && path.parent.key === path.node) ||
+                (core_1.types.isMemberExpression(path.parent) && path.parent.property === path.node)) {
                 return;
             }
             if (!(name.startsWith('state.') || name === 'event' || name === '$event')) {
@@ -39,12 +37,8 @@ var isTemplate = function (node) {
     // TODO: theres got to be a better way than this
     return Array.isArray(node.templateAttrs);
 };
-var isText = function (node) {
-    return typeof node.value === 'string';
-};
-var isBoundText = function (node) {
-    return typeof node.value === 'object';
-};
+var isText = function (node) { return typeof node.value === 'string'; };
+var isBoundText = function (node) { return typeof node.value === 'object'; };
 var angularTemplateNodeToMitosisNode = function (node, options) {
     if (isTemplate(node)) {
         var ngIf = node.templateAttrs.find(function (item) { return item.name === 'ngIf'; });
@@ -56,9 +50,7 @@ var angularTemplateNodeToMitosisNode = function (node, options) {
                         code: transformBinding(ngIf.value.source, options),
                     },
                 },
-                children: [
-                    angularTemplateNodeToMitosisNode((0, lodash_1.omit)(node, 'templateAttrs'), options),
-                ],
+                children: [angularTemplateNodeToMitosisNode((0, lodash_1.omit)(node, 'templateAttrs'), options)],
             });
         }
         var ngFor = node.templateAttrs.find(function (item) { return item.name === 'ngFor'; });
@@ -74,9 +66,7 @@ var angularTemplateNodeToMitosisNode = function (node, options) {
                 properties: {
                     _forName: itemName,
                 },
-                children: [
-                    angularTemplateNodeToMitosisNode((0, lodash_1.omit)(node, 'templateAttrs'), options),
-                ],
+                children: [angularTemplateNodeToMitosisNode((0, lodash_1.omit)(node, 'templateAttrs'), options)],
             });
         }
     }
@@ -105,9 +95,7 @@ var angularTemplateNodeToMitosisNode = function (node, options) {
             name: node.name,
             properties: properties,
             bindings: bindings,
-            children: node.children.map(function (node) {
-                return angularTemplateNodeToMitosisNode(node, options);
-            }),
+            children: node.children.map(function (node) { return angularTemplateNodeToMitosisNode(node, options); }),
         });
     }
     if (isText(node)) {
@@ -129,9 +117,7 @@ var angularTemplateNodeToMitosisNode = function (node, options) {
 };
 var angularTemplateToMitosisNodes = function (template, options) {
     var ast = (0, compiler_1.parseTemplate)(template, '.');
-    var blocks = ast.nodes.map(function (node) {
-        return angularTemplateNodeToMitosisNode(node, options);
-    });
+    var blocks = ast.nodes.map(function (node) { return angularTemplateNodeToMitosisNode(node, options); });
     return blocks;
 };
 var parseTypescript = function (code, options) {
@@ -151,13 +137,9 @@ var parseTypescript = function (code, options) {
                             if (typescript_1.default.isObjectLiteralExpression(firstArg)) {
                                 firstArg.properties.find(function (item) {
                                     if (typescript_1.default.isPropertyAssignment(item)) {
-                                        if (typescript_1.default.isIdentifier(item.name) &&
-                                            item.name.text === 'template') {
+                                        if (typescript_1.default.isIdentifier(item.name) && item.name.text === 'template') {
                                             if (typescript_1.default.isTemplateLiteral(item.initializer)) {
-                                                var template = item.initializer
-                                                    .getText()
-                                                    .trim()
-                                                    .slice(1, -1);
+                                                var template = item.initializer.getText().trim().slice(1, -1);
                                                 component.children = angularTemplateToMitosisNodes(template, options);
                                             }
                                         }

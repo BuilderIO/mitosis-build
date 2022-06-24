@@ -1,4 +1,4 @@
-import { Transpiler } from '..';
+import { Transpiler } from '../types/transpiler';
 import { MitosisNode } from '../types/mitosis-node';
 export interface ToMitosisOptions {
     prettier?: boolean;

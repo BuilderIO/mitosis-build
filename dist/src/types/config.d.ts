@@ -1,34 +1,52 @@
-import { MitosisComponent } from '..';
-import { Plugin } from './plugins';
 export declare type Format = 'esm' | 'cjs';
-export interface TranspilerOptions {
+interface TranspilerOptions {
     format?: Format;
 }
 declare type Targets = typeof import('../targets').targets;
 export declare type Target = keyof Targets;
 export declare type GeneratorOptions = {
-    [K in keyof Targets]: NonNullable<Parameters<Targets[K]>[0]> & {
+    [K in Target]: NonNullable<Parameters<Targets[K]>[0]> & {
         transpiler?: TranspilerOptions;
     };
 };
-export interface TranspilerArgs {
-    path?: string;
-    component: MitosisComponent;
-}
-export declare type Transpiler = (args: TranspilerArgs) => string;
-export interface BaseTranspilerOptions {
-    experimental?: {
-        [key: string]: any;
-    };
-    prettier?: boolean;
-    plugins?: Plugin[];
-}
 export declare type MitosisConfig = {
-    type?: 'library';
+    /**
+     * List of targets to compile to.
+     */
     targets: Target[];
+    /**
+     * The output directory. Defaults to `output`.
+     */
     dest?: string;
+    /**
+     * globs of files to transpile. Defaults to `src/*`.
+     */
     files?: string | string[];
+    /**
+     * The directory where overrides are stored. The structure of the override directory must match that of the source code,
+     * with each target having its own sub-directory: `${overridesDir}/${target}/*`
+     * Defaults to `overrides`.
+     */
     overridesDir?: string;
+    /**
+     * Dictionary of per-target configuration. For each target, the available options can be inspected by going to
+     * `packages/core/src/targets.ts` and looking at the first argument of the desired generator.
+     *
+     * Example:
+     *
+     * ```js
+     * options: {
+     *   vue: {
+     *     prettier: false,
+     *     namePrefix: (path) => path + '-my-vue-code',
+     *   },
+     *   react: {
+     *     stateType: 'builder';
+     *     stylesType: 'styled-jsx'
+     *   }
+     * }
+     * ```
+     */
     options: Partial<GeneratorOptions>;
 };
 export {};

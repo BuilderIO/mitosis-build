@@ -44,10 +44,7 @@ var babelTransform = function (code, visitor) {
         configFile: false,
         babelrc: false,
         presets: [[tsPreset, { isTSX: true, allExtensions: true }]],
-        plugins: __spreadArray([
-            [decorators, { legacy: true }],
-            jsxPlugin
-        ], (visitor ? [function () { return ({ visitor: visitor }); }] : []), true),
+        plugins: __spreadArray([[decorators, { legacy: true }], jsxPlugin], (visitor ? [function () { return ({ visitor: visitor }); }] : []), true),
     });
 };
 exports.babelTransform = babelTransform;
@@ -68,8 +65,7 @@ var babelTransformExpression = function (code, visitor, type) {
     }
     // For Builder content
     if (type === 'unknown' &&
-        (code.includes('return _virtual_index') ||
-            code.trim().startsWith('return ')) &&
+        (code.includes('return _virtual_index') || code.trim().startsWith('return ')) &&
         !code.trim().startsWith('function')) {
         type = 'functionBody';
     }
@@ -97,8 +93,7 @@ var babelTransformExpression = function (code, visitor, type) {
             // If it can't, e.g. this is an expression or code fragment, modify the code below and try again
             // Detect method fragments. These get passed sometimes and otherwise
             // generate compile errors. They are of the form `foo() { ... }`
-            var isMethod = Boolean(!code.startsWith('function') &&
-                code.match(/^[a-z0-9_]+\s*\([^\)]*\)\s*[\{:]/i));
+            var isMethod = Boolean(!code.startsWith('function') && code.match(/^[a-z0-9_]+\s*\([^\)]*\)\s*[\{:]/i));
             if (isMethod) {
                 useCode = "function ".concat(useCode);
             }

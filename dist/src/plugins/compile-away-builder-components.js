@@ -183,9 +183,7 @@ exports.components = {
                         alignSelf: 'stretch',
                         flexGrow: '1',
                         boxSizing: 'border-box',
-                        maxWidth: "".concat((((_b = node.bindings.maxWidth) === null || _b === void 0 ? void 0 : _b.code) &&
-                            Number(node.bindings.maxWidth.code)) ||
-                            1200, "px"),
+                        maxWidth: "".concat((((_b = node.bindings.maxWidth) === null || _b === void 0 ? void 0 : _b.code) && Number(node.bindings.maxWidth.code)) || 1200, "px"),
                         display: 'flex',
                         flexDirection: 'column',
                         alignItems: 'stretch',
@@ -202,13 +200,11 @@ exports.components = {
         var columns = node.children.filter(filter_empty_text_nodes_1.filterEmptyTextNodes).map(function (item) {
             var _a;
             return ({
-                width: parseFloat(item.properties.width || ((_a = item.bindings.width) === null || _a === void 0 ? void 0 : _a.code) || '0') ||
-                    0,
+                width: parseFloat(item.properties.width || ((_a = item.bindings.width) === null || _a === void 0 ? void 0 : _a.code) || '0') || 0,
                 children: item.children,
             });
         });
-        var gutterSize = (node.properties.getterSize && parseFloat(node.properties.getterSize)) ||
-            20;
+        var gutterSize = (node.properties.getterSize && parseFloat(node.properties.getterSize)) || 20;
         function getWidth(index) {
             return (columns[index] && columns[index].width) || 100 / columns.length;
         }
@@ -537,9 +533,7 @@ function generateBuilderIoSrcSet(image) {
     var isBuilderIo = !!(image || '').match(/builder\.io/);
     return isBuilderIo
         ? [100, 200, 400, 800, 1200, 1600, 2000]
-            .map(function (size) {
-            return "".concat(updateQueryParam(image, 'width', String(size)), " ").concat(size, "w");
-        })
+            .map(function (size) { return "".concat(updateQueryParam(image, 'width', String(size)), " ").concat(size, "w"); })
             .concat([image])
             .join(', ')
         : '';

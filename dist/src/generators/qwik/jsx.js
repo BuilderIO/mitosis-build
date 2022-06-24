@@ -130,8 +130,7 @@ function isEmptyTextNode(child) {
 }
 function isTextNode(child) {
     var _a;
-    return (child.properties._text !== undefined ||
-        ((_a = child.bindings._text) === null || _a === void 0 ? void 0 : _a.code) !== undefined);
+    return child.properties._text !== undefined || ((_a = child.bindings._text) === null || _a === void 0 ? void 0 : _a.code) !== undefined;
 }
 /**
  * Rewrites bindings:

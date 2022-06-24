@@ -63,9 +63,7 @@ function addComponent(fileSet, component, opts) {
     var isStatic = Array.from(handlers.keys()).reduce(function (p, v) { return p && v.indexOf('state') == -1; }, true);
     var onRenderFile = isStatic ? fileSet.low : fileSet.med;
     var componentFile = fileSet.med;
-    var styles = _opts.shareStyles
-        ? getCommonStyles(fileSet).styles
-        : new Map();
+    var styles = _opts.shareStyles ? getCommonStyles(fileSet).styles : new Map();
     (0, styles_1.collectStyles)(component.children, styles);
     var useStyles = function () { return null; };
     if (_opts.shareStyles) {

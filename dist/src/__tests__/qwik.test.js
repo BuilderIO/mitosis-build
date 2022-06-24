@@ -309,8 +309,7 @@ describe('qwik', function () {
                         fileSet = (0, index_1.createFileSet)({ output: 'mjs', jsx: true });
                         hierarchy.depthFirstSymbols.forEach(function (builderComponent) {
                             var mitosisComponent = (0, symbol_processor_1.convertBuilderElementToMitosisComponent)(builderComponent);
-                            mitosisComponent &&
-                                (0, index_1.addComponent)(fileSet, mitosisComponent, { isRoot: false });
+                            mitosisComponent && (0, index_1.addComponent)(fileSet, mitosisComponent, { isRoot: false });
                         });
                         component = (0, builder_1.builderContentToMitosisComponent)(content, {
                             includeBuilderExtras: true,

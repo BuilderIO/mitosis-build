@@ -1,6 +1,6 @@
 import { MitosisNode } from '../types/mitosis-node';
 import { BuilderElement } from '@builder.io/sdk';
-import { TranspilerArgs } from '../types/config';
+import { TranspilerArgs } from '../types/transpiler';
 export interface ToBuilderOptions {
     includeIds?: boolean;
 }

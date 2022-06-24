@@ -28,9 +28,7 @@ function ensureAllSymbolsHaveIds(content) {
     var ids = new Set();
     (0, traverse_1.forEach)(content, function (el) {
         var _a, _b, _c;
-        if (this.key === 'jsCode' &&
-            isString(el) &&
-            el.endsWith('return _virtual_index')) {
+        if (this.key === 'jsCode' && isString(el) && el.endsWith('return _virtual_index')) {
             // Sometimes rollup adds a final `return _virtual_index` but that causes VM evaluation to fail.
             // Instead of a return on the last line, it needs a plain expression on the last line. Luckily
             // because the rollup compile behavior is consistent this works pretty reliably

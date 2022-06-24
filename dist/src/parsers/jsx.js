@@ -82,9 +82,7 @@ exports.selfClosingTags = new Set([
     'wbr',
 ]);
 var types = babel.types;
-var arrayToAst = function (array) {
-    return types.arrayExpression(array.map(jsonToAst));
-};
+var arrayToAst = function (array) { return types.arrayExpression(array.map(jsonToAst)); };
 var jsonToAst = function (json) {
     if (types.isNode(json)) {
         if (types.isJSXText(json)) {
@@ -147,8 +145,7 @@ var parseStateObject = function (object) {
     var properties = object.properties;
     var useProperties = properties.map(function (item) {
         if (types.isObjectProperty(item)) {
-            if (types.isFunctionExpression(item.value) ||
-                types.isArrowFunctionExpression(item.value)) {
+            if (types.isFunctionExpression(item.value) || types.isArrowFunctionExpression(item.value)) {
                 return (0, exports.createFunctionStringLiteralObjectProperty)(item.key, item.value);
             }
         }
@@ -231,8 +228,7 @@ var componentFunctionToJson = function (node, context) {
                     else if (expression.callee.name === 'onMount' ||
                         expression.callee.name === 'useEffect') {
                         var firstArg = expression.arguments[0];
-                        if (types.isFunctionExpression(firstArg) ||
-                            types.isArrowFunctionExpression(firstArg)) {
+                        if (types.isFunctionExpression(firstArg) || types.isArrowFunctionExpression(firstArg)) {
                             var code = (0, generator_1.default)(firstArg.body)
                                 .code.trim()
                                 // Remove arbitrary block wrapping if any
@@ -247,8 +243,7 @@ var componentFunctionToJson = function (node, context) {
                     else if (expression.callee.name === 'onUpdate') {
                         var firstArg = expression.arguments[0];
                         var secondArg = expression.arguments[1];
-                        if (types.isFunctionExpression(firstArg) ||
-                            types.isArrowFunctionExpression(firstArg)) {
+                        if (types.isFunctionExpression(firstArg) || types.isArrowFunctionExpression(firstArg)) {
                             var code = (0, generator_1.default)(firstArg.body)
                                 .code.trim()
                                 // Remove arbitrary block wrapping if any
@@ -257,8 +252,7 @@ var componentFunctionToJson = function (node, context) {
                                 .replace(/^{/, '')
                                 .replace(/}$/, '');
                             if (!secondArg ||
-                                (types.isArrayExpression(secondArg) &&
-                                    secondArg.elements.length > 0)) {
+                                (types.isArrayExpression(secondArg) && secondArg.elements.length > 0)) {
                                 var depsCode = secondArg ? (0, generator_1.default)(secondArg).code : '';
                                 hooks.onUpdate = __spreadArray(__spreadArray([], (hooks.onUpdate || []), true), [
                                     {
@@ -271,8 +265,7 @@ var componentFunctionToJson = function (node, context) {
                     }
                     else if (expression.callee.name === 'onUnMount') {
                         var firstArg = expression.arguments[0];
-                        if (types.isFunctionExpression(firstArg) ||
-                            types.isArrowFunctionExpression(firstArg)) {
+                        if (types.isFunctionExpression(firstArg) || types.isArrowFunctionExpression(firstArg)) {
                             var code = (0, generator_1.default)(firstArg.body)
                                 .code.trim()
                                 // Remove arbitrary block wrapping if any
@@ -285,8 +278,7 @@ var componentFunctionToJson = function (node, context) {
                     }
                     else if (expression.callee.name === 'onInit') {
                         var firstArg = expression.arguments[0];
-                        if (types.isFunctionExpression(firstArg) ||
-                            types.isArrowFunctionExpression(firstArg)) {
+                        if (types.isFunctionExpression(firstArg) || types.isArrowFunctionExpression(firstArg)) {
                             var code = (0, generator_1.default)(firstArg.body)
                                 .code.trim()
                                 // Remove arbitrary block wrapping if any
@@ -312,8 +304,7 @@ var componentFunctionToJson = function (node, context) {
                 // React format, like:
                 // const [foo, setFoo] = useState(...)
                 if (types.isArrayPattern(declaration.id)) {
-                    var varName = types.isIdentifier(declaration.id.elements[0]) &&
-                        declaration.id.elements[0].name;
+                    var varName = types.isIdentifier(declaration.id.elements[0]) && declaration.id.elements[0].name;
                     if (varName) {
                         var value = init.arguments[0];
                         // Function as init, like:
@@ -331,8 +322,7 @@ var componentFunctionToJson = function (node, context) {
                 // Legacy format, like:
                 // const state = useStore({...})
                 else if (types.isIdentifier(init.callee)) {
-                    if (init.callee.name === hooks_1.HOOKS.STATE ||
-                        init.callee.name === hooks_1.HOOKS.STORE) {
+                    if (init.callee.name === hooks_1.HOOKS.STATE || init.callee.name === hooks_1.HOOKS.STORE) {
                         var firstArg = init.arguments[0];
                         if (types.isObjectExpression(firstArg)) {
                             Object.assign(state, (0, exports.parseStateObject)(firstArg));
@@ -340,8 +330,7 @@ var componentFunctionToJson = function (node, context) {
                     }
                     else if (init.callee.name === hooks_1.HOOKS.CONTEXT) {
                         var firstArg = init.arguments[0];
-                        if (types.isVariableDeclarator(declaration) &&
-                            types.isIdentifier(declaration.id)) {
+                        if (types.isVariableDeclarator(declaration) && types.isIdentifier(declaration.id)) {
                             if (types.isIdentifier(firstArg)) {
                                 var varName = declaration.id.name;
                                 var name_1 = firstArg.name;
@@ -377,9 +366,7 @@ var componentFunctionToJson = function (node, context) {
             }
         }
     }
-    var theReturn = node.body.body.find(function (item) {
-        return types.isReturnStatement(item);
-    });
+    var theReturn = node.body.body.find(function (item) { return types.isReturnStatement(item); });
     var children = [];
     if (theReturn) {
         var value = theReturn.argument;
@@ -391,9 +378,7 @@ var componentFunctionToJson = function (node, context) {
     if (localExports) {
         var bindingsCode_1 = (0, get_bindings_1.getBindingsCode)(children);
         Object.keys(localExports).forEach(function (name) {
-            var found = bindingsCode_1.find(function (code) {
-                return code.match(new RegExp("\\b".concat(name, "\\b")));
-            });
+            var found = bindingsCode_1.find(function (code) { return code.match(new RegExp("\\b".concat(name, "\\b"))); });
             localExports[name].usedInLocal = Boolean(found);
         });
         context.builder.component.exports = localExports;
@@ -484,9 +469,7 @@ var jsxElementToJson = function (node) {
     if (types.isJSXFragment(node)) {
         return (0, create_mitosis_node_1.createMitosisNode)({
             name: 'Fragment',
-            children: node.children
-                .map(function (item) { return jsxElementToJson(item); })
-                .filter(Boolean),
+            children: node.children.map(function (item) { return jsxElementToJson(item); }).filter(Boolean),
         });
     }
     var nodeName = (0, generator_1.default)(node.openingElement.name).code;
@@ -505,16 +488,12 @@ var jsxElementToJson = function (node) {
                 else: elseValue || undefined,
             },
             bindings: __assign({}, (whenValue ? { when: { code: whenValue } } : {})),
-            children: node.children
-                .map(function (item) { return jsxElementToJson(item); })
-                .filter(Boolean),
+            children: node.children.map(function (item) { return jsxElementToJson(item); }).filter(Boolean),
         });
     }
     // <For ...> control flow component
     if (nodeName === 'For') {
-        var child = node.children.find(function (item) {
-            return types.isJSXExpressionContainer(item);
-        });
+        var child = node.children.find(function (item) { return types.isJSXExpressionContainer(item); });
         if (types.isJSXExpressionContainer(child)) {
             var childExpression = child.expression;
             if (types.isArrowFunctionExpression(childExpression)) {
@@ -523,8 +502,8 @@ var jsxElementToJson = function (node) {
                     name: 'For',
                     bindings: {
                         each: {
-                            code: (0, generator_1.default)(node.openingElement
-                                .attributes[0].value.expression).code,
+                            code: (0, generator_1.default)(node.openingElement.attributes[0]
+                                .value.expression).code,
                         },
                     },
                     scope: {
@@ -586,9 +565,7 @@ var jsxElementToJson = function (node) {
             }
             return memo;
         }, {}),
-        children: node.children
-            .map(function (item) { return jsxElementToJson(item); })
-            .filter(Boolean),
+        children: node.children.map(function (item) { return jsxElementToJson(item); }).filter(Boolean),
     });
 };
 var getHook = function (node) {
@@ -707,8 +684,7 @@ function mapReactIdentifiers(json) {
 }
 var expressionToNode = function (str) {
     var code = "export default ".concat(str);
-    return babel.parse(code).program
-        .body[0].declaration;
+    return babel.parse(code).program.body[0].declaration;
 };
 /**
  * Convert <Context.Provider /> to hooks formats by mutating the
@@ -744,10 +720,8 @@ var isImportOrDefaultExport = function (node) {
 var isTypeOrInterface = function (node) {
     return types.isTSTypeAliasDeclaration(node) ||
         types.isTSInterfaceDeclaration(node) ||
-        (types.isExportNamedDeclaration(node) &&
-            types.isTSTypeAliasDeclaration(node.declaration)) ||
-        (types.isExportNamedDeclaration(node) &&
-            types.isTSInterfaceDeclaration(node.declaration));
+        (types.isExportNamedDeclaration(node) && types.isTSTypeAliasDeclaration(node.declaration)) ||
+        (types.isExportNamedDeclaration(node) && types.isTSInterfaceDeclaration(node.declaration));
 };
 var collectTypes = function (node, context) {
     var typeStr = (0, generator_1.default)(node).code;
@@ -833,10 +807,7 @@ function parseJsx(jsx, options) {
                         context.builder = {
                             component: (0, create_mitosis_component_1.createMitosisComponent)(),
                         };
-                        var keepStatements = path.node.body.filter(function (statement) {
-                            return isImportOrDefaultExport(statement) ||
-                                isTypeOrInterface(statement);
-                        });
+                        var keepStatements = path.node.body.filter(function (statement) { return isImportOrDefaultExport(statement) || isTypeOrInterface(statement); });
                         var exportsOrLocalVariables = path.node.body.filter(function (statement) {
                             return !isImportOrDefaultExport(statement) &&
                                 !isTypeOrInterface(statement) &&
@@ -881,8 +852,7 @@ function parseJsx(jsx, options) {
                         var cutStatements = path.node.body.filter(function (statement) { return !isImportOrDefaultExport(statement); });
                         subComponentFunctions = path.node.body
                             .filter(function (node) {
-                            return !types.isExportDefaultDeclaration(node) &&
-                                types.isFunctionDeclaration(node);
+                            return !types.isExportDefaultDeclaration(node) && types.isFunctionDeclaration(node);
                         })
                             .map(function (node) { return "export default ".concat((0, generator_1.default)(node).code); });
                         cutStatements = collectMetadata(cutStatements, context.builder.component, useOptions);
@@ -904,11 +874,7 @@ function parseJsx(jsx, options) {
                     ImportDeclaration: function (path, context) {
                         // @builder.io/mitosis or React imports compile away
                         var customPackages = (options === null || options === void 0 ? void 0 : options.compileAwayPackages) || [];
-                        if (__spreadArray([
-                            'react',
-                            '@builder.io/mitosis',
-                            '@emotion/react'
-                        ], customPackages, true).includes(path.node.source.value)) {
+                        if (__spreadArray(['react', '@builder.io/mitosis', '@emotion/react'], customPackages, true).includes(path.node.source.value)) {
                             path.remove();
                             return;
                         }
@@ -919,7 +885,8 @@ function parseJsx(jsx, options) {
                         for (var _i = 0, _a = path.node.specifiers; _i < _a.length; _i++) {
                             var specifier = _a[_i];
                             if (types.isImportSpecifier(specifier)) {
-                                importObject.imports[specifier.imported.name] = specifier.local.name;
+                                importObject.imports[specifier.imported.name] =
+                                    specifier.local.name;
                             }
                             else if (types.isImportDefaultSpecifier(specifier)) {
                                 importObject.imports[specifier.local.name] = 'default';
@@ -970,9 +937,7 @@ function parseJsx(jsx, options) {
     var parsed = (0, json_1.tryParseJson)(toParse);
     mapReactIdentifiers(parsed);
     extractContextComponents(parsed);
-    parsed.subComponents = subComponentFunctions.map(function (item) {
-        return parseJsx(item, useOptions);
-    });
+    parsed.subComponents = subComponentFunctions.map(function (item) { return parseJsx(item, useOptions); });
     return parsed;
 }
 exports.parseJsx = parseJsx;

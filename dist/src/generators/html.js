@@ -135,9 +135,7 @@ var addScopeVars = function (parentScopeVars, value, fn) {
 };
 var mappers = {
     Fragment: function (json, options, blockOptions) {
-        return json.children
-            .map(function (item) { return blockToHtml(item, options, blockOptions); })
-            .join('\n');
+        return json.children.map(function (item) { return blockToHtml(item, options, blockOptions); }).join('\n');
     },
 };
 var getId = function (json, options) {
@@ -249,9 +247,7 @@ var blockToHtml = function (json, options, blockOptions) {
         }), "\n        const whenCondition = ").concat(whenCondition, ";\n        if (whenCondition) {\n          ").concat(options.format === 'class' ? 'this.' : '', "showContent(el)\n        }\n      "));
         str += "<template data-el=\"".concat(elId, "\">");
         if (json.children) {
-            str += json.children
-                .map(function (item) { return blockToHtml(item, options, blockOptions); })
-                .join('\n');
+            str += json.children.map(function (item) { return blockToHtml(item, options, blockOptions); }).join('\n');
         }
         str += '</template>';
     }
@@ -274,9 +270,7 @@ var blockToHtml = function (json, options, blockOptions) {
             if (key.startsWith('$')) {
                 continue;
             }
-            var value = (json.properties[key] || '')
-                .replace(/"/g, '&quot;')
-                .replace(/\n/g, '\\n');
+            var value = (json.properties[key] || '').replace(/"/g, '&quot;').replace(/\n/g, '\\n');
             str += " ".concat(key, "=\"").concat(value, "\" ");
         }
         // batch all local vars within the bindings
@@ -344,9 +338,7 @@ var blockToHtml = function (json, options, blockOptions) {
         }
         str += '>';
         if (json.children) {
-            str += json.children
-                .map(function (item) { return blockToHtml(item, options, blockOptions); })
-                .join('\n');
+            str += json.children.map(function (item) { return blockToHtml(item, options, blockOptions); }).join('\n');
         }
         if (json.properties.innerHTML) {
             // Maybe put some kind of safety here for broken HTML such as no close tag
@@ -422,18 +414,13 @@ var componentToHtml = function (options) {
         var css = (0, collect_styles_1.collectCss)(json, {
             prefix: options.prefix,
         });
-        var str = json.children
-            .map(function (item) { return blockToHtml(item, useOptions); })
-            .join('\n');
+        var str = json.children.map(function (item) { return blockToHtml(item, useOptions); }).join('\n');
         if (css.trim().length) {
             str += "<style>".concat(css, "</style>");
         }
         var hasChangeListeners = Boolean(Object.keys(useOptions.onChangeJsById).length);
         var hasGeneratedJs = Boolean(useOptions.js.trim().length);
-        if (hasChangeListeners ||
-            hasGeneratedJs ||
-            ((_b = json.hooks.onMount) === null || _b === void 0 ? void 0 : _b.code) ||
-            hasLoop) {
+        if (hasChangeListeners || hasGeneratedJs || ((_b = json.hooks.onMount) === null || _b === void 0 ? void 0 : _b.code) || hasLoop) {
             // TODO: collectJs helper for here and liquid
             str += "\n      <script>\n      (() => {\n        const state = ".concat((0, get_state_object_string_1.getStateObjectStringFromComponent)(json, {
                 valueMapper: function (value) {
@@ -594,7 +581,7 @@ var componentToCustomElement = function (options) {
                 console.warn('Could not prettify', { string: html }, err);
             }
         }
-        var str = "\n      ".concat(json.types ? json.types.join('\n') : '', "\n      ").concat(json.interfaces ? (_j = json.interfaces) === null || _j === void 0 ? void 0 : _j.join('\n') : '', "\n      ").concat((0, render_imports_1.renderPreComponent)(json, 'customElement'), "\n      /**\n       * Usage:\n       * \n       *  <").concat(kebabName, "></").concat(kebabName, ">\n       * \n       */\n      class ").concat(ComponentName, " extends ").concat(((_k = useOptions === null || useOptions === void 0 ? void 0 : useOptions.experimental) === null || _k === void 0 ? void 0 : _k.classExtends)
+        var str = "\n      ".concat(json.types ? json.types.join('\n') : '', "\n      ").concat(json.interfaces ? (_j = json.interfaces) === null || _j === void 0 ? void 0 : _j.join('\n') : '', "\n      ").concat((0, render_imports_1.renderPreComponent)({ component: json, target: 'customElement' }), "\n      /**\n       * Usage:\n       * \n       *  <").concat(kebabName, "></").concat(kebabName, ">\n       * \n       */\n      class ").concat(ComponentName, " extends ").concat(((_k = useOptions === null || useOptions === void 0 ? void 0 : useOptions.experimental) === null || _k === void 0 ? void 0 : _k.classExtends)
             ? (_l = useOptions === null || useOptions === void 0 ? void 0 : useOptions.experimental) === null || _l === void 0 ? void 0 : _l.classExtends(json, useOptions)
             : 'HTMLElement', " {\n        ").concat(Array.from(domRefs)
             .map(function (ref) {
@@ -627,9 +614,7 @@ var componentToCustomElement = function (options) {
                 .map(function (prop) { return "\"".concat(prop, "\""); })
                 .join(','), "];\n          "), "\n\n          ").concat(!((_q = json.hooks.onUpdate) === null || _q === void 0 ? void 0 : _q.length)
             ? ''
-            : "\n            this.updateDeps = [".concat((_r = json.hooks.onUpdate) === null || _r === void 0 ? void 0 : _r.map(function (hook) {
-                return updateReferencesInCode((hook === null || hook === void 0 ? void 0 : hook.deps) || '[]', useOptions);
-            }).join(','), "];\n            "), "\n\n          // used to keep track of all nodes created by show/for\n          this.nodesToDestroy = [];\n          // batch updates\n          this.pendingUpdate = false;\n          ").concat(((_s = useOptions === null || useOptions === void 0 ? void 0 : useOptions.experimental) === null || _s === void 0 ? void 0 : _s.componentConstructor)
+            : "\n            this.updateDeps = [".concat((_r = json.hooks.onUpdate) === null || _r === void 0 ? void 0 : _r.map(function (hook) { return updateReferencesInCode((hook === null || hook === void 0 ? void 0 : hook.deps) || '[]', useOptions); }).join(','), "];\n            "), "\n\n          // used to keep track of all nodes created by show/for\n          this.nodesToDestroy = [];\n          // batch updates\n          this.pendingUpdate = false;\n          ").concat(((_s = useOptions === null || useOptions === void 0 ? void 0 : useOptions.experimental) === null || _s === void 0 ? void 0 : _s.componentConstructor)
             ? (_t = useOptions === null || useOptions === void 0 ? void 0 : useOptions.experimental) === null || _t === void 0 ? void 0 : _t.componentConstructor(json, useOptions)
             : '', "\n\n          ").concat(useOptions.js, "\n\n          ").concat(jsRefs
             .map(function (ref) {
@@ -661,7 +646,9 @@ var componentToCustomElement = function (options) {
             : "\n          attributeChangedCallback(name, oldValue, newValue) {\n            ".concat((_11 = useOptions === null || useOptions === void 0 ? void 0 : useOptions.experimental) === null || _11 === void 0 ? void 0 : _11.attributeChangedCallback(['name', 'oldValue', 'newValue'], json, useOptions), "\n          }\n          "), "\n\n        onMount() {\n          ").concat(!((_12 = json.hooks.onMount) === null || _12 === void 0 ? void 0 : _12.code)
             ? ''
             : // TODO: make prettier by grabbing only the function body
-                "\n                // onMount\n                ".concat(updateReferencesInCode(addUpdateAfterSetInCode(json.hooks.onMount.code, useOptions), useOptions, { contextVars: contextVars }), "\n                "), "\n        }\n\n        onUpdate() {\n          ").concat(!((_13 = json.hooks.onUpdate) === null || _13 === void 0 ? void 0 : _13.length)
+                "\n                // onMount\n                ".concat(updateReferencesInCode(addUpdateAfterSetInCode(json.hooks.onMount.code, useOptions), useOptions, {
+                    contextVars: contextVars,
+                }), "\n                "), "\n        }\n\n        onUpdate() {\n          ").concat(!((_13 = json.hooks.onUpdate) === null || _13 === void 0 ? void 0 : _13.length)
             ? ''
             : "\n              const self = this;\n            ".concat(json.hooks.onUpdate.reduce(function (code, hook, index) {
                 // create check update

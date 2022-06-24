@@ -57,8 +57,7 @@ var componentMappers = __assign(__assign({}, (!builder_1.symbolBlocksAsChildren
     : {
         Symbol: function (node, options) {
             var child = node.children[0];
-            var symbolOptions = (node.bindings.symbol && json5_1.default.parse(node.bindings.symbol.code)) ||
-                {};
+            var symbolOptions = (node.bindings.symbol && json5_1.default.parse(node.bindings.symbol.code)) || {};
             if (child) {
                 (0, lodash_1.set)(symbolOptions, 'content.data.blocks', child.children.map(function (item) { return (0, exports.blockToBuilder)(item, options); }));
             }
@@ -161,7 +160,8 @@ var blockToBuilder = function (json, options, _internalOptions) {
         var eventBindingKeyRegex = /^on([A-Z])/;
         var firstCharMatchForEventBindingKey = (_d = key.match(eventBindingKeyRegex)) === null || _d === void 0 ? void 0 : _d[1];
         if (firstCharMatchForEventBindingKey) {
-            actions[key.replace(eventBindingKeyRegex, firstCharMatchForEventBindingKey.toLowerCase())] = (0, remove_surrounding_block_1.removeSurroundingBlock)((_e = bindings[key]) === null || _e === void 0 ? void 0 : _e.code);
+            actions[key.replace(eventBindingKeyRegex, firstCharMatchForEventBindingKey.toLowerCase())] =
+                (0, remove_surrounding_block_1.removeSurroundingBlock)((_e = bindings[key]) === null || _e === void 0 ? void 0 : _e.code);
             delete bindings[key];
         }
     }
@@ -222,9 +222,7 @@ var blockToBuilder = function (json, options, _internalOptions) {
     })), { code: {
             bindings: builderBindings,
             actions: actions,
-        }, properties: thisIsComponent
-            ? undefined
-            : omitMetaProperties(json.properties), bindings: thisIsComponent ? builderBindings : (0, lodash_1.omit)(bindings, 'css'), actions: actions, children: json.children
+        }, properties: thisIsComponent ? undefined : omitMetaProperties(json.properties), bindings: thisIsComponent ? builderBindings : (0, lodash_1.omit)(bindings, 'css'), actions: actions, children: json.children
             .filter(filter_empty_text_nodes_1.filterEmptyTextNodes)
             .map(function (child) { return (0, exports.blockToBuilder)(child, options); }) }), options);
 };
@@ -238,12 +236,8 @@ var componentToBuilder = function (options) {
         var result = (0, fast_clone_1.fastClone)({
             data: {
                 httpRequests: (_c = (_b = component === null || component === void 0 ? void 0 : component.meta) === null || _b === void 0 ? void 0 : _b.useMetadata) === null || _c === void 0 ? void 0 : _c.httpRequests,
-                jsCode: tryFormat((0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n        ", "\n\n        ", "\n        \n        ", "\n      "], ["\n        ", "\n\n        ", "\n        \n        ", "\n      "])), !(0, has_props_1.hasProps)(component) ? '' : "var props = state;", !hasState
-                    ? ''
-                    : "Object.assign(state, ".concat((0, get_state_object_string_1.getStateObjectStringFromComponent)(component), ");"), !((_d = component.hooks.onMount) === null || _d === void 0 ? void 0 : _d.code) ? '' : component.hooks.onMount.code)),
-                tsCode: tryFormat((0, dedent_1.default)(templateObject_2 || (templateObject_2 = __makeTemplateObject(["\n        ", "\n\n        ", "\n\n        ", "\n      "], ["\n        ", "\n\n        ", "\n\n        ", "\n      "])), !(0, has_props_1.hasProps)(component) ? '' : "var props = state;", !hasState
-                    ? ''
-                    : "useState(".concat((0, get_state_object_string_1.getStateObjectStringFromComponent)(component), ");"), !((_e = component.hooks.onMount) === null || _e === void 0 ? void 0 : _e.code)
+                jsCode: tryFormat((0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n        ", "\n\n        ", "\n        \n        ", "\n      "], ["\n        ", "\n\n        ", "\n        \n        ", "\n      "])), !(0, has_props_1.hasProps)(component) ? '' : "var props = state;", !hasState ? '' : "Object.assign(state, ".concat((0, get_state_object_string_1.getStateObjectStringFromComponent)(component), ");"), !((_d = component.hooks.onMount) === null || _d === void 0 ? void 0 : _d.code) ? '' : component.hooks.onMount.code)),
+                tsCode: tryFormat((0, dedent_1.default)(templateObject_2 || (templateObject_2 = __makeTemplateObject(["\n        ", "\n\n        ", "\n\n        ", "\n      "], ["\n        ", "\n\n        ", "\n\n        ", "\n      "])), !(0, has_props_1.hasProps)(component) ? '' : "var props = state;", !hasState ? '' : "useState(".concat((0, get_state_object_string_1.getStateObjectStringFromComponent)(component), ");"), !((_e = component.hooks.onMount) === null || _e === void 0 ? void 0 : _e.code)
                     ? ''
                     : "onMount(() => {\n                ".concat(component.hooks.onMount.code, "\n              })"))),
                 blocks: component.children

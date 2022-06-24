@@ -12,11 +12,8 @@ var replaceIdentifiers = function (code, from, to) {
                 core_1.types.isOptionalMemberExpression(path.parent)) &&
                 path.parent.property === path.node) &&
                 // This is no the function name - like `foo` in `function foo() {}`
-                !(core_1.types.isFunctionDeclaration(path.parent) &&
-                    path.parent.id === path.node) &&
-                (Array.isArray(from)
-                    ? from.includes(path.node.name)
-                    : path.node.name === from)) {
+                !(core_1.types.isFunctionDeclaration(path.parent) && path.parent.id === path.node) &&
+                (Array.isArray(from) ? from.includes(path.node.name) : path.node.name === from)) {
                 path.replaceWith(core_1.types.identifier(typeof to === 'string' ? to : to(path.node.name)));
             }
         },

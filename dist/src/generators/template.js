@@ -17,9 +17,7 @@ var dedent_1 = __importDefault(require("dedent"));
 var get_state_object_string_1 = require("../helpers/get-state-object-string");
 var mappers = {
     Fragment: function (json, options) {
-        return "<div>".concat(json.children
-            .map(function (item) { return blockToTemplate(item, options); })
-            .join('\n'), "</div>");
+        return "<div>".concat(json.children.map(function (item) { return blockToTemplate(item, options); }).join('\n'), "</div>");
     },
 };
 // TODO: spread support
@@ -39,18 +37,14 @@ var blockToTemplate = function (json, options) {
     if (json.name === 'For') {
         str += "${".concat((_b = json.bindings.each) === null || _b === void 0 ? void 0 : _b.code, "?.map(").concat(json.properties._forName, " => `");
         if (json.children) {
-            str += json.children
-                .map(function (item) { return blockToTemplate(item, options); })
-                .join('\n');
+            str += json.children.map(function (item) { return blockToTemplate(item, options); }).join('\n');
         }
         str += '`).join("")}';
     }
     else if (json.name === 'Show') {
         str += "${!(".concat((_c = json.bindings.when) === null || _c === void 0 ? void 0 : _c.code, ") ? '' : `");
         if (json.children) {
-            str += json.children
-                .map(function (item) { return blockToTemplate(item, options); })
-                .join('\n');
+            str += json.children.map(function (item) { return blockToTemplate(item, options); }).join('\n');
         }
         str += '`}';
     }
@@ -87,9 +81,7 @@ var blockToTemplate = function (json, options) {
         }
         str += '>';
         if (json.children) {
-            str += json.children
-                .map(function (item) { return blockToTemplate(item, options); })
-                .join('\n');
+            str += json.children.map(function (item) { return blockToTemplate(item, options); }).join('\n');
         }
         str += "</".concat(json.name, ">");
     }

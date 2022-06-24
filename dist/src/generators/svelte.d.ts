@@ -1,6 +1,6 @@
 import { MitosisComponent } from '../types/mitosis-component';
 import { MitosisNode } from '../types/mitosis-node';
-import { BaseTranspilerOptions, Transpiler } from '../types/config';
+import { BaseTranspilerOptions, Transpiler } from '../types/transpiler';
 export interface ToSvelteOptions extends BaseTranspilerOptions {
     stateType?: 'proxies' | 'variables';
 }

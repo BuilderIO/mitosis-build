@@ -28,6 +28,8 @@ exports.targets = {
     swift: swift_ui_1.componentToSwift,
     template: template_1.componentToTemplate,
     webcomponent: html_1.componentToCustomElement,
-    vue: vue_1.componentToVue,
+    vue: vue_1.componentToVue3,
+    vue2: vue_1.componentToVue2,
+    vue3: vue_1.componentToVue3,
     stencil: stencil_1.componentToStencil,
 };

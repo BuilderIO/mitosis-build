@@ -230,13 +230,10 @@ var SrcBuilder = /** @class */ (function () {
             }
         }
         var _loop_1 = function (rawKey) {
-            if (Object.prototype.hasOwnProperty.call(bindings, rawKey) &&
-                !ignoreKey(rawKey)) {
+            if (Object.prototype.hasOwnProperty.call(bindings, rawKey) && !ignoreKey(rawKey)) {
                 var binding_1 = bindings[rawKey];
                 binding_1 =
-                    binding_1 && typeof binding_1 == 'object' && 'code' in binding_1
-                        ? binding_1.code
-                        : binding_1;
+                    binding_1 && typeof binding_1 == 'object' && 'code' in binding_1 ? binding_1.code : binding_1;
                 var key = lastProperty(rawKey);
                 if (!binding_1 && rawKey in props) {
                     binding_1 = quote(props[rawKey]);
@@ -406,9 +403,7 @@ function iif(code) {
         return;
     code = code.trim();
     if (code.endsWith(_virtual_index) && !code.endsWith(return_virtual_index)) {
-        code =
-            code.substr(0, code.length - _virtual_index.length) +
-                return_virtual_index;
+        code = code.substr(0, code.length - _virtual_index.length) + return_virtual_index;
     }
     return function () {
         code && this.emit('(()=>{', code, '})()');

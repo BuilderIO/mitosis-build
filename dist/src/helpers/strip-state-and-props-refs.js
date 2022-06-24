@@ -36,9 +36,7 @@ var stripStateAndPropsRefs = function (code, options) {
             newCode = newCode.replace(/props\./g, replacer);
         }
         else {
-            newCode = newCode.replace(/props\.([\$a-z0-9_]+)/gi, function (memo, name) {
-                return replacer(name);
-            });
+            newCode = newCode.replace(/props\.([\$a-z0-9_]+)/gi, function (memo, name) { return replacer(name); });
         }
         // TODO: webcomponent edge-case
         if (/el\.this\.props/.test(newCode)) {
@@ -50,9 +48,7 @@ var stripStateAndPropsRefs = function (code, options) {
             newCode = newCode.replace(/state\./g, replacer);
         }
         else {
-            newCode = newCode.replace(/state\.([\$a-z0-9_]+)/gi, function (memo, name) {
-                return replacer(name);
-            });
+            newCode = newCode.replace(/state\.([\$a-z0-9_]+)/gi, function (memo, name) { return replacer(name); });
         }
     }
     return newCode;
