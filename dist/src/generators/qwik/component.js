@@ -56,6 +56,7 @@ function addComponent(fileSet, component, opts) {
     if (opts === void 0) { opts = {}; }
     var _opts = __assign({ isRoot: false, shareStyles: false, hostProps: null }, opts);
     (0, compile_away_builder_components_1.compileAwayBuilderComponentsFromTree)(component, __assign(__assign({}, compile_away_builder_components_1.components), { Image: undefined, CoreButton: undefined }));
+    addBuilderBlockClass(component.children);
     var componentName = component.name;
     var handlers = (0, handlers_1.renderHandlers)(fileSet.high, componentName, component.children);
     // If the component has no handlers, than it is probably static
@@ -106,6 +107,14 @@ function generateStyles(fromFile, dstFile, symbol, scoped) {
     return function () {
         this.emit((0, src_generator_1.invoke)(fromFile.import(fromFile.qwikModule, scoped ? 'withScopedStylesQrl' : 'useStylesQrl'), [generateQrl(fromFile, dstFile, symbol)]), ';');
     };
+}
+function addBuilderBlockClass(children) {
+    children.forEach(function (child) {
+        var props = child.properties;
+        if (props['builder-id']) {
+            props.class = (props.class ? props.class + ' ' : '') + 'builder-block';
+        }
+    });
 }
 function renderUseLexicalScope(file) {
     return function () {

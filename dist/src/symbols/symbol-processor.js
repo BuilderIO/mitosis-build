@@ -189,7 +189,8 @@ function hashCode(obj, hash) {
                 }
             }
             else {
-                for (var key in obj) {
+                for (var _i = 0, _a = Object.keys(obj).sort(); _i < _a.length; _i++) {
+                    var key = _a[_i];
                     if (obj.hasOwnProperty(key)) {
                         hash = hashCode(obj[key], hash);
                     }

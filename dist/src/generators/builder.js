@@ -33,6 +33,7 @@ var lodash_1 = require("lodash");
 var builder_1 = require("../parsers/builder");
 var remove_surrounding_block_1 = require("../helpers/remove-surrounding-block");
 var traverse_1 = __importDefault(require("traverse"));
+var symbol_processor_1 = require("../symbols/symbol-processor");
 var omitMetaProperties = function (obj) {
     return (0, lodash_1.omitBy)(obj, function (_value, key) { return key.startsWith('$'); });
 };
@@ -109,7 +110,7 @@ var componentMappers = __assign(__assign({}, (!builder_1.symbolBlocksAsChildren
         }, options);
     } });
 var el = function (options, toBuilderOptions) { return (__assign(__assign({ '@type': '@builder.io/sdk:Element' }, (toBuilderOptions.includeIds && {
-    id: 'builder-' + Math.random().toString(36).split('.')[1],
+    id: 'builder-' + (0, symbol_processor_1.hashCodeAsString)(options),
 })), options)); };
 function tryFormat(code) {
     var str = code;
