@@ -22,7 +22,7 @@ exports.componentToSvelte = exports.blockToSvelte = void 0;
 var dedent_1 = __importDefault(require("dedent"));
 var standalone_1 = require("prettier/standalone");
 var traverse_1 = __importDefault(require("traverse"));
-var collect_styles_1 = require("../helpers/collect-styles");
+var collect_css_1 = require("../helpers/styles/collect-css");
 var fast_clone_1 = require("../helpers/fast-clone");
 var get_props_1 = require("../helpers/get-props");
 var get_refs_1 = require("../helpers/get-refs");
@@ -248,7 +248,7 @@ var componentToSvelte = function (options) {
         if (useOptions.plugins) {
             json = (0, plugins_1.runPostJsonPlugins)(json, useOptions.plugins);
         }
-        var css = (0, collect_styles_1.collectCss)(json);
+        var css = (0, collect_css_1.collectCss)(json);
         (0, strip_meta_properties_1.stripMetaProperties)(json);
         var dataString = (0, function_1.pipe)((0, get_state_object_string_1.getStateObjectStringFromComponent)(json, {
             data: true,

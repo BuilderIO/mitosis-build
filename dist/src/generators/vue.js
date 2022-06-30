@@ -41,7 +41,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.componentToVue3 = exports.componentToVue2 = exports.blockToVue = void 0;
 var dedent_1 = __importDefault(require("dedent"));
 var standalone_1 = require("prettier/standalone");
-var collect_styles_1 = require("../helpers/collect-styles");
+var collect_css_1 = require("../helpers/styles/collect-css");
 var fast_clone_1 = require("../helpers/fast-clone");
 var get_state_object_string_1 = require("../helpers/get-state-object-string");
 var map_refs_1 = require("../helpers/map-refs");
@@ -340,7 +340,7 @@ var componentToVue = function (userOptions) {
         if (options.plugins) {
             component = (0, plugins_1.runPostJsonPlugins)(component, options.plugins);
         }
-        var css = (0, collect_styles_1.collectCss)(component, {
+        var css = (0, collect_css_1.collectCss)(component, {
             prefix: (_c = (_b = options.cssNamespace) === null || _b === void 0 ? void 0 : _b.call(options)) !== null && _c !== void 0 ? _c : undefined,
         });
         var localExports = component.exports;

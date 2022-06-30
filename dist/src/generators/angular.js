@@ -19,7 +19,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.componentToAngular = exports.blockToAngular = void 0;
 var dedent_1 = __importDefault(require("dedent"));
 var standalone_1 = require("prettier/standalone");
-var collect_styles_1 = require("../helpers/collect-styles");
+var collect_css_1 = require("../helpers/styles/collect-css");
 var fast_clone_1 = require("../helpers/fast-clone");
 var get_refs_1 = require("../helpers/get-refs");
 var get_state_object_string_1 = require("../helpers/get-state-object-string");
@@ -246,7 +246,7 @@ var componentToAngular = function (options) {
         if (options.plugins) {
             json = (0, plugins_1.runPostJsonPlugins)(json, options.plugins);
         }
-        var css = (0, collect_styles_1.collectCss)(json);
+        var css = (0, collect_css_1.collectCss)(json);
         if (options.prettier !== false) {
             css = tryFormat(css, 'css');
         }

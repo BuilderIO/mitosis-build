@@ -21,7 +21,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.componentToSolid = void 0;
 var dedent_1 = __importDefault(require("dedent"));
 var standalone_1 = require("prettier/standalone");
-var collect_styles_1 = require("../helpers/collect-styles");
+var helpers_1 = require("../helpers/styles/helpers");
 var get_refs_1 = require("../helpers/get-refs");
 var get_state_object_string_1 = require("../helpers/get-state-object-string");
 var render_imports_1 = require("../helpers/render-imports");
@@ -226,7 +226,7 @@ var componentToSolid = function (options) {
             json = (0, plugins_1.runPreJsonPlugins)(json, options.plugins);
         }
         addProviderComponents(json, options);
-        var componentHasStyles = (0, collect_styles_1.hasStyles)(json);
+        var componentHasStyles = (0, helpers_1.hasStyles)(json);
         var addWrapper = json.children.filter(filter_empty_text_nodes_1.filterEmptyTextNodes).length !== 1;
         if (options.plugins) {
             json = (0, plugins_1.runPostJsonPlugins)(json, options.plugins);

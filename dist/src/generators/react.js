@@ -29,7 +29,7 @@ var function_literal_prefix_1 = require("../constants/function-literal-prefix");
 var method_literal_prefix_1 = require("../constants/method-literal-prefix");
 var babel_transform_1 = require("../helpers/babel-transform");
 var capitalize_1 = require("../helpers/capitalize");
-var collect_styles_1 = require("../helpers/collect-styles");
+var collect_css_1 = require("../helpers/styles/collect-css");
 var create_mitosis_node_1 = require("../helpers/create-mitosis-node");
 var fast_clone_1 = require("../helpers/fast-clone");
 var filter_empty_text_nodes_1 = require("../helpers/filter-empty-text-nodes");
@@ -51,6 +51,8 @@ var plugins_1 = require("../modules/plugins");
 var jsx_1 = require("../parsers/jsx");
 var context_1 = require("./helpers/context");
 var react_native_1 = require("./react-native");
+var collect_styled_components_1 = require("../helpers/styles/collect-styled-components");
+var helpers_1 = require("../helpers/styles/helpers");
 /**
  * If the root Mitosis component only has 1 child, and it is a `Show` node, then we need to wrap it in a fragment.
  * Otherwise, we end up with invalid React render code.
@@ -418,7 +420,7 @@ var _componentToReact = function (json, options, isSubComponent) {
     (0, handle_missing_state_1.handleMissingState)(json);
     (0, process_tag_references_1.processTagReferences)(json);
     addProviderComponents(json, options);
-    var componentHasStyles = (0, collect_styles_1.hasStyles)(json);
+    var componentHasStyles = (0, helpers_1.hasStyles)(json);
     if (options.stateType === 'useState') {
         (0, getters_to_functions_1.gettersToFunctions)(json);
         updateStateSetters(json, options);
@@ -446,8 +448,8 @@ var _componentToReact = function (json, options, isSubComponent) {
     if (options.plugins) {
         json = (0, plugins_1.runPostJsonPlugins)(json, options.plugins);
     }
-    var css = stylesType === 'styled-jsx' && (0, collect_styles_1.collectCss)(json);
-    var styledComponentsCode = stylesType === 'styled-components' && componentHasStyles && (0, collect_styles_1.collectStyledComponents)(json);
+    var css = stylesType === 'styled-jsx' && (0, collect_css_1.collectCss)(json);
+    var styledComponentsCode = stylesType === 'styled-components' && componentHasStyles && (0, collect_styled_components_1.collectStyledComponents)(json);
     if (options.format !== 'lite') {
         (0, strip_meta_properties_1.stripMetaProperties)(json);
     }

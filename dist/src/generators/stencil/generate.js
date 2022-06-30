@@ -22,7 +22,7 @@ var get_props_1 = require("../../helpers/get-props");
 var strip_state_and_props_refs_1 = require("../../helpers/strip-state-and-props-refs");
 var filter_empty_text_nodes_1 = require("../../helpers/filter-empty-text-nodes");
 var dash_case_1 = require("../../helpers/dash-case");
-var collect_styles_1 = require("../../helpers/collect-styles");
+var collect_css_1 = require("../../helpers/styles/collect-css");
 var indent_1 = require("../../helpers/indent");
 var map_refs_1 = require("../../helpers/map-refs");
 var blockToStencil = function (json, options) {
@@ -109,7 +109,7 @@ var componentToStencil = function (options) {
             json = (0, plugins_1.runPreJsonPlugins)(json, options.plugins);
         }
         var props = (0, get_props_1.getProps)(component);
-        var css = (0, collect_styles_1.collectCss)(json);
+        var css = (0, collect_css_1.collectCss)(json);
         (0, map_refs_1.mapRefs)(component, function (refName) { return "this.".concat(refName); });
         if (options.plugins) {
             json = (0, plugins_1.runPostJsonPlugins)(json, options.plugins);

@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.componentToLiquid = exports.isValidLiquidBinding = void 0;
 var standalone_1 = require("prettier/standalone");
-var collect_styles_1 = require("../helpers/collect-styles");
+var collect_css_1 = require("../helpers/styles/collect-css");
 var fast_clone_1 = require("../helpers/fast-clone");
 var strip_state_and_props_refs_1 = require("../helpers/strip-state-and-props-refs");
 var jsx_1 = require("../parsers/jsx");
@@ -114,7 +114,7 @@ var componentToLiquid = function (options) {
         if (options.plugins) {
             json = (0, plugins_1.runPreJsonPlugins)(json, options.plugins);
         }
-        var css = (0, collect_styles_1.collectCss)(json);
+        var css = (0, collect_css_1.collectCss)(json);
         (0, strip_meta_properties_1.stripMetaProperties)(json);
         if (options.plugins) {
             json = (0, plugins_1.runPostJsonPlugins)(json, options.plugins);

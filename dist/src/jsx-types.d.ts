@@ -46,6 +46,7 @@ declare global {
             classList?: {
                 [k: string]: boolean | undefined;
             };
+            className?: string;
             on?: {
                 [key: string]: EventHandler<T, CustomEvent>;
             };

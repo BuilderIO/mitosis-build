@@ -34,7 +34,7 @@ var get_refs_1 = require("../helpers/get-refs");
 var map_refs_1 = require("../helpers/map-refs");
 var traverse_1 = __importDefault(require("traverse"));
 var babel_transform_1 = require("../helpers/babel-transform");
-var collect_styles_1 = require("../helpers/collect-styles");
+var collect_css_1 = require("../helpers/styles/collect-css");
 var dash_case_1 = require("../helpers/dash-case");
 var fast_clone_1 = require("../helpers/fast-clone");
 var get_state_object_string_1 = require("../helpers/get-state-object-string");
@@ -411,7 +411,7 @@ var componentToHtml = function (options) {
         if (options.plugins) {
             json = (0, plugins_1.runPostJsonPlugins)(json, options.plugins);
         }
-        var css = (0, collect_styles_1.collectCss)(json, {
+        var css = (0, collect_css_1.collectCss)(json, {
             prefix: options.prefix,
         });
         var str = json.children.map(function (item) { return blockToHtml(item, useOptions); }).join('\n');
@@ -532,12 +532,12 @@ var componentToCustomElement = function (options) {
         var css = '';
         if ((_c = useOptions === null || useOptions === void 0 ? void 0 : useOptions.experimental) === null || _c === void 0 ? void 0 : _c.css) {
             css = (_d = useOptions === null || useOptions === void 0 ? void 0 : useOptions.experimental) === null || _d === void 0 ? void 0 : _d.css(json, useOptions, {
-                collectCss: collect_styles_1.collectCss,
+                collectCss: collect_css_1.collectCss,
                 prefix: options.prefix,
             });
         }
         else {
-            css = (0, collect_styles_1.collectCss)(json, {
+            css = (0, collect_css_1.collectCss)(json, {
                 prefix: options.prefix,
             });
         }
