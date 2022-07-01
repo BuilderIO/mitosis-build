@@ -35,6 +35,7 @@ function createFileSet(options) {
         isModule: opts.output != 'cjs',
         isTypeScript: opts.output == 'ts',
         isJSX: opts.jsx,
+        isBuilder: true,
     };
     var fileSet = {
         high: new src_generator_1.File('high.' + extension, srcOptions, opts.qwikLib, opts.qrlPrefix),
@@ -98,7 +99,7 @@ function generateStyles(fromFile, dstFile, symbol, scoped) {
 }
 function renderUseLexicalScope(file) {
     return function () {
-        return this.emit('const state=', file.import(file.qwikModule, 'useLexicalScope').name, '()[0]');
+        return this.emit('const state=', file.import(file.qwikModule, 'useLexicalScope').localName, '()[0]');
     };
 }
 exports.renderUseLexicalScope = renderUseLexicalScope;

@@ -191,6 +191,14 @@ var TESTS_FOR_TARGET = {
         MULTI_ON_UPDATE_TESTS,
         FORM_BLOCK_TESTS,
     ],
+    qwik: [
+        BASIC_TESTS,
+        ROOT_SHOW_TESTS,
+        FORWARD_REF_TESTS,
+        MULTI_ON_UPDATE_TESTS,
+        FORM_BLOCK_TESTS,
+        FOR_SHOW_TESTS,
+    ],
 };
 var runTestsForTarget = function (target, generator) {
     var testsArray = TESTS_FOR_TARGET[target];
