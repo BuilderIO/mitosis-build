@@ -8,5 +8,5 @@ export interface ColumnProps {
     stackColumnsAt?: 'tablet' | 'mobile' | 'never';
     reverseColumnsWhenStacked?: boolean;
 }
-export default function Column(props: ColumnProps): JSX.Element;
+export default function Column(props: ColumnProps): import("@builder.io/mitosis/jsx-runtime").JSX.Element;
 export {};

@@ -12,4 +12,4 @@ export interface ImageProps {
     aspectRatio?: number;
     children?: any;
 }
-export default function Image(props: ImageProps): JSX.Element;
+export default function Image(props: ImageProps): import("@builder.io/mitosis/jsx-runtime").JSX.Element;

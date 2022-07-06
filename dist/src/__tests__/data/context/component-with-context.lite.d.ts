@@ -1,3 +1,3 @@
 export default function ComponentWithContext(props: {
     content: string;
-}): JSX.Element;
+}): import("@builder.io/mitosis/jsx-runtime").JSX.Element;

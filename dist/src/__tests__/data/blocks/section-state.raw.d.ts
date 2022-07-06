@@ -3,4 +3,4 @@ export interface SectionProps {
     attributes?: any;
     children?: any;
 }
-export default function SectionStateComponent(props: SectionProps): JSX.Element;
+export default function SectionStateComponent(props: SectionProps): import("@builder.io/mitosis/jsx-runtime").JSX.Element;

@@ -6,4 +6,4 @@ export interface ImgProps {
     backgroundSize?: 'cover' | 'contain';
     backgroundPosition?: 'center' | 'top' | 'left' | 'right' | 'bottom' | 'top left' | 'top right' | 'bottom left' | 'bottom right';
 }
-export default function ImgComponent(props: ImgProps): JSX.Element;
+export default function ImgComponent(props: ImgProps): import("@builder.io/mitosis/jsx-runtime").JSX.Element;

@@ -3,4 +3,4 @@ export declare const DEFAULT_VALUES: {
 };
 export default function MyBasicComponent(props: {
     id: string;
-}): JSX.Element;
+}): import("@builder.io/mitosis/jsx-runtime").JSX.Element;

@@ -1,3 +1,4 @@
+import type { JSX } from '../../../jsx-types';
 declare type Props = {
     [key: string]: string | JSX.Element;
 };

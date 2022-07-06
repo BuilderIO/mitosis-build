@@ -5,4 +5,4 @@ export interface C {
 export default function MyBasicComponent(props: {
     name: string;
     age?: number;
-}): JSX.Element;
+}): import("@builder.io/mitosis/jsx-runtime").JSX.Element;

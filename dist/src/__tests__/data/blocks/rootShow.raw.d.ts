@@ -1,3 +1,3 @@
 export default function RenderStyles(props: {
     foo: string;
-}): JSX.Element;
+}): import("@builder.io/mitosis/jsx-runtime").JSX.Element;

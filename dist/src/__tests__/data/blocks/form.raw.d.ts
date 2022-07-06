@@ -22,4 +22,4 @@ export interface FormProps {
     errorMessagePath?: string;
 }
 export declare type FormState = 'unsubmitted' | 'sending' | 'success' | 'error';
-export default function FormComponent(props: FormProps): JSX.Element;
+export default function FormComponent(props: FormProps): import("@builder.io/mitosis/jsx-runtime").JSX.Element;

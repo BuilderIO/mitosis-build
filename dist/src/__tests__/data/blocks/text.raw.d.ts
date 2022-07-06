@@ -5,4 +5,4 @@ export interface TextProps {
     content?: string;
     builderBlock?: any;
 }
-export default function Text(props: TextProps): JSX.Element;
+export default function Text(props: TextProps): import("@builder.io/mitosis/jsx-runtime").JSX.Element;
