@@ -11,5 +11,5 @@ interface BlockToSvelteProps {
 }
 declare type BlockToSvelte = (props: BlockToSvelteProps) => string;
 export declare const blockToSvelte: BlockToSvelte;
-export declare const componentToSvelte: (options?: ToSvelteOptions) => Transpiler;
+export declare const componentToSvelte: ({ plugins, ...options }?: ToSvelteOptions) => Transpiler;
 export {};

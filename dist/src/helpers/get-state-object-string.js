@@ -19,15 +19,22 @@ var json5_1 = __importDefault(require("json5"));
 var function_literal_prefix_1 = require("../constants/function-literal-prefix");
 var method_literal_prefix_1 = require("../constants/method-literal-prefix");
 var patterns_1 = require("./patterns");
-var convertStateMemberToString = function (options) {
+var DEFAULT_OPTIONS = {
+    format: 'object',
+    keyPrefix: '',
+    valueMapper: function (val) { return val; },
+    data: true,
+    functions: true,
+    getters: true,
+};
+var convertStateMemberToString = function (_a) {
+    var data = _a.data, format = _a.format, functions = _a.functions, getters = _a.getters, keyPrefix = _a.keyPrefix, valueMapper = _a.valueMapper;
     return function (_a) {
         var key = _a[0], value = _a[1];
-        var valueMapper = options.valueMapper || (function (val) { return val; });
-        var keyValueDelimiter = options.format === 'object' ? ':' : '=';
-        var keyPrefix = options.keyPrefix || '';
+        var keyValueDelimiter = format === 'object' ? ':' : '=';
         if (typeof value === 'string') {
             if (value.startsWith(function_literal_prefix_1.functionLiteralPrefix)) {
-                if (options.functions === false) {
+                if (functions === false) {
                     return undefined;
                 }
                 var functionValue = value.replace(function_literal_prefix_1.functionLiteralPrefix, '');
@@ -36,31 +43,31 @@ var convertStateMemberToString = function (options) {
             else if (value.startsWith(method_literal_prefix_1.methodLiteralPrefix)) {
                 var methodValue = value.replace(method_literal_prefix_1.methodLiteralPrefix, '');
                 var isGet = Boolean(methodValue.match(patterns_1.GETTER));
-                if (isGet && options.getters === false) {
+                if (isGet && getters === false) {
                     return undefined;
                 }
-                if (!isGet && options.functions === false) {
+                if (!isGet && functions === false) {
                     return undefined;
                 }
                 return "".concat(keyPrefix, " ").concat(valueMapper(methodValue, isGet ? 'getter' : 'function'));
             }
         }
-        if (options.data === false) {
+        if (data === false) {
             return undefined;
         }
         return "".concat(keyPrefix, " ").concat(key).concat(keyValueDelimiter, " ").concat(valueMapper(json5_1.default.stringify(value), 'data'));
     };
 };
-var getMemberObjectString = function (object, options) {
-    if (options === void 0) { options = {}; }
-    var format = options.format || 'object';
-    var lineItemDelimiter = format === 'object' ? ',' : '\n';
+var getMemberObjectString = function (object, userOptions) {
+    if (userOptions === void 0) { userOptions = {}; }
+    var options = __assign(__assign({}, DEFAULT_OPTIONS), userOptions);
+    var lineItemDelimiter = options.format === 'object' ? ',' : '\n';
     var stringifiedProperties = Object.entries(object)
-        .map(convertStateMemberToString(__assign(__assign({}, options), { format: format })))
+        .map(convertStateMemberToString(options))
         .filter(function (x) { return x !== undefined; })
         .join(lineItemDelimiter);
-    var prefix = format === 'object' ? '{' : '';
-    var suffix = format === 'object' ? '}' : '';
+    var prefix = options.format === 'object' ? '{' : '';
+    var suffix = options.format === 'object' ? '}' : '';
     // NOTE: we add a `lineItemDelimiter` at the very end because other functions will sometimes append more properties.
     // If the delimiter is a comma and the format is `object`, then we need to make sure we have an extra comma at the end,
     // or the object will become invalid JS.
@@ -69,9 +76,5 @@ var getMemberObjectString = function (object, options) {
     return "".concat(prefix).concat(stringifiedProperties).concat(extraDelimiter).concat(suffix);
 };
 exports.getMemberObjectString = getMemberObjectString;
-var getStateObjectStringFromComponent = function (component, options) {
-    if (options === void 0) { options = {}; }
-    var stateObjectStr = (0, exports.getMemberObjectString)(component.state, options);
-    return stateObjectStr;
-};
+var getStateObjectStringFromComponent = function (component, options) { return (0, exports.getMemberObjectString)(component.state, options); };
 exports.getStateObjectStringFromComponent = getStateObjectStringFromComponent;
