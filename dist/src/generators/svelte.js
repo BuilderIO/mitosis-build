@@ -350,7 +350,17 @@ var componentToSvelte = function (_a) {
             : "onMount(() => { ".concat(transformHookCode(json.hooks.onMount.code), " });"), !((_f = json.hooks.onUpdate) === null || _f === void 0 ? void 0 : _f.length)
             ? ''
             : json.hooks.onUpdate
-                .map(function (hook) { return "afterUpdate(() => { ".concat(transformHookCode(hook.code), " })"); })
+                .map(function (_a, index) {
+                var code = _a.code, deps = _a.deps;
+                var hookCode = transformHookCode(code);
+                if (deps) {
+                    var fnName = "onUpdateFn_".concat(index);
+                    return "\n                    function ".concat(fnName, "() {\n                      ").concat(hookCode, "\n                    }\n                    $: ").concat(fnName, "(...").concat(deps, ")\n                    ");
+                }
+                else {
+                    return "afterUpdate(() => { ".concat(hookCode, " })");
+                }
+            })
                 .join(';'), !((_g = json.hooks.onUnMount) === null || _g === void 0 ? void 0 : _g.code)
             ? ''
             : "onDestroy(() => { ".concat(transformHookCode(json.hooks.onUnMount.code), " });"), json.children
