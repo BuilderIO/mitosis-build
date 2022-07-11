@@ -1,4 +1,4 @@
-import type { JSX } from '../../../jsx-types';
+import type { JSX } from '../../../../jsx-runtime';
 declare type Props = {
     [key: string]: string | JSX.Element;
     slotTesting: JSX.Element;
