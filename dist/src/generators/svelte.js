@@ -81,11 +81,18 @@ var mappers = {
         }
     },
     For: function (_a) {
-        var _b;
+        var _b, _c;
         var json = _a.json, options = _a.options, parentComponent = _a.parentComponent;
-        return "\n{#each ".concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)((_b = json.bindings.each) === null || _b === void 0 ? void 0 : _b.code, {
+        var firstChild = json.children[0];
+        var keyValue = firstChild.properties.key || ((_b = firstChild.bindings.key) === null || _b === void 0 ? void 0 : _b.code);
+        if (keyValue) {
+            // we remove extraneous prop which Svelte does not use
+            delete firstChild.properties.key;
+            delete firstChild.bindings.key;
+        }
+        return "\n{#each ".concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)((_c = json.bindings.each) === null || _c === void 0 ? void 0 : _c.code, {
             includeState: options.stateType === 'variables',
-        }), " as ").concat(json.properties._forName, ", index }\n").concat(json.children.map(function (item) { return (0, exports.blockToSvelte)({ json: item, options: options, parentComponent: parentComponent }); }).join('\n'), "\n{/each}\n");
+        }), " as ").concat(json.scope.For[0], ", ").concat(json.scope.For[1], " ").concat(keyValue ? "(".concat(keyValue, ")") : '', "}\n").concat(json.children.map(function (item) { return (0, exports.blockToSvelte)({ json: item, options: options, parentComponent: parentComponent }); }).join('\n'), "\n{/each}\n");
     },
     Show: function (_a) {
         var _b;
@@ -188,7 +195,7 @@ var blockToSvelte = function (_a) {
         if (key.startsWith('on')) {
             var event_1 = key.replace('on', '').toLowerCase();
             // TODO: handle quotes in event handler values
-            str += " on:".concat(event_1, "=\"{").concat(cusArgs.join(','), " => ").concat((0, remove_surrounding_block_1.removeSurroundingBlock)(useValue), "}\" ");
+            str += " on:".concat(event_1, "=\"{").concat(cusArgs.join(','), " => {").concat((0, remove_surrounding_block_1.removeSurroundingBlock)(useValue), "}}\" ");
         }
         else if (key === 'ref') {
             str += " bind:this={".concat(useValue, "} ");

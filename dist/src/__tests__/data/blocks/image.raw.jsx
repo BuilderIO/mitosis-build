@@ -53,7 +53,7 @@ function Image(props) {
             transition: 'opacity 0.2s ease-in-out',
             objectFit: 'cover',
             objectPosition: 'center',
-        }} class={'builder-image' + (props.class ? ' ' + props.class : '')} src={props.image} onLoad={function () { return state.setLoaded(); }} 
+        }} class={'builder-image' + (props._class ? ' ' + props._class : '')} src={props.image} onLoad={function () { return state.setLoaded(); }} 
     // TODO: memoize on image on client
     srcset={props.srcset} sizes={props.sizes}/>
         </mitosis_1.Show>

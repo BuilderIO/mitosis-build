@@ -53,6 +53,7 @@ var context_1 = require("./helpers/context");
 var react_native_1 = require("./react-native");
 var collect_styled_components_1 = require("../helpers/styles/collect-styled-components");
 var helpers_1 = require("../helpers/styles/helpers");
+var slots_1 = require("../helpers/slots");
 /**
  * If the root Mitosis component only has 1 child, and it is a `Show` node, then we need to wrap it in a fragment.
  * Otherwise, we end up with invalid React render code.
@@ -257,7 +258,7 @@ var processBinding = function (str, options) {
     if (options.stateType !== 'useState') {
         return str;
     }
-    if (str.startsWith('slot')) {
+    if ((0, slots_1.isSlotProperty)(str)) {
         return (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(str, {
             includeState: true,
             includeProps: false,

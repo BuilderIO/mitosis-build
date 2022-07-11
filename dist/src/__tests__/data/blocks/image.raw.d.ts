@@ -1,5 +1,5 @@
 export interface ImageProps {
-    class?: string;
+    _class?: string;
     image: string;
     sizes?: string;
     lazy?: boolean;

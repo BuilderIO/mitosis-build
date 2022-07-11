@@ -4,13 +4,9 @@ exports.runTestsForTarget = void 0;
 var jsx_1 = require("../parsers/jsx");
 var basicForShow = require('./data/basic-for-show.raw');
 var basicOnMountUpdate = require('./data/basic-onMount-update.raw');
-var sectionState = require('./data/blocks/section-state.raw');
-var imageState = require('./data/blocks/img-state.raw');
-var onInitonMount = require('./data/blocks/onInit-onMount.raw');
 var basicContext = require('./data/basic-context.raw');
 var basicOutputsMeta = require('./data/basic-outputs-meta.raw');
 var basicOutputs = require('./data/basic-outputs.raw');
-var classNameJsx = require('./data/blocks/classname-jsx.raw');
 var basic = require('./data/basic.raw');
 var basicMitosis = require('./data/basic-custom-mitosis-package.raw');
 var basicChildComponent = require('./data/basic-child-component.raw');
@@ -20,46 +16,48 @@ var basicForwardRef = require('./data/basic-forwardRef.raw');
 var basicForwardRefMetadata = require('./data/basic-forwardRef-metadata.raw');
 var basicRefPrevious = require('./data/basic-ref-usePrevious.raw');
 var basicRefAssignment = require('./data/basic-ref-assignment.raw');
-var submitButtonBlock = require('./data/blocks/submit-button.raw');
-var inputBlock = require('./data/blocks/input.raw');
-var selectBlock = require('./data/blocks/select.raw');
-var formBlock = require('./data/blocks/form.raw');
-var button = require('./data/blocks/button.raw');
-var textarea = require('./data/blocks/textarea.raw');
-var img = require('./data/blocks/img.raw');
-var video = require('./data/blocks/video.raw');
-var section = require('./data/blocks/section.raw');
-var text = require('./data/blocks/text.raw');
-var rawText = require('./data/blocks/raw-text.raw');
-var stamped = require('./data/blocks/stamped-io.raw');
-var customCode = require('./data/blocks/custom-code.raw');
-var image = require('./data/blocks/image.raw');
-var columns = require('./data/blocks/columns.raw');
-var onUpdate = require('./data/blocks/onUpdate.raw');
-var onInit = require('./data/blocks/onInit.raw');
-var onUpdateWithDeps = require('./data/blocks/onUpdateWithDeps.raw');
-var multipleOnUpdate = require('./data/blocks/multiple-onUpdate.raw');
-var multipleOnUpdateWithDeps = require('./data/blocks/multiple-onUpdateWithDeps.raw');
-var onMount = require('./data/blocks/onMount.raw');
-var rootShow = require('./data/blocks/rootShow.raw');
-var contentSlotHtml = require('./data/blocks/content-slot-html.raw');
-var contentSlotJsx = require('./data/blocks/content-slot-jsx.raw');
-var slotJsx = require('./data/blocks/slot-jsx.raw');
-var slotHtml = require('./data/blocks/slot-html.raw');
+var propsDestructure = require('./data/basic-props-destructure.raw');
+var preserveExportOrLocalStatement = require('./data/basic-preserve-export-or-local-statement.raw');
 var propsType = require('./data/types/component-props-type.raw');
 var propsInterface = require('./data/types/component-props-interface.raw');
 var preserveTyping = require('./data/types/preserve-typing.raw');
-var propsDestructure = require('./data/basic-props-destructure.raw');
-var preserveExportOrLocalStatement = require('./data/basic-preserve-export-or-local-statement.raw');
 var classRaw = require('./data/styles/class.raw');
 var className = require('./data/styles/className.raw');
 var classAndClassName = require('./data/styles/class-and-className.raw');
+var button = require('./data/blocks/button.raw');
+var classNameJsx = require('./data/blocks/classname-jsx.raw');
+var columns = require('./data/blocks/columns.raw');
+var contentSlotHtml = require('./data/blocks/content-slot-html.raw');
+var contentSlotJsx = require('./data/blocks/content-slot-jsx.raw');
+var customCode = require('./data/blocks/custom-code.raw');
+var formBlock = require('./data/blocks/form.raw');
+var image = require('./data/blocks/image.raw');
+var imageState = require('./data/blocks/img-state.raw');
+var img = require('./data/blocks/img.raw');
+var inputBlock = require('./data/blocks/input.raw');
+var multipleOnUpdate = require('./data/blocks/multiple-onUpdate.raw');
+var multipleOnUpdateWithDeps = require('./data/blocks/multiple-onUpdateWithDeps.raw');
+var onInit = require('./data/blocks/onInit.raw');
+var onInitonMount = require('./data/blocks/onInit-onMount.raw');
+var onMount = require('./data/blocks/onMount.raw');
+var onUpdate = require('./data/blocks/onUpdate.raw');
+var onUpdateWithDeps = require('./data/blocks/onUpdateWithDeps.raw');
+var rawText = require('./data/blocks/raw-text.raw');
+var rootShow = require('./data/blocks/rootShow.raw');
+var section = require('./data/blocks/section.raw');
+var sectionState = require('./data/blocks/section-state.raw');
+var selectBlock = require('./data/blocks/select.raw');
+var selfRefCompWChildren = require('./data/blocks/self-referencing-component-with-children.raw');
+var selfRefComp = require('./data/blocks/self-referencing-component.raw');
+var slotHtml = require('./data/blocks/slot-html.raw');
+var slotJsx = require('./data/blocks/slot-jsx.raw');
+var stamped = require('./data/blocks/stamped-io.raw');
+var submitButtonBlock = require('./data/blocks/submit-button.raw');
+var text = require('./data/blocks/text.raw');
+var textarea = require('./data/blocks/textarea.raw');
+var video = require('./data/blocks/video.raw');
 var path = 'test-path';
 var BASIC_TESTS = {
-    ContentSlotJSX: contentSlotJsx,
-    ContentSlotHtml: contentSlotHtml,
-    SlotJsx: slotJsx,
-    SlotHtml: slotHtml,
     Basic: basic,
     BasicRef: basicRef,
     BasicRefPrevious: basicRefPrevious,
@@ -100,6 +98,14 @@ var BASIC_TESTS = {
     'class + css': classRaw,
     'className + css': className,
     'class + ClassName + css': classAndClassName,
+    'self-referencing component with children': selfRefCompWChildren,
+    'self-referencing component': selfRefComp,
+};
+var SLOTS_TESTS = {
+    ContentSlotJSX: contentSlotJsx,
+    ContentSlotHtml: contentSlotHtml,
+    SlotJsx: slotJsx,
+    SlotHtml: slotHtml,
 };
 var MULTI_ON_UPDATE_TESTS = {
     multipleOnUpdate: multipleOnUpdate,
@@ -122,6 +128,7 @@ var ROOT_SHOW_TESTS = {
 var TESTS_FOR_TARGET = {
     react: [
         BASIC_TESTS,
+        SLOTS_TESTS,
         ROOT_SHOW_TESTS,
         FORWARD_REF_TESTS,
         MULTI_ON_UPDATE_TESTS,
@@ -130,6 +137,7 @@ var TESTS_FOR_TARGET = {
     ],
     angular: [
         BASIC_TESTS,
+        SLOTS_TESTS,
         ROOT_SHOW_TESTS,
         FORWARD_REF_TESTS,
         MULTI_ON_UPDATE_TESTS,
@@ -138,6 +146,7 @@ var TESTS_FOR_TARGET = {
     ],
     webcomponent: [
         BASIC_TESTS,
+        SLOTS_TESTS,
         ROOT_SHOW_TESTS,
         FORWARD_REF_TESTS,
         MULTI_ON_UPDATE_TESTS,
@@ -146,6 +155,7 @@ var TESTS_FOR_TARGET = {
     ],
     vue: [
         BASIC_TESTS,
+        SLOTS_TESTS,
         ROOT_SHOW_TESTS,
         FORWARD_REF_TESTS,
         MULTI_ON_UPDATE_TESTS,
@@ -162,6 +172,7 @@ var TESTS_FOR_TARGET = {
     ],
     html: [
         BASIC_TESTS,
+        SLOTS_TESTS,
         ROOT_SHOW_TESTS,
         FORWARD_REF_TESTS,
         MULTI_ON_UPDATE_TESTS,
@@ -170,6 +181,7 @@ var TESTS_FOR_TARGET = {
     ],
     stencil: [
         BASIC_TESTS,
+        SLOTS_TESTS,
         // ROOT_SHOW_TESTS,
         FORWARD_REF_TESTS,
         // MULTI_ON_UPDATE_TESTS,
@@ -178,6 +190,7 @@ var TESTS_FOR_TARGET = {
     ],
     solid: [
         BASIC_TESTS,
+        SLOTS_TESTS,
         ROOT_SHOW_TESTS,
         // FORWARD_REF_TESTS,
         MULTI_ON_UPDATE_TESTS,
@@ -186,6 +199,7 @@ var TESTS_FOR_TARGET = {
     ],
     reactNative: [
         BASIC_TESTS,
+        SLOTS_TESTS,
         ROOT_SHOW_TESTS,
         FORWARD_REF_TESTS,
         MULTI_ON_UPDATE_TESTS,
@@ -194,6 +208,7 @@ var TESTS_FOR_TARGET = {
     ],
     liquid: [
         BASIC_TESTS,
+        SLOTS_TESTS,
         ROOT_SHOW_TESTS,
         FORWARD_REF_TESTS,
         MULTI_ON_UPDATE_TESTS,
@@ -201,6 +216,7 @@ var TESTS_FOR_TARGET = {
     ],
     qwik: [
         BASIC_TESTS,
+        SLOTS_TESTS,
         ROOT_SHOW_TESTS,
         FORWARD_REF_TESTS,
         MULTI_ON_UPDATE_TESTS,
