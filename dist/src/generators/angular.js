@@ -59,6 +59,7 @@ var mappers = {
 // TODO: Maybe in the future allow defining `string | function` as values
 var BINDINGS_MAPPER = {
     innerHTML: 'innerHTML',
+    style: 'ngStyle',
 };
 var blockToAngular = function (json, options, blockOptions) {
     var _a, _b, _c, _d, _e, _f;

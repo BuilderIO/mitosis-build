@@ -152,7 +152,7 @@ var getTagName = function (_a) {
     return json.name;
 };
 var blockToSvelte = function (_a) {
-    var _b, _c, _d;
+    var _b, _c, _d, _e, _f;
     var json = _a.json, options = _a.options, parentComponent = _a.parentComponent;
     if (mappers[json.name]) {
         return mappers[json.name]({ json: json, options: options, parentComponent: parentComponent });
@@ -176,6 +176,14 @@ var blockToSvelte = function (_a) {
             includeState: options.stateType === 'variables',
         }), "}");
     }
+    if (((_d = json.bindings.style) === null || _d === void 0 ? void 0 : _d.code) || json.properties.style) {
+        var useValue = (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(((_e = json.bindings.style) === null || _e === void 0 ? void 0 : _e.code) || json.properties.style, {
+            includeState: options.stateType === 'variables',
+        });
+        str += "use:mitosis_styling={".concat(useValue, "}");
+        delete json.bindings.style;
+        delete json.properties.style;
+    }
     for (var key in json.properties) {
         var value = json.properties[key];
         str += " ".concat(key, "=\"").concat(value, "\" ");
@@ -187,7 +195,7 @@ var blockToSvelte = function (_a) {
         if (key === '_spread') {
             continue;
         }
-        var _e = json.bindings[key], value = _e.code, _f = _e.arguments, cusArgs = _f === void 0 ? ['event'] : _f;
+        var _g = json.bindings[key], value = _g.code, _h = _g.arguments, cusArgs = _h === void 0 ? ['event'] : _h;
         // TODO: proper babel transform to replace. Util for this
         var useValue = (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(value, {
             includeState: options.stateType === 'variables',
@@ -206,7 +214,7 @@ var blockToSvelte = function (_a) {
     }
     // if we have innerHTML, it doesn't matter whether we have closing tags or not, or children or not.
     // we use the innerHTML content as children and don't render the self-closing tag.
-    if ((_d = json.bindings.innerHTML) === null || _d === void 0 ? void 0 : _d.code) {
+    if ((_f = json.bindings.innerHTML) === null || _f === void 0 ? void 0 : _f.code) {
         str += '>';
         str += BINDINGS_MAPPER.innerHTML(json, options);
         str += "</".concat(tagName, ">");
@@ -278,6 +286,18 @@ var FUNCTION_HACK_PLUGIN = function () { return ({
         },
     },
 }); };
+var hasStyleObject = function (children) {
+    for (var i = 0; i < children.length; i++) {
+        var child = children[i];
+        if (child.bindings.style || child.properties.style) {
+            return true;
+        }
+        else if (child.children.length) {
+            return hasStyleObject(child.children);
+        }
+    }
+    return false;
+};
 var componentToSvelte = function (_a) {
     if (_a === void 0) { _a = {}; }
     var _b = _a.plugins, plugins = _b === void 0 ? [] : _b, options = __rest(_a, ["plugins"]);
@@ -341,14 +361,16 @@ var componentToSvelte = function (_a) {
                 includeState: useOptions.stateType === 'variables',
             }), babel_transform_1.babelTransformCode);
         };
-        var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    <script>\n      ", "\n      ", "\n      ", "\n      ", "\n      ", "\n\n      ", "\n      ", "\n      \n      ", "\n      ", "\n\n      ", "\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n    </script>\n\n    ", "\n\n    ", "\n  "], ["\n    <script>\n      ", "\n      ", "\n      ", "\n      ", "\n      ", "\n\n      ", "\n      ", "\n      \n      ", "\n      ", "\n\n      ", "\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n    </script>\n\n    ", "\n\n    ", "\n  "])), !((_b = json.hooks.onMount) === null || _b === void 0 ? void 0 : _b.code) ? '' : "import { onMount } from 'svelte'", !((_c = json.hooks.onUpdate) === null || _c === void 0 ? void 0 : _c.length) ? '' : "import { afterUpdate } from 'svelte'", !((_d = json.hooks.onUnMount) === null || _d === void 0 ? void 0 : _d.code) ? '' : "import { onDestroy } from 'svelte'", (0, render_imports_1.renderPreComponent)({ component: json, target: 'svelte' }), (0, context_1.hasContext)(component) ? 'import { getContext, setContext } from "svelte";' : '', !hasData || useOptions.stateType === 'variables' ? '' : "import onChange from 'on-change'", (0, lodash_1.uniq)(refs.map(function (ref) { return (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(ref); }).concat(props))
+        var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    <script>\n      ", "\n      ", "\n      ", "\n      ", "\n      ", "\n\n      ", "\n      ", "\n      ", "\n      ", "\n      ", "\n\n      ", "\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n    </script>\n\n    ", "\n\n    ", "\n  "], ["\n    <script>\n      ", "\n      ", "\n      ", "\n      ", "\n      ", "\n\n      ", "\n      ", "\n      ", "\n      ", "\n      ", "\n\n      ", "\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n    </script>\n\n    ", "\n\n    ", "\n  "])), !((_b = json.hooks.onMount) === null || _b === void 0 ? void 0 : _b.code) ? '' : "import { onMount } from 'svelte'", !((_c = json.hooks.onUpdate) === null || _c === void 0 ? void 0 : _c.length) ? '' : "import { afterUpdate } from 'svelte'", !((_d = json.hooks.onUnMount) === null || _d === void 0 ? void 0 : _d.code) ? '' : "import { onDestroy } from 'svelte'", (0, render_imports_1.renderPreComponent)({ component: json, target: 'svelte' }), (0, context_1.hasContext)(component) ? 'import { getContext, setContext } from "svelte";' : '', !hasData || useOptions.stateType === 'variables' ? '' : "import onChange from 'on-change'", (0, lodash_1.uniq)(refs.map(function (ref) { return (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(ref); }).concat(props))
             .map(function (name) {
             if (name === 'children') {
                 return '';
             }
             return "export let ".concat(name, ";");
         })
-            .join('\n'), functionsString.length < 4 ? '' : functionsString, getterString.length < 4 ? '' : getterString, getContextCode(json), setContextCode(json), useOptions.stateType === 'proxies'
+            .join('\n'), hasStyleObject(json.children)
+            ? "\n        function mitosis_styling (node, vars) {\n          Object.entries(vars).forEach(([ p, v ]) => { node.style[p] = v })\n        }\n      "
+            : '', functionsString.length < 4 ? '' : functionsString, getterString.length < 4 ? '' : getterString, getContextCode(json), setContextCode(json), useOptions.stateType === 'proxies'
             ? dataString.length < 4
                 ? ''
                 : "let state = onChange(".concat(dataString, ", () => state = state)")

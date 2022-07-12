@@ -24,6 +24,7 @@ var preserveTyping = require('./data/types/preserve-typing.raw');
 var classRaw = require('./data/styles/class.raw');
 var className = require('./data/styles/className.raw');
 var classAndClassName = require('./data/styles/class-and-className.raw');
+var classState = require('./data/styles/classState.raw');
 var button = require('./data/blocks/button.raw');
 var classNameJsx = require('./data/blocks/classname-jsx.raw');
 var columns = require('./data/blocks/columns.raw');
@@ -106,6 +107,7 @@ var SLOTS_TESTS = {
     ContentSlotHtml: contentSlotHtml,
     SlotJsx: slotJsx,
     SlotHtml: slotHtml,
+    classState: classState,
 };
 var MULTI_ON_UPDATE_TESTS = {
     multipleOnUpdate: multipleOnUpdate,

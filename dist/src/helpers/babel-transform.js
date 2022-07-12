@@ -102,7 +102,7 @@ var babelTransformExpression = function (code, visitor, type) {
             // that is an object
             useCode = "let _ = ".concat(useCode);
             result = (((_a = (0, exports.babelTransform)(useCode, visitor)) === null || _a === void 0 ? void 0 : _a.code) || '')
-                // Babel addes trailing semicolons, but for expressions we need those gone
+                // Babel adds trailing semicolons, but for expressions we need those gone
                 .replace(/;$/, '')
                 // Remove our fake variable assignment
                 .replace(/let _ =\s/, '');
@@ -124,7 +124,7 @@ var babelTransformExpression = function (code, visitor, type) {
         return result.replace(/^function\s*\(\)\s*\{/, '').replace(/\};?$/, '');
     }
     else {
-        // Babel addes trailing semicolons, but for expressions we need those gone
+        // Babel adds trailing semicolons, but for expressions we need those gone
         // TODO: maybe detect if the original code ended with one, and keep it if so, for the case
         // of appending several fragements
         return result.replace(/;$/, '');
