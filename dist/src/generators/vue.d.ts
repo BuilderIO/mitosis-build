@@ -10,7 +10,11 @@ export interface ToVueOptions extends BaseTranspilerOptions, VueVersionOpt {
     namePrefix?: (path: string) => string;
     asyncComponentImports?: boolean;
 }
-export declare const blockToVue: (node: MitosisNode, options: ToVueOptions) => string;
+declare type BlockRenderer = (json: MitosisNode, options: ToVueOptions, scope?: Scope) => string;
+interface Scope {
+    isRootNode?: boolean;
+}
+export declare const blockToVue: BlockRenderer;
 declare type VueOptsWithoutVersion = OmitObj<ToVueOptions, VueVersionOpt>;
 export declare const componentToVue2: (vueOptions?: VueOptsWithoutVersion) => Transpiler;
 export declare const componentToVue3: (vueOptions?: VueOptsWithoutVersion) => Transpiler;

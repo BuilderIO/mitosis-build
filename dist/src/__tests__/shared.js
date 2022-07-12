@@ -44,7 +44,6 @@ var onMount = require('./data/blocks/onMount.raw');
 var onUpdate = require('./data/blocks/onUpdate.raw');
 var onUpdateWithDeps = require('./data/blocks/onUpdateWithDeps.raw');
 var rawText = require('./data/blocks/raw-text.raw');
-var rootShow = require('./data/blocks/rootShow.raw');
 var section = require('./data/blocks/section.raw');
 var sectionState = require('./data/blocks/section-state.raw');
 var selectBlock = require('./data/blocks/select.raw');
@@ -124,14 +123,16 @@ var FORWARD_REF_TESTS = {
     basicForwardRef: basicForwardRef,
     basicForwardRefMetadata: basicForwardRefMetadata,
 };
-var ROOT_SHOW_TESTS = {
-    rootShow: rootShow,
+var SHOW_TESTS = {
+    rootShow: require('./data/blocks/rootShow.raw'),
+    nestedShow: require('./data/show/nested-show.raw'),
+    showWithFor: require('./data/show/show-with-for.raw'),
 };
 var TESTS_FOR_TARGET = {
     react: [
         BASIC_TESTS,
         SLOTS_TESTS,
-        ROOT_SHOW_TESTS,
+        SHOW_TESTS,
         FORWARD_REF_TESTS,
         MULTI_ON_UPDATE_TESTS,
         FORM_BLOCK_TESTS,
@@ -140,7 +141,7 @@ var TESTS_FOR_TARGET = {
     angular: [
         BASIC_TESTS,
         SLOTS_TESTS,
-        ROOT_SHOW_TESTS,
+        SHOW_TESTS,
         FORWARD_REF_TESTS,
         MULTI_ON_UPDATE_TESTS,
         FORM_BLOCK_TESTS,
@@ -149,7 +150,7 @@ var TESTS_FOR_TARGET = {
     webcomponent: [
         BASIC_TESTS,
         SLOTS_TESTS,
-        ROOT_SHOW_TESTS,
+        SHOW_TESTS,
         FORWARD_REF_TESTS,
         MULTI_ON_UPDATE_TESTS,
         FOR_SHOW_TESTS,
@@ -158,7 +159,7 @@ var TESTS_FOR_TARGET = {
     vue: [
         BASIC_TESTS,
         SLOTS_TESTS,
-        ROOT_SHOW_TESTS,
+        SHOW_TESTS,
         FORWARD_REF_TESTS,
         MULTI_ON_UPDATE_TESTS,
         FORM_BLOCK_TESTS,
@@ -166,7 +167,7 @@ var TESTS_FOR_TARGET = {
     ],
     svelte: [
         BASIC_TESTS,
-        ROOT_SHOW_TESTS,
+        SHOW_TESTS,
         FORWARD_REF_TESTS,
         MULTI_ON_UPDATE_TESTS,
         FORM_BLOCK_TESTS,
@@ -175,7 +176,7 @@ var TESTS_FOR_TARGET = {
     html: [
         BASIC_TESTS,
         SLOTS_TESTS,
-        ROOT_SHOW_TESTS,
+        SHOW_TESTS,
         FORWARD_REF_TESTS,
         MULTI_ON_UPDATE_TESTS,
         FOR_SHOW_TESTS,
@@ -193,7 +194,7 @@ var TESTS_FOR_TARGET = {
     solid: [
         BASIC_TESTS,
         SLOTS_TESTS,
-        ROOT_SHOW_TESTS,
+        SHOW_TESTS,
         // FORWARD_REF_TESTS,
         MULTI_ON_UPDATE_TESTS,
         FORM_BLOCK_TESTS,
@@ -202,7 +203,7 @@ var TESTS_FOR_TARGET = {
     reactNative: [
         BASIC_TESTS,
         SLOTS_TESTS,
-        ROOT_SHOW_TESTS,
+        SHOW_TESTS,
         FORWARD_REF_TESTS,
         MULTI_ON_UPDATE_TESTS,
         FORM_BLOCK_TESTS,
@@ -211,7 +212,7 @@ var TESTS_FOR_TARGET = {
     liquid: [
         BASIC_TESTS,
         SLOTS_TESTS,
-        ROOT_SHOW_TESTS,
+        SHOW_TESTS,
         FORWARD_REF_TESTS,
         MULTI_ON_UPDATE_TESTS,
         FORM_BLOCK_TESTS,
@@ -219,7 +220,7 @@ var TESTS_FOR_TARGET = {
     qwik: [
         BASIC_TESTS,
         SLOTS_TESTS,
-        ROOT_SHOW_TESTS,
+        SHOW_TESTS,
         FORWARD_REF_TESTS,
         MULTI_ON_UPDATE_TESTS,
         FORM_BLOCK_TESTS,
