@@ -43,6 +43,7 @@ var dedent_1 = __importDefault(require("dedent"));
 var standalone_1 = require("prettier/standalone");
 var traverse_1 = __importDefault(require("traverse"));
 var collect_css_1 = require("../helpers/styles/collect-css");
+var helpers_1 = require("../helpers/styles/helpers");
 var fast_clone_1 = require("../helpers/fast-clone");
 var get_props_1 = require("../helpers/get-props");
 var get_refs_1 = require("../helpers/get-refs");
@@ -286,18 +287,6 @@ var FUNCTION_HACK_PLUGIN = function () { return ({
         },
     },
 }); };
-var hasStyleObject = function (children) {
-    for (var i = 0; i < children.length; i++) {
-        var child = children[i];
-        if (child.bindings.style || child.properties.style) {
-            return true;
-        }
-        else if (child.children.length) {
-            return hasStyleObject(child.children);
-        }
-    }
-    return false;
-};
 var componentToSvelte = function (_a) {
     if (_a === void 0) { _a = {}; }
     var _b = _a.plugins, plugins = _b === void 0 ? [] : _b, options = __rest(_a, ["plugins"]);
@@ -368,7 +357,7 @@ var componentToSvelte = function (_a) {
             }
             return "export let ".concat(name, ";");
         })
-            .join('\n'), hasStyleObject(json.children)
+            .join('\n'), (0, helpers_1.hasStyle)(json)
             ? "\n        function mitosis_styling (node, vars) {\n          Object.entries(vars).forEach(([ p, v ]) => { node.style[p] = v })\n        }\n      "
             : '', functionsString.length < 4 ? '' : functionsString, getterString.length < 4 ? '' : getterString, getContextCode(json), setContextCode(json), useOptions.stateType === 'proxies'
             ? dataString.length < 4

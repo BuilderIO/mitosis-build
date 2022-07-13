@@ -28,7 +28,7 @@ var collectStyles = function (json, options) {
     (0, traverse_1.default)(json).forEach(function (item) {
         var _a;
         if ((0, is_mitosis_node_1.isMitosisNode)(item)) {
-            if ((0, helpers_1.nodeHasStyles)(item)) {
+            if ((0, helpers_1.nodeHasCss)(item)) {
                 var value = (0, helpers_1.parseCssObject)((_a = item.bindings.css) === null || _a === void 0 ? void 0 : _a.code);
                 delete item.bindings.css;
                 var componentName = item.properties.$name

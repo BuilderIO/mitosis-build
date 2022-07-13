@@ -421,7 +421,7 @@ var _componentToReact = function (json, options, isSubComponent) {
     (0, handle_missing_state_1.handleMissingState)(json);
     (0, process_tag_references_1.processTagReferences)(json);
     addProviderComponents(json, options);
-    var componentHasStyles = (0, helpers_1.hasStyles)(json);
+    var componentHasStyles = (0, helpers_1.hasCss)(json);
     if (options.stateType === 'useState') {
         (0, getters_to_functions_1.gettersToFunctions)(json);
         updateStateSetters(json, options);

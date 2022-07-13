@@ -3,22 +3,28 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.styleMapToCss = exports.parseCssObject = exports.getStylesOnly = exports.getNestedSelectors = exports.hasStyles = exports.nodeHasStyles = void 0;
+exports.styleMapToCss = exports.parseCssObject = exports.getStylesOnly = exports.getNestedSelectors = exports.hasStyle = exports.hasCss = exports.nodeHasStyle = exports.nodeHasCss = void 0;
 var traverse_1 = __importDefault(require("traverse"));
 var is_mitosis_node_1 = require("../is-mitosis-node");
 var json5_1 = __importDefault(require("json5"));
 var lodash_1 = require("lodash");
 var dash_case_1 = require("../dash-case");
-var nodeHasStyles = function (node) {
+var nodeHasCss = function (node) {
     var _a;
     return Boolean(typeof ((_a = node.bindings.css) === null || _a === void 0 ? void 0 : _a.code) === 'string' && node.bindings.css.code.trim().length > 6);
 };
-exports.nodeHasStyles = nodeHasStyles;
-var hasStyles = function (component) {
+exports.nodeHasCss = nodeHasCss;
+var nodeHasStyle = function (node) {
+    var _a;
+    return (Boolean(typeof ((_a = node.bindings.style) === null || _a === void 0 ? void 0 : _a.code) === 'string') ||
+        Boolean(typeof node.properties.style === 'string'));
+};
+exports.nodeHasStyle = nodeHasStyle;
+var hasCss = function (component) {
     var hasStyles = false;
     (0, traverse_1.default)(component).forEach(function (item) {
         if ((0, is_mitosis_node_1.isMitosisNode)(item)) {
-            if ((0, exports.nodeHasStyles)(item)) {
+            if ((0, exports.nodeHasCss)(item)) {
                 hasStyles = true;
                 this.stop();
             }
@@ -26,7 +32,20 @@ var hasStyles = function (component) {
     });
     return hasStyles;
 };
-exports.hasStyles = hasStyles;
+exports.hasCss = hasCss;
+var hasStyle = function (component) {
+    var hasStyles = false;
+    (0, traverse_1.default)(component).forEach(function (item) {
+        if ((0, is_mitosis_node_1.isMitosisNode)(item)) {
+            if ((0, exports.nodeHasStyle)(item)) {
+                hasStyles = true;
+                this.stop();
+            }
+        }
+    });
+    return hasStyles;
+};
+exports.hasStyle = hasStyle;
 var getNestedSelectors = function (map) {
     return (0, lodash_1.pickBy)(map, function (value) { return typeof value === 'object'; });
 };

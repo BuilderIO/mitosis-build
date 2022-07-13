@@ -226,7 +226,7 @@ var componentToSolid = function (options) {
             json = (0, plugins_1.runPreJsonPlugins)(json, options.plugins);
         }
         addProviderComponents(json, options);
-        var componentHasStyles = (0, helpers_1.hasStyles)(json);
+        var componentHasStyles = (0, helpers_1.hasCss)(json);
         var addWrapper = json.children.filter(filter_empty_text_nodes_1.filterEmptyTextNodes).length !== 1;
         if (options.plugins) {
             json = (0, plugins_1.runPostJsonPlugins)(json, options.plugins);
