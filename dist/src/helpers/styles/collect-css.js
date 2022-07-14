@@ -13,8 +13,8 @@ var trimClassStr = function (classStr) { return classStr.trim().replace(/\s{2,}/
 var updateClassForNode = function (item, className) {
     if (item.bindings.class) {
         // combine className with existing binding. We use single quotes because in Vue, bindings are wrapped in double quotes
-        // e.g. <div :class="_classStringToObject(this.className + 'div-21azgz5avex')" />
-        item.bindings.class.code = trimClassStr("".concat(item.bindings.class.code, " + '").concat(className, "'"));
+        // e.g. <div :class="_classStringToObject(this.className + ' div-21azgz5avex')" />
+        item.bindings.class.code = trimClassStr("".concat(item.bindings.class.code, " + ' ").concat(className, "'"));
     }
     else {
         item.properties.class = trimClassStr("".concat(item.properties.class || '', " ").concat(className));
