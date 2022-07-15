@@ -16,3 +16,5 @@ export declare function convertBuilderContentToSymbolHierarchy(content: BuilderC
 }): SymbolHierarchy;
 export declare function convertBuilderElementToMitosisComponent(element: BuilderElement): MitosisComponent | null;
 export declare function getJsxSymbolComponentName(id: string): string;
+export declare function hashCodeAsString(obj: any): string;
+export declare function hashCode(obj: any, hash?: number): number;

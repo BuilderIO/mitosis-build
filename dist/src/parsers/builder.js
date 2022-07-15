@@ -50,6 +50,7 @@ var create_mitosis_component_1 = require("../helpers/create-mitosis-component");
 var create_mitosis_node_1 = require("../helpers/create-mitosis-node");
 var jsx_1 = require("./jsx");
 var parsers_1 = require("../helpers/parsers");
+var __1 = require("..");
 // Omit some superflous styles that can come from Builder's web importer
 var styleOmitList = [
     'backgroundRepeatX',
@@ -638,7 +639,7 @@ function extractSymbols(json) {
         subComponents: subComponents,
     };
 }
-var createBuilderElement = function (options) { return (__assign({ '@type': '@builder.io/sdk:Element', id: 'builder-' + Math.random().toString(36).split('.')[1] }, options)); };
+var createBuilderElement = function (options) { return (__assign({ '@type': '@builder.io/sdk:Element', id: 'builder-' + (0, __1.hashCodeAsString)(options) }, options)); };
 exports.createBuilderElement = createBuilderElement;
 var isBuilderElement = function (el) {
     return (el === null || el === void 0 ? void 0 : el['@type']) === '@builder.io/sdk:Element';

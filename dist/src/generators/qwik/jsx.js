@@ -24,6 +24,18 @@ exports.renderJSXNodes = void 0;
 var is_mitosis_node_1 = require("../../helpers/is-mitosis-node");
 var directives_1 = require("./directives");
 var src_generator_1 = require("./src-generator");
+/**
+ * Convert a Mitosis nodes to a JSX nodes.
+ *
+ * @param file File into which the output will be written to.
+ * @param directives Store for directives which we came across so that they can be imported.
+ * @param handlers A set of handlers which we came across so that they can be rendered
+ * @param children A list of children to convert to JSX
+ * @param styles Store for styles which we came across so that they can be rendered.
+ * @param parentSymbolBindings A set of bindings from parent to be written into the child.
+ * @param root True if this is the root JSX, and may need a Fragment wrapper.
+ * @returns
+ */
 function renderJSXNodes(file, directives, handlers, children, styles, parentSymbolBindings, root) {
     if (root === void 0) { root = true; }
     return function () {

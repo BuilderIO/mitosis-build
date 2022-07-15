@@ -85,10 +85,11 @@ var File = /** @class */ (function () {
                 });
             }
             catch (e) {
-                debugger;
-                source += "\n===============================\n";
-                source += String(e);
-                console.error(source);
+                throw new Error(e +
+                    '\n' +
+                    '========================================================================\n' +
+                    source +
+                    '\n\n========================================================================');
             }
         }
         return source;
@@ -207,6 +208,7 @@ var SrcBuilder = /** @class */ (function () {
             value.startsWith(':') ||
             value.startsWith(']') ||
             value.startsWith('}') ||
+            value.startsWith(',') ||
             value.startsWith('?')) {
             // clear last ',' or ';';
             var index = this.buf.length - 1;
@@ -449,7 +451,6 @@ function ignoreKey(key) {
         key.startsWith('_') ||
         key == 'code' ||
         key == '' ||
-        key == 'builder-id' ||
         key.indexOf('.') !== -1);
 }
 var Block = /** @class */ (function () {
