@@ -204,14 +204,10 @@ var blockToSolid = function (json, options) {
     }
     return str;
 };
-var getRefsString = function (json, refs) {
-    if (refs === void 0) { refs = (0, get_refs_1.getRefs)(json); }
-    var str = '';
-    for (var _i = 0, _a = Array.from(refs); _i < _a.length; _i++) {
-        var ref = _a[_i];
-        str += "\nconst ".concat(ref, " = useRef();");
-    }
-    return str;
+var getRefsString = function (json) {
+    return Array.from((0, get_refs_1.getRefs)(json))
+        .map(function (ref) { return "let ".concat(ref, ";"); })
+        .join('\n');
 };
 function addProviderComponents(json, options) {
     for (var key in json.context.set) {
@@ -246,20 +242,17 @@ var componentToSolid = function (options) {
         var hasState = Object.keys(component.state).length > 0;
         var componentsUsed = (0, get_components_used_1.getComponentsUsed)(json);
         var componentHasContext = (0, context_1.hasContext)(json);
-        var refs = getRefsString(json);
         var hasShowComponent = componentsUsed.has('Show');
         var hasForComponent = componentsUsed.has('For');
-        var hasRefs = refs.length > 0;
         var solidJSImports = __spreadArray([
             componentHasContext ? 'useContext' : undefined,
             hasShowComponent ? 'Show' : undefined,
             hasForComponent ? 'For' : undefined,
-            ((_b = json.hooks.onMount) === null || _b === void 0 ? void 0 : _b.code) ? 'onMount' : undefined,
-            hasRefs ? 'useRef' : undefined
+            ((_b = json.hooks.onMount) === null || _b === void 0 ? void 0 : _b.code) ? 'onMount' : undefined
         ], (((_c = json.hooks.onUpdate) === null || _c === void 0 ? void 0 : _c.length) ? ['on', 'createEffect'] : []), true).filter(Boolean);
         var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n\n    function ", "(props) {\n      ", "\n      \n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      return (", "\n        ", "\n        ", ")\n    }\n\n    export default ", ";\n  "], ["\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n\n    function ", "(props) {\n      ", "\n      \n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      return (", "\n        ", "\n        ", ")\n    }\n\n    export default ", ";\n  "])), solidJSImports.length > 0
             ? "import { \n          ".concat(solidJSImports.map(function (item) { return item; }).join(', '), "\n         } from 'solid-js';")
-            : '', !foundDynamicComponents ? '' : "import { Dynamic } from 'solid-js/web';", !hasState ? '' : "import { createMutable } from 'solid-js/store';", !componentHasStyles ? '' : "import { css } from \"solid-styled-components\";", (0, render_imports_1.renderPreComponent)({ component: json, target: 'solid' }), json.name, !hasState ? '' : "const state = createMutable(".concat(stateString, ");"), refs, getContextString(json, options), !((_d = json.hooks.onMount) === null || _d === void 0 ? void 0 : _d.code) ? '' : "onMount(() => { ".concat(json.hooks.onMount.code, " })"), json.hooks.onUpdate
+            : '', !foundDynamicComponents ? '' : "import { Dynamic } from 'solid-js/web';", !hasState ? '' : "import { createMutable } from 'solid-js/store';", !componentHasStyles ? '' : "import { css } from \"solid-styled-components\";", (0, render_imports_1.renderPreComponent)({ component: json, target: 'solid' }), json.name, !hasState ? '' : "const state = createMutable(".concat(stateString, ");"), getRefsString(json), getContextString(json, options), !((_d = json.hooks.onMount) === null || _d === void 0 ? void 0 : _d.code) ? '' : "onMount(() => { ".concat(json.hooks.onMount.code, " })"), json.hooks.onUpdate
             ? json.hooks.onUpdate
                 .map(function (hook, index) {
                 if (hook.deps) {
