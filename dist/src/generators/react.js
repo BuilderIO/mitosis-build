@@ -55,12 +55,12 @@ var collect_styled_components_1 = require("../helpers/styles/collect-styled-comp
 var helpers_1 = require("../helpers/styles/helpers");
 var slots_1 = require("../helpers/slots");
 /**
- * If the root Mitosis component only has 1 child, and it is a `Show` node, then we need to wrap it in a fragment.
+ * If the root Mitosis component only has 1 child, and it is a `Show`/`For` node, then we need to wrap it in a fragment.
  * Otherwise, we end up with invalid React render code.
  *
  */
-var isRootShowNode = function (json) {
-    return json.children.length === 1 && ['Show'].includes(json.children[0].name);
+var isRootSpecialNode = function (json) {
+    return json.children.length === 1 && ['Show', 'For'].includes(json.children[0].name);
 };
 var wrapInFragment = function (json) { return json.children.length !== 1; };
 var NODE_MAPPERS = {
@@ -475,7 +475,7 @@ var _componentToReact = function (json, options, isSubComponent) {
     }
     var wrap = wrapInFragment(json) ||
         (componentHasStyles && stylesType === 'styled-jsx') ||
-        isRootShowNode(json);
+        isRootSpecialNode(json);
     var _o = getRefsString(json, allRefs, options), hasStateArgument = _o[0], refsString = _o[1];
     var nativeStyles = stylesType === 'react-native' && componentHasStyles && (0, react_native_1.collectReactNativeStyles)(json);
     var propsArgs = 'props';
