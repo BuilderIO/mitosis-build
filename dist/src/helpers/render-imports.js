@@ -102,7 +102,7 @@ var renderImport = function (_a) {
             return "const ".concat(importValue, " = () => import('").concat(path, "')");
         }
     }
-    return "import ".concat(importValue, " from '").concat(path, "';");
+    return importValue ? "import ".concat(importValue, " from '").concat(path, "';") : "import '".concat(path, "';");
 };
 exports.renderImport = renderImport;
 var renderImports = function (_a) {

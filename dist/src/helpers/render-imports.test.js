@@ -16,4 +16,18 @@ describe('renderImport', function () {
         });
         expect(output).toMatchSnapshot();
     });
+    test('Adds correctly a side-effect import', function () {
+        var data = [
+            {
+                imports: {},
+                path: '../render-blocks.scss',
+            },
+        ];
+        var output = (0, render_imports_1.renderImport)({
+            theImport: data[0],
+            target: 'react',
+            asyncComponentImports: false,
+        });
+        expect(output).toEqual("import '../render-blocks.scss';");
+    });
 });
