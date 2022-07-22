@@ -10,31 +10,37 @@ var src_generator_1 = require("./src-generator");
 exports.DIRECTIVES = {
     Show: function (node, blockFn) {
         return function () {
+            var _this = this;
             var _a;
             var expr = (_a = node.bindings.when) === null || _a === void 0 ? void 0 : _a.code;
-            this.isJSX && this.emit('{');
-            this.emit(expr, '?');
-            blockFn();
-            this.emit(':null');
-            this.isJSX && this.emit('}');
+            this.jsxExpression(function () {
+                _this.emit(expr, '?');
+                blockFn();
+                _this.emit(':null');
+            });
         };
     },
     For: function (node, blockFn) {
         return function () {
+            var _this = this;
             var _a;
             var expr = (_a = node.bindings.each) === null || _a === void 0 ? void 0 : _a.code;
-            this.isJSX && this.emit('{');
-            this.emit('(', expr, '||[]).map(', '(function(__value__){');
-            this.emit('var state=Object.assign({},this,{', (0, src_generator_1.iteratorProperty)(expr), ':__value__==null?{}:__value__});');
-            this.emit('return(');
-            blockFn();
-            this.emit(');}).bind(state))');
-            this.isJSX && this.emit('}');
+            this.jsxExpression(function () {
+                var forName = node.properties._forName || '_';
+                var indexName = node.properties._indexName;
+                _this.emit('(', expr, '||[]).map(', '((', forName, indexName ? ',' : '', indexName ? indexName : '', ') => {');
+                if (_this.isBuilder) {
+                    _this.emit('var state=Object.assign({},this,{', (0, src_generator_1.iteratorProperty)(expr), ':', forName, '==null?{}:', forName, '});');
+                }
+                _this.emit('return(');
+                blockFn();
+                _this.emit(');}))');
+            });
         };
     },
     Host: function (node, blockFn) {
         return function () {
-            var host = this.file.import(this.file.qwikModule, 'Host').name;
+            var host = this.file.import(this.file.qwikModule, 'Host').localName;
             this.jsxBegin(host, node.properties, {});
             blockFn();
             this.jsxEnd(host);

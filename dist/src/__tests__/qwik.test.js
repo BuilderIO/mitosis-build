@@ -38,12 +38,13 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var fs_extra_promise_1 = require("fs-extra-promise");
 var qwik_1 = require("../generators/qwik");
+var component_generator_1 = require("../generators/qwik/component-generator");
 var index_1 = require("../generators/qwik/index");
-var src_generator_1 = require("../generators/qwik/src-generator");
 var builder_1 = require("../parsers/builder");
 var jsx_1 = require("../parsers/jsx");
 var compile_away_builder_components_1 = require("../plugins/compile-away-builder-components");
 var symbol_processor_1 = require("../symbols/symbol-processor");
+var shared_1 = require("./shared");
 var todo = require('../../../../examples/todo/src/components/todo.lite');
 var todos = require('../../../../examples/todo/src/components/todos.lite');
 var debugFiles = true;
@@ -76,6 +77,7 @@ var debugOutput = function (fileSet) { return __awaiter(void 0, void 0, void 0, 
     });
 }); };
 describe('qwik', function () {
+    (0, shared_1.runTestsForTarget)('qwik', (0, component_generator_1.componentToQwik)());
     describe('todo', function () {
         test('Todo.tsx', function () { return __awaiter(void 0, void 0, void 0, function () {
             var json, fileSet;
@@ -437,6 +439,7 @@ describe('qwik', function () {
                 isTypeScript: false,
                 isJSX: true,
                 isModule: true,
+                isBuilder: true,
             }, '', ''));
         });
         test('should format code', function () {
@@ -447,21 +450,6 @@ describe('qwik', function () {
             file.src.jsxBegin('Image', {}, { image: '' });
             file.src.jsxEnd('Image');
             expect(file.toString()).toEqual('<Image></Image>;\n');
-        });
-    });
-    describe('helper functions', function () {
-        describe('isStatement', function () {
-            test('is an expression', function () {
-                expect((0, src_generator_1.isStatement)('a.b')).toBe(false);
-                expect((0, src_generator_1.isStatement)('1?2:"bar"')).toBe(false);
-                expect((0, src_generator_1.isStatement)('"var x; return foo + \'\\"\';"')).toBe(false);
-                expect((0, src_generator_1.isStatement)('"foo" + `bar\nbaz`')).toBe(false);
-                expect((0, src_generator_1.isStatement)('(...)()')).toBe(false);
-            });
-            test('is a statement', function () {
-                expect((0, src_generator_1.isStatement)('var x; return x;')).toBe(true);
-                expect((0, src_generator_1.isStatement)('var x')).toBe(true);
-            });
         });
     });
 });

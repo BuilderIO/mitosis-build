@@ -4,4 +4,4 @@ export interface ButtonProps {
     link?: string;
     openLinkInNewTab?: boolean;
 }
-export default function Button(props: ButtonProps): JSX.Element;
+export default function Button(props: ButtonProps): import("@builder.io/mitosis/jsx-runtime").JSX.Element;

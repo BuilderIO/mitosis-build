@@ -1,6 +1,8 @@
 export declare type Format = 'esm' | 'cjs';
+export declare type Language = 'js' | 'ts';
 interface TranspilerOptions {
     format?: Format;
+    languages?: Language[];
 }
 declare type Targets = typeof import('../targets').targets;
 export declare type Target = keyof Targets;

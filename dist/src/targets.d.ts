@@ -15,7 +15,7 @@ export declare const targets: {
     react: (reactOptions?: import("./generators/react").ToReactOptions) => import(".").Transpiler;
     reactNative: (options?: import("./generators/react-native").ToReactNativeOptions) => import(".").Transpiler;
     solid: (options?: import("./generators/solid").ToSolidOptions) => import(".").Transpiler;
-    svelte: (options?: import("./generators/svelte").ToSvelteOptions) => import(".").Transpiler;
+    svelte: ({ plugins, ...userProvidedOptions }?: import("./generators/svelte").ToSvelteOptions) => import(".").Transpiler;
     swift: (options?: import("./generators/swift-ui").ToSwiftOptions) => import(".").Transpiler;
     template: (options?: import("./generators/template").ToTemplateOptions) => import(".").Transpiler;
     webcomponent: (options?: import("./generators/html").ToHtmlOptions) => import(".").Transpiler;
@@ -23,4 +23,5 @@ export declare const targets: {
     vue2: (vueOptions?: Omit<import("./generators/vue").ToVueOptions, "vueVersion"> | undefined) => import(".").Transpiler;
     vue3: (vueOptions?: Omit<import("./generators/vue").ToVueOptions, "vueVersion"> | undefined) => import(".").Transpiler;
     stencil: (options?: import("./generators/stencil").ToStencilOptions) => import(".").Transpiler;
+    qwik: (userOptions?: import("./generators/qwik/component-generator").ToQwikOptions) => import(".").Transpiler;
 };

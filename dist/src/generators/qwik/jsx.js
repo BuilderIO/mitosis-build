@@ -46,8 +46,9 @@ function renderJSXNodes(file, directives, handlers, children, styles, parentSymb
             this.emit('(');
         var needsFragment = root && (children.length > 1 || isInlinedDirective(children[0]));
         file.import(file.qwikModule, 'h');
+        var fragmentSymbol = file.import(file.qwikModule, 'Fragment');
         if (needsFragment) {
-            this.jsxBeginFragment(file.import(file.qwikModule, 'Fragment'));
+            this.jsxBeginFragment(fragmentSymbol);
         }
         children.forEach(function (child) {
             var _a, _b;
@@ -75,7 +76,11 @@ function renderJSXNodes(file, directives, handlers, children, styles, parentSymb
                 var directive = directives_1.DIRECTIVES[childName];
                 if (typeof directive == 'function') {
                     _this.emit(directive(child, function () {
-                        return renderJSXNodes(file, directives, handlers, child.children, styles, {}, false).call(_this);
+                        var children = child.children.filter(function (c) { return !isEmptyTextNode(c); });
+                        var needsFragment = children.length > 1 || isTextNode(children[0]);
+                        needsFragment && _this.jsxBeginFragment(fragmentSymbol);
+                        renderJSXNodes(file, directives, handlers, children, styles, {}, false).call(_this);
+                        needsFragment && _this.jsxEndFragment();
                     }));
                     !_this.isJSX && _this.emit(',');
                 }
@@ -87,13 +92,13 @@ function renderJSXNodes(file, directives, handlers, children, styles, parentSymb
                             var code = directives_1.DIRECTIVES[name];
                             typeof code == 'string' && directives.set(name, code);
                         });
-                        if (file.module !== 'med') {
+                        if (file.module !== 'med' && file.imports.hasImport(childName)) {
                             file.import('./med.js', childName);
                         }
                     }
                     if (isSymbol(childName)) {
                         // TODO(misko): We are hard coding './med.js' which is not right.
-                        file.import('./med.js', childName);
+                        !file.imports.hasImport(childName) && file.import('./med.js', childName);
                         var exportedChildName = file.exports.get(childName);
                         if (exportedChildName) {
                             childName = exportedChildName;

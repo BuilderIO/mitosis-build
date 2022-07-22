@@ -5,4 +5,4 @@ export interface TextareaProps {
     defaultValue?: string;
     placeholder?: string;
 }
-export default function Textarea(props: TextareaProps): JSX.Element;
+export default function Textarea(props: TextareaProps): import("@builder.io/mitosis/jsx-runtime").JSX.Element;

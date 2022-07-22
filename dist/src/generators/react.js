@@ -29,7 +29,7 @@ var function_literal_prefix_1 = require("../constants/function-literal-prefix");
 var method_literal_prefix_1 = require("../constants/method-literal-prefix");
 var babel_transform_1 = require("../helpers/babel-transform");
 var capitalize_1 = require("../helpers/capitalize");
-var collect_styles_1 = require("../helpers/collect-styles");
+var collect_css_1 = require("../helpers/styles/collect-css");
 var create_mitosis_node_1 = require("../helpers/create-mitosis-node");
 var fast_clone_1 = require("../helpers/fast-clone");
 var filter_empty_text_nodes_1 = require("../helpers/filter-empty-text-nodes");
@@ -51,13 +51,16 @@ var plugins_1 = require("../modules/plugins");
 var jsx_1 = require("../parsers/jsx");
 var context_1 = require("./helpers/context");
 var react_native_1 = require("./react-native");
+var collect_styled_components_1 = require("../helpers/styles/collect-styled-components");
+var helpers_1 = require("../helpers/styles/helpers");
+var slots_1 = require("../helpers/slots");
 /**
- * If the root Mitosis component only has 1 child, and it is a `Show` node, then we need to wrap it in a fragment.
+ * If the root Mitosis component only has 1 child, and it is a `Show`/`For` node, then we need to wrap it in a fragment.
  * Otherwise, we end up with invalid React render code.
  *
  */
-var isRootShowNode = function (json) {
-    return json.children.length === 1 && ['Show'].includes(json.children[0].name);
+var isRootSpecialNode = function (json) {
+    return json.children.length === 1 && ['Show', 'For'].includes(json.children[0].name);
 };
 var wrapInFragment = function (json) { return json.children.length !== 1; };
 var NODE_MAPPERS = {
@@ -255,7 +258,7 @@ var processBinding = function (str, options) {
     if (options.stateType !== 'useState') {
         return str;
     }
-    if (str.startsWith('slot')) {
+    if ((0, slots_1.isSlotProperty)(str)) {
         return (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(str, {
             includeState: true,
             includeProps: false,
@@ -418,7 +421,7 @@ var _componentToReact = function (json, options, isSubComponent) {
     (0, handle_missing_state_1.handleMissingState)(json);
     (0, process_tag_references_1.processTagReferences)(json);
     addProviderComponents(json, options);
-    var componentHasStyles = (0, collect_styles_1.hasStyles)(json);
+    var componentHasStyles = (0, helpers_1.hasCss)(json);
     if (options.stateType === 'useState') {
         (0, getters_to_functions_1.gettersToFunctions)(json);
         updateStateSetters(json, options);
@@ -446,8 +449,8 @@ var _componentToReact = function (json, options, isSubComponent) {
     if (options.plugins) {
         json = (0, plugins_1.runPostJsonPlugins)(json, options.plugins);
     }
-    var css = stylesType === 'styled-jsx' && (0, collect_styles_1.collectCss)(json);
-    var styledComponentsCode = stylesType === 'styled-components' && componentHasStyles && (0, collect_styles_1.collectStyledComponents)(json);
+    var css = stylesType === 'styled-jsx' && (0, collect_css_1.collectCss)(json);
+    var styledComponentsCode = stylesType === 'styled-components' && componentHasStyles && (0, collect_styled_components_1.collectStyledComponents)(json);
     if (options.format !== 'lite') {
         (0, strip_meta_properties_1.stripMetaProperties)(json);
     }
@@ -472,7 +475,7 @@ var _componentToReact = function (json, options, isSubComponent) {
     }
     var wrap = wrapInFragment(json) ||
         (componentHasStyles && stylesType === 'styled-jsx') ||
-        isRootShowNode(json);
+        isRootSpecialNode(json);
     var _o = getRefsString(json, allRefs, options), hasStateArgument = _o[0], refsString = _o[1];
     var nativeStyles = stylesType === 'react-native' && componentHasStyles && (0, react_native_1.collectReactNativeStyles)(json);
     var propsArgs = 'props';

@@ -19,7 +19,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.componentToAngular = exports.blockToAngular = void 0;
 var dedent_1 = __importDefault(require("dedent"));
 var standalone_1 = require("prettier/standalone");
-var collect_styles_1 = require("../helpers/collect-styles");
+var collect_css_1 = require("../helpers/styles/collect-css");
 var fast_clone_1 = require("../helpers/fast-clone");
 var get_refs_1 = require("../helpers/get-refs");
 var get_state_object_string_1 = require("../helpers/get-state-object-string");
@@ -36,6 +36,7 @@ var lodash_1 = require("lodash");
 var strip_meta_properties_1 = require("../helpers/strip-meta-properties");
 var remove_surrounding_block_1 = require("../helpers/remove-surrounding-block");
 var indent_1 = require("../helpers/indent");
+var slots_1 = require("../helpers/slots");
 var mappers = {
     Fragment: function (json, options, blockOptions) {
         return "<div>".concat(json.children
@@ -58,6 +59,7 @@ var mappers = {
 // TODO: Maybe in the future allow defining `string | function` as values
 var BINDINGS_MAPPER = {
     innerHTML: 'innerHTML',
+    style: 'ngStyle',
 };
 var blockToAngular = function (json, options, blockOptions) {
     var _a, _b, _c, _d, _e, _f;
@@ -153,7 +155,7 @@ var blockToAngular = function (json, options, blockOptions) {
             else if (key === 'ref') {
                 str += " #".concat(useValue, " ");
             }
-            else if (key.startsWith('slot')) {
+            else if ((0, slots_1.isSlotProperty)(key)) {
                 var lowercaseKey = key.replace('slot', '')[0].toLowerCase() + key.replace('slot', '').substring(1);
                 needsToRenderSlots.push("".concat(useValue.replace(/(\/\>)|\>/, " ".concat(lowercaseKey, ">"))));
             }
@@ -246,7 +248,7 @@ var componentToAngular = function (options) {
         if (options.plugins) {
             json = (0, plugins_1.runPostJsonPlugins)(json, options.plugins);
         }
-        var css = (0, collect_styles_1.collectCss)(json);
+        var css = (0, collect_css_1.collectCss)(json);
         if (options.prettier !== false) {
             css = tryFormat(css, 'css');
         }
@@ -276,7 +278,7 @@ var componentToAngular = function (options) {
         var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    import { ", " ", " Component ", "", " } from '@angular/core';\n\n    ", "\n    ", "\n    ", "\n\n    @Component({\n      selector: '", "',\n      template: `\n        ", "\n      `,\n      ", "\n    })\n    export default class ", " {\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n    }\n  "], ["\n    import { ", " ", " Component ", "", " } from '@angular/core';\n\n    ", "\n    ", "\n    ", "\n\n    @Component({\n      selector: '", "',\n      template: \\`\n        ", "\n      \\`,\n      ", "\n    })\n    export default class ", " {\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n    }\n  "])), outputs.length ? 'Output, EventEmitter, \n' : '', ((_g = options === null || options === void 0 ? void 0 : options.experimental) === null || _g === void 0 ? void 0 : _g.inject) ? 'Inject, forwardRef,' : '', domRefs.size ? ', ViewChild, ElementRef' : '', props.size ? ', Input' : '', json.types ? json.types.join('\n') : '', json.interfaces ? (_h = json.interfaces) === null || _h === void 0 ? void 0 : _h.join('\n') : '', (0, render_imports_1.renderPreComponent)({ component: json, target: 'angular' }), (0, lodash_1.kebabCase)(json.name || 'my-component'), (0, indent_1.indent)(template, 8).replace(/`/g, '\\`').replace(/\$\{/g, '\\${'), css.length
             ? "styles: [\n        `".concat((0, indent_1.indent)(css, 8), "`\n      ],")
             : '', component.name, localExportVars.join('\n'), Array.from(props)
-            .filter(function (item) { return !item.startsWith('slot') && item !== 'children'; })
+            .filter(function (item) { return !(0, slots_1.isSlotProperty)(item) && item !== 'children'; })
             .map(function (item) {
             var propType = propsTypeRef ? "".concat(propsTypeRef, "[\"").concat(item, "\"]") : 'any';
             return "@Input() ".concat(item, ": ").concat(propType);

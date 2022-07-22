@@ -8,4 +8,4 @@ export interface FormSelectProps {
     value?: string;
     defaultValue?: string;
 }
-export default function SelectComponent(props: FormSelectProps): JSX.Element;
+export default function SelectComponent(props: FormSelectProps): import("@builder.io/mitosis/jsx-runtime").JSX.Element;

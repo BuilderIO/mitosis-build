@@ -529,6 +529,10 @@ var jsxElementToJson = function (node) {
                     memo[key] = value;
                     return memo;
                 }
+                if (types.isJSXExpressionContainer(value) && types.isStringLiteral(value.expression)) {
+                    memo[key] = value.expression.value;
+                    return memo;
+                }
             }
             return memo;
         }, {}),
@@ -536,7 +540,7 @@ var jsxElementToJson = function (node) {
             if (types.isJSXAttribute(item)) {
                 var key = item.name.name;
                 var value = item.value;
-                if (types.isJSXExpressionContainer(value)) {
+                if (types.isJSXExpressionContainer(value) && !types.isStringLiteral(value.expression)) {
                     var expression = value.expression;
                     if (types.isArrowFunctionExpression(expression)) {
                         if (key.startsWith('on')) {

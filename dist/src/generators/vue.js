@@ -41,7 +41,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.componentToVue3 = exports.componentToVue2 = exports.blockToVue = void 0;
 var dedent_1 = __importDefault(require("dedent"));
 var standalone_1 = require("prettier/standalone");
-var collect_styles_1 = require("../helpers/collect-styles");
+var collect_css_1 = require("../helpers/styles/collect-css");
 var fast_clone_1 = require("../helpers/fast-clone");
 var get_state_object_string_1 = require("../helpers/get-state-object-string");
 var map_refs_1 = require("../helpers/map-refs");
@@ -62,14 +62,28 @@ var filter_empty_text_nodes_1 = require("../helpers/filter-empty-text-nodes");
 var process_http_requests_1 = require("../helpers/process-http-requests");
 var patterns_1 = require("../helpers/patterns");
 var method_literal_prefix_1 = require("../constants/method-literal-prefix");
+var function_1 = require("fp-ts/lib/function");
 function encodeQuotes(string) {
     return string.replace(/"/g, '&quot;');
 }
+var SPECIAL_PROPERTIES = {
+    V_IF: 'v-if',
+    V_FOR: 'v-for',
+    V_ELSE: 'v-else',
+    V_ELSE_IF: 'v-else-if',
+};
 function getContextNames(json) {
     return Object.keys(json.context.get);
 }
 var ON_UPDATE_HOOK_NAME = 'onUpdateHook';
 var getOnUpdateHookName = function (index) { return ON_UPDATE_HOOK_NAME + "".concat(index); };
+var invertBooleanExpression = function (expression) { return "!Boolean(".concat(expression, ")"); };
+var addPropertiesToJson = function (properties) {
+    return function (json) { return (__assign(__assign({}, json), { properties: __assign(__assign({}, json.properties), properties) })); };
+};
+var addBindingsToJson = function (bindings) {
+    return function (json) { return (__assign(__assign({}, json), { bindings: __assign(__assign({}, json.bindings), bindings) })); };
+};
 // TODO: migrate all stripStateAndPropsRefs to use this here
 // to properly replace context refs
 function processBinding(code, _options, json) {
@@ -84,44 +98,86 @@ var NODE_MAPPERS = {
         return json.children.map(function (item) { return (0, exports.blockToVue)(item, options); }).join('\n');
     },
     For: function (json, options) {
-        var _a;
+        var _a, _b;
+        var _c;
         var keyValue = json.bindings.key || { code: 'index' };
-        var forValue = "(".concat(json.properties._forName, ", index) in ").concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)((_a = json.bindings.each) === null || _a === void 0 ? void 0 : _a.code));
+        var forValue = "(".concat(json.properties._forName, ", index) in ").concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)((_c = json.bindings.each) === null || _c === void 0 ? void 0 : _c.code));
         if (options.vueVersion >= 3) {
             // TODO: tmk key goes on different element (parent vs child) based on Vue 2 vs Vue 3
             return "<template :key=\"".concat(encodeQuotes((keyValue === null || keyValue === void 0 ? void 0 : keyValue.code) || 'index'), "\" v-for=\"").concat(encodeQuotes(forValue), "\">\n        ").concat(json.children.map(function (item) { return (0, exports.blockToVue)(item, options); }).join('\n'), "\n      </template>");
         }
         // Vue 2 can only handle one root element
         var firstChild = json.children.filter(filter_empty_text_nodes_1.filterEmptyTextNodes)[0];
-        if (!firstChild) {
-            return '';
-        }
-        firstChild.bindings.key = keyValue;
-        firstChild.properties['v-for'] = forValue;
-        return (0, exports.blockToVue)(firstChild, options);
+        // Edge-case for when the parent is a `Show`, we need to pass down the `v-if` prop.
+        var jsonIf = json.properties[SPECIAL_PROPERTIES.V_IF];
+        return firstChild
+            ? (0, function_1.pipe)(firstChild, addBindingsToJson({ key: keyValue }), addPropertiesToJson(__assign((_a = {}, _a[SPECIAL_PROPERTIES.V_FOR] = forValue, _a), (jsonIf ? (_b = {}, _b[SPECIAL_PROPERTIES.V_IF] = jsonIf, _b) : {}))), function (block) { return (0, exports.blockToVue)(block, options); })
+            : '';
     },
-    Show: function (json, options) {
-        var _a;
-        var ifValue = (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)((_a = json.bindings.when) === null || _a === void 0 ? void 0 : _a.code);
-        if (options.vueVersion >= 3) {
-            return "\n      <template v-if=\"".concat(encodeQuotes(ifValue), "\">\n        ").concat(json.children.map(function (item) { return (0, exports.blockToVue)(item, options); }).join('\n'), "\n      </template>\n      ").concat(!json.meta.else
-                ? ''
-                : "\n        <template v-else>\n          ".concat((0, exports.blockToVue)(json.meta.else, options), "\n        </template>\n      "), "\n      ");
+    Show: function (json, options, scope) {
+        var _a, _b, _c, _d, _e;
+        var _f, _g;
+        var ifValue = (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)((_f = json.bindings.when) === null || _f === void 0 ? void 0 : _f.code);
+        switch (options.vueVersion) {
+            case 3:
+                return "\n        <template ".concat(SPECIAL_PROPERTIES.V_IF, "=\"").concat(encodeQuotes(ifValue), "\">\n          ").concat(json.children.map(function (item) { return (0, exports.blockToVue)(item, options); }).join('\n'), "\n        </template>\n        ").concat((0, is_mitosis_node_1.isMitosisNode)(json.meta.else)
+                    ? "\n            <template ".concat(SPECIAL_PROPERTIES.V_ELSE, "> \n              ").concat((0, exports.blockToVue)(json.meta.else, options), "\n            </template>")
+                    : '', "\n        ");
+            case 2:
+                // Vue 2 can only handle one root element, so we just take the first one.
+                // TO-DO: warn user of multi-children Show.
+                var firstChild = json.children.filter(filter_empty_text_nodes_1.filterEmptyTextNodes)[0];
+                var elseBlock = json.meta.else;
+                var hasShowChild = (firstChild === null || firstChild === void 0 ? void 0 : firstChild.name) === 'Show';
+                var childElseBlock = firstChild === null || firstChild === void 0 ? void 0 : firstChild.meta.else;
+                /**
+                 * This is special edge logic to handle 2 nested Show elements in Vue 2.
+                 * We need to invert the logic to make it work, due to no-template-root-element limitations in Vue 2.
+                 *
+                 * <show when={foo} else={else-1}>
+                 *  <show when={bar} else={else-2}>
+                 *   <if-code>
+                 *  </show>
+                 * </show>
+                 *
+                 *
+                 * foo: true && bar: true => if-code
+                 * foo: true && bar: false => else-2
+                 * foo: false && bar: true?? => else-1
+                 *
+                 *
+                 * map to:
+                 *
+                 * <else-1 if={!foo} />
+                 * <else-2 else-if={!bar} />
+                 * <if-code v-else />
+                 *
+                 */
+                if (firstChild &&
+                    (0, is_mitosis_node_1.isMitosisNode)(elseBlock) &&
+                    hasShowChild &&
+                    (0, is_mitosis_node_1.isMitosisNode)(childElseBlock)) {
+                    var ifString = (0, function_1.pipe)(elseBlock, addPropertiesToJson((_a = {}, _a[SPECIAL_PROPERTIES.V_IF] = invertBooleanExpression(ifValue), _a)), function (block) { return (0, exports.blockToVue)(block, options); });
+                    var childIfValue = (0, function_1.pipe)((_g = firstChild.bindings.when) === null || _g === void 0 ? void 0 : _g.code, strip_state_and_props_refs_1.stripStateAndPropsRefs, invertBooleanExpression);
+                    var elseIfString = (0, function_1.pipe)(childElseBlock, addPropertiesToJson((_b = {}, _b[SPECIAL_PROPERTIES.V_ELSE_IF] = childIfValue, _b)), function (block) { return (0, exports.blockToVue)(block, options); });
+                    var firstChildOfFirstChild = firstChild.children.filter(filter_empty_text_nodes_1.filterEmptyTextNodes)[0];
+                    var elseString = firstChildOfFirstChild
+                        ? (0, function_1.pipe)(firstChildOfFirstChild, addPropertiesToJson((_c = {}, _c[SPECIAL_PROPERTIES.V_ELSE] = '', _c)), function (block) { return (0, exports.blockToVue)(block, options); })
+                        : '';
+                    return "\n            \n            ".concat(ifString, "\n            \n            ").concat(elseIfString, "\n            \n            ").concat(elseString, "\n            \n          ");
+                }
+                else {
+                    var ifString = firstChild
+                        ? (0, function_1.pipe)(firstChild, addPropertiesToJson((_d = {}, _d[SPECIAL_PROPERTIES.V_IF] = ifValue, _d)), function (block) { return (0, exports.blockToVue)(block, options); })
+                        : '';
+                    var elseString = (0, is_mitosis_node_1.isMitosisNode)(elseBlock)
+                        ? (0, function_1.pipe)(elseBlock, addPropertiesToJson((_e = {}, _e[SPECIAL_PROPERTIES.V_ELSE] = '', _e)), function (block) {
+                            return (0, exports.blockToVue)(block, options);
+                        })
+                        : '';
+                    return "\n                    ".concat(ifString, "\n                    ").concat(elseString, "\n                  ");
+                }
         }
-        var ifString = '';
-        // Vue 2 can only handle one root element
-        var firstChild = json.children.filter(filter_empty_text_nodes_1.filterEmptyTextNodes)[0];
-        if (firstChild) {
-            firstChild.properties['v-if'] = ifValue;
-            ifString = (0, exports.blockToVue)(firstChild, options);
-        }
-        var elseString = '';
-        var elseBlock = json.meta.else;
-        if ((0, is_mitosis_node_1.isMitosisNode)(elseBlock)) {
-            elseBlock.properties['v-else'] = '';
-            elseString = (0, exports.blockToVue)(elseBlock, options);
-        }
-        return "\n    ".concat(ifString, "\n    ").concat(elseString, "\n    ");
     },
 };
 // TODO: Maybe in the future allow defining `string | function` as values
@@ -199,11 +255,11 @@ var stringifyBinding = function (node) {
         }
     };
 };
-var blockToVue = function (node, options) {
+var blockToVue = function (node, options, scope) {
     var _a, _b;
     var nodeMapper = NODE_MAPPERS[node.name];
     if (nodeMapper) {
-        return nodeMapper(node, options);
+        return nodeMapper(node, options, scope);
     }
     if ((0, is_children_1.default)(node)) {
         return "<slot></slot>";
@@ -230,7 +286,10 @@ var blockToVue = function (node, options) {
         if (key === 'className') {
             continue;
         }
-        if (typeof value === 'string') {
+        else if (key === SPECIAL_PROPERTIES.V_ELSE) {
+            str += " ".concat(key, " ");
+        }
+        else if (typeof value === 'string') {
             str += " ".concat(key, "=\"").concat(encodeQuotes(value), "\" ");
         }
     }
@@ -340,7 +399,7 @@ var componentToVue = function (userOptions) {
         if (options.plugins) {
             component = (0, plugins_1.runPostJsonPlugins)(component, options.plugins);
         }
-        var css = (0, collect_styles_1.collectCss)(component, {
+        var css = (0, collect_css_1.collectCss)(component, {
             prefix: (_c = (_b = options.cssNamespace) === null || _b === void 0 ? void 0 : _b.call(options)) !== null && _c !== void 0 ? _c : undefined,
         });
         var localExports = component.exports;
@@ -394,7 +453,9 @@ var componentToVue = function (userOptions) {
         }
         var elementProps = (0, get_props_1.getProps)(component);
         (0, strip_meta_properties_1.stripMetaProperties)(component);
-        var template = component.children.map(function (item) { return (0, exports.blockToVue)(item, options); }).join('\n');
+        var template = component.children
+            .map(function (item) { return (0, exports.blockToVue)(item, options, { isRootNode: true }); })
+            .join('\n');
         var includeClassMapHelper = template.includes('_classStringToObject');
         if (includeClassMapHelper) {
             functionsString = functionsString.replace(/}\s*$/, "_classStringToObject(str) {\n        const obj = {};\n        if (typeof str !== 'string') { return obj }\n        const classNames = str.trim().split(/\\s+/); \n        for (const name of classNames) {\n          obj[name] = true;\n        } \n        return obj;\n      }  }");

@@ -102,7 +102,7 @@ var renderImport = function (_a) {
             return "const ".concat(importValue, " = () => import('").concat(path, "')");
         }
     }
-    return "import ".concat(importValue, " from '").concat(path, "';");
+    return importValue ? "import ".concat(importValue, " from '").concat(path, "';") : "import '".concat(path, "';");
 };
 exports.renderImport = renderImport;
 var renderImports = function (_a) {
@@ -114,6 +114,9 @@ var renderImports = function (_a) {
         theImport.path === '@builder.io/components' ||
             // TODO: Mitosis output needs this
             theImport.path.startsWith('@builder.io/mitosis')) {
+            return false;
+        }
+        else if (target === 'angular' && theImport.path.includes('.lite')) {
             return false;
         }
         else {

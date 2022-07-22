@@ -1,1 +1,1 @@
-export default function OnInit(): JSX.Element;
+export default function OnInit(): import("@builder.io/mitosis/jsx-runtime").JSX.Element;

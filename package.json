@@ -25,12 +25,13 @@
   "engines": {
     "npm": "99999999.9.9"
   },
-  "version": "0.0.56-15",
+  "version": "0.0.56-28",
   "homepage": "https://github.com/BuilderIO/mitosis",
   "main": "./dist/src/index.js",
   "exports": {
     ".": "./dist/src/index.js",
-    "./lib/*": "./dist/src/*"
+    "./lib/*": "./dist/src/*",
+    "./jsx-runtime": "./jsx-runtime.d.ts"
   },
   "types": "./dist/src/index.d.ts",
   "license": "MIT",
@@ -44,14 +45,15 @@
     "build": "tsc --build tsconfig.build.json",
     "clean": "tsc --build --clean tsconfig.build.json",
     "remove-stableVersion": "./scripts/remove-stableVersion.sh",
-    "release:dev": "yarn build && yarn run remove-stableVersion && yarn version prerelease && ALLOW_PUBLISH=true yarn npm publish --tag dev",
-    "release:patch": "yarn build && yarn run remove-stableVersion && yarn version patch && ALLOW_PUBLISH=true yarn npm publish",
+    "release:dev": "yarn build && yarn run remove-stableVersion && yarn version prerelease && yarn npm publish --tag dev",
+    "release:patch": "yarn build && yarn run remove-stableVersion && yarn version patch && yarn npm publish",
     "mitosis-save-artifacts": "node -r esbuild-register ../../scripts/mitosis-save-artifacts.ts",
     "start": "yarn build --watch",
     "script": "ts-node -O '{\"module\": \"commonjs\"}'"
   },
   "files": [
     "dist",
+    "jsx-runtime.d.ts",
     "!**/*.tsbuildinfo"
   ],
   "dependencies": {
@@ -74,7 +76,7 @@
     "liquidjs": "9.6.0",
     "lodash": "^4.17.20",
     "object-hash": "^2.0.3",
-    "prettier-plugin-svelte": "^1.4.1",
+    "prettier-plugin-svelte": "^2.7.0",
     "svelte": "^3.30.0",
     "traverse": "^0.6.6",
     "typescript": "^4.7.3",
@@ -109,5 +111,5 @@
     "typescript": "^4",
     "universalify": "^2.0.0"
   },
-  "stableVersion": "0.0.56-14"
+  "stableVersion": "0.0.56-27"
 }

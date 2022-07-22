@@ -1,4 +1,4 @@
-import { ClassStyleMap } from '../helpers/collect-styles';
+import { ClassStyleMap } from '../helpers/styles/helpers';
 import { MitosisComponent } from '../types/mitosis-component';
 import { BaseTranspilerOptions, Transpiler } from '../types/transpiler';
 export interface ToReactNativeOptions extends BaseTranspilerOptions {

@@ -8,4 +8,4 @@ export interface FormInputProps {
     defaultValue?: string;
     required?: boolean;
 }
-export default function FormInputComponent(props: FormInputProps): JSX.Element;
+export default function FormInputComponent(props: FormInputProps): import("@builder.io/mitosis/jsx-runtime").JSX.Element;

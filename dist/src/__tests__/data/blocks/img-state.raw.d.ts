@@ -1,1 +1,1 @@
-export default function ImgStateComponent(): JSX.Element;
+export default function ImgStateComponent(): import("@builder.io/mitosis/jsx-runtime").JSX.Element;

@@ -14,4 +14,4 @@ export interface VideoProps {
     posterImage?: string;
     lazyLoad?: boolean;
 }
-export default function Video(props: VideoProps): JSX.Element;
+export default function Video(props: VideoProps): import("@builder.io/mitosis/jsx-runtime").JSX.Element;

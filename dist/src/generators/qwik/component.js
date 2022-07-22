@@ -10,15 +10,6 @@ var __assign = (this && this.__assign) || function () {
     };
     return __assign.apply(this, arguments);
 };
-var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
-    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
-        if (ar || !(i in from)) {
-            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
-            ar[i] = from[i];
-        }
-    }
-    return to.concat(ar || Array.prototype.slice.call(from));
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.addCommonStyles = exports.renderUseLexicalScope = exports.addComponent = exports.createFileSet = void 0;
 var create_mitosis_node_1 = require("../../helpers/create-mitosis-node");
@@ -36,6 +27,7 @@ function createFileSet(options) {
         isModule: opts.output != 'cjs',
         isTypeScript: opts.output == 'ts',
         isJSX: opts.jsx,
+        isBuilder: true,
     };
     var fileSet = {
         high: new src_generator_1.File('high.' + extension, srcOptions, opts.qwikLib, opts.qrlPrefix),
@@ -55,7 +47,9 @@ function getCommonStyles(fileSet) {
 function addComponent(fileSet, component, opts) {
     if (opts === void 0) { opts = {}; }
     var _opts = __assign({ isRoot: false, shareStyles: false, hostProps: null }, opts);
-    (0, compile_away_builder_components_1.compileAwayBuilderComponentsFromTree)(component, __assign(__assign({}, compile_away_builder_components_1.components), { Image: undefined, CoreButton: undefined }));
+    (0, compile_away_builder_components_1.compileAwayBuilderComponentsFromTree)(component, __assign(__assign({}, compile_away_builder_components_1.components), { 
+        // A set of components that should not be compiled away because they are implemented as runtime components.
+        Image: undefined, CoreButton: undefined }));
     addBuilderBlockClass(component.children);
     var componentName = component.name;
     var handlers = (0, handlers_1.renderHandlers)(fileSet.high, componentName, component.children);
@@ -118,7 +112,7 @@ function addBuilderBlockClass(children) {
 }
 function renderUseLexicalScope(file) {
     return function () {
-        return this.emit('const state=', file.import(file.qwikModule, 'useLexicalScope').name, '()[0]');
+        return this.emit('const state=', file.import(file.qwikModule, 'useLexicalScope').localName, '()[0]');
     };
 }
 exports.renderUseLexicalScope = renderUseLexicalScope;
@@ -140,16 +134,18 @@ function addComponentOnMount(componentFile, onRenderEmit, componentName, compone
     }
     componentFile.exportConst(componentName + '_onMount', function () {
         var _this = this;
-        this.emit((0, src_generator_1.arrowFnValue)(['state'], function () {
-            var _a, _b;
-            return _this.emit.apply(_this, __spreadArray(__spreadArray(__spreadArray(__spreadArray(['{',
-                'if(!state.__INIT__){',
-                'state.__INIT__=true;'], inputInitializer, false), ['typeof __STATE__==="object"&&Object.assign(state,__STATE__[state.serverStateId]);'], false), (((_a = component.hooks.onMount) === null || _a === void 0 ? void 0 : _a.code) ? [(0, src_generator_1.iif)((_b = component.hooks.onMount) === null || _b === void 0 ? void 0 : _b.code)] : []), false), ['}',
-                useStyles,
-                onRenderEmit,
-                ';}'], false));
+        this.emit((0, src_generator_1.arrowFnValue)(['props'], function () {
+            var _a;
+            return _this.emit('{', 'const state=', componentFile.import(componentFile.qwikModule, 'useStore').localName, '(()=>{', 'const state = Object.assign({},props,typeof __STATE__==="object"?__STATE__[props.serverStateId]:undefined);', inlineCode((_a = component.hooks.onMount) === null || _a === void 0 ? void 0 : _a.code), 'return state;', '});', useStyles, onRenderEmit, ';}');
         }));
     });
+}
+function inlineCode(code) {
+    return function () {
+        if (code) {
+            this.emit(code, ';');
+        }
+    };
 }
 function generateQrl(fromFile, dstFile, componentName, capture) {
     if (capture === void 0) { capture = []; }

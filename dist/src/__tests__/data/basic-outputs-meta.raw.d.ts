@@ -1,1 +1,1 @@
-export default function MyBasicOutputsComponent(props: any): JSX.Element;
+export default function MyBasicOutputsComponent(props: any): import("@builder.io/mitosis/jsx-runtime").JSX.Element;
