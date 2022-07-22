@@ -116,6 +116,9 @@ var renderImports = function (_a) {
             theImport.path.startsWith('@builder.io/mitosis')) {
             return false;
         }
+        else if (target === 'angular' && theImport.path.includes('.lite')) {
+            return false;
+        }
         else {
             return true;
         }
