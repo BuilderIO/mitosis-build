@@ -143,6 +143,11 @@ function addComponentOnMount(componentFile, onRenderEmit, componentName, compone
 function inlineCode(code) {
     return function () {
         if (code) {
+            // HACK: remove the return value as it is not the state we are creating.
+            code = code
+                .trim()
+                .replace(/return main\(\);?$/, '')
+                .trim();
             this.emit(code, ';');
         }
     };
