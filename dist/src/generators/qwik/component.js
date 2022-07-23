@@ -10,6 +10,15 @@ var __assign = (this && this.__assign) || function () {
     };
     return __assign.apply(this, arguments);
 };
+var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
+    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
+        if (ar || !(i in from)) {
+            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+            ar[i] = from[i];
+        }
+    }
+    return to.concat(ar || Array.prototype.slice.call(from));
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.addCommonStyles = exports.renderUseLexicalScope = exports.addComponent = exports.createFileSet = void 0;
 var create_mitosis_node_1 = require("../../helpers/create-mitosis-node");
@@ -136,7 +145,16 @@ function addComponentOnMount(componentFile, onRenderEmit, componentName, compone
         var _this = this;
         this.emit((0, src_generator_1.arrowFnValue)(['props'], function () {
             var _a;
-            return _this.emit('{', 'const state=', componentFile.import(componentFile.qwikModule, 'useStore').localName, '(()=>{', 'const state = Object.assign({},props,typeof __STATE__==="object"?__STATE__[props.serverStateId]:undefined);', inlineCode((_a = component.hooks.onMount) === null || _a === void 0 ? void 0 : _a.code), 'return state;', '});', useStyles, onRenderEmit, ';}');
+            return _this.emit.apply(_this, __spreadArray(__spreadArray(['{',
+                'const state=',
+                componentFile.import(componentFile.qwikModule, 'useStore').localName,
+                '(()=>{',
+                'const state = Object.assign({},props,typeof __STATE__==="object"?__STATE__[props.serverStateId]:undefined);'], inputInitializer, false), [inlineCode((_a = component.hooks.onMount) === null || _a === void 0 ? void 0 : _a.code),
+                'return state;',
+                '});',
+                useStyles,
+                onRenderEmit,
+                ';}'], false));
         }));
     });
 }
