@@ -109,13 +109,11 @@ function Image(props) {
 exports.Image = Image;
 function __passThroughProps__(dstProps, srcProps) {
     for (var key in srcProps) {
-        console.log(key);
         if (Object.prototype.hasOwnProperty.call(srcProps, key) &&
             ((key.startsWith('on') && key.endsWith('$')) || key == 'style')) {
             dstProps[key] = srcProps[key];
         }
     }
-    console.log(dstProps);
     return dstProps;
 }
 exports.__passThroughProps__ = __passThroughProps__;
