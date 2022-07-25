@@ -56,7 +56,9 @@ function getCommonStyles(fileSet) {
 function addComponent(fileSet, component, opts) {
     if (opts === void 0) { opts = {}; }
     var _opts = __assign({ isRoot: false, shareStyles: false, hostProps: null }, opts);
-    (0, compile_away_builder_components_1.compileAwayBuilderComponentsFromTree)(component, __assign(__assign({}, compile_away_builder_components_1.components), { Image: undefined, CoreButton: undefined }));
+    (0, compile_away_builder_components_1.compileAwayBuilderComponentsFromTree)(component, __assign(__assign({}, compile_away_builder_components_1.components), { 
+        // A set of components that should not be compiled away because they are implemented as runtime components.
+        Image: undefined, CoreButton: undefined }));
     addBuilderBlockClass(component.children);
     var componentName = component.name;
     var handlers = (0, handlers_1.renderHandlers)(fileSet.high, componentName, component.children);
@@ -141,16 +143,32 @@ function addComponentOnMount(componentFile, onRenderEmit, componentName, compone
     }
     componentFile.exportConst(componentName + '_onMount', function () {
         var _this = this;
-        this.emit((0, src_generator_1.arrowFnValue)(['state'], function () {
-            var _a, _b;
-            return _this.emit.apply(_this, __spreadArray(__spreadArray(__spreadArray(__spreadArray(['{',
-                'if(!state.__INIT__){',
-                'state.__INIT__=true;'], inputInitializer, false), ['typeof __STATE__==="object"&&Object.assign(state,__STATE__[state.serverStateId]);'], false), (((_a = component.hooks.onMount) === null || _a === void 0 ? void 0 : _a.code) ? [(0, src_generator_1.iif)((_b = component.hooks.onMount) === null || _b === void 0 ? void 0 : _b.code)] : []), false), ['}',
+        this.emit((0, src_generator_1.arrowFnValue)(['props'], function () {
+            var _a;
+            return _this.emit.apply(_this, __spreadArray(__spreadArray(['{',
+                'const state=',
+                componentFile.import(componentFile.qwikModule, 'useStore').localName,
+                '(()=>{',
+                'const state = Object.assign({},props,typeof __STATE__==="object"?__STATE__[props.serverStateId]:undefined);'], inputInitializer, false), [inlineCode((_a = component.hooks.onMount) === null || _a === void 0 ? void 0 : _a.code),
+                'return state;',
+                '});',
                 useStyles,
                 onRenderEmit,
                 ';}'], false));
         }));
     });
+}
+function inlineCode(code) {
+    return function () {
+        if (code) {
+            // HACK: remove the return value as it is not the state we are creating.
+            code = code
+                .trim()
+                .replace(/return main\(\);?$/, '')
+                .trim();
+            this.emit(code, ';');
+        }
+    };
 }
 function generateQrl(fromFile, dstFile, componentName, capture) {
     if (capture === void 0) { capture = []; }

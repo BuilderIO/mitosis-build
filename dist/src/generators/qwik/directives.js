@@ -110,7 +110,7 @@ exports.Image = Image;
 function __passThroughProps__(dstProps, srcProps) {
     for (var key in srcProps) {
         if (Object.prototype.hasOwnProperty.call(srcProps, key) &&
-            ((key.startsWith('on') && key.endsWith('Qrl')) || key == 'style')) {
+            ((key.startsWith('on') && key.endsWith('$')) || key == 'style')) {
             dstProps[key] = srcProps[key];
         }
     }

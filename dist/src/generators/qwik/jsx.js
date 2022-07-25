@@ -162,27 +162,31 @@ function isTextNode(child) {
  * @returns
  */
 function rewriteHandlers(file, handlers, bindings, symbolBindings) {
+    var _a;
     var outBindings = {};
     for (var key in bindings) {
         if (Object.prototype.hasOwnProperty.call(bindings, key)) {
-            var binding = bindings[key].code;
+            var bindingExpr = (_a = bindings === null || bindings === void 0 ? void 0 : bindings[key]) === null || _a === void 0 ? void 0 : _a.code;
             var handlerBlock = void 0;
-            if (binding != null) {
+            if (bindingExpr != null) {
                 if (key == 'css') {
                     continue;
                 }
-                else if ((handlerBlock = handlers.get(binding))) {
-                    key = "".concat(key, "Qrl");
-                    binding = (0, src_generator_1.invoke)(file.import(file.qwikModule, 'qrl'), [
+                else if ((handlerBlock = handlers.get(bindingExpr))) {
+                    key = "".concat(key, "$");
+                    bindingExpr = (0, src_generator_1.invoke)(file.import(file.qwikModule, 'qrl'), [
                         (0, src_generator_1.quote)(file.qrlPrefix + 'high.js'),
                         (0, src_generator_1.quote)(handlerBlock),
                         '[state]',
                     ]);
                 }
                 else if (symbolBindings && key.startsWith('symbol.data.')) {
-                    symbolBindings[(0, src_generator_1.lastProperty)(key)] = binding;
+                    symbolBindings[(0, src_generator_1.lastProperty)(key)] = bindingExpr;
                 }
-                outBindings[key] = { code: binding };
+                else if (key.startsWith('component.options.')) {
+                    key = (0, src_generator_1.lastProperty)(key);
+                }
+                outBindings[key] = { code: bindingExpr };
             }
         }
     }

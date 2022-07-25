@@ -281,15 +281,16 @@ var componentMappers = __assign(__assign({ Symbol: function (block, options) {
         });
         delete node.bindings.columns;
         delete node.properties.columns;
-        node.children = (_b = (_a = block.component) === null || _a === void 0 ? void 0 : _a.options.columns) === null || _b === void 0 ? void 0 : _b.map(function (col, index) {
-            return (0, create_mitosis_node_1.createMitosisNode)(__assign(__assign({ name: 'Column', bindings: {
-                    width: { code: col.width },
-                } }, (col.link && {
-                properties: {
-                    link: col.link,
-                },
-            })), { children: col.blocks.map(function (col) { return (0, exports.builderElementToMitosisNode)(col, options); }) }));
-        });
+        node.children =
+            ((_b = (_a = block.component) === null || _a === void 0 ? void 0 : _a.options.columns) === null || _b === void 0 ? void 0 : _b.map(function (col, index) {
+                return (0, create_mitosis_node_1.createMitosisNode)(__assign(__assign({ name: 'Column', bindings: {
+                        width: { code: col.width },
+                    } }, (col.link && {
+                    properties: {
+                        link: col.link,
+                    },
+                })), { children: col.blocks.map(function (col) { return (0, exports.builderElementToMitosisNode)(col, options); }) }));
+            })) || [];
         return node;
     }, 'Shopify:For': function (block, options) {
         return (0, create_mitosis_node_1.createMitosisNode)({
