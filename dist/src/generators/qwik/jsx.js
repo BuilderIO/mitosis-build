@@ -166,7 +166,7 @@ function rewriteHandlers(file, handlers, bindings, symbolBindings) {
     var outBindings = {};
     for (var key in bindings) {
         if (Object.prototype.hasOwnProperty.call(bindings, key)) {
-            var bindingExpr = typeof bindings[key] == 'object' ? (_a = bindings[key]) === null || _a === void 0 ? void 0 : _a.code : bindings[key];
+            var bindingExpr = (_a = bindings === null || bindings === void 0 ? void 0 : bindings[key]) === null || _a === void 0 ? void 0 : _a.code;
             var handlerBlock = void 0;
             if (bindingExpr != null) {
                 if (key == 'css') {
