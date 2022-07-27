@@ -68,6 +68,7 @@ var blockToAngular = function (json, options, blockOptions) {
     var contextVars = (blockOptions === null || blockOptions === void 0 ? void 0 : blockOptions.contextVars) || [];
     var outputVars = (blockOptions === null || blockOptions === void 0 ? void 0 : blockOptions.outputVars) || [];
     var childComponents = (blockOptions === null || blockOptions === void 0 ? void 0 : blockOptions.childComponents) || [];
+    var domRefs = (blockOptions === null || blockOptions === void 0 ? void 0 : blockOptions.domRefs) || [];
     if (mappers[json.name]) {
         return mappers[json.name](json, options, blockOptions);
     }
@@ -86,6 +87,7 @@ var blockToAngular = function (json, options, blockOptions) {
             // the context is the class
             contextVars: [],
             outputVars: outputVars,
+            domRefs: domRefs,
         }), "}}");
     }
     var str = '';
@@ -94,6 +96,7 @@ var blockToAngular = function (json, options, blockOptions) {
         str += "<ng-container *ngFor=\"let ".concat(json.properties._forName, " of ").concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)((_e = json.bindings.each) === null || _e === void 0 ? void 0 : _e.code, {
             contextVars: contextVars,
             outputVars: outputVars,
+            domRefs: domRefs,
         }), "\">");
         str += json.children.map(function (item) { return (0, exports.blockToAngular)(item, options, blockOptions); }).join('\n');
         str += "</ng-container>";
@@ -102,6 +105,7 @@ var blockToAngular = function (json, options, blockOptions) {
         str += "<ng-container *ngIf=\"".concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)((_f = json.bindings.when) === null || _f === void 0 ? void 0 : _f.code, {
             contextVars: contextVars,
             outputVars: outputVars,
+            domRefs: domRefs,
         }), "\">");
         str += json.children.map(function (item) { return (0, exports.blockToAngular)(item, options, blockOptions); }).join('\n');
         str += "</ng-container>";
@@ -136,6 +140,7 @@ var blockToAngular = function (json, options, blockOptions) {
             var useValue = (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(code, {
                 contextVars: contextVars,
                 outputVars: outputVars,
+                domRefs: domRefs,
             });
             if (key.startsWith('on')) {
                 var event_1 = key.replace('on', '').toLowerCase();
@@ -252,14 +257,14 @@ var componentToAngular = function (options) {
         if (options.prettier !== false) {
             css = tryFormat(css, 'css');
         }
+        var blockOptions = {
+            contextVars: contextVars,
+            outputVars: outputVars,
+            domRefs: [],
+            childComponents: childComponents,
+        };
         var template = json.children
-            .map(function (item) {
-            return (0, exports.blockToAngular)(item, options, {
-                contextVars: contextVars,
-                outputVars: outputVars,
-                childComponents: childComponents,
-            });
-        })
+            .map(function (item) { return (0, exports.blockToAngular)(item, options, blockOptions); })
             .join('\n');
         if (options.prettier !== false) {
             template = tryFormat(template, 'html');
@@ -272,6 +277,7 @@ var componentToAngular = function (options) {
                     replaceWith: 'this.',
                     contextVars: contextVars,
                     outputVars: outputVars,
+                    domRefs: Array.from(domRefs),
                 });
             },
         });
@@ -294,6 +300,7 @@ var componentToAngular = function (options) {
                     replaceWith: 'this.',
                     contextVars: contextVars,
                     outputVars: outputVars,
+                    domRefs: Array.from(domRefs),
                 }))
                 : '', ";");
         })
@@ -313,6 +320,7 @@ var componentToAngular = function (options) {
                     replaceWith: 'this.',
                     contextVars: contextVars,
                     outputVars: outputVars,
+                    domRefs: Array.from(domRefs),
                 }), "\n                "), "\n            }"), !((_o = component.hooks.onUpdate) === null || _o === void 0 ? void 0 : _o.length)
             ? ''
             : "ngAfterContentChecked() {\n              ".concat(component.hooks.onUpdate.reduce(function (code, hook) {
@@ -320,6 +328,7 @@ var componentToAngular = function (options) {
                     replaceWith: 'this.',
                     contextVars: contextVars,
                     outputVars: outputVars,
+                    domRefs: Array.from(domRefs),
                 });
                 return code + '\n';
             }, ''), "\n            }"), !component.hooks.onUnMount
@@ -328,6 +337,7 @@ var componentToAngular = function (options) {
                 replaceWith: 'this.',
                 contextVars: contextVars,
                 outputVars: outputVars,
+                domRefs: Array.from(domRefs),
             }), "\n            }"));
         if (options.plugins) {
             str = (0, plugins_1.runPreCodePlugins)(str, options.plugins);

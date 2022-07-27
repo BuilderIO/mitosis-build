@@ -6,6 +6,7 @@ interface AngularBlockOptions {
     contextVars?: string[];
     outputVars?: string[];
     childComponents?: string[];
+    domRefs?: string[];
 }
 export declare const blockToAngular: (json: MitosisNode, options?: ToAngularOptions, blockOptions?: AngularBlockOptions) => string;
 export declare const componentToAngular: (options?: ToAngularOptions) => Transpiler;

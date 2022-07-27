@@ -16,10 +16,11 @@ var stripStateAndPropsRefs = function (code, options) {
     var contextVars = (options === null || options === void 0 ? void 0 : options.contextVars) || [];
     var outputVars = (options === null || options === void 0 ? void 0 : options.outputVars) || [];
     var context = (options === null || options === void 0 ? void 0 : options.context) || 'this.';
+    var domRefs = (options === null || options === void 0 ? void 0 : options.domRefs) || [];
     if (contextVars.length) {
         contextVars.forEach(function (_var) {
             newCode = newCode.replace(
-            // determine expression edge cases
+            // determine expression edge cases - https://regex101.com/r/iNcTSM/1
             new RegExp('(^|\\n|\\r| |;|\\(|\\[|!)' + _var + '(\\?\\.|\\.|\\(| |;|\\)|$)', 'g'), '$1' + context + _var + '$2');
         });
     }
@@ -50,6 +51,13 @@ var stripStateAndPropsRefs = function (code, options) {
         else {
             newCode = newCode.replace(/state\.([\$a-z0-9_]+)/gi, function (memo, name) { return replacer(name); });
         }
+    }
+    if (domRefs.length) {
+        domRefs.forEach(function (_var) {
+            newCode = newCode.replace(
+            // determine expression edge cases - https://regex101.com/r/iNcTSM/1
+            new RegExp('(^|\\n|\\r| |;|\\(|\\[|!)' + _var + '(\\?\\.|\\.|\\(| |;|\\)|$)', 'g'), '$1' + 'this.' + _var + '$2');
+        });
     }
     return newCode;
 };
