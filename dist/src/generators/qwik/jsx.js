@@ -77,7 +77,7 @@ function renderJSXNodes(file, directives, handlers, children, styles, parentSymb
                 if (typeof directive == 'function') {
                     _this.emit(directive(child, function () {
                         var children = child.children.filter(function (c) { return !isEmptyTextNode(c); });
-                        var needsFragment = children.length > 1 || isTextNode(children[0]);
+                        var needsFragment = children.length > 1 || (children.length === 1 && isTextNode(children[0]));
                         needsFragment && _this.jsxBeginFragment(fragmentSymbol);
                         renderJSXNodes(file, directives, handlers, children, styles, {}, false).call(_this);
                         needsFragment && _this.jsxEndFragment();
