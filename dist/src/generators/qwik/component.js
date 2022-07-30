@@ -71,15 +71,15 @@ function addComponent(fileSet, component, opts) {
     var styles = _opts.shareStyles ? getCommonStyles(fileSet).styles : new Map();
     (0, styles_1.collectStyles)(component.children, styles);
     var useStyles = function () { return null; };
-    if (styles.size) {
-        if (_opts.shareStyles) {
-            if (_opts.isRoot) {
-                var symbolName = componentName + '_styles';
-                getCommonStyles(fileSet).symbolName = symbolName;
-                useStyles = generateStyles(onRenderFile, fileSet.low, symbolName, false);
-            }
+    if (_opts.shareStyles) {
+        if (_opts.isRoot) {
+            var symbolName = componentName + '_styles';
+            getCommonStyles(fileSet).symbolName = symbolName;
+            useStyles = generateStyles(onRenderFile, fileSet.low, symbolName, false);
         }
-        else {
+    }
+    else {
+        if (styles.size) {
             var symbolName = componentName + '_styles';
             onRenderFile.exportConst(symbolName, (0, styles_1.renderStyles)(styles));
             useStyles = generateStyles(onRenderFile, onRenderFile, symbolName, true);

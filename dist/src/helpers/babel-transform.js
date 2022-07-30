@@ -44,7 +44,6 @@ var babelTransform = function (code, visitor) {
         configFile: false,
         babelrc: false,
         presets: [[tsPreset, { isTSX: true, allExtensions: true }]],
-        parserOpts: { allowReturnOutsideFunction: true },
         plugins: __spreadArray([[decorators, { legacy: true }], jsxPlugin], (visitor ? [function () { return ({ visitor: visitor }); }] : []), true),
     });
 };

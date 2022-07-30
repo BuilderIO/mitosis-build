@@ -203,7 +203,7 @@ var getBlockNonActionBindings = function (block, options) {
     }
     return obj;
 };
-function wrapBinding(value) {
+var wrapBinding = function (value) {
     if (!value) {
         return value;
     }
@@ -211,7 +211,7 @@ function wrapBinding(value) {
         return value;
     }
     return "(() => {\n    try { ".concat((0, parsers_1.isExpression)(value) ? 'return ' : '').concat(value, " }\n    catch (err) {\n      console.warn('Builder code error', err);\n    }\n  })()");
-}
+};
 var getBlockBindings = function (block, options) {
     var obj = __assign(__assign({}, getBlockNonActionBindings(block, options)), getBlockActionsAsBindings(block, options));
     return obj;
@@ -304,12 +304,12 @@ var componentMappers = __assign(__assign({ Symbol: function (block, options) {
             children: (block.children || []).map(function (child) { return (0, exports.builderElementToMitosisNode)(child, options); }),
         });
     }, Text: function (block, options) {
-        var _a;
-        var _b;
+        var _a, _b;
+        var _c;
         var css = getCssFromBlock(block);
         var styleString = getStyleStringFromBlock(block, options);
         var actionBindings = getActionBindingsFromBlock(block, options);
-        var blockBindings = __assign(__assign({}, mapBuilderBindingsToMitosisBindingWithCode((_b = block.code) === null || _b === void 0 ? void 0 : _b.bindings)), mapBuilderBindingsToMitosisBindingWithCode(block.bindings));
+        var blockBindings = __assign(__assign({}, (_c = block.code) === null || _c === void 0 ? void 0 : _c.bindings), block.bindings);
         var bindings = __assign(__assign(__assign(__assign({}, (0, lodash_1.omitBy)(blockBindings, function (value, key) {
             if (key === 'component.options.text') {
                 return true;
@@ -327,16 +327,14 @@ var componentMappers = __assign(__assign({ Symbol: function (block, options) {
         if (block.layerName) {
             properties.$name = block.layerName;
         }
-        var innerBindings = {};
-        var componentOptionsText = blockBindings['component.options.text'];
-        if (componentOptionsText) {
-            innerBindings[options.preserveTextBlocks ? 'innerHTML' : '_text'] = {
-                code: wrapBindingIfNeeded(componentOptionsText.code, options),
-            };
-        }
-        var innerProperties = (_a = {},
-            _a[options.preserveTextBlocks ? 'innerHTML' : '_text'] = block.component.options.text,
+        var innerBindings = (_a = {},
+            _a[options.preserveTextBlocks ? 'innerHTML' : '_text'] = {
+                code: wrapBindingIfNeeded(blockBindings['component.options.text'], options),
+            },
             _a);
+        var innerProperties = (_b = {},
+            _b[options.preserveTextBlocks ? 'innerHTML' : '_text'] = block.component.options.text,
+            _b);
         if (options.preserveTextBlocks) {
             return (0, create_mitosis_node_1.createMitosisNode)({
                 name: block.tagName || 'div',
@@ -715,20 +713,3 @@ var builderContentToMitosisComponent = function (builderContent, options) {
     return componentJson;
 };
 exports.builderContentToMitosisComponent = builderContentToMitosisComponent;
-function mapBuilderBindingsToMitosisBindingWithCode(bindings) {
-    var result = {};
-    bindings &&
-        Object.keys(bindings).forEach(function (key) {
-            var value = bindings[key];
-            if (typeof value === 'string') {
-                result[key] = { code: value };
-            }
-            else if (value && typeof value === 'object' && value.code) {
-                result[key] = { code: value.code };
-            }
-            else {
-                throw new Error('Unexpected binding value: ' + JSON.stringify(value));
-            }
-        });
-    return result;
-}

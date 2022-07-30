@@ -5,7 +5,6 @@ export declare type StripStateAndPropsRefsOptions = {
     contextVars?: string[];
     outputVars?: string[];
     context?: string;
-    domRefs?: string[];
 };
 /**
  * Remove state. and props. from expressions, e.g.

@@ -128,12 +128,6 @@ var SHOW_TESTS = {
     nestedShow: require('./data/show/nested-show.raw'),
     showWithFor: require('./data/show/show-with-for.raw'),
 };
-var ADVANCED_REF = {
-    AdvancedRef: require('./data/advanced-ref.raw'),
-};
-var ON_UPDATE_RETURN = {
-    basicOnUpdateReturn: require('./data/basic-onUpdate-return.raw'),
-};
 var TESTS_FOR_TARGET = {
     react: [
         BASIC_TESTS,
@@ -142,8 +136,6 @@ var TESTS_FOR_TARGET = {
         FORWARD_REF_TESTS,
         MULTI_ON_UPDATE_TESTS,
         FORM_BLOCK_TESTS,
-        ADVANCED_REF,
-        ON_UPDATE_RETURN,
         // FOR_SHOW_TESTS,
     ],
     angular: [
@@ -154,8 +146,6 @@ var TESTS_FOR_TARGET = {
         MULTI_ON_UPDATE_TESTS,
         FORM_BLOCK_TESTS,
         FOR_SHOW_TESTS,
-        ADVANCED_REF,
-        ON_UPDATE_RETURN,
     ],
     webcomponent: [
         BASIC_TESTS,
@@ -164,8 +154,6 @@ var TESTS_FOR_TARGET = {
         FORWARD_REF_TESTS,
         MULTI_ON_UPDATE_TESTS,
         FOR_SHOW_TESTS,
-        ADVANCED_REF,
-        ON_UPDATE_RETURN,
         // FORM_BLOCK_TESTS
     ],
     vue: [
@@ -176,8 +164,6 @@ var TESTS_FOR_TARGET = {
         MULTI_ON_UPDATE_TESTS,
         FORM_BLOCK_TESTS,
         FOR_SHOW_TESTS,
-        ADVANCED_REF,
-        ON_UPDATE_RETURN,
     ],
     svelte: [
         BASIC_TESTS,
@@ -186,8 +172,6 @@ var TESTS_FOR_TARGET = {
         MULTI_ON_UPDATE_TESTS,
         FORM_BLOCK_TESTS,
         FOR_SHOW_TESTS,
-        ADVANCED_REF,
-        ON_UPDATE_RETURN,
     ],
     html: [
         BASIC_TESTS,
@@ -196,8 +180,6 @@ var TESTS_FOR_TARGET = {
         FORWARD_REF_TESTS,
         MULTI_ON_UPDATE_TESTS,
         FOR_SHOW_TESTS,
-        ADVANCED_REF,
-        ON_UPDATE_RETURN,
         // FORM_BLOCK_TESTS
     ],
     stencil: [
@@ -207,8 +189,6 @@ var TESTS_FOR_TARGET = {
         FORWARD_REF_TESTS,
         // MULTI_ON_UPDATE_TESTS,
         FORM_BLOCK_TESTS,
-        ADVANCED_REF,
-        ON_UPDATE_RETURN,
         // FOR_SHOW_TESTS
     ],
     solid: [
@@ -219,8 +199,6 @@ var TESTS_FOR_TARGET = {
         MULTI_ON_UPDATE_TESTS,
         FORM_BLOCK_TESTS,
         FOR_SHOW_TESTS,
-        ADVANCED_REF,
-        ON_UPDATE_RETURN,
     ],
     reactNative: [
         BASIC_TESTS,
@@ -229,8 +207,6 @@ var TESTS_FOR_TARGET = {
         FORWARD_REF_TESTS,
         MULTI_ON_UPDATE_TESTS,
         FORM_BLOCK_TESTS,
-        ADVANCED_REF,
-        ON_UPDATE_RETURN,
         // FOR_SHOW_TESTS,
     ],
     liquid: [
@@ -240,8 +216,6 @@ var TESTS_FOR_TARGET = {
         FORWARD_REF_TESTS,
         MULTI_ON_UPDATE_TESTS,
         FORM_BLOCK_TESTS,
-        ADVANCED_REF,
-        ON_UPDATE_RETURN,
     ],
     qwik: [
         BASIC_TESTS,

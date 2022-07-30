@@ -1,4 +1,15 @@
 "use strict";
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
 var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
     if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
         if (ar || !(i in from)) {
@@ -17,10 +28,11 @@ var src_generator_1 = require("./src-generator");
 var babel_transform_1 = require("../../helpers/babel-transform");
 Error.stackTraceLimit = 9999;
 // TODO(misko): styles are not processed.
-var DEBUG = false;
+var DEBUG = true;
 var componentToQwik = function (userOptions) {
     if (userOptions === void 0) { userOptions = {}; }
     return function (_a) {
+        var _b, _c;
         var component = _a.component, path = _a.path;
         var file = new src_generator_1.File(component.name + '.js', {
             isPretty: true,
@@ -32,24 +44,31 @@ var componentToQwik = function (userOptions) {
         try {
             emitImports(file, component);
             emitTypes(file, component);
+            var metadata = component.meta.useMetadata || {};
+            var isLightComponent = ((_c = (_b = metadata === null || metadata === void 0 ? void 0 : metadata.qwik) === null || _b === void 0 ? void 0 : _b.component) === null || _c === void 0 ? void 0 : _c.isLight) || false;
             var state_1 = emitStateMethodsAndRewriteBindings(file, component);
             var hasState_1 = Boolean(Object.keys(component.state).length);
             var css_1 = null;
-            file.src.const(component.name, (0, src_generator_1.invoke)(file.import(file.qwikModule, 'component$'), [
-                (0, src_generator_1.arrowFnBlock)(['props'], [
-                    function () {
-                        css_1 = emitUseStyles(file, component);
-                        emitUseContext(file, component);
-                        emitUseRef(file, component);
-                        hasState_1 && emitUseStore(file, state_1);
-                        emitUseContextProvider(file, component);
-                        emitUseMount(file, component);
-                        emitUseWatch(file, component);
-                        emitUseCleanup(file, component);
-                        emitJSX(file, component);
-                    },
-                ], [component.propsTypeRef || 'any']),
-            ]), true, true);
+            var topLevelElement_1 = isLightComponent ? null : getTopLevelElement(component);
+            var componentBody = (0, src_generator_1.arrowFnBlock)(['props'], [
+                function () {
+                    css_1 = emitUseStyles(file, component);
+                    emitUseContext(file, component);
+                    emitUseRef(file, component);
+                    hasState_1 && emitUseStore(file, state_1);
+                    emitUseContextProvider(file, component);
+                    emitUseMount(file, component);
+                    emitUseWatch(file, component);
+                    emitUseCleanup(file, component);
+                    emitTagNameHack(file, component);
+                    emitJSX(file, component, topLevelElement_1);
+                },
+            ], [component.propsTypeRef || 'any']);
+            file.src.const(component.name, isLightComponent
+                ? componentBody
+                : (0, src_generator_1.invoke)(file.import(file.qwikModule, 'component$'), __spreadArray([
+                    componentBody
+                ], (topLevelElement_1 ? ["{tagName:\"".concat(topLevelElement_1, "\"}")] : []), true)), true, true);
             file.exportDefault(component.name);
             emitStyles(file, css_1);
             DEBUG && file.exportConst('COMPONENT', JSON.stringify(component, null, 2));
@@ -62,6 +81,13 @@ var componentToQwik = function (userOptions) {
     };
 };
 exports.componentToQwik = componentToQwik;
+function emitTagNameHack(file, component) {
+    var _a;
+    var elementTag = (_a = component.meta.useMetadata) === null || _a === void 0 ? void 0 : _a.elementTag;
+    if (elementTag) {
+        file.src.emit(elementTag, '=', (0, convertMethodToFunction_1.convertMethodToFunction)(elementTag, stateToMethodOrGetter(component.state), getLexicalScopeVars(component)), ';');
+    }
+}
 function emitUseMount(file, component) {
     if (component.hooks.onMount) {
         // This is called useMount, but in practice it is used as
@@ -84,9 +110,11 @@ function emitTrackExpressions(src, deps) {
         var dependencies = deps.substring(1, deps.length - 1).split(',');
         dependencies.forEach(function (dep) {
             var lastDotIdx = dep.lastIndexOf('.');
-            var objExp = dep.substring(0, lastDotIdx).replace(/\?$/, '');
-            var objProp = dep.substring(lastDotIdx + 1);
-            src.emit(objExp, '&&track(', objExp, ',"', objProp, '");');
+            if (lastDotIdx > 0) {
+                var objExp = dep.substring(0, lastDotIdx).replace(/\?$/, '');
+                var objProp = dep.substring(lastDotIdx + 1);
+                src.emit(objExp, '&&track(', objExp, ',"', objProp, '");');
+            }
         });
     }
 }
@@ -96,12 +124,18 @@ function emitUseCleanup(file, component) {
         file.src.emit(file.import(file.qwikModule, 'useCleanup$').localName, '(()=>{', code, '});');
     }
 }
-function emitJSX(file, component) {
+function emitJSX(file, component, topLevelElement) {
     var directives = new Map();
     var handlers = new Map();
     var styles = new Map();
     var parentSymbolBindings = {};
-    file.src.emit('return ', (0, jsx_1.renderJSXNodes)(file, directives, handlers, component.children, styles, parentSymbolBindings));
+    var children = component.children;
+    if (topLevelElement && children.length == 1) {
+        var child = children[0];
+        children[0] = __assign(__assign({}, child), { name: 'Host' });
+        file.import(file.qwikModule, 'Host');
+    }
+    file.src.emit('return ', (0, jsx_1.renderJSXNodes)(file, directives, handlers, children, styles, parentSymbolBindings));
 }
 function emitUseContextProvider(file, component) {
     Object.keys(component.context.set).forEach(function (ctxKey) {
@@ -112,9 +146,7 @@ function emitUseContextProvider(file, component) {
                 var propValue = context.value[prop];
                 file.src.emit(prop, ':');
                 if (isGetter(propValue)) {
-                    var methodMap = stateToMethodOrGetter(component.state);
-                    var code = (0, convertMethodToFunction_1.convertMethodToFunction)(extractGetterBody(propValue), methodMap, getLexicalScopeVars(component));
-                    file.src.emit('(()=>{', code, '})(),');
+                    file.src.emit('(()=>{', extractGetterBody(propValue), '})(),');
                 }
                 else if (typeof propValue == 'function') {
                     throw new Error('Qwik: Functions are not supported in context');
@@ -149,19 +181,22 @@ function emitStyles(file, css) {
         file.exportConst('STYLES', '`' + css.replace(/`/g, '\\`') + '`');
     }
 }
+/**
+ * @param file
+ * @param stateInit
+ */
 function emitUseStore(file, stateInit) {
     var state = stateInit[0];
-    file.src.emit('const state=', file.import(file.qwikModule, 'useStore').localName, '(');
-    if (stateInit.length == 1) {
+    var hasState = state && Object.keys(state).length > 0;
+    if (hasState) {
+        file.src.emit('const state=', file.import(file.qwikModule, 'useStore').localName, '(');
         file.src.emit(JSON.stringify(state));
+        file.src.emit(');');
     }
     else {
-        file.src.emit('()=>{const state=', JSON.stringify(state), ';');
-        file.src.emitList(stateInit.slice(1), ';');
-        file.src.emit(';return state;');
-        file.src.emit('}');
+        // TODO hack for now so that `state` variable is defined, even though it is never read.
+        file.src.emit('const state={};');
     }
-    file.src.emit(');');
 }
 function emitTypes(file, component) {
     var _a, _b;
@@ -171,12 +206,29 @@ function emitTypes(file, component) {
     }
 }
 function emitStateMethodsAndRewriteBindings(file, component) {
-    var _a;
     var lexicalArgs = getLexicalScopeVars(component);
     var state = emitStateMethods(file, component.state, lexicalArgs);
     var methodMap = stateToMethodOrGetter(component.state);
-    (_a = component.children) === null || _a === void 0 ? void 0 : _a.forEach(function (node) { return rewriteBindings(node, methodMap, lexicalArgs); });
+    rewriteCodeExpr(component, methodMap, lexicalArgs);
     return state;
+}
+function rewriteCodeExpr(obj, methodMap, lexicalArgs) {
+    if (obj && typeof obj == 'object') {
+        if (Array.isArray(obj)) {
+            obj.forEach(function (item) { return rewriteCodeExpr(item, methodMap, lexicalArgs); });
+        }
+        else {
+            Object.keys(obj).forEach(function (key) {
+                var value = obj[key];
+                if (typeof value == 'string') {
+                    if (value.startsWith(CODE_PREFIX) || key == 'code') {
+                        obj[key] = (0, convertMethodToFunction_1.convertMethodToFunction)(value, methodMap, lexicalArgs);
+                    }
+                }
+                rewriteCodeExpr(value, methodMap, lexicalArgs);
+            });
+        }
+    }
 }
 function getLexicalScopeVars(component) {
     return __spreadArray(__spreadArray(['props', 'state'], Object.keys(component.refs), true), Object.keys(component.context.get), true);
@@ -230,8 +282,6 @@ function emitStateMethods(file, componentState, lexicalArgs) {
     return stateInit;
 }
 function convertTypeScriptToJS(code) {
-    // HACK, proper implementation should use Babel
-    // return code.replace(/(\w+):\s+[\w\[\]"']+/gm, (_, ident) => ident);
     return (0, babel_transform_1.babelTransformExpression)(code, {});
 }
 function isGetter(code) {
@@ -258,19 +308,25 @@ function stateToMethodOrGetter(state) {
     });
     return methodMap;
 }
-function rewriteBindings(node, methodMap, lexicalArgs) {
+/**
+ * Return a top-level element for the component.
+ *
+ * WHAT: If the component has a single root element, than this returns the element name.
+ *
+ * WHY: This is useful to pull the root element into the component's host and those saving unnecessary wrapping.
+ *
+ * @param component
+ */
+function getTopLevelElement(component) {
     var _a;
-    Object.keys(node.bindings).forEach(function (key) {
-        var binding = node.bindings[key];
-        if (binding === null || binding === void 0 ? void 0 : binding.code) {
-            binding.code = (0, convertMethodToFunction_1.convertMethodToFunction)(binding.code, methodMap, lexicalArgs);
+    if (((_a = component.children) === null || _a === void 0 ? void 0 : _a.length) === 1) {
+        var child = component.children[0];
+        if (child['@type'] === '@builder.io/mitosis/node' && startsLowerCase(child.name)) {
+            return child.name;
         }
-        if (key.startsWith('on') && (binding === null || binding === void 0 ? void 0 : binding.code)) {
-            var args = (binding === null || binding === void 0 ? void 0 : binding.arguments) || [];
-            binding.code = "(".concat(args.join(','), ") => ").concat(binding.code);
-            delete node.bindings[key];
-            node.bindings[key + '$'] = binding;
-        }
-    });
-    (_a = node.children) === null || _a === void 0 ? void 0 : _a.forEach(function (child) { return rewriteBindings(child, methodMap, lexicalArgs); });
+    }
+    return null;
+}
+function startsLowerCase(name) {
+    return name.length > 0 && name[0].toLowerCase() === name[0];
 }
