@@ -101,7 +101,8 @@ function emitUseWatch(file, component) {
         component.hooks.onUpdate.forEach(function (onUpdate) {
             file.src.emit(file.import(file.qwikModule, 'useWatch$').localName, '((track)=>{');
             emitTrackExpressions(file.src, onUpdate.deps);
-            file.src.emit(convertTypeScriptToJS(onUpdate.code), '});');
+            file.src.emit(convertTypeScriptToJS(onUpdate.code));
+            file.src.emit('});');
         });
     }
 }
@@ -113,7 +114,7 @@ function emitTrackExpressions(src, deps) {
             if (lastDotIdx > 0) {
                 var objExp = dep.substring(0, lastDotIdx).replace(/\?$/, '');
                 var objProp = dep.substring(lastDotIdx + 1);
-                src.emit(objExp, '&&track(', objExp, ',"', objProp, '");');
+                objExp && src.emit(objExp, '&&track(', objExp, ',"', objProp, '");');
             }
         });
     }
