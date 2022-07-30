@@ -101,12 +101,18 @@ var mapRefs = function (component, mapper) {
                 if (hook.code) {
                     hook.code = replaceRefsInString(hook.code, refs, mapper);
                 }
+                if (hook.deps) {
+                    hook.deps = replaceRefsInString(hook.deps, refs, mapper);
+                }
             });
         }
         else {
             var hookCode = hooks === null || hooks === void 0 ? void 0 : hooks.code;
             if (hookCode) {
                 hooks.code = replaceRefsInString(hookCode, refs, mapper);
+            }
+            if (hooks === null || hooks === void 0 ? void 0 : hooks.deps) {
+                hooks.deps = replaceRefsInString(hooks === null || hooks === void 0 ? void 0 : hooks.deps, refs, mapper);
             }
         }
     }
