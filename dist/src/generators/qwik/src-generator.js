@@ -318,7 +318,7 @@ var SrcBuilder = /** @class */ (function () {
                 var key = lastProperty(rawKey);
                 if (isEvent(key)) {
                     key = key + '$';
-                    binding_1 = "(event)=>{".concat(binding_1, "}");
+                    binding_1 = "(event)=>".concat(binding_1);
                 }
                 if (!binding_1 && rawKey in props) {
                     binding_1 = quote(props[rawKey]);

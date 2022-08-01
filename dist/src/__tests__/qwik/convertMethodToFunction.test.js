@@ -15,6 +15,9 @@ describe('convertMethodToFunction', function () {
         test('getter', function () {
             expect((0, convertMethodToFunction_1.convertMethodToFunction)('this.getterB', methodMap, lexicalArgs)).toEqual('getterB(props,state)');
         });
+        test('method binding', function () {
+            expect((0, convertMethodToFunction_1.convertMethodToFunction)('this.methodA', methodMap, lexicalArgs)).toEqual('methodA.bind(null,props,state)');
+        });
         test('handle comments', function () {
             expect((0, convertMethodToFunction_1.convertMethodToFunction)('//\nreturn this.getterB;', methodMap, lexicalArgs)).toEqual('//\nreturn getterB(props,state);');
         });

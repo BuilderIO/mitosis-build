@@ -250,8 +250,8 @@ var FUNCTION = CODE_PREFIX + 'function:';
 var METHOD = CODE_PREFIX + 'method:';
 var GETTER = CODE_PREFIX + 'method:get ';
 function emitStateMethods(file, componentState, lexicalArgs) {
-    var state = {};
-    var stateInit = [state];
+    var stateValues = {};
+    var stateInit = [stateValues];
     var methodMap = stateToMethodOrGetter(componentState);
     Object.keys(componentState).forEach(function (key) {
         var code = componentState[key];
@@ -277,7 +277,7 @@ function emitStateMethods(file, componentState, lexicalArgs) {
             file.exportConst(functionName, 'function ' + code, true);
         }
         else {
-            state[key] = code;
+            stateValues[key] = code;
         }
     });
     return stateInit;

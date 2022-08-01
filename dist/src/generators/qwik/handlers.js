@@ -64,9 +64,6 @@ function renderHandler(file, symbol, code) {
         this.emit([(0, src_generator_1.arrowFnBlock)(['event'], body)]);
     });
 }
-function stripBlock(block) {
-    return block.substring(1, block.length - 1).trim();
-}
 function isEventName(name) {
     return name.startsWith('on') && name.charAt(2).toUpperCase() == name.charAt(2);
 }
