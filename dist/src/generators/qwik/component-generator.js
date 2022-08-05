@@ -22,7 +22,7 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.componentToQwik = void 0;
 var collect_css_1 = require("../../helpers/styles/collect-css");
-var convertMethodToFunction_1 = require("./convertMethodToFunction");
+var convert_method_to_function_1 = require("./convert-method-to-function");
 var jsx_1 = require("./jsx");
 var src_generator_1 = require("./src-generator");
 var babel_transform_1 = require("../../helpers/babel-transform");
@@ -85,7 +85,7 @@ function emitTagNameHack(file, component) {
     var _a;
     var elementTag = (_a = component.meta.useMetadata) === null || _a === void 0 ? void 0 : _a.elementTag;
     if (elementTag) {
-        file.src.emit(elementTag, '=', (0, convertMethodToFunction_1.convertMethodToFunction)(elementTag, stateToMethodOrGetter(component.state), getLexicalScopeVars(component)), ';');
+        file.src.emit(elementTag, '=', (0, convert_method_to_function_1.convertMethodToFunction)(elementTag, stateToMethodOrGetter(component.state), getLexicalScopeVars(component)), ';');
     }
 }
 function emitUseMount(file, component) {
@@ -223,7 +223,7 @@ function rewriteCodeExpr(obj, methodMap, lexicalArgs) {
                 var value = obj[key];
                 if (typeof value == 'string') {
                     if (value.startsWith(CODE_PREFIX) || key == 'code') {
-                        obj[key] = (0, convertMethodToFunction_1.convertMethodToFunction)(value, methodMap, lexicalArgs);
+                        obj[key] = (0, convert_method_to_function_1.convertMethodToFunction)(value, methodMap, lexicalArgs);
                     }
                 }
                 rewriteCodeExpr(value, methodMap, lexicalArgs);
@@ -265,7 +265,7 @@ function emitStateMethods(file, componentState, lexicalArgs) {
                 prefixIdx += 'function '.length;
             }
             code = code.substring(prefixIdx);
-            code = (0, convertMethodToFunction_1.convertMethodToFunction)(code, methodMap, lexicalArgs).replace('(', "(".concat(lexicalArgs.join(','), ","));
+            code = (0, convert_method_to_function_1.convertMethodToFunction)(code, methodMap, lexicalArgs).replace('(', "(".concat(lexicalArgs.join(','), ","));
             var functionName = code.split(/\(/)[0];
             if (codeIisGetter) {
                 stateInit.push("state.".concat(key, "=").concat(functionName, "(").concat(lexicalArgs.join(','), ")"));

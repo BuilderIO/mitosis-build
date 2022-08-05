@@ -127,7 +127,7 @@ exports.__passThroughProps__ = __passThroughProps__;
 function CoreButton(props) {
     var hasLink = !!props.link;
     var hProps = {
-        innerHTML: props.text || '',
+        dangerouslySetInnerHTML: props.text || '',
         href: props.link,
         target: props.openInNewTab ? '_blank' : '_self',
         class: props.class,
