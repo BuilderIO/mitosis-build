@@ -246,6 +246,7 @@ var componentToAngular = function (options) {
         var hasOnMount = Boolean((_f = component.hooks) === null || _f === void 0 ? void 0 : _f.onMount);
         var domRefs = (0, get_refs_1.getRefs)(json);
         var jsRefs = Object.keys(json.refs).filter(function (ref) { return !domRefs.has(ref); });
+        var stateVars = Object.keys((json === null || json === void 0 ? void 0 : json.state) || {});
         (0, map_refs_1.mapRefs)(json, function (refName) {
             var isDomRef = domRefs.has(refName);
             return "this.".concat(isDomRef ? '' : '_').concat(refName).concat(isDomRef ? '.nativeElement' : '');
@@ -278,6 +279,7 @@ var componentToAngular = function (options) {
                     contextVars: contextVars,
                     outputVars: outputVars,
                     domRefs: Array.from(domRefs),
+                    stateVars: stateVars,
                 });
             },
         });
@@ -301,6 +303,7 @@ var componentToAngular = function (options) {
                     contextVars: contextVars,
                     outputVars: outputVars,
                     domRefs: Array.from(domRefs),
+                    stateVars: stateVars,
                 }))
                 : '', ";");
         })
@@ -321,6 +324,7 @@ var componentToAngular = function (options) {
                     contextVars: contextVars,
                     outputVars: outputVars,
                     domRefs: Array.from(domRefs),
+                    stateVars: stateVars,
                 }), "\n                "), "\n            }"), !((_o = component.hooks.onUpdate) === null || _o === void 0 ? void 0 : _o.length)
             ? ''
             : "ngAfterContentChecked() {\n              ".concat(component.hooks.onUpdate.reduce(function (code, hook) {
@@ -329,6 +333,7 @@ var componentToAngular = function (options) {
                     contextVars: contextVars,
                     outputVars: outputVars,
                     domRefs: Array.from(domRefs),
+                    stateVars: stateVars,
                 });
                 return code + '\n';
             }, ''), "\n            }"), !component.hooks.onUnMount
@@ -338,6 +343,7 @@ var componentToAngular = function (options) {
                 contextVars: contextVars,
                 outputVars: outputVars,
                 domRefs: Array.from(domRefs),
+                stateVars: stateVars,
             }), "\n            }"));
         if (options.plugins) {
             str = (0, plugins_1.runPreCodePlugins)(str, options.plugins);
