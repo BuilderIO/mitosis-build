@@ -32,7 +32,7 @@ var DEBUG = true;
 var componentToQwik = function (userOptions) {
     if (userOptions === void 0) { userOptions = {}; }
     return function (_a) {
-        var _b, _c;
+        var _b, _c, _d;
         var component = _a.component, path = _a.path;
         var file = new src_generator_1.File(component.name + '.js', {
             isPretty: true,
@@ -44,14 +44,19 @@ var componentToQwik = function (userOptions) {
         try {
             emitImports(file, component);
             emitTypes(file, component);
-            var metadata = component.meta.useMetadata || {};
-            var isLightComponent = ((_c = (_b = metadata === null || metadata === void 0 ? void 0 : metadata.qwik) === null || _b === void 0 ? void 0 : _b.component) === null || _c === void 0 ? void 0 : _c.isLight) || false;
-            var state_1 = emitStateMethodsAndRewriteBindings(file, component);
+            var metadata_1 = component.meta.useMetadata || {};
+            var isLightComponent = ((_c = (_b = metadata_1 === null || metadata_1 === void 0 ? void 0 : metadata_1.qwik) === null || _b === void 0 ? void 0 : _b.component) === null || _c === void 0 ? void 0 : _c.isLight) || false;
+            var imports_1 = (_d = metadata_1 === null || metadata_1 === void 0 ? void 0 : metadata_1.qwik) === null || _d === void 0 ? void 0 : _d.imports;
+            imports_1 && Object.keys(imports_1).forEach(function (key) { return file.import(imports_1[key], key); });
+            var state_1 = emitStateMethodsAndRewriteBindings(file, component, metadata_1);
             var hasState_1 = Boolean(Object.keys(component.state).length);
             var css_1 = null;
             var topLevelElement_1 = isLightComponent ? null : getTopLevelElement(component);
             var componentBody = (0, src_generator_1.arrowFnBlock)(['props'], [
                 function () {
+                    var _a, _b;
+                    if ((_b = (_a = metadata_1 === null || metadata_1 === void 0 ? void 0 : metadata_1.qwik) === null || _a === void 0 ? void 0 : _a.component) === null || _b === void 0 ? void 0 : _b.useHostElement)
+                        emitUseHostElement(file);
                     css_1 = emitUseStyles(file, component);
                     emitUseContext(file, component);
                     emitUseRef(file, component);
@@ -99,7 +104,7 @@ function emitUseMount(file, component) {
 function emitUseWatch(file, component) {
     if (component.hooks.onUpdate) {
         component.hooks.onUpdate.forEach(function (onUpdate) {
-            file.src.emit(file.import(file.qwikModule, 'useWatch$').localName, '((track)=>{');
+            file.src.emit(file.import(file.qwikModule, 'useWatch$').localName, '(({track})=>{');
             emitTrackExpressions(file.src, onUpdate.deps);
             file.src.emit(convertTypeScriptToJS(onUpdate.code));
             file.src.emit('});');
@@ -136,7 +141,7 @@ function emitJSX(file, component, topLevelElement) {
         children[0] = __assign(__assign({}, child), { name: 'Host' });
         file.import(file.qwikModule, 'Host');
     }
-    file.src.emit('return ', (0, jsx_1.renderJSXNodes)(file, directives, handlers, children, styles, parentSymbolBindings));
+    file.src.emit('return ', (0, jsx_1.renderJSXNodes)(file, directives, handlers, component.children, styles, parentSymbolBindings));
 }
 function emitUseContextProvider(file, component) {
     Object.keys(component.context.set).forEach(function (ctxKey) {
@@ -171,9 +176,9 @@ function emitUseRef(file, component) {
     });
 }
 function emitUseStyles(file, component) {
-    var css = (0, collect_css_1.collectCss)(component);
+    var css = (0, collect_css_1.collectCss)(component, { prefix: component.name });
     if (css) {
-        file.src.emit(file.import(file.qwikModule, 'useScopedStyles$').localName, '(STYLES);');
+        file.src.emit(file.import(file.qwikModule, 'useStylesScoped$').localName, '(STYLES);');
     }
     return css;
 }
@@ -206,27 +211,31 @@ function emitTypes(file, component) {
         (_b = component.interfaces) === null || _b === void 0 ? void 0 : _b.forEach(function (i) { return file.src.emit(i); });
     }
 }
-function emitStateMethodsAndRewriteBindings(file, component) {
+function emitStateMethodsAndRewriteBindings(file, component, metadata) {
+    var _a;
     var lexicalArgs = getLexicalScopeVars(component);
     var state = emitStateMethods(file, component.state, lexicalArgs);
     var methodMap = stateToMethodOrGetter(component.state);
-    rewriteCodeExpr(component, methodMap, lexicalArgs);
+    rewriteCodeExpr(component, methodMap, lexicalArgs, (_a = metadata.qwik) === null || _a === void 0 ? void 0 : _a.replace);
     return state;
 }
-function rewriteCodeExpr(obj, methodMap, lexicalArgs) {
+function rewriteCodeExpr(obj, methodMap, lexicalArgs, replace) {
     if (obj && typeof obj == 'object') {
         if (Array.isArray(obj)) {
-            obj.forEach(function (item) { return rewriteCodeExpr(item, methodMap, lexicalArgs); });
+            obj.forEach(function (item) { return rewriteCodeExpr(item, methodMap, lexicalArgs, replace); });
         }
         else {
             Object.keys(obj).forEach(function (key) {
                 var value = obj[key];
                 if (typeof value == 'string') {
                     if (value.startsWith(CODE_PREFIX) || key == 'code') {
-                        obj[key] = (0, convert_method_to_function_1.convertMethodToFunction)(value, methodMap, lexicalArgs);
+                        var code_1 = (0, convert_method_to_function_1.convertMethodToFunction)(value, methodMap, lexicalArgs);
+                        replace &&
+                            Object.keys(replace).forEach(function (key) { return (code_1 = code_1.replace(key, replace[key])); });
+                        obj[key] = code_1;
                     }
                 }
-                rewriteCodeExpr(value, methodMap, lexicalArgs);
+                rewriteCodeExpr(value, methodMap, lexicalArgs, replace);
             });
         }
     }
@@ -330,4 +339,7 @@ function getTopLevelElement(component) {
 }
 function startsLowerCase(name) {
     return name.length > 0 && name[0].toLowerCase() === name[0];
+}
+function emitUseHostElement(file) {
+    file.src.emit('const hostElement=', file.import(file.qwikModule, 'useHostElement').localName, '();');
 }
