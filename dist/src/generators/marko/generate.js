@@ -118,17 +118,11 @@ var componentToMarko = function (options) {
         var dataString = (0, get_state_object_string_1.getStateObjectStringFromComponent)(json, {
             format: 'object',
             data: true,
-            functions: false,
-            getters: false,
-            valueMapper: function (code) { return processBinding(code, 'class'); },
-        });
-        var methodsString = (0, get_state_object_string_1.getStateObjectStringFromComponent)(json, {
-            format: 'class',
-            data: false,
             functions: true,
             getters: true,
             valueMapper: function (code) { return processBinding(code, 'class'); },
         });
+        var methodsString = '';
         var hasState = dataString.length > 5;
         if (options.prettier !== false) {
             try {
@@ -172,7 +166,7 @@ var componentToMarko = function (options) {
             }
         }
         // Convert on-click=(...) -> on-click(...)
-        jsString = jsString.replace(/(on-[a-z]+)=\(/g, function (_match, group) { return group + '('; });
+        htmlString = htmlString.replace(/(on-[a-z]+)=\(/g, function (_match, group) { return group + '('; });
         var finalStr = "\n".concat(jsString, "\n").concat(cssString, "\n").concat(htmlString, "\n    ")
             .replace(/\n{3,}/g, '\n\n')
             .trim();
