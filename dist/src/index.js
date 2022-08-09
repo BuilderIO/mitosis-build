@@ -80,6 +80,7 @@ __exportStar(require("./symbols/symbol-processor"), exports);
 __exportStar(require("./generators/html"), exports);
 __exportStar(require("./generators/svelte"), exports);
 __exportStar(require("./generators/stencil"), exports);
+__exportStar(require("./generators/marko"), exports);
 __exportStar(require("./generators/mitosis"), exports);
 __exportStar(require("./generators/template"), exports);
 __exportStar(require("./generators/swift-ui"), exports);
