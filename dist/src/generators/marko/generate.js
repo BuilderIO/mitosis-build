@@ -171,6 +171,8 @@ var componentToMarko = function (options) {
                 console.warn('Could not format js', err);
             }
         }
+        // Convert on-click=(...) -> on-click(...)
+        jsString = jsString.replace(/(on-[a-z]+)=\(/g, function (_match, group) { return group + '('; });
         var finalStr = "\n".concat(jsString, "\n").concat(cssString, "\n").concat(htmlString, "\n    ")
             .replace(/\n{3,}/g, '\n\n')
             .trim();
