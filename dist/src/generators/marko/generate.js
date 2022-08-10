@@ -3,6 +3,17 @@ var __makeTemplateObject = (this && this.__makeTemplateObject) || function (cook
     if (Object.defineProperty) { Object.defineProperty(cooked, "raw", { value: raw }); } else { cooked.raw = raw; }
     return cooked;
 };
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -24,28 +35,67 @@ var indent_1 = require("../../helpers/indent");
 var map_refs_1 = require("../../helpers/map-refs");
 var dash_case_1 = require("../../helpers/dash-case");
 var has_props_1 = require("../../helpers/has-props");
+var function_literal_prefix_1 = require("../../constants/function-literal-prefix");
+var method_literal_prefix_1 = require("../../constants/method-literal-prefix");
+var patterns_1 = require("../../helpers/patterns");
 // Having issues with this, so off for now
 var USE_MARKO_PRETTIER = false;
+function getStateTypeOfValue(value) {
+    if (typeof value === 'string') {
+        if (value.startsWith(function_literal_prefix_1.functionLiteralPrefix)) {
+            return 'function';
+        }
+        else if (value.startsWith(method_literal_prefix_1.methodLiteralPrefix)) {
+            var isGet = Boolean(value.replace(method_literal_prefix_1.methodLiteralPrefix, '').match(patterns_1.GETTER));
+            if (isGet) {
+                return 'getter';
+            }
+            return 'method';
+        }
+    }
+    return 'property';
+}
+/**
+ * Return the names of methods and functions on state
+ */
+function getStateMethodNames(json) {
+    return Object.keys(json.state).filter(function (key) {
+        var value = json.state[key];
+        var type = getStateTypeOfValue(value);
+        return type === 'function' || type === 'method';
+    });
+}
+/**
+ * Return the names of getter and functions on state
+ */
+function getStateGetterNames(json) {
+    return Object.keys(json.state).filter(function (key) { return getStateTypeOfValue(json.state[key]) === 'getter'; });
+}
+/**
+ * Return the names of properties (basic literal values) on state
+ */
+function getStatePropertyNames(json) {
+    return Object.keys(json.state).filter(function (key) { return getStateTypeOfValue(json.state[key]) === 'property'; });
+}
 var blockToMarko = function (json, options) {
     var _a, _b, _c, _d, _e;
-    if (options === void 0) { options = {}; }
     if (json.properties._text) {
         return json.properties._text;
     }
     if ((_a = json.bindings._text) === null || _a === void 0 ? void 0 : _a.code) {
-        return "${".concat(processBinding((_b = json.bindings) === null || _b === void 0 ? void 0 : _b._text.code), "}");
+        return "${".concat(processBinding(options.component, (_b = json.bindings) === null || _b === void 0 ? void 0 : _b._text.code), "}");
     }
     if (json.name === 'Fragment') {
         return json.children.map(function (child) { return blockToMarko(child, options); }).join('\n');
     }
     if (json.name === 'For') {
-        return "<for|".concat(json.properties._forName, "| of=(").concat(processBinding((_c = json.bindings.each) === null || _c === void 0 ? void 0 : _c.code), ")>\n      ").concat(json.children
+        return "<for|".concat(json.properties._forName, "| of=(").concat(processBinding(options.component, (_c = json.bindings.each) === null || _c === void 0 ? void 0 : _c.code), ")>\n      ").concat(json.children
             .filter(filter_empty_text_nodes_1.filterEmptyTextNodes)
             .map(function (item) { return blockToMarko(item, options); })
             .join('\n'), "\n    </for>");
     }
     else if (json.name === 'Show') {
-        return "<if(".concat(processBinding((_d = json.bindings.when) === null || _d === void 0 ? void 0 : _d.code), ")>\n      ").concat(json.children
+        return "<if(".concat(processBinding(options.component, (_d = json.bindings.when) === null || _d === void 0 ? void 0 : _d.code), ")>\n      ").concat(json.children
             .filter(filter_empty_text_nodes_1.filterEmptyTextNodes)
             .map(function (item) { return blockToMarko(item, options); })
             .join('\n'), "</if>\n    ").concat(!json.meta.else ? '' : "<else>".concat(blockToMarko(json.meta.else, options), "</else>"));
@@ -73,10 +123,10 @@ var blockToMarko = function (json, options) {
         }
         else if (key.startsWith('on')) {
             var useKey = key === 'onChange' && json.name === 'input' ? 'onInput' : key;
-            str += " ".concat((0, dash_case_1.dashCase)(useKey), "=(").concat(cusArgs.join(','), " => ").concat(processBinding(code), ") ");
+            str += " ".concat((0, dash_case_1.dashCase)(useKey), "=(").concat(cusArgs.join(','), " => ").concat(processBinding(options.component, code), ") ");
         }
         else {
-            str += " ".concat(key, "=(").concat(processBinding(code), ") ");
+            str += " ".concat(key, "=(").concat(processBinding(options.component, code), ") ");
         }
     }
     if (jsx_1.selfClosingTags.has(json.name)) {
@@ -89,24 +139,31 @@ var blockToMarko = function (json, options) {
     str += "</".concat((0, dash_case_1.dashCase)(json.name), ">");
     return str;
 };
-function processBinding(code, type) {
+function processBinding(json, code, type) {
     if (type === void 0) { type = 'attribute'; }
     return (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(code, {
         replaceWith: type === 'state' ? 'input.' : type === 'class' ? 'this.input.' : 'input.',
         includeProps: true,
         includeState: false,
     }), {
-        replaceWith: type === 'state' ? 'this.' : type === 'class' ? 'this.state.' : 'state.',
+        replaceWith: function (key) {
+            var isProperty = getStatePropertyNames(json).includes(key);
+            if (isProperty) {
+                return (type === 'state' || type === 'class' ? 'this.state.' : 'state.') + key;
+            }
+            return (type === 'class' || type === 'state' ? 'this.' : 'component.') + key;
+        },
         includeProps: false,
         includeState: true,
     });
 }
-var componentToMarko = function (options) {
-    if (options === void 0) { options = {}; }
+var componentToMarko = function (userOptions) {
+    if (userOptions === void 0) { userOptions = {}; }
     return function (_a) {
         var _b, _c, _d;
         var component = _a.component;
         var json = (0, fast_clone_1.fastClone)(component);
+        var options = __assign(__assign({}, userOptions), { component: component });
         if (options.plugins) {
             json = (0, plugins_1.runPreJsonPlugins)(json, options.plugins);
         }
@@ -119,13 +176,19 @@ var componentToMarko = function (options) {
         var dataString = (0, get_state_object_string_1.getStateObjectStringFromComponent)(json, {
             format: 'object',
             data: true,
-            functions: true,
-            getters: true,
-            valueMapper: function (code) { return processBinding(code, 'state'); },
+            functions: false,
+            getters: false,
+            valueMapper: function (code) { return processBinding(json, code, 'state'); },
         });
         var thisHasProps = (0, has_props_1.hasProps)(json);
-        var methodsString = '';
-        var hasState = dataString.length > 5;
+        var methodsString = (0, get_state_object_string_1.getStateObjectStringFromComponent)(json, {
+            format: 'class',
+            data: false,
+            functions: true,
+            getters: true,
+            valueMapper: function (code) { return processBinding(json, code, 'class'); },
+        });
+        var hasState = dataString.trim().length > 5;
         if (options.prettier !== false) {
             try {
                 css = (0, standalone_1.format)(css, {
@@ -141,11 +204,11 @@ var componentToMarko = function (options) {
             ? ''
             : "onCreate(".concat(thisHasProps ? 'input' : '', ") {\n          this.state = ").concat(dataString, "\n        }"), !((_b = json.hooks.onMount) === null || _b === void 0 ? void 0 : _b.code)
             ? ''
-            : "onMount() { ".concat(processBinding(json.hooks.onMount.code, 'class'), " }"), !((_c = json.hooks.onUnMount) === null || _c === void 0 ? void 0 : _c.code)
+            : "onMount() { ".concat(processBinding(json, json.hooks.onMount.code, 'class'), " }"), !((_c = json.hooks.onUnMount) === null || _c === void 0 ? void 0 : _c.code)
             ? ''
-            : "onDestroy() { ".concat(processBinding(json.hooks.onUnMount.code, 'class'), " }"), !((_d = json.hooks.onUpdate) === null || _d === void 0 ? void 0 : _d.length)
+            : "onDestroy() { ".concat(processBinding(json, json.hooks.onUnMount.code, 'class'), " }"), !((_d = json.hooks.onUpdate) === null || _d === void 0 ? void 0 : _d.length)
             ? ''
-            : json.hooks.onUpdate.map(function (hook) { return "onRender() { ".concat(processBinding(hook.code, 'class'), " }"); }));
+            : json.hooks.onUpdate.map(function (hook) { return "onRender() { ".concat(processBinding(json, hook.code, 'class'), " }"); }));
         var htmlString = json.children.map(function (item) { return blockToMarko(item, options); }).join('\n');
         var cssString = css.length
             ? "style { \n  ".concat((0, indent_1.indent)(css, 2).trim(), "\n}")

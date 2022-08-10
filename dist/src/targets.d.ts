@@ -24,5 +24,5 @@ export declare const targets: {
     vue3: (vueOptions?: Omit<import("./generators/vue").ToVueOptions, "vueVersion"> | undefined) => import(".").Transpiler;
     stencil: (options?: import("./generators/stencil").ToStencilOptions) => import(".").Transpiler;
     qwik: (userOptions?: import("./generators/qwik/component-generator").ToQwikOptions) => import(".").Transpiler;
-    marko: (options?: import("./generators/marko").ToMarkoOptions) => import(".").Transpiler;
+    marko: (userOptions?: import("./generators/marko").ToMarkoOptions) => import(".").Transpiler;
 };

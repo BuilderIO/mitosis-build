@@ -1,7 +1,7 @@
 import { BaseTranspilerOptions, Transpiler } from '../../types/transpiler';
 export interface ToMarkoOptions extends BaseTranspilerOptions {
 }
-export declare const componentToMarko: (options?: ToMarkoOptions) => Transpiler;
+export declare const componentToMarko: (userOptions?: ToMarkoOptions) => Transpiler;
 /**
  * Convert marko expressions to valid html
  *
