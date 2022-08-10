@@ -889,8 +889,7 @@ function parseJsx(jsx, options) {
                         for (var _i = 0, _a = path.node.specifiers; _i < _a.length; _i++) {
                             var specifier = _a[_i];
                             if (types.isImportSpecifier(specifier)) {
-                                importObject.imports[specifier.imported.name] =
-                                    specifier.local.name;
+                                importObject.imports[specifier.local.name] = specifier.imported.name;
                             }
                             else if (types.isImportDefaultSpecifier(specifier)) {
                                 importObject.imports[specifier.local.name] = 'default';
