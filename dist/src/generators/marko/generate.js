@@ -23,6 +23,7 @@ var collect_css_1 = require("../../helpers/styles/collect-css");
 var indent_1 = require("../../helpers/indent");
 var map_refs_1 = require("../../helpers/map-refs");
 var dash_case_1 = require("../../helpers/dash-case");
+var has_props_1 = require("../../helpers/has-props");
 // Having issues with this, so off for now
 var USE_MARKO_PRETTIER = false;
 var blockToMarko = function (json, options) {
@@ -50,7 +51,7 @@ var blockToMarko = function (json, options) {
             .join('\n'), "</if>\n    ").concat(!json.meta.else ? '' : "<else>".concat(blockToMarko(json.meta.else, options), "</else>"));
     }
     var str = '';
-    str += "<".concat(json.name, " ");
+    str += "<".concat((0, dash_case_1.dashCase)(json.name), " ");
     var classString = (0, collect_class_string_1.collectClassString)(json);
     if (classString) {
         str += " class=".concat(classString, " ");
@@ -85,17 +86,17 @@ var blockToMarko = function (json, options) {
     if (json.children) {
         str += json.children.map(function (item) { return blockToMarko(item, options); }).join('\n');
     }
-    str += "</".concat(json.name, ">");
+    str += "</".concat((0, dash_case_1.dashCase)(json.name), ">");
     return str;
 };
 function processBinding(code, type) {
     if (type === void 0) { type = 'attribute'; }
     return (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(code, {
-        replaceWith: type === 'class' ? 'this.input.' : 'input.',
+        replaceWith: type === 'state' ? 'input.' : type === 'class' ? 'this.input.' : 'input.',
         includeProps: true,
         includeState: false,
     }), {
-        replaceWith: type === 'class' ? 'this.state.' : 'state.',
+        replaceWith: type === 'state' ? 'this.' : type === 'class' ? 'this.state.' : 'state.',
         includeProps: false,
         includeState: true,
     });
@@ -120,8 +121,9 @@ var componentToMarko = function (options) {
             data: true,
             functions: true,
             getters: true,
-            valueMapper: function (code) { return processBinding(code, 'class'); },
+            valueMapper: function (code) { return processBinding(code, 'state'); },
         });
+        var thisHasProps = (0, has_props_1.hasProps)(json);
         var methodsString = '';
         var hasState = dataString.length > 5;
         if (options.prettier !== false) {
@@ -137,13 +139,13 @@ var componentToMarko = function (options) {
         }
         var jsString = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    ", "\n\n    class {\n        ", "\n\n        ", "\n      \n        ", "\n        ", "\n        ", "\n    }\n  "], ["\n    ", "\n\n    class {\n        ", "\n\n        ", "\n      \n        ", "\n        ", "\n        ", "\n    }\n  "])), (0, render_imports_1.renderPreComponent)({ component: json, target: 'marko' }), methodsString, !hasState
             ? ''
-            : "onCreate() {\n          this.state = ".concat(dataString, "\n        }"), !((_b = json.hooks.onMount) === null || _b === void 0 ? void 0 : _b.code)
+            : "onCreate() {\n          ".concat(thisHasProps ? 'const input = this.input;' : '', "\n          this.state = ").concat(dataString, "\n        }"), !((_b = json.hooks.onMount) === null || _b === void 0 ? void 0 : _b.code)
             ? ''
-            : "onMount() { ".concat(processBinding(json.hooks.onMount.code), " }"), !((_c = json.hooks.onUnMount) === null || _c === void 0 ? void 0 : _c.code)
+            : "onMount() { ".concat(processBinding(json.hooks.onMount.code, 'class'), " }"), !((_c = json.hooks.onUnMount) === null || _c === void 0 ? void 0 : _c.code)
             ? ''
-            : "onDestroy() { ".concat(processBinding(json.hooks.onUnMount.code), " }"), !((_d = json.hooks.onUpdate) === null || _d === void 0 ? void 0 : _d.length)
+            : "onDestroy() { ".concat(processBinding(json.hooks.onUnMount.code, 'class'), " }"), !((_d = json.hooks.onUpdate) === null || _d === void 0 ? void 0 : _d.length)
             ? ''
-            : json.hooks.onUpdate.map(function (hook) { return "onRender() { ".concat(processBinding(hook.code), " }"); }));
+            : json.hooks.onUpdate.map(function (hook) { return "onRender() { ".concat(processBinding(hook.code, 'class'), " }"); }));
         var htmlString = json.children.map(function (item) { return blockToMarko(item, options); }).join('\n');
         var cssString = css.length
             ? "style { \n  ".concat((0, indent_1.indent)(css, 2).trim(), "\n}")
