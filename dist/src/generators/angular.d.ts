@@ -1,6 +1,7 @@
 import { MitosisNode } from '../types/mitosis-node';
 import { BaseTranspilerOptions, Transpiler } from '../types/transpiler';
 export interface ToAngularOptions extends BaseTranspilerOptions {
+    standalone?: boolean;
 }
 interface AngularBlockOptions {
     contextVars?: string[];
