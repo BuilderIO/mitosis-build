@@ -39,6 +39,18 @@ var function_literal_prefix_1 = require("../../constants/function-literal-prefix
 var method_literal_prefix_1 = require("../../constants/method-literal-prefix");
 var patterns_1 = require("../../helpers/patterns");
 var get_refs_1 = require("../../helpers/get-refs");
+var is_upper_case_1 = require("../../helpers/is-upper-case");
+var lodash_1 = require("lodash");
+/**
+ * Convert a component name to a tagName
+ *
+ * So things like
+ *  'FooBar' -> <foo-bar>
+ *  'h1' -> <h1>
+ */
+var toTagName = function (str) {
+    return (0, is_upper_case_1.isUpperCase)(str[0]) ? (0, lodash_1.kebabCase)(str) : str;
+};
 // Having issues with this, so off for now
 var USE_MARKO_PRETTIER = false;
 function getStateTypeOfValue(value) {
@@ -102,7 +114,7 @@ var blockToMarko = function (json, options) {
             .join('\n'), "</if>\n    ").concat(!json.meta.else ? '' : "<else>".concat(blockToMarko(json.meta.else, options), "</else>"));
     }
     var str = '';
-    str += "<".concat((0, dash_case_1.dashCase)(json.name), " ");
+    str += "<".concat(toTagName(json.name), " ");
     var classString = (0, collect_class_string_1.collectClassString)(json);
     if (classString) {
         str += " class=".concat(classString, " ");
@@ -137,7 +149,7 @@ var blockToMarko = function (json, options) {
     if (json.children) {
         str += json.children.map(function (item) { return blockToMarko(item, options); }).join('\n');
     }
-    str += "</".concat((0, dash_case_1.dashCase)(json.name), ">");
+    str += "</".concat(toTagName(json.name), ">");
     return str;
 };
 function processBinding(json, code, type) {
