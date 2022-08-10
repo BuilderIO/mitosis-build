@@ -38,6 +38,7 @@ var has_props_1 = require("../../helpers/has-props");
 var function_literal_prefix_1 = require("../../constants/function-literal-prefix");
 var method_literal_prefix_1 = require("../../constants/method-literal-prefix");
 var patterns_1 = require("../../helpers/patterns");
+var get_refs_1 = require("../../helpers/get-refs");
 // Having issues with this, so off for now
 var USE_MARKO_PRETTIER = false;
 function getStateTypeOfValue(value) {
@@ -119,7 +120,7 @@ var blockToMarko = function (json, options) {
             continue;
         }
         if (key === 'ref') {
-            // TODO: implement refs like this: https://github.com/BuilderIO/mitosis/pull/621#discussion_r942001014
+            str += " key=\"".concat(code, "\" ");
         }
         else if (key.startsWith('on')) {
             var useKey = key === 'onChange' && json.name === 'input' ? 'onInput' : key;
@@ -163,12 +164,13 @@ var componentToMarko = function (userOptions) {
         var _b, _c, _d;
         var component = _a.component;
         var json = (0, fast_clone_1.fastClone)(component);
-        var options = __assign(__assign({}, userOptions), { component: component });
+        var options = __assign(__assign({}, userOptions), { component: json });
         if (options.plugins) {
             json = (0, plugins_1.runPreJsonPlugins)(json, options.plugins);
         }
         var css = (0, collect_css_1.collectCss)(json);
-        (0, map_refs_1.mapRefs)(component, function (refName) { return "this.".concat(refName); });
+        var domRefs = (0, get_refs_1.getRefs)(json);
+        (0, map_refs_1.mapRefs)(json, function (refName) { return "this.".concat(refName); });
         if (options.plugins) {
             json = (0, plugins_1.runPostJsonPlugins)(json, options.plugins);
         }
@@ -200,9 +202,11 @@ var componentToMarko = function (userOptions) {
                 console.warn('Could not format css', err);
             }
         }
-        var jsString = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    ", "\n\n    class {\n        ", "\n\n        ", "\n      \n        ", "\n        ", "\n        ", "\n    }\n  "], ["\n    ", "\n\n    class {\n        ", "\n\n        ", "\n      \n        ", "\n        ", "\n        ", "\n    }\n  "])), (0, render_imports_1.renderPreComponent)({ component: json, target: 'marko' }), methodsString, !hasState
+        var jsString = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    ", "\n\n    class {\n        ", "\n\n        ", "\n\n        ", "\n      \n        ", "\n        ", "\n        ", "\n    }\n  "], ["\n    ", "\n\n    class {\n        ", "\n\n        ", "\n\n        ", "\n      \n        ", "\n        ", "\n        ", "\n    }\n  "])), (0, render_imports_1.renderPreComponent)({ component: json, target: 'marko' }), methodsString, !hasState
             ? ''
-            : "onCreate(".concat(thisHasProps ? 'input' : '', ") {\n          this.state = ").concat(dataString, "\n        }"), !((_b = json.hooks.onMount) === null || _b === void 0 ? void 0 : _b.code)
+            : "onCreate(".concat(thisHasProps ? 'input' : '', ") {\n          this.state = ").concat(dataString, "\n        }"), Array.from(domRefs)
+            .map(function (refName) { return "get ".concat(refName, "() { \n            return this.getEl('").concat(refName, "')\n          }"); })
+            .join('\n'), !((_b = json.hooks.onMount) === null || _b === void 0 ? void 0 : _b.code)
             ? ''
             : "onMount() { ".concat(processBinding(json, json.hooks.onMount.code, 'class'), " }"), !((_c = json.hooks.onUnMount) === null || _c === void 0 ? void 0 : _c.code)
             ? ''
