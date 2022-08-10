@@ -142,7 +142,7 @@ var blockToAngular = function (json, options, blockOptions) {
                 contextVars: contextVars,
                 outputVars: outputVars,
                 domRefs: domRefs,
-            });
+            }).replace(/"/g, "&quot;");
             if (key.startsWith('on')) {
                 var event_1 = key.replace('on', '').toLowerCase();
                 if (event_1 === 'change' && json.name === 'input' /* todo: other tags */) {
@@ -166,10 +166,10 @@ var blockToAngular = function (json, options, blockOptions) {
                 needsToRenderSlots.push("".concat(useValue.replace(/(\/\>)|\>/, " ".concat(lowercaseKey, ">"))));
             }
             else if (BINDINGS_MAPPER[key]) {
-                str += " [".concat(BINDINGS_MAPPER[key], "]=\"").concat(useValue.replace(/"/g, "\\'"), "\"  ");
+                str += " [".concat(BINDINGS_MAPPER[key], "]=\"").concat(useValue, "\"  ");
             }
             else {
-                str += " [".concat(key, "]='").concat(useValue, "' ");
+                str += " [".concat(key, "]=\"").concat(useValue, "\" ");
             }
         }
         if (jsx_1.selfClosingTags.has(json.name)) {
