@@ -233,14 +233,10 @@ var stringifyBinding = function (node) {
                 var isAssignmentExpression = useValue.includes('=');
                 // TODO: proper babel transform to replace. Util for this
                 if (isAssignmentExpression) {
-                    return " @".concat(event_1, "=\"").concat(encodeQuotes((0, remove_surrounding_block_1.removeSurroundingBlock)(useValue
-                        // TODO: proper reference parse and replacing
-                        .replace(new RegExp("".concat(cusArgs[0], "\\."), 'g'), '$event.'))), "\" ");
+                    return " @".concat(event_1, "=\"").concat(encodeQuotes((0, remove_surrounding_block_1.removeSurroundingBlock)((0, replace_idenifiers_1.replaceIdentifiers)(useValue, cusArgs[0], '$event'))), "\" ");
                 }
                 else {
-                    return " @".concat(event_1, "=\"").concat(encodeQuotes((0, remove_surrounding_block_1.removeSurroundingBlock)(useValue
-                        // TODO: proper reference parse and replacing
-                        .replace(new RegExp("".concat(cusArgs[0]), 'g'), '$event'))), "\" ");
+                    return " @".concat(event_1, "=\"").concat(encodeQuotes((0, remove_surrounding_block_1.removeSurroundingBlock)((0, remove_surrounding_block_1.removeSurroundingBlock)((0, replace_idenifiers_1.replaceIdentifiers)(useValue, cusArgs[0], '$event')))), "\" ");
                 }
             }
             else if (key === 'ref') {

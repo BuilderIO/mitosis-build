@@ -10,7 +10,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.componentToStencil = void 0;
 var dedent_1 = __importDefault(require("dedent"));
 var standalone_1 = require("prettier/standalone");
-var get_refs_1 = require("../../helpers/get-refs");
 var get_state_object_string_1 = require("../../helpers/get-state-object-string");
 var render_imports_1 = require("../../helpers/render-imports");
 var jsx_1 = require("../../parsers/jsx");
@@ -85,15 +84,6 @@ var blockToStencil = function (json, options) {
         str += json.children.map(function (item) { return blockToStencil(item, options); }).join('\n');
     }
     str += "</".concat(json.name, ">");
-    return str;
-};
-var getRefsString = function (json, refs) {
-    if (refs === void 0) { refs = (0, get_refs_1.getRefs)(json); }
-    var str = '';
-    for (var _i = 0, _a = Array.from(refs); _i < _a.length; _i++) {
-        var ref = _a[_i];
-        str += "\nconst ".concat(ref, " = useRef();");
-    }
     return str;
 };
 function processBinding(code) {

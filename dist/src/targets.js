@@ -15,6 +15,7 @@ var template_1 = require("./generators/template");
 var vue_1 = require("./generators/vue");
 var stencil_1 = require("./generators/stencil");
 var qwik_1 = require("./generators/qwik");
+var marko_1 = require("./generators/marko");
 exports.targets = {
     angular: angular_1.componentToAngular,
     builder: builder_1.componentToBuilder,
@@ -34,4 +35,5 @@ exports.targets = {
     vue3: vue_1.componentToVue3,
     stencil: stencil_1.componentToStencil,
     qwik: qwik_1.componentToQwik,
+    marko: marko_1.componentToMarko,
 };
