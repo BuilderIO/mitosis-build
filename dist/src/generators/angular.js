@@ -214,7 +214,8 @@ var componentToAngular = function (options) {
         })
             .map(function (item) {
             return Object.keys(item.imports).filter(function (item) { return item && !(0, is_upper_case_1.isUpperCase)(item[0]); });
-        });
+        })
+            .flat();
         var _q = component.exports, localExports = _q === void 0 ? {} : _q;
         var localExportVars = Object.keys(localExports)
             .filter(function (key) { return localExports[key].usedInLocal; })
