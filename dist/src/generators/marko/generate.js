@@ -69,7 +69,7 @@ var blockToMarko = function (json, options) {
             continue;
         }
         if (key === 'ref') {
-            str += " ref=((el) => this.".concat(code, " = el) ");
+            // TODO: implement refs like this: https://github.com/BuilderIO/mitosis/pull/621#discussion_r942001014
         }
         else if (key.startsWith('on')) {
             var useKey = key === 'onChange' && json.name === 'input' ? 'onInput' : key;
@@ -139,7 +139,7 @@ var componentToMarko = function (options) {
         }
         var jsString = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    ", "\n\n    class {\n        ", "\n\n        ", "\n      \n        ", "\n        ", "\n        ", "\n    }\n  "], ["\n    ", "\n\n    class {\n        ", "\n\n        ", "\n      \n        ", "\n        ", "\n        ", "\n    }\n  "])), (0, render_imports_1.renderPreComponent)({ component: json, target: 'marko' }), methodsString, !hasState
             ? ''
-            : "onCreate() {\n          ".concat(thisHasProps ? 'const input = this.input;' : '', "\n          this.state = ").concat(dataString, "\n        }"), !((_b = json.hooks.onMount) === null || _b === void 0 ? void 0 : _b.code)
+            : "onCreate(".concat(thisHasProps ? 'input' : '', ") {\n          this.state = ").concat(dataString, "\n        }"), !((_b = json.hooks.onMount) === null || _b === void 0 ? void 0 : _b.code)
             ? ''
             : "onMount() { ".concat(processBinding(json.hooks.onMount.code, 'class'), " }"), !((_c = json.hooks.onUnMount) === null || _c === void 0 ? void 0 : _c.code)
             ? ''
