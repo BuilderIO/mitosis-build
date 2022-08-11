@@ -33,6 +33,8 @@ var getFileExtensionForTarget = function (target) {
         case 'vue2':
         case 'vue3':
             return '.vue';
+        case 'marko':
+            return '.marko';
         case 'angular':
             return '';
         // these `.lite` extensions are handled in the `transpile` step of the CLI.
