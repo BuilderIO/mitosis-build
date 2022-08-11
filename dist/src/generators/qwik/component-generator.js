@@ -16,6 +16,7 @@ var jsx_1 = require("./jsx");
 var src_generator_1 = require("./src-generator");
 var babel_transform_1 = require("../../helpers/babel-transform");
 var fast_clone_1 = require("../../helpers/fast-clone");
+var add_prevent_default_1 = require("./add-prevent-default");
 Error.stackTraceLimit = 9999;
 // TODO(misko): styles are not processed.
 var DEBUG = false;
@@ -25,6 +26,7 @@ var componentToQwik = function (userOptions) {
         var _component = _a.component, path = _a.path;
         // Make a copy we can safely mutate, similar to babel's toolchain
         var component = (0, fast_clone_1.fastClone)(_component);
+        (0, add_prevent_default_1.addPreventDefault)(component);
         var file = new src_generator_1.File(component.name + '.js', {
             isPretty: true,
             isJSX: true,
