@@ -1,12 +1,11 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.convertMethodToFunction = void 0;
-function convertMethodToFunction(code, methods, lexicalArgs) {
+function convertMethodToFunction(code, properties, lexicalArgs) {
     var out = [];
     var idx = 0;
     var lastIdx = idx;
     var end = code.length;
-    var templateDepth = 0;
     var mode = "code" /* Mode.code */;
     var braceDepth = 0;
     var stringEndBraceDepth = -1;
@@ -25,7 +24,6 @@ function convertMethodToFunction(code, methods, lexicalArgs) {
                 }
                 else if (ch === QUOTE_BACK_TICK) {
                     mode = "stringTemplate" /* Mode.stringTemplate */;
-                    templateDepth++;
                 }
                 else if (ch === OPEN_BRACE) {
                     braceDepth++;
@@ -40,7 +38,6 @@ function convertMethodToFunction(code, methods, lexicalArgs) {
                     braceDepth--;
                     if (braceDepth === stringEndBraceDepth) {
                         stringEndBraceDepth = stringEndBraceDepthQueue.pop();
-                        templateDepth--;
                         mode = "stringTemplate" /* Mode.stringTemplate */;
                     }
                 }
@@ -52,11 +49,17 @@ function convertMethodToFunction(code, methods, lexicalArgs) {
                         idx++;
                         var propEndIdx = findIdentEnd();
                         var identifier = code.substring(idx, propEndIdx);
-                        if (identifier in methods) {
+                        var propType = properties[identifier];
+                        if (propType) {
                             var isGetter = code.charCodeAt(propEndIdx) !== OPEN_PAREN;
                             lastIdx = idx = propEndIdx + (isGetter ? 0 : 1);
                             if (isGetter) {
-                                out.push(identifier, "(".concat(lexicalArgs.join(','), ")"));
+                                if (propType === 'method') {
+                                    out.push(identifier, ".bind(null,".concat(lexicalArgs.join(','), ")"));
+                                }
+                                else {
+                                    out.push(identifier, "(".concat(lexicalArgs.join(','), ")"));
+                                }
                             }
                             else {
                                 out.push(identifier, "(".concat(lexicalArgs.join(','), ","));
@@ -87,10 +90,8 @@ function convertMethodToFunction(code, methods, lexicalArgs) {
             case "stringTemplate" /* Mode.stringTemplate */:
                 if (lastCh !== BACKSLASH && ch == QUOTE_BACK_TICK) {
                     mode = "code" /* Mode.code */;
-                    templateDepth--;
                 }
                 else if (lastCh === DOLLAR && ch == OPEN_BRACE) {
-                    templateDepth++;
                     mode = "code" /* Mode.code */;
                     stringEndBraceDepthQueue.push(stringEndBraceDepth);
                     stringEndBraceDepth = braceDepth;

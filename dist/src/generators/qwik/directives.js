@@ -13,10 +13,17 @@ exports.DIRECTIVES = {
             var _this = this;
             var _a;
             var expr = (_a = node.bindings.when) === null || _a === void 0 ? void 0 : _a.code;
+            var elseBlockFn = blockFn.else;
             this.jsxExpression(function () {
                 _this.emit(expr, '?');
                 blockFn();
-                _this.emit(':null');
+                _this.emit(':');
+                if (elseBlockFn) {
+                    elseBlockFn();
+                }
+                else {
+                    _this.emit('null');
+                }
             });
         };
     },
@@ -41,7 +48,7 @@ exports.DIRECTIVES = {
     Host: function (node, blockFn) {
         return function () {
             var host = this.file.import(this.file.qwikModule, 'Host').localName;
-            this.jsxBegin(host, node.properties, {});
+            this.jsxBegin(host, node.properties, node.bindings);
             blockFn();
             this.jsxEnd(host);
         };
@@ -120,7 +127,7 @@ exports.__passThroughProps__ = __passThroughProps__;
 function CoreButton(props) {
     var hasLink = !!props.link;
     var hProps = {
-        innerHTML: props.text || '',
+        dangerouslySetInnerHTML: props.text || '',
         href: props.link,
         target: props.openInNewTab ? '_blank' : '_self',
         class: props.class,

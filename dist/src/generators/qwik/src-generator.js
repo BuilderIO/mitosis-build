@@ -316,6 +316,10 @@ var SrcBuilder = /** @class */ (function () {
                     binding_1 = quote(props.class + ' ') + '+' + binding_1;
                 }
                 var key = lastProperty(rawKey);
+                if (isEvent(key)) {
+                    key = key + '$';
+                    binding_1 = "(event)=>".concat(binding_1);
+                }
                 if (!binding_1 && rawKey in props) {
                     binding_1 = quote(props[rawKey]);
                 }
@@ -350,6 +354,8 @@ var SrcBuilder = /** @class */ (function () {
         }
         function emitJsxProp(key, value) {
             if (value) {
+                if (key === 'innerHTML')
+                    key = 'dangerouslySetInnerHTML';
                 if (self.isJSX) {
                     self.emit(' ', key, '=');
                     if (typeof value == 'string' && value.startsWith('"') && value.endsWith('"')) {
@@ -406,6 +412,12 @@ var SrcBuilder = /** @class */ (function () {
     return SrcBuilder;
 }());
 exports.SrcBuilder = SrcBuilder;
+function isEvent(name) {
+    return name.startsWith('on') && isUppercase(name.charAt(2)) && !name.endsWith('$');
+}
+function isUppercase(ch) {
+    return ch == ch.toUpperCase();
+}
 var Symbol = /** @class */ (function () {
     function Symbol(importName, localName) {
         this.importName = importName;
