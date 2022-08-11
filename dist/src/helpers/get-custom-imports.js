@@ -25,7 +25,7 @@ function getCustomImports(json) {
         // This is imperfect. Basically, if the string of this import name
         // doesn't occur at all, it's definitely not used. If it does, it might.
         // So this simple check helps us ~90% of the time not over-add imports
-        // to templates. Arguably "good enough" for now, as there is generally no 
+        // to templates. Arguably "good enough" for now, as there is generally no
         // consequence to over adding here, and it would be a lot more performance expensive
         // during compilation to do a complete AST parse and look for real references
         .filter(function (item) { return blocksString.includes(item); });
