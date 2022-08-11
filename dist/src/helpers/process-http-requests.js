@@ -8,7 +8,7 @@ function processHttpRequests(json) {
     if (httpRequests) {
         for (var key in httpRequests) {
             if (!json.state[key]) {
-                json.state[key] = null;
+                json.state[key] = { code: null, type: 'property' };
             }
             var value = httpRequests[key];
             // TODO: unravel our proxy. aka parse out methods, header, etc

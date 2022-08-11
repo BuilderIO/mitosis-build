@@ -217,7 +217,7 @@ var stringifyBinding = function (node) {
         }
         else if (key === 'class') {
             return " :class=\"_classStringToObject(".concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(value === null || value === void 0 ? void 0 : value.code, {
-                replaceWith: 'this.',
+                replaceWith: '',
             }), ")\" ");
             // TODO: support dynamic classes as objects somehow like Vue requires
             // https://vuejs.org/v2/guide/class-and-style.html
@@ -320,7 +320,7 @@ function getContextProvideString(component, options) {
     for (var key in component.context.set) {
         var _a = component.context.set[key], value = _a.value, name_1 = _a.name;
         str += "\n      ".concat(name_1, ": ").concat(value
-            ? (0, get_state_object_string_1.getMemberObjectString)(value, {
+            ? (0, get_state_object_string_1.stringifyContextValue)(value, {
                 valueMapper: function (code) { return (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(code, { replaceWith: '_this.' }); },
             })
             : null, ",\n    ");
@@ -342,10 +342,14 @@ var onUpdatePlugin = function (options) { return ({
                     .filter(function (hook) { var _a; return (_a = hook.deps) === null || _a === void 0 ? void 0 : _a.length; })
                     .forEach(function (hook, index) {
                     var _a;
-                    component.state[getOnUpdateHookName(index)] = "".concat(method_literal_prefix_1.methodLiteralPrefix, "get ").concat(getOnUpdateHookName(index), " () {\n            return {\n              ").concat((_a = hook.deps) === null || _a === void 0 ? void 0 : _a.slice(1, -1).split(',').map(function (dep, k) {
+                    var code = "".concat(method_literal_prefix_1.methodLiteralPrefix, "get ").concat(getOnUpdateHookName(index), " () {\n            return {\n              ").concat((_a = hook.deps) === null || _a === void 0 ? void 0 : _a.slice(1, -1).split(',').map(function (dep, k) {
                         var val = dep.trim();
                         return "".concat(k, ": ").concat(val);
                     }).join(','), "\n            }\n          }");
+                    component.state[getOnUpdateHookName(index)] = {
+                        code: code,
+                        type: 'getter',
+                    };
                 });
             }
         },

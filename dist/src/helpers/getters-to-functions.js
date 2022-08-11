@@ -11,7 +11,8 @@ var traverse_1 = __importDefault(require("traverse"));
  */
 var gettersToFunctions = function (json) {
     var getterKeys = Object.keys(json.state).filter(function (item) {
-        var value = json.state[item];
+        var _a;
+        var value = (_a = json.state[item]) === null || _a === void 0 ? void 0 : _a.code;
         if (typeof value === 'string' &&
             value.startsWith(method_literal_prefix_1.methodLiteralPrefix) &&
             value.replace(method_literal_prefix_1.methodLiteralPrefix, '').startsWith('get ')) {

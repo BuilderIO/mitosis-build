@@ -1,8 +1,11 @@
 export declare type JSONPrimitive = string | null | number | boolean | undefined;
 export declare type JSONObject = {
-    [key: string]: JSON | undefined;
+    [key: string]: _JSON | undefined;
 };
-export declare type JSON = JSONPrimitive | JSONObject | JSON[];
+/**
+ * We use an underscore to avoid collisions with the global `JSON` primitive type.
+ */
+export declare type _JSON = JSONPrimitive | JSONObject | _JSON[];
 export declare type JSONPrimitiveOrNode = JSONPrimitive | babel.Node;
 export declare type JSONOrNodeObject = {
     [key: string]: JSONOrNode;

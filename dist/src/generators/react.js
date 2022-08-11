@@ -54,6 +54,7 @@ var react_native_1 = require("./react-native");
 var collect_styled_components_1 = require("../helpers/styles/collect-styled-components");
 var helpers_1 = require("../helpers/styles/helpers");
 var slots_1 = require("../helpers/slots");
+var state_1 = require("../helpers/state");
 /**
  * If the root Mitosis component only has 1 child, and it is a `Show`/`For` node, then we need to wrap it in a fragment.
  * Otherwise, we end up with invalid React render code.
@@ -270,6 +271,7 @@ var processBinding = function (str, options) {
     });
 };
 var getUseStateCode = function (json, options) {
+    var _a;
     var str = '';
     var state = json.state;
     var valueMapper = function (val) {
@@ -278,7 +280,7 @@ var getUseStateCode = function (json, options) {
     };
     var lineItemDelimiter = '\n\n\n';
     for (var key in state) {
-        var value = state[key];
+        var value = (_a = state[key]) === null || _a === void 0 ? void 0 : _a.code;
         var defaultCase = "const [".concat(key, ", set").concat((0, capitalize_1.capitalize)(key), "] = useState(() => (").concat(valueMapper(json5_1.default.stringify(value)), "))");
         if (typeof value === 'string') {
             if (value.startsWith(function_literal_prefix_1.functionLiteralPrefix)) {
@@ -329,7 +331,7 @@ function addProviderComponents(json, options) {
                 (0, create_mitosis_node_1.createMitosisNode)(__assign({ name: "".concat(name_1, ".Provider"), children: json.children }, (value && {
                     bindings: {
                         value: {
-                            code: (0, get_state_object_string_1.getMemberObjectString)(value),
+                            code: (0, get_state_object_string_1.stringifyContextValue)(value),
                         },
                     },
                 }))),
@@ -415,7 +417,7 @@ var componentToReact = function (reactOptions) {
 };
 exports.componentToReact = componentToReact;
 var _componentToReact = function (json, options, isSubComponent) {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l;
+    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m;
     if (isSubComponent === void 0) { isSubComponent = false; }
     (0, process_http_requests_1.processHttpRequests)(json);
     (0, handle_missing_state_1.handleMissingState)(json);
@@ -429,8 +431,8 @@ var _componentToReact = function (json, options, isSubComponent) {
     // const domRefs = getRefs(json);
     var allRefs = Object.keys(json.refs);
     (0, map_refs_1.mapRefs)(json, function (refName) { return "".concat(refName, ".current"); });
-    var hasState = Boolean(Object.keys(json.state).length);
-    var _m = (0, get_props_ref_1.getPropsRef)(json), forwardRef = _m[0], hasPropRef = _m[1];
+    var hasState = (0, state_1.checkHasState)(json);
+    var _o = (0, get_props_ref_1.getPropsRef)(json), forwardRef = _o[0], hasPropRef = _o[1];
     var isForwardRef = Boolean(((_a = json.meta.useMetadata) === null || _a === void 0 ? void 0 : _a.forwardRef) || hasPropRef);
     if (isForwardRef) {
         var meta = (_b = json.meta.useMetadata) === null || _b === void 0 ? void 0 : _b.forwardRef;
@@ -476,7 +478,7 @@ var _componentToReact = function (json, options, isSubComponent) {
     var wrap = wrapInFragment(json) ||
         (componentHasStyles && stylesType === 'styled-jsx') ||
         isRootSpecialNode(json);
-    var _o = getRefsString(json, allRefs, options), hasStateArgument = _o[0], refsString = _o[1];
+    var _p = getRefsString(json, allRefs, options), hasStateArgument = _p[0], refsString = _p[1];
     var nativeStyles = stylesType === 'react-native' && componentHasStyles && (0, react_native_1.collectReactNativeStyles)(json);
     var propsArgs = 'props';
     if (json.propsTypeRef) {
@@ -502,11 +504,7 @@ var _componentToReact = function (json, options, isSubComponent) {
         ? "\n          useEffect(() => {\n            ".concat(processBinding(updateStateSettersInCode(json.hooks.onInit.code, options), options), "\n          })\n          ")
         : '', ((_j = json.hooks.onMount) === null || _j === void 0 ? void 0 : _j.code)
         ? "useEffect(() => {\n            ".concat(processBinding(updateStateSettersInCode(json.hooks.onMount.code, options), options), "\n          }, [])")
-        : '', ((_k = json.hooks.onUpdate) === null || _k === void 0 ? void 0 : _k.length)
-        ? json.hooks.onUpdate
-            .map(function (hook) { return "useEffect(() => {\n            ".concat(processBinding(updateStateSettersInCode(hook.code, options), options), "\n          }, \n          ").concat(hook.deps ? processBinding(updateStateSettersInCode(hook.deps, options), options) : '', ")"); })
-            .join(';')
-        : '', ((_l = json.hooks.onUnMount) === null || _l === void 0 ? void 0 : _l.code)
+        : '', (_l = (_k = json.hooks.onUpdate) === null || _k === void 0 ? void 0 : _k.map(function (hook) { return "useEffect(() => {\n            ".concat(processBinding(updateStateSettersInCode(hook.code, options), options), "\n          }, \n          ").concat(hook.deps ? processBinding(updateStateSettersInCode(hook.deps, options), options) : '', ")"); }).join(';')) !== null && _l !== void 0 ? _l : '', ((_m = json.hooks.onUnMount) === null || _m === void 0 ? void 0 : _m.code)
         ? "useEffect(() => {\n            return () => {\n              ".concat(processBinding(updateStateSettersInCode(json.hooks.onUnMount.code, options), options), "\n            }\n          }, [])")
         : '', wrap ? '<>' : '', json.children.map(function (item) { return (0, exports.blockToReact)(item, options); }).join('\n'), componentHasStyles && stylesType === 'styled-jsx' ? "<style jsx>{`".concat(css, "`}</style>") : '', wrap ? '</>' : '', isForwardRef ? ')' : '', !nativeStyles
         ? ''

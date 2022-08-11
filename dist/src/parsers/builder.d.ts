@@ -1,5 +1,6 @@
 import { BuilderContent, BuilderElement } from '@builder.io/sdk';
 import { MitosisNode } from '../types/mitosis-node';
+import { JSONObject } from '../types/json';
 declare type InternalOptions = {
     skipMapper?: boolean;
 };
@@ -35,11 +36,11 @@ export declare const builderContentToMitosisComponent: (builderContent: BuilderC
         '@type': "@builder.io/mitosis/component";
         imports: import("..").MitosisImport[];
         exports?: import("..").MitosisExport | undefined;
-        meta: import("../types/json").JSONObject & {
-            useMetadata?: import("../types/json").JSONObject | undefined;
+        meta: JSONObject & {
+            useMetadata?: JSONObject | undefined;
         };
         inputs: import("..").MitosisComponentInput[];
-        state: import("../types/json").JSONObject;
+        state: import("../helpers/typescript").Dictionary<import("..").StateValue | undefined>;
         context: {
             get: import("..").ContextGet;
             set: import("..").ContextSet;
@@ -69,11 +70,11 @@ export declare const builderContentToMitosisComponent: (builderContent: BuilderC
     name: string;
     imports: import("..").MitosisImport[];
     exports?: import("..").MitosisExport | undefined;
-    meta: import("../types/json").JSONObject & {
-        useMetadata?: import("../types/json").JSONObject | undefined;
+    meta: JSONObject & {
+        useMetadata?: JSONObject | undefined;
     };
     inputs: import("..").MitosisComponentInput[];
-    state: import("../types/json").JSONObject;
+    state: import("../helpers/typescript").Dictionary<import("..").StateValue | undefined>;
     context: {
         get: import("..").ContextGet;
         set: import("..").ContextSet;

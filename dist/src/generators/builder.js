@@ -34,6 +34,7 @@ var builder_1 = require("../parsers/builder");
 var remove_surrounding_block_1 = require("../helpers/remove-surrounding-block");
 var traverse_1 = __importDefault(require("traverse"));
 var symbol_processor_1 = require("../symbols/symbol-processor");
+var state_1 = require("../helpers/state");
 var omitMetaProperties = function (obj) {
     return (0, lodash_1.omitBy)(obj, function (_value, key) { return key.startsWith('$'); });
 };
@@ -233,7 +234,7 @@ var componentToBuilder = function (options) {
     return function (_a) {
         var _b, _c, _d, _e;
         var component = _a.component;
-        var hasState = Boolean(Object.keys(component.state).length);
+        var hasState = (0, state_1.checkHasState)(component);
         var result = (0, fast_clone_1.fastClone)({
             data: {
                 httpRequests: (_c = (_b = component === null || component === void 0 ? void 0 : component.meta) === null || _b === void 0 ? void 0 : _b.useMetadata) === null || _c === void 0 ? void 0 : _c.httpRequests,

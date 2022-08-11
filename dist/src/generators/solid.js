@@ -47,6 +47,7 @@ var context_1 = require("./helpers/context");
 var babel_transform_1 = require("../helpers/babel-transform");
 var core_1 = require("@babel/core");
 var lodash_1 = require("lodash");
+var state_1 = require("../helpers/state");
 // Transform <foo.bar key="value" /> to <component :is="foo.bar" key="value" />
 function processDynamicComponents(json, options) {
     var found = false;
@@ -215,7 +216,7 @@ function addProviderComponents(json, options) {
         json.children = [
             (0, create_mitosis_node_1.createMitosisNode)(__assign({ name: "".concat(name_1, ".Provider"), children: json.children }, (value && {
                 bindings: {
-                    value: { code: (0, get_state_object_string_1.getMemberObjectString)(value) },
+                    value: { code: (0, get_state_object_string_1.stringifyContextValue)(value) },
                 },
             }))),
         ];
@@ -239,7 +240,7 @@ var componentToSolid = function (options) {
         (0, strip_meta_properties_1.stripMetaProperties)(json);
         var foundDynamicComponents = processDynamicComponents(json, options);
         var stateString = (0, get_state_object_string_1.getStateObjectStringFromComponent)(json);
-        var hasState = Object.keys(component.state).length > 0;
+        var hasState = (0, state_1.checkHasState)(json);
         var componentsUsed = (0, get_components_used_1.getComponentsUsed)(json);
         var componentHasContext = (0, context_1.hasContext)(json);
         var hasShowComponent = componentsUsed.has('Show');

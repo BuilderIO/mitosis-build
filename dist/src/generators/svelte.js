@@ -116,7 +116,7 @@ var setContextCode = function (json) {
     return Object.keys(contextSetters)
         .map(function (key) {
         var _a = contextSetters[key], value = _a.value, name = _a.name;
-        return "setContext(".concat(name, ".key, ").concat(value ? (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)((0, get_state_object_string_1.getMemberObjectString)(value)) : 'undefined', ");");
+        return "setContext(".concat(name, ".key, ").concat(value ? (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)((0, get_state_object_string_1.stringifyContextValue)(value)) : 'undefined', ");");
     })
         .join('\n');
 };
@@ -267,13 +267,17 @@ var stripThisRefs = function (str) {
 var FUNCTION_HACK_PLUGIN = function () { return ({
     json: {
         pre: function (json) {
+            var _a;
             for (var key in json.state) {
-                var value = json.state[key];
+                var value = (_a = json.state[key]) === null || _a === void 0 ? void 0 : _a.code;
                 if (typeof value === 'string' && value.startsWith(method_literal_prefix_1.methodLiteralPrefix)) {
                     var strippedValue = value.replace(method_literal_prefix_1.methodLiteralPrefix, '');
                     if (!Boolean(strippedValue.match(patterns_1.GETTER))) {
                         var newValue = "".concat(function_literal_prefix_1.functionLiteralPrefix, " function ").concat(strippedValue);
-                        json.state[key] = newValue;
+                        json.state[key] = {
+                            code: newValue,
+                            type: 'function',
+                        };
                     }
                 }
             }

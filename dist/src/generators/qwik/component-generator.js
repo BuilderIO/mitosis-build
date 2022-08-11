@@ -1,15 +1,4 @@
 "use strict";
-var __assign = (this && this.__assign) || function () {
-    __assign = Object.assign || function(t) {
-        for (var s, i = 1, n = arguments.length; i < n; i++) {
-            s = arguments[i];
-            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-                t[p] = s[p];
-        }
-        return t;
-    };
-    return __assign.apply(this, arguments);
-};
 var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
     if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
         if (ar || !(i in from)) {
@@ -24,6 +13,7 @@ exports.componentToQwik = void 0;
 var babel_transform_1 = require("../../helpers/babel-transform");
 var fast_clone_1 = require("../../helpers/fast-clone");
 var collect_css_1 = require("../../helpers/styles/collect-css");
+var state_1 = require("../../helpers/state");
 var add_prevent_default_1 = require("./add-prevent-default");
 var convert_method_to_function_1 = require("./convert-method-to-function");
 var jsx_1 = require("./jsx");
@@ -49,36 +39,30 @@ var componentToQwik = function (userOptions) {
         try {
             emitImports(file, component);
             emitTypes(file, component);
-            var metadata_1 = component.meta.useMetadata || {};
-            var isLightComponent = ((_c = (_b = metadata_1 === null || metadata_1 === void 0 ? void 0 : metadata_1.qwik) === null || _b === void 0 ? void 0 : _b.component) === null || _c === void 0 ? void 0 : _c.isLight) || false;
-            var imports_1 = (_d = metadata_1 === null || metadata_1 === void 0 ? void 0 : metadata_1.qwik) === null || _d === void 0 ? void 0 : _d.imports;
+            var metadata = component.meta.useMetadata || {};
+            var isLightComponent = ((_c = (_b = metadata === null || metadata === void 0 ? void 0 : metadata.qwik) === null || _b === void 0 ? void 0 : _b.component) === null || _c === void 0 ? void 0 : _c.isLight) || false;
+            var imports_1 = (_d = metadata === null || metadata === void 0 ? void 0 : metadata.qwik) === null || _d === void 0 ? void 0 : _d.imports;
             imports_1 && Object.keys(imports_1).forEach(function (key) { return file.import(imports_1[key], key); });
-            var state_1 = emitStateMethodsAndRewriteBindings(file, component, metadata_1);
-            var hasState_1 = Boolean(Object.keys(component.state).length);
+            var state_2 = emitStateMethodsAndRewriteBindings(file, component, metadata);
+            var hasState_1 = (0, state_1.checkHasState)(component);
             var css_1 = null;
-            var topLevelElement_1 = isLightComponent ? null : getTopLevelElement(component);
             var componentBody = (0, src_generator_1.arrowFnBlock)(['props'], [
                 function () {
-                    var _a, _b;
-                    if ((_b = (_a = metadata_1 === null || metadata_1 === void 0 ? void 0 : metadata_1.qwik) === null || _a === void 0 ? void 0 : _a.component) === null || _b === void 0 ? void 0 : _b.useHostElement)
-                        emitUseHostElement(file);
                     css_1 = emitUseStyles(file, component);
                     emitUseContext(file, component);
                     emitUseRef(file, component);
-                    hasState_1 && emitUseStore(file, state_1);
+                    hasState_1 && emitUseStore(file, state_2);
                     emitUseContextProvider(file, component);
                     emitUseMount(file, component);
                     emitUseWatch(file, component);
                     emitUseCleanup(file, component);
                     emitTagNameHack(file, component);
-                    emitJSX(file, component, topLevelElement_1);
+                    emitJSX(file, component);
                 },
             ], [component.propsTypeRef || 'any']);
             file.src.const(component.name, isLightComponent
                 ? componentBody
-                : (0, src_generator_1.invoke)(file.import(file.qwikModule, 'component$'), __spreadArray([
-                    componentBody
-                ], (topLevelElement_1 ? ["{tagName:\"".concat(topLevelElement_1, "\"}")] : []), true)), true, true);
+                : (0, src_generator_1.invoke)(file.import(file.qwikModule, 'component$'), [componentBody]), true, true);
             file.exportDefault(component.name);
             emitStyles(file, css_1);
             DEBUG && file.exportConst('COMPONENT', JSON.stringify(component, null, 2));
@@ -135,17 +119,11 @@ function emitUseCleanup(file, component) {
         file.src.emit(file.import(file.qwikModule, 'useCleanup$').localName, '(()=>{', code, '});');
     }
 }
-function emitJSX(file, component, topLevelElement) {
+function emitJSX(file, component) {
     var directives = new Map();
     var handlers = new Map();
     var styles = new Map();
     var parentSymbolBindings = {};
-    var children = component.children;
-    if (topLevelElement && children.length == 1) {
-        var child = children[0];
-        children[0] = __assign(__assign({}, child), { name: 'Host' });
-        file.import(file.qwikModule, 'Host');
-    }
     file.src.emit('return ', (0, jsx_1.renderJSXNodes)(file, directives, handlers, component.children, styles, parentSymbolBindings));
 }
 function emitUseContextProvider(file, component) {
@@ -268,7 +246,8 @@ function emitStateMethods(file, componentState, lexicalArgs) {
     var stateInit = [stateValues];
     var methodMap = stateToMethodOrGetter(componentState);
     Object.keys(componentState).forEach(function (key) {
-        var code = componentState[key];
+        var _a;
+        var code = (_a = componentState[key]) === null || _a === void 0 ? void 0 : _a.code;
         if (isCode(code)) {
             var codeIisGetter = isGetter(code);
             var prefixIdx = code.indexOf(':') + 1;
@@ -316,35 +295,11 @@ function extractGetterBody(code) {
 function stateToMethodOrGetter(state) {
     var methodMap = {};
     Object.keys(state).forEach(function (key) {
-        var code = state[key];
+        var _a;
+        var code = (_a = state[key]) === null || _a === void 0 ? void 0 : _a.code;
         if (typeof code == 'string' && code.startsWith(METHOD)) {
             methodMap[key] = code.startsWith(GETTER) ? 'getter' : 'method';
         }
     });
     return methodMap;
-}
-/**
- * Return a top-level element for the component.
- *
- * WHAT: If the component has a single root element, then this returns the element name.
- *
- * WHY: This is useful to pull the root element into the component's host and thus saving unnecessary wrapping.
- *
- * @param component
- */
-function getTopLevelElement(component) {
-    var _a;
-    if (((_a = component.children) === null || _a === void 0 ? void 0 : _a.length) === 1) {
-        var child = component.children[0];
-        if (child['@type'] === '@builder.io/mitosis/node' && startsLowerCase(child.name)) {
-            return child.name;
-        }
-    }
-    return null;
-}
-function startsLowerCase(name) {
-    return name.length > 0 && name[0].toLowerCase() === name[0];
-}
-function emitUseHostElement(file) {
-    file.src.emit('const hostElement=', file.import(file.qwikModule, 'useHostElement').localName, '();');
 }

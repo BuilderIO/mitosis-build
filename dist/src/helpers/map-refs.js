@@ -59,26 +59,31 @@ var replaceRefsInString = function (code, refs, mapper) {
     });
 };
 var mapRefs = function (component, mapper) {
+    var _a;
     var refSet = (0, get_refs_1.getRefs)(component);
     // grab refs not used for bindings
     Object.keys(component.refs).forEach(function (ref) { return refSet.add(ref); });
     var refs = Array.from(refSet);
-    for (var _i = 0, _a = Object.keys(component.state); _i < _a.length; _i++) {
-        var key = _a[_i];
-        var value = component.state[key];
+    for (var _i = 0, _b = Object.keys(component.state); _i < _b.length; _i++) {
+        var key = _b[_i];
+        var value = (_a = component.state[key]) === null || _a === void 0 ? void 0 : _a.code;
         if (typeof value === 'string') {
             if (value.startsWith(method_literal_prefix_1.methodLiteralPrefix)) {
                 var methodValue = value.replace(method_literal_prefix_1.methodLiteralPrefix, '');
                 var isGet = Boolean(methodValue.match(patterns_1.GETTER));
                 var isSet = Boolean(methodValue.match(patterns_1.SETTER));
-                component.state[key] =
-                    method_literal_prefix_1.methodLiteralPrefix +
-                        replaceRefsInString(methodValue.replace(/^(get |set )?/, 'function '), refs, mapper).replace(/^function /, isGet ? 'get ' : isSet ? 'set ' : '');
+                component.state[key] = {
+                    code: method_literal_prefix_1.methodLiteralPrefix +
+                        replaceRefsInString(methodValue.replace(/^(get |set )?/, 'function '), refs, mapper).replace(/^function /, isGet ? 'get ' : isSet ? 'set ' : ''),
+                    type: isGet ? 'getter' : 'method',
+                };
             }
             else if (value.startsWith(function_literal_prefix_1.functionLiteralPrefix)) {
-                component.state[key] =
-                    function_literal_prefix_1.functionLiteralPrefix +
-                        replaceRefsInString(value.replace(function_literal_prefix_1.functionLiteralPrefix, ''), refs, mapper);
+                component.state[key] = {
+                    code: function_literal_prefix_1.functionLiteralPrefix +
+                        replaceRefsInString(value.replace(function_literal_prefix_1.functionLiteralPrefix, ''), refs, mapper),
+                    type: 'function',
+                };
             }
         }
     }
@@ -93,8 +98,8 @@ var mapRefs = function (component, mapper) {
             }
         }
     });
-    for (var _b = 0, _c = Object.keys(component.hooks); _b < _c.length; _b++) {
-        var key = _c[_b];
+    for (var _c = 0, _d = Object.keys(component.hooks); _c < _d.length; _c++) {
+        var key = _d[_c];
         var hooks = component.hooks[key];
         if (Array.isArray(hooks)) {
             hooks.forEach(function (hook) {
