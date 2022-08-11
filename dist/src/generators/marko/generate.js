@@ -115,7 +115,7 @@ var blockToMarko = function (json, options) {
     }
     var str = '';
     str += "<".concat(toTagName(json.name), " ");
-    var classString = (0, collect_class_string_1.collectClassString)(json);
+    var classString = (0, collect_class_string_1.collectClassString)(json, '(', ')');
     if (classString) {
         str += " class=".concat(classString, " ");
     }
@@ -297,7 +297,7 @@ exports.preprocessHtml = preprocessHtml;
 function postprocessHtml(htmlString) {
     return htmlString
         .replace(/<for \|/g, '<for|')
-        .replace(/<if _="([\s\S]+)"\s*>/g, function (_match, group) {
+        .replace(/<if _="([\s\S]+?)"\s*>/g, function (_match, group) {
         return "<if(".concat(decodeAttributeValue(group), ")>");
     })
         .replace(/="\(([\s\S]*?)\)"(\s*[a-z\/>])/g, function (_match, group, after) {
