@@ -1,1 +1,3 @@
-export declare const tryParseJson: (jsonStr: string) => any;
+declare type ParsedJson = any;
+export declare const tryParseJson: (jsonStr: string) => ParsedJson;
+export {};

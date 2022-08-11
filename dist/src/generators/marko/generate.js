@@ -34,34 +34,16 @@ var indent_1 = require("../../helpers/indent");
 var map_refs_1 = require("../../helpers/map-refs");
 var dash_case_1 = require("../../helpers/dash-case");
 var has_props_1 = require("../../helpers/has-props");
-var function_literal_prefix_1 = require("../../constants/function-literal-prefix");
-var method_literal_prefix_1 = require("../../constants/method-literal-prefix");
-var patterns_1 = require("../../helpers/patterns");
 var get_refs_1 = require("../../helpers/get-refs");
 // Having issues with this, so off for now
 var USE_MARKO_PRETTIER = false;
-function getStateTypeOfValue(value) {
-    if (typeof value === 'string') {
-        if (value.startsWith(function_literal_prefix_1.functionLiteralPrefix)) {
-            return 'function';
-        }
-        else if (value.startsWith(method_literal_prefix_1.methodLiteralPrefix)) {
-            var isGet = Boolean(value.replace(method_literal_prefix_1.methodLiteralPrefix, '').match(patterns_1.GETTER));
-            if (isGet) {
-                return 'getter';
-            }
-            return 'method';
-        }
-    }
-    return 'property';
-}
 /**
  * Return the names of methods and functions on state
  */
 function getStateMethodNames(json) {
     return Object.keys(json.state).filter(function (key) {
-        var value = json.state[key];
-        var type = getStateTypeOfValue(value);
+        var _a;
+        var type = (_a = json.state[key]) === null || _a === void 0 ? void 0 : _a.type;
         return type === 'function' || type === 'method';
     });
 }
@@ -69,13 +51,13 @@ function getStateMethodNames(json) {
  * Return the names of getter and functions on state
  */
 function getStateGetterNames(json) {
-    return Object.keys(json.state).filter(function (key) { return getStateTypeOfValue(json.state[key]) === 'getter'; });
+    return Object.keys(json.state).filter(function (key) { var _a; return ((_a = json.state[key]) === null || _a === void 0 ? void 0 : _a.type) === 'getter'; });
 }
 /**
  * Return the names of properties (basic literal values) on state
  */
 function getStatePropertyNames(json) {
-    return Object.keys(json.state).filter(function (key) { return getStateTypeOfValue(json.state[key]) === 'property'; });
+    return Object.keys(json.state).filter(function (key) { var _a; return ((_a = json.state[key]) === null || _a === void 0 ? void 0 : _a.type) === 'property'; });
 }
 var blockToMarko = function (json, options) {
     var _a, _b, _c, _d, _e;

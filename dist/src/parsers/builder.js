@@ -51,6 +51,7 @@ var create_mitosis_node_1 = require("../helpers/create-mitosis-node");
 var jsx_1 = require("./jsx");
 var parsers_1 = require("../helpers/parsers");
 var __1 = require("..");
+var state_1 = require("../helpers/state");
 // Omit some superflous styles that can come from Builder's web importer
 var styleOmitList = [
     'backgroundRepeatX',
@@ -691,7 +692,7 @@ var builderContentPartToMitosisComponent = function (builderContent, options) {
             name: input.name,
             defaultValue: input.defaultValue,
         }); }),
-        state: (parsed === null || parsed === void 0 ? void 0 : parsed.state) || __assign(__assign({}, state), (_f = builderContent.data) === null || _f === void 0 ? void 0 : _f.state),
+        state: (parsed === null || parsed === void 0 ? void 0 : parsed.state) || __assign(__assign({}, state), (0, state_1.mapJsonObjectToStateValue)((_f = builderContent.data) === null || _f === void 0 ? void 0 : _f.state)),
         hooks: __assign({}, ((((_g = parsed === null || parsed === void 0 ? void 0 : parsed.hooks.onMount) === null || _g === void 0 ? void 0 : _g.code) || (customCode && { code: customCode })) && {
             onMount: (parsed === null || parsed === void 0 ? void 0 : parsed.hooks.onMount) || { code: customCode },
         })),

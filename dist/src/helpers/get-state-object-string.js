@@ -14,11 +14,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getStateObjectStringFromComponent = exports.getMemberObjectString = void 0;
+exports.getStateObjectStringFromComponent = exports.stringifyContextValue = exports.getMemberObjectString = void 0;
 var json5_1 = __importDefault(require("json5"));
 var function_literal_prefix_1 = require("../constants/function-literal-prefix");
 var method_literal_prefix_1 = require("../constants/method-literal-prefix");
 var patterns_1 = require("./patterns");
+var state_1 = require("./state");
 var DEFAULT_OPTIONS = {
     format: 'object',
     keyPrefix: '',
@@ -30,18 +31,19 @@ var DEFAULT_OPTIONS = {
 var convertStateMemberToString = function (_a) {
     var data = _a.data, format = _a.format, functions = _a.functions, getters = _a.getters, keyPrefix = _a.keyPrefix, valueMapper = _a.valueMapper;
     return function (_a) {
-        var key = _a[0], value = _a[1];
+        var key = _a[0], state = _a[1];
         var keyValueDelimiter = format === 'object' ? ':' : '=';
-        if (typeof value === 'string') {
-            if (value.startsWith(function_literal_prefix_1.functionLiteralPrefix)) {
+        var code = state === null || state === void 0 ? void 0 : state.code;
+        if (typeof code === 'string') {
+            if (code.startsWith(function_literal_prefix_1.functionLiteralPrefix)) {
                 if (functions === false) {
                     return undefined;
                 }
-                var functionValue = value.replace(function_literal_prefix_1.functionLiteralPrefix, '');
+                var functionValue = code.replace(function_literal_prefix_1.functionLiteralPrefix, '');
                 return "".concat(keyPrefix, " ").concat(key, " ").concat(keyValueDelimiter, " ").concat(valueMapper(functionValue, 'function'));
             }
-            else if (value.startsWith(method_literal_prefix_1.methodLiteralPrefix)) {
-                var methodValue = value.replace(method_literal_prefix_1.methodLiteralPrefix, '');
+            else if (code.startsWith(method_literal_prefix_1.methodLiteralPrefix)) {
+                var methodValue = code.replace(method_literal_prefix_1.methodLiteralPrefix, '');
                 var isGet = Boolean(methodValue.match(patterns_1.GETTER));
                 if (isGet && getters === false) {
                     return undefined;
@@ -55,7 +57,7 @@ var convertStateMemberToString = function (_a) {
         if (data === false) {
             return undefined;
         }
-        return "".concat(keyPrefix, " ").concat(key).concat(keyValueDelimiter, " ").concat(valueMapper(json5_1.default.stringify(value), 'data'));
+        return "".concat(keyPrefix, " ").concat(key).concat(keyValueDelimiter, " ").concat(valueMapper(json5_1.default.stringify(code), 'data'));
     };
 };
 var getMemberObjectString = function (object, userOptions) {
@@ -76,5 +78,10 @@ var getMemberObjectString = function (object, userOptions) {
     return "".concat(prefix).concat(stringifiedProperties).concat(extraDelimiter).concat(suffix);
 };
 exports.getMemberObjectString = getMemberObjectString;
+var stringifyContextValue = function (object, userOptions) {
+    if (userOptions === void 0) { userOptions = {}; }
+    return (0, exports.getMemberObjectString)((0, state_1.mapJsonObjectToStateValue)(object), userOptions);
+};
+exports.stringifyContextValue = stringifyContextValue;
 var getStateObjectStringFromComponent = function (component, options) { return (0, exports.getMemberObjectString)(component.state, options); };
 exports.getStateObjectStringFromComponent = getStateObjectStringFromComponent;

@@ -39,6 +39,7 @@ var map_refs_1 = require("../helpers/map-refs");
 var render_imports_1 = require("../helpers/render-imports");
 var jsx_1 = require("../parsers/jsx");
 var react_1 = require("./react");
+var state_1 = require("../helpers/state");
 exports.DEFAULT_FORMAT = 'legacy';
 // Special isValidAttributeName for Mitosis so we can allow for $ in names
 var isValidAttributeName = function (str) {
@@ -152,7 +153,7 @@ var componentToMitosis = function (toMitosisOptions) {
         var components = Array.from((0, get_components_1.getComponents)(json));
         var mitosisComponents = components.filter(function (item) { return mitosisCoreComponents.includes(item); });
         var otherComponents = components.filter(function (item) { return !mitosisCoreComponents.includes(item); });
-        var hasState = Boolean(Object.keys(component.state).length);
+        var hasState = (0, state_1.checkHasState)(component);
         var needsMitosisCoreImport = Boolean(hasState || refs.length || mitosisComponents.length);
         var stringifiedUseMetadata = json5_1.default.stringify(component.meta.useMetadata);
         // TODO: smart only pull in imports as needed

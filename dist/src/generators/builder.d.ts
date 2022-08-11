@@ -10,7 +10,7 @@ declare type InternalOptions = {
 export declare const blockToBuilder: (json: MitosisNode, options?: ToBuilderOptions, _internalOptions?: InternalOptions) => BuilderElement;
 export declare const componentToBuilder: (options?: ToBuilderOptions) => ({ component }: TranspilerArgs) => {
     data: {
-        httpRequests: import("../types/json").JSON;
+        httpRequests: import("../types/json")._JSON;
         jsCode: string;
         tsCode: string;
         blocks: BuilderElement[];

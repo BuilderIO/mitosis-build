@@ -24,6 +24,7 @@ exports.componentToQwik = void 0;
 var babel_transform_1 = require("../../helpers/babel-transform");
 var fast_clone_1 = require("../../helpers/fast-clone");
 var collect_css_1 = require("../../helpers/styles/collect-css");
+var state_1 = require("../../helpers/state");
 var add_prevent_default_1 = require("./add-prevent-default");
 var convert_method_to_function_1 = require("./convert-method-to-function");
 var jsx_1 = require("./jsx");
@@ -53,8 +54,8 @@ var componentToQwik = function (userOptions) {
             var isLightComponent = ((_c = (_b = metadata_1 === null || metadata_1 === void 0 ? void 0 : metadata_1.qwik) === null || _b === void 0 ? void 0 : _b.component) === null || _c === void 0 ? void 0 : _c.isLight) || false;
             var imports_1 = (_d = metadata_1 === null || metadata_1 === void 0 ? void 0 : metadata_1.qwik) === null || _d === void 0 ? void 0 : _d.imports;
             imports_1 && Object.keys(imports_1).forEach(function (key) { return file.import(imports_1[key], key); });
-            var state_1 = emitStateMethodsAndRewriteBindings(file, component, metadata_1);
-            var hasState_1 = Boolean(Object.keys(component.state).length);
+            var state_2 = emitStateMethodsAndRewriteBindings(file, component, metadata_1);
+            var hasState_1 = (0, state_1.checkHasState)(component);
             var css_1 = null;
             var topLevelElement_1 = isLightComponent ? null : getTopLevelElement(component);
             var componentBody = (0, src_generator_1.arrowFnBlock)(['props'], [
@@ -65,7 +66,7 @@ var componentToQwik = function (userOptions) {
                     css_1 = emitUseStyles(file, component);
                     emitUseContext(file, component);
                     emitUseRef(file, component);
-                    hasState_1 && emitUseStore(file, state_1);
+                    hasState_1 && emitUseStore(file, state_2);
                     emitUseContextProvider(file, component);
                     emitUseMount(file, component);
                     emitUseWatch(file, component);
@@ -268,7 +269,8 @@ function emitStateMethods(file, componentState, lexicalArgs) {
     var stateInit = [stateValues];
     var methodMap = stateToMethodOrGetter(componentState);
     Object.keys(componentState).forEach(function (key) {
-        var code = componentState[key];
+        var _a;
+        var code = (_a = componentState[key]) === null || _a === void 0 ? void 0 : _a.code;
         if (isCode(code)) {
             var codeIisGetter = isGetter(code);
             var prefixIdx = code.indexOf(':') + 1;
@@ -316,7 +318,8 @@ function extractGetterBody(code) {
 function stateToMethodOrGetter(state) {
     var methodMap = {};
     Object.keys(state).forEach(function (key) {
-        var code = state[key];
+        var _a;
+        var code = (_a = state[key]) === null || _a === void 0 ? void 0 : _a.code;
         if (typeof code == 'string' && code.startsWith(METHOD)) {
             methodMap[key] = code.startsWith(GETTER) ? 'getter' : 'method';
         }
