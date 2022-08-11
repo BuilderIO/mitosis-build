@@ -27,7 +27,6 @@ var jsx_1 = require("../../parsers/jsx");
 var plugins_1 = require("../../modules/plugins");
 var fast_clone_1 = require("../../helpers/fast-clone");
 var strip_meta_properties_1 = require("../../helpers/strip-meta-properties");
-var collect_class_string_1 = require("../stencil/collect-class-string");
 var strip_state_and_props_refs_1 = require("../../helpers/strip-state-and-props-refs");
 var filter_empty_text_nodes_1 = require("../../helpers/filter-empty-text-nodes");
 var collect_css_1 = require("../../helpers/styles/collect-css");
@@ -115,10 +114,6 @@ var blockToMarko = function (json, options) {
     }
     var str = '';
     str += "<".concat(toTagName(json.name), " ");
-    var classString = (0, collect_class_string_1.collectClassString)(json);
-    if (classString) {
-        str += " class=".concat(classString, " ");
-    }
     if ((_e = json.bindings._spread) === null || _e === void 0 ? void 0 : _e.code) {
         str += " ...(".concat(json.bindings._spread.code, ") ");
     }
@@ -246,8 +241,11 @@ var componentToMarko = function (userOptions) {
                 console.warn('Could not format js', err);
             }
         }
-        // Convert on-click=(...) -> on-click(...)
-        htmlString = htmlString.replace(/(on-[a-z]+)=\(/g, function (_match, group) { return group + '('; });
+        htmlString = htmlString
+            // Convert on-click=(...) -> on-click(...)
+            .replace(/(on-[a-z]+)=\(/g, function (_match, group) { return group + '('; })
+            // Fix a weird edge case where </if> becomes </if \n > which is invalid in marko
+            .replace(/<\/([a-z]+)\s+>/g, '</$1>');
         var finalStr = "\n".concat(jsString, "\n").concat(cssString, "\n").concat(htmlString, "\n    ")
             .replace(/\n{3,}/g, '\n\n')
             .trim();
@@ -297,7 +295,7 @@ exports.preprocessHtml = preprocessHtml;
 function postprocessHtml(htmlString) {
     return htmlString
         .replace(/<for \|/g, '<for|')
-        .replace(/<if _="([\s\S]+)"\s*>/g, function (_match, group) {
+        .replace(/<if _="([\s\S]+?)"\s*>/g, function (_match, group) {
         return "<if(".concat(decodeAttributeValue(group), ")>");
     })
         .replace(/="\(([\s\S]*?)\)"(\s*[a-z\/>])/g, function (_match, group, after) {

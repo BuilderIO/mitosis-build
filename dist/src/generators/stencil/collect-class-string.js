@@ -3,8 +3,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.collectClassString = void 0;
 // This should really be a preprocessor mapping the `class` attribute binding based on what other values have
 // to make this more pluggable
-function collectClassString(json) {
+function collectClassString(json, bindingOpenChar, bindingCloseChar) {
     var _a, _b;
+    if (bindingOpenChar === void 0) { bindingOpenChar = '{'; }
+    if (bindingCloseChar === void 0) { bindingCloseChar = '}'; }
     var staticClasses = [];
     var hasStaticClasses = Boolean(staticClasses.length);
     if (json.properties.class) {
@@ -31,10 +33,10 @@ function collectClassString(json) {
         return "\"".concat(staticClassesString, "\"");
     }
     if (hasDynamicClasses && !hasStaticClasses) {
-        return "{".concat(dynamicClassesString, "}");
+        return "".concat(bindingOpenChar).concat(dynamicClassesString).concat(bindingCloseChar);
     }
     if (hasDynamicClasses && hasStaticClasses) {
-        return "{\"".concat(staticClassesString, " \" + ").concat(dynamicClassesString, "}");
+        return "".concat(bindingOpenChar, "\"").concat(staticClassesString, " \" + ").concat(dynamicClassesString).concat(bindingCloseChar);
     }
     return null;
 }

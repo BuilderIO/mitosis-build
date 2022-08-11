@@ -31,7 +31,8 @@ function SmileReviews(props) {
         <input css={{ display: 'block' }} placeholder="Title"/>
 
         <textarea css={{ display: 'block' }} placeholder="How was your experience?"/>
-        <button css={{ display: 'block' }} onClick={function () {
+        <button css={{ display: 'block' }} onClick={function (event) {
+            event.preventDefault();
             state.showReviewPrompt = false;
         }}>
           Submit
