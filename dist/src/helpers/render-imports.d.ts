@@ -5,14 +5,16 @@ export declare const renderImport: ({ theImport, target, asyncComponentImports, 
     target: Target;
     asyncComponentImports: boolean;
 }) => string;
-export declare const renderImports: ({ imports, target, asyncComponentImports, }: {
+export declare const renderImports: ({ imports, target, asyncComponentImports, excludeMitosisComponents, }: {
     imports: MitosisImport[];
     target: Target;
     asyncComponentImports: boolean;
+    excludeMitosisComponents?: boolean | undefined;
 }) => string;
-export declare const renderPreComponent: ({ component, target, asyncComponentImports, }: {
+export declare const renderPreComponent: ({ component, target, excludeMitosisComponents, asyncComponentImports, }: {
     component: MitosisComponent;
     target: Target;
     asyncComponentImports?: boolean | undefined;
+    excludeMitosisComponents?: boolean | undefined;
 }) => string;
 export declare const renderExportAndLocal: (component: MitosisComponent) => string;

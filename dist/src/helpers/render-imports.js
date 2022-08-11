@@ -33,6 +33,10 @@ var getFileExtensionForTarget = function (target) {
         case 'vue2':
         case 'vue3':
             return '.vue';
+        case 'marko':
+            return '.marko';
+        case 'angular':
+            return '';
         // these `.lite` extensions are handled in the `transpile` step of the CLI.
         // TO-DO: consolidate file-extension renaming to one place.
         default:
@@ -106,7 +110,7 @@ var renderImport = function (_a) {
 };
 exports.renderImport = renderImport;
 var renderImports = function (_a) {
-    var imports = _a.imports, target = _a.target, asyncComponentImports = _a.asyncComponentImports;
+    var imports = _a.imports, target = _a.target, asyncComponentImports = _a.asyncComponentImports, excludeMitosisComponents = _a.excludeMitosisComponents;
     return imports
         .filter(function (theImport) {
         if (
@@ -116,7 +120,7 @@ var renderImports = function (_a) {
             theImport.path.startsWith('@builder.io/mitosis')) {
             return false;
         }
-        else if (target === 'angular' && theImport.path.includes('.lite')) {
+        else if (excludeMitosisComponents && theImport.path.includes('.lite')) {
             return false;
         }
         else {
@@ -128,11 +132,12 @@ var renderImports = function (_a) {
 };
 exports.renderImports = renderImports;
 var renderPreComponent = function (_a) {
-    var component = _a.component, target = _a.target, _b = _a.asyncComponentImports, asyncComponentImports = _b === void 0 ? false : _b;
+    var component = _a.component, target = _a.target, excludeMitosisComponents = _a.excludeMitosisComponents, _b = _a.asyncComponentImports, asyncComponentImports = _b === void 0 ? false : _b;
     return "\n    ".concat((0, exports.renderImports)({
         imports: component.imports,
         target: target,
         asyncComponentImports: asyncComponentImports,
+        excludeMitosisComponents: excludeMitosisComponents,
     }), "\n    ").concat((0, exports.renderExportAndLocal)(component), "\n    ").concat(component.hooks.preComponent || '', "\n  ");
 };
 exports.renderPreComponent = renderPreComponent;

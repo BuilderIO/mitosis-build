@@ -217,7 +217,7 @@ var stringifyBinding = function (node) {
         }
         else if (key === 'class') {
             return " :class=\"_classStringToObject(".concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(value === null || value === void 0 ? void 0 : value.code, {
-                replaceWith: 'this.',
+                replaceWith: '',
             }), ")\" ");
             // TODO: support dynamic classes as objects somehow like Vue requires
             // https://vuejs.org/v2/guide/class-and-style.html
