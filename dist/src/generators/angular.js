@@ -37,7 +37,7 @@ var strip_meta_properties_1 = require("../helpers/strip-meta-properties");
 var remove_surrounding_block_1 = require("../helpers/remove-surrounding-block");
 var indent_1 = require("../helpers/indent");
 var slots_1 = require("../helpers/slots");
-var is_upper_case_1 = require("../helpers/is-upper-case");
+var get_custom_imports_1 = require("../helpers/get-custom-imports");
 var mappers = {
     Fragment: function (json, options, blockOptions) {
         return "<div>".concat(json.children
@@ -142,7 +142,7 @@ var blockToAngular = function (json, options, blockOptions) {
                 contextVars: contextVars,
                 outputVars: outputVars,
                 domRefs: domRefs,
-            }).replace(/"/g, "&quot;");
+            }).replace(/"/g, '&quot;');
             if (key.startsWith('on')) {
                 var event_1 = key.replace('on', '').toLowerCase();
                 if (event_1 === 'change' && json.name === 'input' /* todo: other tags */) {
@@ -208,14 +208,7 @@ var componentToAngular = function (options) {
                 }
             });
         });
-        var customImports = json.imports
-            .filter(function (item) {
-            return item.path.startsWith('.');
-        })
-            .map(function (item) {
-            return Object.keys(item.imports).filter(function (item) { return item && !(0, is_upper_case_1.isUpperCase)(item[0]); });
-        })
-            .flat();
+        var customImports = (0, get_custom_imports_1.getCustomImports)(json);
         var _q = component.exports, localExports = _q === void 0 ? {} : _q;
         var localExportVars = Object.keys(localExports)
             .filter(function (key) { return localExports[key].usedInLocal; })
