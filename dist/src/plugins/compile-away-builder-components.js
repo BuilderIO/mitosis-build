@@ -88,7 +88,9 @@ exports.components = {
         }
         var omitFields = ['link', 'openInNewTab', 'text'];
         var hasLink = node.properties.link || node.bindings.link;
-        return (0, create_mitosis_node_1.createMitosisNode)(__assign(__assign({}, node), { name: hasLink ? 'a' : node.properties.$tagName || 'span', properties: __assign(__assign({}, (0, lodash_1.omit)(node.properties, omitFields)), properties), bindings: __assign(__assign({}, (0, lodash_1.omit)(node.bindings, omitFields)), bindings) }));
+        return (0, create_mitosis_node_1.createMitosisNode)(__assign(__assign({}, node), { 
+            // TODO: use 'button' tag for no link, and add `all: unset` to CSS string only then
+            name: hasLink ? 'a' : node.properties.$tagName || 'span', properties: __assign(__assign({}, (0, lodash_1.omit)(node.properties, omitFields)), properties), bindings: __assign(__assign({}, (0, lodash_1.omit)(node.bindings, omitFields)), bindings) }));
     },
     Embed: function (node, context, components) {
         return wrapOutput(node, (0, create_mitosis_node_1.createMitosisNode)({

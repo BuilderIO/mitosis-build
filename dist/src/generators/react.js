@@ -483,7 +483,7 @@ var _componentToReact = function (json, options, isSubComponent) {
         propsArgs = "props: ".concat(json.propsTypeRef);
     }
     var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n  ", "\n  ", "\n  ", "\n  ", "\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "", "function ", "(", "", ") {\n    ", "\n      ", "\n      ", "\n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      return (\n        ", "\n        ", "\n        ", "\n        ", "\n      );\n    }", "\n\n    ", "\n\n    ", "\n  "], ["\n  ", "\n  ", "\n  ", "\n  ", "\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "", "function ", "(", "", ") {\n    ", "\n      ", "\n      ", "\n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      return (\n        ", "\n        ", "\n        ", "\n        ", "\n      );\n    }", "\n\n    ", "\n\n    ", "\n  "])), options.type !== 'native'
-        ? ''
+        ? "import * as React from 'react';"
         : "\n  import * as React from 'react';\n  import { View, StyleSheet, Image, Text } from 'react-native';\n  ", styledComponentsCode ? "import styled from 'styled-components';\n" : '', reactLibImports.size ? "import { ".concat(Array.from(reactLibImports).join(', '), " } from 'react'") : '', componentHasStyles && stylesType === 'emotion' && options.format !== 'lite'
         ? "/** @jsx jsx */\n    import { jsx } from '@emotion/react'".trim()
         : '', hasState && stateType === 'valtio' ? "import { useLocalProxy } from 'valtio/utils';" : '', hasState && stateType === 'solid' ? "import { useMutable } from 'react-solid-state';" : '', stateType === 'mobx' && hasState

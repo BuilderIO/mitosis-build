@@ -37,6 +37,7 @@ var strip_meta_properties_1 = require("../helpers/strip-meta-properties");
 var remove_surrounding_block_1 = require("../helpers/remove-surrounding-block");
 var indent_1 = require("../helpers/indent");
 var slots_1 = require("../helpers/slots");
+var get_custom_imports_1 = require("../helpers/get-custom-imports");
 var mappers = {
     Fragment: function (json, options, blockOptions) {
         return "<div>".concat(json.children
@@ -141,7 +142,7 @@ var blockToAngular = function (json, options, blockOptions) {
                 contextVars: contextVars,
                 outputVars: outputVars,
                 domRefs: domRefs,
-            });
+            }).replace(/"/g, '&quot;');
             if (key.startsWith('on')) {
                 var event_1 = key.replace('on', '').toLowerCase();
                 if (event_1 === 'change' && json.name === 'input' /* todo: other tags */) {
@@ -165,10 +166,10 @@ var blockToAngular = function (json, options, blockOptions) {
                 needsToRenderSlots.push("".concat(useValue.replace(/(\/\>)|\>/, " ".concat(lowercaseKey, ">"))));
             }
             else if (BINDINGS_MAPPER[key]) {
-                str += " [".concat(BINDINGS_MAPPER[key], "]=\"").concat(useValue.replace(/"/g, "\\'"), "\"  ");
+                str += " [".concat(BINDINGS_MAPPER[key], "]=\"").concat(useValue, "\"  ");
             }
             else {
-                str += " [".concat(key, "]='").concat(useValue, "' ");
+                str += " [".concat(key, "]=\"").concat(useValue, "\" ");
             }
         }
         if (jsx_1.selfClosingTags.has(json.name)) {
@@ -207,6 +208,7 @@ var componentToAngular = function (options) {
                 }
             });
         });
+        var customImports = (0, get_custom_imports_1.getCustomImports)(json);
         var _q = component.exports, localExports = _q === void 0 ? {} : _q;
         var localExportVars = Object.keys(localExports)
             .filter(function (key) { return localExports[key].usedInLocal; })
@@ -246,6 +248,7 @@ var componentToAngular = function (options) {
         var hasOnMount = Boolean((_f = component.hooks) === null || _f === void 0 ? void 0 : _f.onMount);
         var domRefs = (0, get_refs_1.getRefs)(json);
         var jsRefs = Object.keys(json.refs).filter(function (ref) { return !domRefs.has(ref); });
+        var stateVars = Object.keys((json === null || json === void 0 ? void 0 : json.state) || {});
         (0, map_refs_1.mapRefs)(json, function (refName) {
             var isDomRef = domRefs.has(refName);
             return "this.".concat(isDomRef ? '' : '_').concat(refName).concat(isDomRef ? '.nativeElement' : '');
@@ -278,12 +281,16 @@ var componentToAngular = function (options) {
                     contextVars: contextVars,
                     outputVars: outputVars,
                     domRefs: Array.from(domRefs),
+                    stateVars: stateVars,
                 });
             },
         });
-        var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    import { ", " ", " Component ", "", " } from '@angular/core';\n\n    ", "\n    ", "\n    ", "\n\n    @Component({\n      selector: '", "',\n      template: `\n        ", "\n      `,\n      ", "\n    })\n    export default class ", " {\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n    }\n  "], ["\n    import { ", " ", " Component ", "", " } from '@angular/core';\n\n    ", "\n    ", "\n    ", "\n\n    @Component({\n      selector: '", "',\n      template: \\`\n        ", "\n      \\`,\n      ", "\n    })\n    export default class ", " {\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n    }\n  "])), outputs.length ? 'Output, EventEmitter, \n' : '', ((_g = options === null || options === void 0 ? void 0 : options.experimental) === null || _g === void 0 ? void 0 : _g.inject) ? 'Inject, forwardRef,' : '', domRefs.size ? ', ViewChild, ElementRef' : '', props.size ? ', Input' : '', json.types ? json.types.join('\n') : '', json.interfaces ? (_h = json.interfaces) === null || _h === void 0 ? void 0 : _h.join('\n') : '', (0, render_imports_1.renderPreComponent)({ component: json, target: 'angular' }), (0, lodash_1.kebabCase)(json.name || 'my-component'), (0, indent_1.indent)(template, 8).replace(/`/g, '\\`').replace(/\$\{/g, '\\${'), css.length
+        var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    import { ", " ", " Component ", "", " } from '@angular/core';\n    ", "\n\n    ", "\n    ", "\n    ", "\n\n    @Component({\n      ", "\n      selector: '", "',\n      template: `\n        ", "\n      `,\n      ", "\n    })\n    export default class ", " {\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n    }\n  "], ["\n    import { ", " ", " Component ", "", " } from '@angular/core';\n    ", "\n\n    ", "\n    ", "\n    ", "\n\n    @Component({\n      ", "\n      selector: '", "',\n      template: \\`\n        ", "\n      \\`,\n      ", "\n    })\n    export default class ", " {\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n    }\n  "])), outputs.length ? 'Output, EventEmitter, \n' : '', ((_g = options === null || options === void 0 ? void 0 : options.experimental) === null || _g === void 0 ? void 0 : _g.inject) ? 'Inject, forwardRef,' : '', domRefs.size ? ', ViewChild, ElementRef' : '', props.size ? ', Input' : '', options.standalone ? "import { CommonModule } from '@angular/common';" : '', json.types ? json.types.join('\n') : '', json.interfaces ? (_h = json.interfaces) === null || _h === void 0 ? void 0 : _h.join('\n') : '', (0, render_imports_1.renderPreComponent)({ component: json, target: 'angular' }), options.standalone
+            ? // TODO: also add child component imports here as well
+                "\n        standalone: true,\n        imports: [CommonModule],\n      "
+            : '', (0, lodash_1.kebabCase)(json.name || 'my-component'), (0, indent_1.indent)(template, 8).replace(/`/g, '\\`').replace(/\$\{/g, '\\${'), css.length
             ? "styles: [\n        `".concat((0, indent_1.indent)(css, 8), "`\n      ],")
-            : '', component.name, localExportVars.join('\n'), Array.from(props)
+            : '', component.name, localExportVars.join('\n'), customImports.map(function (name) { return "".concat(name, " = ").concat(name); }).join('\n'), Array.from(props)
             .filter(function (item) { return !(0, slots_1.isSlotProperty)(item) && item !== 'children'; })
             .map(function (item) {
             var propType = propsTypeRef ? "".concat(propsTypeRef, "[\"").concat(item, "\"]") : 'any';
@@ -301,6 +308,7 @@ var componentToAngular = function (options) {
                     contextVars: contextVars,
                     outputVars: outputVars,
                     domRefs: Array.from(domRefs),
+                    stateVars: stateVars,
                 }))
                 : '', ";");
         })
@@ -321,6 +329,7 @@ var componentToAngular = function (options) {
                     contextVars: contextVars,
                     outputVars: outputVars,
                     domRefs: Array.from(domRefs),
+                    stateVars: stateVars,
                 }), "\n                "), "\n            }"), !((_o = component.hooks.onUpdate) === null || _o === void 0 ? void 0 : _o.length)
             ? ''
             : "ngAfterContentChecked() {\n              ".concat(component.hooks.onUpdate.reduce(function (code, hook) {
@@ -329,6 +338,7 @@ var componentToAngular = function (options) {
                     contextVars: contextVars,
                     outputVars: outputVars,
                     domRefs: Array.from(domRefs),
+                    stateVars: stateVars,
                 });
                 return code + '\n';
             }, ''), "\n            }"), !component.hooks.onUnMount
@@ -338,6 +348,7 @@ var componentToAngular = function (options) {
                 contextVars: contextVars,
                 outputVars: outputVars,
                 domRefs: Array.from(domRefs),
+                stateVars: stateVars,
             }), "\n            }"));
         if (options.plugins) {
             str = (0, plugins_1.runPreCodePlugins)(str, options.plugins);

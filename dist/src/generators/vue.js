@@ -63,6 +63,7 @@ var process_http_requests_1 = require("../helpers/process-http-requests");
 var patterns_1 = require("../helpers/patterns");
 var method_literal_prefix_1 = require("../constants/method-literal-prefix");
 var function_1 = require("fp-ts/lib/function");
+var get_custom_imports_1 = require("../helpers/get-custom-imports");
 function encodeQuotes(string) {
     return string.replace(/"/g, '&quot;');
 }
@@ -233,14 +234,10 @@ var stringifyBinding = function (node) {
                 var isAssignmentExpression = useValue.includes('=');
                 // TODO: proper babel transform to replace. Util for this
                 if (isAssignmentExpression) {
-                    return " @".concat(event_1, "=\"").concat(encodeQuotes((0, remove_surrounding_block_1.removeSurroundingBlock)(useValue
-                        // TODO: proper reference parse and replacing
-                        .replace(new RegExp("".concat(cusArgs[0], "\\."), 'g'), '$event.'))), "\" ");
+                    return " @".concat(event_1, "=\"").concat(encodeQuotes((0, remove_surrounding_block_1.removeSurroundingBlock)((0, replace_idenifiers_1.replaceIdentifiers)(useValue, cusArgs[0], '$event'))), "\" ");
                 }
                 else {
-                    return " @".concat(event_1, "=\"").concat(encodeQuotes((0, remove_surrounding_block_1.removeSurroundingBlock)(useValue
-                        // TODO: proper reference parse and replacing
-                        .replace(new RegExp("".concat(cusArgs[0]), 'g'), '$event'))), "\" ");
+                    return " @".concat(event_1, "=\"").concat(encodeQuotes((0, remove_surrounding_block_1.removeSurroundingBlock)((0, remove_surrounding_block_1.removeSurroundingBlock)((0, replace_idenifiers_1.replaceIdentifiers)(useValue, cusArgs[0], '$event')))), "\" ");
                 }
             }
             else if (key === 'ref') {
@@ -434,20 +431,13 @@ var componentToVue = function (userOptions) {
             functions: true,
             valueMapper: function (code) { return processBinding(code, options, component); },
         });
-        var blocksString = JSON.stringify(component.children);
         // Component references to include in `component: { YourComponent, ... }
         var componentsUsed = Array.from((0, get_components_used_1.getComponentsUsed)(component))
             .filter(function (name) { return name.length && !name.includes('.') && name[0].toUpperCase() === name[0]; })
             // Strip out components that compile away
             .filter(function (name) { return !['For', 'Show', 'Fragment', component.name].includes(name); });
         // Append refs to data as { foo, bar, etc }
-        dataString = dataString.replace(/}$/, "".concat(component.imports
-            .map(function (thisImport) { return Object.keys(thisImport.imports).join(','); })
-            // Make sure actually used in template
-            .filter(function (key) { return Boolean(key && blocksString.includes(key)); })
-            // Don't include component imports
-            .filter(function (key) { return !componentsUsed.includes(key); })
-            .join(','), "}"));
+        dataString = dataString.replace(/}$/, "".concat((0, get_custom_imports_1.getCustomImports)(component).join(','), "}"));
         if (localVarAsData.length) {
             dataString = dataString.replace(/}$/, "".concat(localVarAsData.join(','), "}"));
         }

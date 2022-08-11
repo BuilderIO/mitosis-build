@@ -4,6 +4,7 @@ export declare type StripStateAndPropsRefsOptions = {
     includeState?: boolean;
     contextVars?: string[];
     outputVars?: string[];
+    stateVars?: string[];
     context?: string;
     domRefs?: string[];
 };
