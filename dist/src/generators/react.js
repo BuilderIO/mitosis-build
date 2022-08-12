@@ -82,9 +82,10 @@ var NODE_MAPPERS = {
     },
     Fragment: function (json, options) {
         var wrap = wrapInFragment(json);
-        return "".concat(wrap ? '<>' : '').concat(json.children
+        var tagName = options.preact ? 'Fragment' : '';
+        return "".concat(wrap ? "<".concat(tagName, ">") : '').concat(json.children
             .map(function (item) { return (0, exports.blockToReact)(item, options); })
-            .join('\n')).concat(wrap ? '</>' : '');
+            .join('\n')).concat(wrap ? "</".concat(tagName, ">") : '');
     },
     For: function (json, options) {
         var _a, _b;
@@ -490,7 +491,7 @@ var _componentToReact = function (json, options, isSubComponent) {
         propsArgs = "props: ".concat(json.propsTypeRef);
     }
     var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n  ", "\n  ", "\n  ", "\n  ", "\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "", "function ", "(", "", ") {\n    ", "\n      ", "\n      ", "\n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      return (\n        ", "\n        ", "\n        ", "\n        ", "\n      );\n    }", "\n\n    ", "\n\n    ", "\n  "], ["\n  ", "\n  ", "\n  ", "\n  ", "\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "", "function ", "(", "", ") {\n    ", "\n      ", "\n      ", "\n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      return (\n        ", "\n        ", "\n        ", "\n        ", "\n      );\n    }", "\n\n    ", "\n\n    ", "\n  "])), options.preact
-        ? "\n    /** @jsx h */\n    import { h } from 'preact';\n    "
+        ? "\n    /** @jsx h */\n    import { h, Fragment } from 'preact';\n    "
         : options.type !== 'native'
             ? "import * as React from 'react';"
             : "\n  import * as React from 'react';\n  import { View, StyleSheet, Image, Text } from 'react-native';\n  ", styledComponentsCode ? "import styled from 'styled-components';\n" : '', reactLibImports.size
