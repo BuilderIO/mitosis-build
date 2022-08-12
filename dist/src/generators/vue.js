@@ -64,6 +64,7 @@ var patterns_1 = require("../helpers/patterns");
 var method_literal_prefix_1 = require("../constants/method-literal-prefix");
 var function_1 = require("fp-ts/lib/function");
 var get_custom_imports_1 = require("../helpers/get-custom-imports");
+var slots_1 = require("../helpers/slots");
 function encodeQuotes(string) {
     return string.replace(/"/g, '&quot;');
 }
@@ -122,7 +123,7 @@ var NODE_MAPPERS = {
         switch (options.vueVersion) {
             case 3:
                 return "\n        <template ".concat(SPECIAL_PROPERTIES.V_IF, "=\"").concat(encodeQuotes(ifValue), "\">\n          ").concat(json.children.map(function (item) { return (0, exports.blockToVue)(item, options); }).join('\n'), "\n        </template>\n        ").concat((0, is_mitosis_node_1.isMitosisNode)(json.meta.else)
-                    ? "\n            <template ".concat(SPECIAL_PROPERTIES.V_ELSE, "> \n              ").concat((0, exports.blockToVue)(json.meta.else, options), "\n            </template>")
+                    ? "\n            <template ".concat(SPECIAL_PROPERTIES.V_ELSE, ">\n              ").concat((0, exports.blockToVue)(json.meta.else, options), "\n            </template>")
                     : '', "\n        ");
             case 2:
                 // Vue 2 can only handle one root element, so we just take the first one.
@@ -165,7 +166,7 @@ var NODE_MAPPERS = {
                     var elseString = firstChildOfFirstChild
                         ? (0, function_1.pipe)(firstChildOfFirstChild, addPropertiesToJson((_c = {}, _c[SPECIAL_PROPERTIES.V_ELSE] = '', _c)), function (block) { return (0, exports.blockToVue)(block, options); })
                         : '';
-                    return "\n            \n            ".concat(ifString, "\n            \n            ").concat(elseIfString, "\n            \n            ").concat(elseString, "\n            \n          ");
+                    return "\n\n            ".concat(ifString, "\n\n            ").concat(elseIfString, "\n\n            ").concat(elseString, "\n\n          ");
                 }
                 else {
                     var ifString = firstChild
@@ -259,7 +260,7 @@ var blockToVue = function (node, options, scope) {
         return nodeMapper(node, options, scope);
     }
     if ((0, is_children_1.default)(node)) {
-        return "<slot></slot>";
+        return "<slot/>";
     }
     if (node.name === 'style') {
         // Vue doesn't allow <style>...</style> in templates, but does support the synonymous
@@ -270,8 +271,13 @@ var blockToVue = function (node, options, scope) {
     if (node.properties._text) {
         return "".concat(node.properties._text);
     }
-    if ((_a = node.bindings._text) === null || _a === void 0 ? void 0 : _a.code) {
-        return "{{".concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(node.bindings._text.code), "}}");
+    var textCode = (_a = node.bindings._text) === null || _a === void 0 ? void 0 : _a.code;
+    if (textCode) {
+        var strippedTextCode = (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(textCode);
+        if ((0, slots_1.isSlotProperty)(strippedTextCode)) {
+            return "<slot name=\"".concat((0, slots_1.stripSlotPrefix)(strippedTextCode).toLowerCase(), "\"/>");
+        }
+        return "{{".concat(strippedTextCode, "}}");
     }
     var str = '';
     str += "<".concat(node.name, " ");
@@ -452,7 +458,7 @@ var componentToVue = function (userOptions) {
             .join('\n');
         var includeClassMapHelper = template.includes('_classStringToObject');
         if (includeClassMapHelper) {
-            functionsString = functionsString.replace(/}\s*$/, "_classStringToObject(str) {\n        const obj = {};\n        if (typeof str !== 'string') { return obj }\n        const classNames = str.trim().split(/\\s+/); \n        for (const name of classNames) {\n          obj[name] = true;\n        } \n        return obj;\n      }  }");
+            functionsString = functionsString.replace(/}\s*$/, "_classStringToObject(str) {\n        const obj = {};\n        if (typeof str !== 'string') { return obj }\n        const classNames = str.trim().split(/\\s+/);\n        for (const name of classNames) {\n          obj[name] = true;\n        }\n        return obj;\n      }  }");
         }
         if (localVarAsFunc.length) {
             functionsString = functionsString.replace(/}\s*$/, "".concat(localVarAsFunc.join(','), "}"));
