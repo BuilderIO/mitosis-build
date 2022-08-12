@@ -37,5 +37,5 @@ exports.targets = {
     stencil: stencil_1.componentToStencil,
     qwik: qwik_1.componentToQwik,
     marko: marko_1.componentToMarko,
-    preact: react_2.componentToPreact
+    preact: react_2.componentToPreact,
 };
