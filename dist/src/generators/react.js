@@ -18,7 +18,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.componentToReact = exports.blockToReact = void 0;
+exports.componentToReact = exports.componentToPreact = exports.blockToReact = void 0;
 var core_1 = require("@babel/core");
 var dedent_1 = __importDefault(require("dedent"));
 var json5_1 = __importDefault(require("json5"));
@@ -376,6 +376,11 @@ var DEFAULT_OPTIONS = {
     stateType: 'useState',
     stylesType: 'styled-jsx',
 };
+var componentToPreact = function (reactOptions) {
+    if (reactOptions === void 0) { reactOptions = {}; }
+    return (0, exports.componentToReact)(__assign(__assign({}, reactOptions), { preact: true }));
+};
+exports.componentToPreact = componentToPreact;
 var componentToReact = function (reactOptions) {
     if (reactOptions === void 0) { reactOptions = {}; }
     return function (_a) {
@@ -484,9 +489,13 @@ var _componentToReact = function (json, options, isSubComponent) {
     if (json.propsTypeRef) {
         propsArgs = "props: ".concat(json.propsTypeRef);
     }
-    var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n  ", "\n  ", "\n  ", "\n  ", "\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "", "function ", "(", "", ") {\n    ", "\n      ", "\n      ", "\n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      return (\n        ", "\n        ", "\n        ", "\n        ", "\n      );\n    }", "\n\n    ", "\n\n    ", "\n  "], ["\n  ", "\n  ", "\n  ", "\n  ", "\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "", "function ", "(", "", ") {\n    ", "\n      ", "\n      ", "\n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      return (\n        ", "\n        ", "\n        ", "\n        ", "\n      );\n    }", "\n\n    ", "\n\n    ", "\n  "])), options.type !== 'native'
-        ? "import * as React from 'react';"
-        : "\n  import * as React from 'react';\n  import { View, StyleSheet, Image, Text } from 'react-native';\n  ", styledComponentsCode ? "import styled from 'styled-components';\n" : '', reactLibImports.size ? "import { ".concat(Array.from(reactLibImports).join(', '), " } from 'react'") : '', componentHasStyles && stylesType === 'emotion' && options.format !== 'lite'
+    var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n  ", "\n  ", "\n  ", "\n  ", "\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "", "function ", "(", "", ") {\n    ", "\n      ", "\n      ", "\n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      return (\n        ", "\n        ", "\n        ", "\n        ", "\n      );\n    }", "\n\n    ", "\n\n    ", "\n  "], ["\n  ", "\n  ", "\n  ", "\n  ", "\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "", "function ", "(", "", ") {\n    ", "\n      ", "\n      ", "\n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      return (\n        ", "\n        ", "\n        ", "\n        ", "\n      );\n    }", "\n\n    ", "\n\n    ", "\n  "])), options.preact
+        ? "\n    /** @jsx h */\n    import { h } from 'preact';\n    "
+        : options.type !== 'native'
+            ? "import * as React from 'react';"
+            : "\n  import * as React from 'react';\n  import { View, StyleSheet, Image, Text } from 'react-native';\n  ", styledComponentsCode ? "import styled from 'styled-components';\n" : '', reactLibImports.size
+        ? "import { ".concat(Array.from(reactLibImports).join(', '), " } from '").concat(options.preact ? 'preact/hooks' : 'react', "'")
+        : '', componentHasStyles && stylesType === 'emotion' && options.format !== 'lite'
         ? "/** @jsx jsx */\n    import { jsx } from '@emotion/react'".trim()
         : '', hasState && stateType === 'valtio' ? "import { useLocalProxy } from 'valtio/utils';" : '', hasState && stateType === 'solid' ? "import { useMutable } from 'react-solid-state';" : '', stateType === 'mobx' && hasState
         ? "import { useLocalObservable } from 'mobx-react-lite';"

@@ -25,4 +25,5 @@ export declare const targets: {
     stencil: (options?: import("./generators/stencil").ToStencilOptions) => import(".").Transpiler;
     qwik: (userOptions?: import("./generators/qwik/component-generator").ToQwikOptions) => import(".").Transpiler;
     marko: (userOptions?: import("./generators/marko").ToMarkoOptions) => import(".").Transpiler;
+    preact: (reactOptions?: import("./generators/react").ToReactOptions) => import(".").Transpiler;
 };
