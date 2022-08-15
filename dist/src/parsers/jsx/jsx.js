@@ -509,6 +509,11 @@ function parseJsx(jsx, options) {
                         for (var _i = 0, _a = path.node.body; _i < _a.length; _i++) {
                             var statement = _a[_i];
                             if ((0, component_types_1.isTypeImport)(statement)) {
+                                var importDeclaration = statement;
+                                // Remove .lite from path if exists, as that will be stripped
+                                if (importDeclaration.source.value.endsWith('.lite')) {
+                                    importDeclaration.source.value = importDeclaration.source.value.replace(/\.lite$/, '');
+                                }
                                 (0, component_types_1.collectTypes)(statement, context);
                             }
                         }
