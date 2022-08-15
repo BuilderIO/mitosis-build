@@ -48,6 +48,7 @@ var babel_transform_1 = require("../helpers/babel-transform");
 var core_1 = require("@babel/core");
 var lodash_1 = require("lodash");
 var state_1 = require("../helpers/state");
+var collect_css_1 = require("../helpers/styles/collect-css");
 // Transform <foo.bar key="value" /> to <component :is="foo.bar" key="value" />
 function processDynamicComponents(json, options) {
     var found = false;
@@ -71,7 +72,7 @@ function getContextString(component, options) {
 }
 // This should really be a preprocessor mapping the `class` attribute binding based on what other values have
 // to make this more pluggable
-var collectClassString = function (json) {
+var collectClassString = function (json, options) {
     var _a, _b, _c;
     var staticClasses = [];
     if (json.properties.class) {
@@ -91,7 +92,9 @@ var collectClassString = function (json) {
         dynamicClasses.push(json.bindings.className.code);
         delete json.bindings.className;
     }
-    if (typeof ((_c = json.bindings.css) === null || _c === void 0 ? void 0 : _c.code) === 'string' && json.bindings.css.code.trim().length > 4) {
+    if (typeof ((_c = json.bindings.css) === null || _c === void 0 ? void 0 : _c.code) === 'string' &&
+        json.bindings.css.code.trim().length > 4 &&
+        options.stylesType === 'styled-components') {
         dynamicClasses.push("css(".concat(json.bindings.css.code, ")"));
     }
     delete json.bindings.css;
@@ -137,7 +140,7 @@ var blockToSolid = function (json, options) {
     if (json.name === 'Show' && json.meta.else) {
         str += "fallback={".concat(blockToSolid(json.meta.else, options), "}");
     }
-    var classString = collectClassString(json);
+    var classString = collectClassString(json, options);
     if (classString) {
         str += " class=".concat(classString, " ");
     }
@@ -222,23 +225,25 @@ function addProviderComponents(json, options) {
         ];
     }
 }
-var componentToSolid = function (options) {
-    if (options === void 0) { options = {}; }
+var componentToSolid = function (_options) {
+    if (_options === void 0) { _options = {}; }
     return function (_a) {
         var _b, _c, _d;
         var component = _a.component;
+        var options = __assign({ stylesType: 'styled-components' }, _options);
         var json = (0, fast_clone_1.fastClone)(component);
         if (options.plugins) {
             json = (0, plugins_1.runPreJsonPlugins)(json, options.plugins);
         }
         addProviderComponents(json, options);
         var componentHasStyles = (0, helpers_1.hasCss)(json);
-        var addWrapper = json.children.filter(filter_empty_text_nodes_1.filterEmptyTextNodes).length !== 1;
+        var addWrapper = json.children.filter(filter_empty_text_nodes_1.filterEmptyTextNodes).length !== 1 || options.stylesType === 'style-tag';
         if (options.plugins) {
             json = (0, plugins_1.runPostJsonPlugins)(json, options.plugins);
         }
         (0, strip_meta_properties_1.stripMetaProperties)(json);
         var foundDynamicComponents = processDynamicComponents(json, options);
+        var css = options.stylesType === 'style-tag' && (0, collect_css_1.collectCss)(json);
         var stateString = (0, get_state_object_string_1.getStateObjectStringFromComponent)(json);
         var hasState = (0, state_1.checkHasState)(json);
         var componentsUsed = (0, get_components_used_1.getComponentsUsed)(json);
@@ -251,9 +256,11 @@ var componentToSolid = function (options) {
             hasForComponent ? 'For' : undefined,
             ((_b = json.hooks.onMount) === null || _b === void 0 ? void 0 : _b.code) ? 'onMount' : undefined
         ], (((_c = json.hooks.onUpdate) === null || _c === void 0 ? void 0 : _c.length) ? ['on', 'createEffect'] : []), true).filter(Boolean);
-        var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n\n    function ", "(props) {\n      ", "\n      \n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      return (", "\n        ", "\n        ", ")\n    }\n\n    export default ", ";\n  "], ["\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n\n    function ", "(props) {\n      ", "\n      \n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      return (", "\n        ", "\n        ", ")\n    }\n\n    export default ", ";\n  "])), solidJSImports.length > 0
+        var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n\n    function ", "(props) {\n      ", "\n      \n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      return (", "\n        ", "\n        ", "\n        ", ")\n    }\n\n    export default ", ";\n  "], ["\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n\n    function ", "(props) {\n      ", "\n      \n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      return (", "\n        ", "\n        ", "\n        ", ")\n    }\n\n    export default ", ";\n  "])), solidJSImports.length > 0
             ? "import { \n          ".concat(solidJSImports.map(function (item) { return item; }).join(', '), "\n         } from 'solid-js';")
-            : '', !foundDynamicComponents ? '' : "import { Dynamic } from 'solid-js/web';", !hasState ? '' : "import { createMutable } from 'solid-js/store';", !componentHasStyles ? '' : "import { css } from \"solid-styled-components\";", (0, render_imports_1.renderPreComponent)({ component: json, target: 'solid' }), json.name, !hasState ? '' : "const state = createMutable(".concat(stateString, ");"), getRefsString(json), getContextString(json, options), !((_d = json.hooks.onMount) === null || _d === void 0 ? void 0 : _d.code) ? '' : "onMount(() => { ".concat(json.hooks.onMount.code, " })"), json.hooks.onUpdate
+            : '', !foundDynamicComponents ? '' : "import { Dynamic } from 'solid-js/web';", !hasState ? '' : "import { createMutable } from 'solid-js/store';", !componentHasStyles && options.stylesType === 'styled-components'
+            ? ''
+            : "import { css } from \"solid-styled-components\";", (0, render_imports_1.renderPreComponent)({ component: json, target: 'solid' }), json.name, !hasState ? '' : "const state = createMutable(".concat(stateString, ");"), getRefsString(json), getContextString(json, options), !((_d = json.hooks.onMount) === null || _d === void 0 ? void 0 : _d.code) ? '' : "onMount(() => { ".concat(json.hooks.onMount.code, " })"), json.hooks.onUpdate
             ? json.hooks.onUpdate
                 .map(function (hook, index) {
                 if (hook.deps) {
@@ -269,7 +276,10 @@ var componentToSolid = function (options) {
             : '', addWrapper ? '<>' : '', json.children
             .filter(filter_empty_text_nodes_1.filterEmptyTextNodes)
             .map(function (item) { return blockToSolid(item, options); })
-            .join('\n'), addWrapper ? '</>' : '', json.name);
+            .join('\n'), options.stylesType === 'style-tag' && css && css.trim().length > 4
+            ? // We add the jsx attribute so prettier formats this nicely
+                "<style jsx>{`".concat(css, "`}</style>")
+            : '', addWrapper ? '</>' : '', json.name);
         // HACK: for some reason we are generating `state.state.foo` instead of `state.foo`
         // need a full fix, but this unblocks a lot in the short term
         str = str.replace(/state\.state\./g, 'state.');
@@ -279,7 +289,7 @@ var componentToSolid = function (options) {
         if (options.prettier !== false) {
             str = (0, standalone_1.format)(str, {
                 parser: 'typescript',
-                plugins: [require('prettier/parser-typescript')],
+                plugins: [require('prettier/parser-typescript'), require('prettier/parser-postcss')],
             });
         }
         if (options.plugins) {
