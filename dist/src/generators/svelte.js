@@ -335,12 +335,21 @@ var componentToSvelte = function (_a) {
         var transformHookCode = function (hookCode) {
             return (0, function_1.pipe)(stripStateAndProps(hookCode, options), babel_transform_1.babelTransformCode);
         };
-        var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    <script>\n      ", "\n      ", "\n      ", "\n      ", "\n      ", "\n\n      ", "\n      ", "\n      ", "\n      ", "\n      ", "\n\n      ", "\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n    </script>\n\n    ", "\n\n    ", "\n  "], ["\n    <script>\n      ", "\n      ", "\n      ", "\n      ", "\n      ", "\n\n      ", "\n      ", "\n      ", "\n      ", "\n      ", "\n\n      ", "\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n    </script>\n\n    ", "\n\n    ", "\n  "])), !((_b = json.hooks.onMount) === null || _b === void 0 ? void 0 : _b.code) ? '' : "import { onMount } from 'svelte'", !((_c = json.hooks.onUpdate) === null || _c === void 0 ? void 0 : _c.length) ? '' : "import { afterUpdate } from 'svelte'", !((_d = json.hooks.onUnMount) === null || _d === void 0 ? void 0 : _d.code) ? '' : "import { onDestroy } from 'svelte'", (0, render_imports_1.renderPreComponent)({ component: json, target: 'svelte' }), (0, context_1.hasContext)(component) ? 'import { getContext, setContext } from "svelte";' : '', !hasData || options.stateType === 'variables' ? '' : "import onChange from 'on-change'", (0, lodash_1.uniq)(refs.map(function (ref) { return (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(ref); }).concat(props))
+        var str = '';
+        if (json.propsTypeRef) {
+            str += (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n      <script context='module' lang='ts'>\n        ", "\n        ", "\n      </script>\n      \n\n      \n\n      "], ["\n      <script context='module' lang='ts'>\n        ", "\n        ", "\n      </script>\n      \\n\n      \\n\n      "])), json.types ? json.types.join('\n\n') + '\n' : '', json.interfaces ? json.interfaces.join('\n\n') + '\n' : '');
+        }
+        str += (0, dedent_1.default)(templateObject_2 || (templateObject_2 = __makeTemplateObject(["\n      <script>\n      ", "\n      ", "\n      ", "\n      ", "\n      ", "\n\n      ", "\n      ", "\n      ", "\n      ", "\n      ", "\n\n      ", "\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n    </script>\n\n    ", "\n\n    ", "\n  "], ["\n      <script>\n      ", "\n      ", "\n      ", "\n      ", "\n      ", "\n\n      ", "\n      ", "\n      ", "\n      ", "\n      ", "\n\n      ", "\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n    </script>\n\n    ", "\n\n    ", "\n  "])), !((_b = json.hooks.onMount) === null || _b === void 0 ? void 0 : _b.code) ? '' : "import { onMount } from 'svelte'", !((_c = json.hooks.onUpdate) === null || _c === void 0 ? void 0 : _c.length) ? '' : "import { afterUpdate } from 'svelte'", !((_d = json.hooks.onUnMount) === null || _d === void 0 ? void 0 : _d.code) ? '' : "import { onDestroy } from 'svelte'", (0, render_imports_1.renderPreComponent)({ component: json, target: 'svelte' }), (0, context_1.hasContext)(component) ? 'import { getContext, setContext } from "svelte";' : '', !hasData || options.stateType === 'variables' ? '' : "import onChange from 'on-change'", (0, lodash_1.uniq)(refs.map(function (ref) { return (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(ref); }).concat(props))
             .map(function (name) {
             if (name === 'children') {
                 return '';
             }
-            return "export let ".concat(name, ";");
+            var propDeclaration = "export let ".concat(name);
+            if (json.propsTypeRef && json.propsTypeRef !== 'any') {
+                propDeclaration += ": ".concat(json.propsTypeRef.split(' |')[0], "['").concat(name, "']");
+            }
+            propDeclaration += ';';
+            return propDeclaration;
         })
             .join('\n'), (0, helpers_1.hasStyle)(json)
             ? "\n        function mitosis_styling (node, vars) {\n          Object.entries(vars).forEach(([ p, v ]) => { node.style[p] = v })\n        }\n      "
@@ -406,4 +415,4 @@ var componentToSvelte = function (_a) {
     };
 };
 exports.componentToSvelte = componentToSvelte;
-var templateObject_1;
+var templateObject_1, templateObject_2;

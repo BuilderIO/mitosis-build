@@ -273,10 +273,11 @@ var componentFunctionToJson = function (node, context) {
         });
         context.builder.component.exports = localExports;
     }
+    var propsTypeRef = (0, component_types_1.getPropsTypeRef)(node, context);
     return (0, create_mitosis_component_1.createMitosisComponent)(__assign(__assign({}, context.builder.component), { name: (_a = node.id) === null || _a === void 0 ? void 0 : _a.name, state: state, children: children, refs: refs, hooks: hooks, context: {
             get: accessedContext,
             set: setContext,
-        }, propsTypeRef: (0, component_types_1.getPropsTypeRef)(node) }));
+        }, propsTypeRef: propsTypeRef }));
 };
 var jsxElementToJson = function (node) {
     if (types.isJSXText(node)) {

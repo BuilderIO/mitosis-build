@@ -22,6 +22,15 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
+var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
+    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
+        if (ar || !(i in from)) {
+            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+            ar[i] = from[i];
+        }
+    }
+    return to.concat(ar || Array.prototype.slice.call(from));
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -30,7 +39,8 @@ exports.collectInterfaces = exports.collectTypes = exports.isTypeOrInterface = e
 var babel = __importStar(require("@babel/core"));
 var generator_1 = __importDefault(require("@babel/generator"));
 var types = babel.types;
-var getPropsTypeRef = function (node) {
+var getPropsTypeRef = function (node, context) {
+    var _a;
     var param = node.params[0];
     // TODO: component function params name must be props
     if (babel.types.isIdentifier(param) &&
@@ -39,9 +49,17 @@ var getPropsTypeRef = function (node) {
         var paramIdentifier = babel.types.variableDeclaration('let', [
             babel.types.variableDeclarator(param),
         ]);
-        return (0, generator_1.default)(paramIdentifier)
+        var generatedTypes = (0, generator_1.default)(paramIdentifier)
             .code.replace(/^let\sprops:\s+/, '')
             .replace(/;/g, '');
+        if (generatedTypes.startsWith('{')) {
+            var propsTypeRef = "".concat((_a = node.id) === null || _a === void 0 ? void 0 : _a.name, "Props");
+            context.builder.component.interfaces = __spreadArray(__spreadArray([], (context.builder.component.interfaces || []), true), [
+                "export interface ".concat(propsTypeRef, " ").concat(generatedTypes),
+            ], false);
+            return propsTypeRef;
+        }
+        return generatedTypes;
     }
     return undefined;
 };
