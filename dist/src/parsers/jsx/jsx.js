@@ -506,6 +506,12 @@ function parseJsx(jsx, options) {
                             component: (0, create_mitosis_component_1.createMitosisComponent)(),
                         };
                         var keepStatements = path.node.body.filter(function (statement) { return isImportOrDefaultExport(statement) || (0, component_types_1.isTypeOrInterface)(statement); });
+                        for (var _i = 0, _a = path.node.body; _i < _a.length; _i++) {
+                            var statement = _a[_i];
+                            if ((0, component_types_1.isTypeImport)(statement)) {
+                                (0, component_types_1.collectTypes)(statement, context);
+                            }
+                        }
                         var exportsOrLocalVariables = path.node.body.filter(function (statement) {
                             return !isImportOrDefaultExport(statement) &&
                                 !(0, component_types_1.isTypeOrInterface)(statement) &&
