@@ -49,6 +49,7 @@ var core_1 = require("@babel/core");
 var lodash_1 = require("lodash");
 var state_1 = require("../helpers/state");
 var collect_css_1 = require("../helpers/styles/collect-css");
+var hash_sum_1 = __importDefault(require("hash-sum"));
 // Transform <foo.bar key="value" /> to <component :is="foo.bar" key="value" />
 function processDynamicComponents(json, options) {
     var found = false;
@@ -243,7 +244,10 @@ var componentToSolid = function (_options) {
         }
         (0, strip_meta_properties_1.stripMetaProperties)(json);
         var foundDynamicComponents = processDynamicComponents(json, options);
-        var css = options.stylesType === 'style-tag' && (0, collect_css_1.collectCss)(json);
+        var css = options.stylesType === 'style-tag' &&
+            (0, collect_css_1.collectCss)(json, {
+                prefix: (0, hash_sum_1.default)(json),
+            });
         var stateString = (0, get_state_object_string_1.getStateObjectStringFromComponent)(json);
         var hasState = (0, state_1.checkHasState)(json);
         var componentsUsed = (0, get_components_used_1.getComponentsUsed)(json);
