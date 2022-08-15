@@ -7,6 +7,7 @@ var basicOnMountUpdate = require('./data/basic-onMount-update.raw');
 var basicContext = require('./data/basic-context.raw');
 var basicOutputsMeta = require('./data/basic-outputs-meta.raw');
 var basicOutputs = require('./data/basic-outputs.raw');
+var subComponent = require('./data/sub-component.lite.jsx');
 var basic = require('./data/basic.raw');
 var basicMitosis = require('./data/basic-custom-mitosis-package.raw');
 var basicChildComponent = require('./data/basic-child-component.raw');
@@ -21,6 +22,7 @@ var preserveExportOrLocalStatement = require('./data/basic-preserve-export-or-lo
 var propsType = require('./data/types/component-props-type.raw');
 var propsInterface = require('./data/types/component-props-interface.raw');
 var preserveTyping = require('./data/types/preserve-typing.raw');
+var typeDependency = require('./data/types/type-dependency.raw');
 var classRaw = require('./data/styles/class.raw');
 var className = require('./data/styles/className.raw');
 var classAndClassName = require('./data/styles/class-and-className.raw');
@@ -86,6 +88,8 @@ var BASIC_TESTS = {
     propsType: propsType,
     propsInterface: propsInterface,
     preserveTyping: preserveTyping,
+    typeDependency: typeDependency,
+    subComponent: subComponent,
     propsDestructure: propsDestructure,
     'onInit & onMount': onInitonMount,
     'Basic Context': basicContext,

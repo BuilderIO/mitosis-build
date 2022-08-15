@@ -7,6 +7,7 @@ var html_1 = require("./generators/html");
 var mitosis_1 = require("./generators/mitosis");
 var liquid_1 = require("./generators/liquid");
 var react_1 = require("./generators/react");
+var react_2 = require("./generators/react");
 var react_native_1 = require("./generators/react-native");
 var solid_1 = require("./generators/solid");
 var svelte_1 = require("./generators/svelte");
@@ -36,4 +37,5 @@ exports.targets = {
     stencil: stencil_1.componentToStencil,
     qwik: qwik_1.componentToQwik,
     marko: marko_1.componentToMarko,
+    preact: react_2.componentToPreact,
 };

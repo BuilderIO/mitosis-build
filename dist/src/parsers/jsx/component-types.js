@@ -26,7 +26,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.collectInterfaces = exports.collectTypes = exports.isTypeOrInterface = exports.getPropsTypeRef = void 0;
+exports.collectInterfaces = exports.collectTypes = exports.isTypeOrInterface = exports.isTypeImport = exports.getPropsTypeRef = void 0;
 var babel = __importStar(require("@babel/core"));
 var generator_1 = __importDefault(require("@babel/generator"));
 var types = babel.types;
@@ -46,6 +46,14 @@ var getPropsTypeRef = function (node) {
     return undefined;
 };
 exports.getPropsTypeRef = getPropsTypeRef;
+var isTypeImport = function (node) {
+    var _a;
+    return types.isImportDeclaration(node) &&
+        node.importKind === 'type' &&
+        // Babel adds an implicit JSX type import that we don't want
+        ((_a = node.specifiers[0]) === null || _a === void 0 ? void 0 : _a.local.name) !== 'JSX';
+};
+exports.isTypeImport = isTypeImport;
 var isTypeOrInterface = function (node) {
     return types.isTSTypeAliasDeclaration(node) ||
         types.isTSInterfaceDeclaration(node) ||
