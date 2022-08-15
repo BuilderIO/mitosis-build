@@ -46,7 +46,7 @@ var blockToLit = function (json, options) {
         return "${".concat(processBinding((_d = json.bindings.when) === null || _d === void 0 ? void 0 : _d.code), " ?\n      html`").concat(json.children
             .filter(filter_empty_text_nodes_1.filterEmptyTextNodes)
             .map(function (item) { return blockToLit(item, options); })
-            .join('\n'), "`\n    ) : ").concat(!json.meta.else ? 'null' : blockToLit(json.meta.else, options), "}");
+            .join('\n'), "`\n    : ").concat(!json.meta.else ? 'null' : blockToLit(json.meta.else, options), "}");
     }
     var str = '';
     var tagName = (0, is_upper_case_1.isUpperCase)(json.name[0]) ? (0, dash_case_1.dashCase)(json.name) : json.name;
@@ -156,6 +156,9 @@ var componentToLit = function (options) {
             }
             catch (err) {
                 console.warn('Could not format html', err);
+                // If can't format HTML (this can happen with lit given it is tagged template strings),
+                // at least remove excess space
+                html = html.replace(/\n{3,}/g, '\n\n');
             }
         }
         var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    ", "\n    import { LitElement, html } from 'lit';\n    import { customElement, property, css, state } from 'lit/decorators.js';\n\n\n    @customElement('", "')\n    export default class ", " extends LitElement {\n      ", "\n\n      ", "\n    \n  \n      ", "\n\n        ", "\n        ", "\n      \n        ", "\n        ", "\n        ", "\n    \n      render() {\n        return html`\n          ", "\n        `\n      }\n    }\n  "], ["\n    ", "\n    import { LitElement, html } from 'lit';\n    import { customElement, property, css, state } from 'lit/decorators.js';\n\n\n    @customElement('", "')\n    export default class ", " extends LitElement {\n      ", "\n\n      ", "\n    \n  \n      ", "\n\n        ", "\n        ", "\n      \n        ", "\n        ", "\n        ", "\n    \n      render() {\n        return html\\`\n          ", "\n        \\`\n      }\n    }\n  "])), (0, render_imports_1.renderPreComponent)({ component: json, target: 'lit' }), ((_b = json.meta.useMetadata) === null || _b === void 0 ? void 0 : _b.tagName) || (0, dash_case_1.dashCase)(json.name), json.name, css.length
