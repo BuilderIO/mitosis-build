@@ -517,9 +517,6 @@ function parseJsx(jsx, options) {
                                 }
                                 (0, component_types_1.collectTypes)(statement, context);
                             }
-                            if ((0, component_types_1.isTypeExport)(statement)) {
-                                (0, component_types_1.collectTypes)(statement, context);
-                            }
                         }
                         var exportsOrLocalVariables = path.node.body.filter(function (statement) {
                             return !isImportOrDefaultExport(statement) &&
