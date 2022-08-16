@@ -27,6 +27,7 @@ var map_refs_1 = require("../../helpers/map-refs");
 var get_refs_1 = require("../../helpers/get-refs");
 var lodash_1 = require("lodash");
 var is_upper_case_1 = require("../../helpers/is-upper-case");
+var has_1 = require("../../helpers/has");
 var blockToLit = function (json, options) {
     var _a, _b, _c, _d, _e;
     if (options === void 0) { options = {}; }
@@ -56,9 +57,7 @@ var blockToLit = function (json, options) {
         str += " class=".concat(classString, " ");
     }
     if ((_e = json.bindings._spread) === null || _e === void 0 ? void 0 : _e.code) {
-        // Lit currently does not support spread, it's been an open PR
-        // for a year https://github.com/lit/lit/pull/1960/files
-        // str += ` \${...(${json.bindings._spread.code})} `;
+        str += " ${spread(".concat(json.bindings._spread.code, ")} ");
     }
     for (var key in json.properties) {
         var value = json.properties[key];
@@ -70,6 +69,8 @@ var blockToLit = function (json, options) {
             continue;
         }
         if (key === 'ref') {
+            // TODO: maybe use ref directive instead
+            // https://lit.dev/docs/templates/directives/#ref
             str += " ref=\"".concat(code, "\" ");
         }
         else if (key.startsWith('on')) {
@@ -78,7 +79,9 @@ var blockToLit = function (json, options) {
             str += " ".concat(useKey, "=${").concat(cusArgs.join(','), " => ").concat(processBinding(code), "} ");
         }
         else {
-            str += " ".concat(key, "=${").concat(processBinding(code), "} ");
+            // TODO: handle boolean attributes too by matching list of html boolean attributes
+            // https://lit.dev/docs/templates/expressions/#boolean-attribute-expressions
+            str += " .".concat(key, "=${").concat(processBinding(code), "} ");
         }
     }
     if (jsx_1.selfClosingTags.has(json.name)) {
@@ -138,6 +141,7 @@ var componentToLit = function (options) {
             }
         }
         var html = json.children.map(function (item) { return blockToLit(item, options); }).join('\n');
+        var hasSpread = (0, has_1.has)(json, function (node) { return Boolean(node.bindings._spread); });
         if (options.prettier !== false) {
             try {
                 css = (0, standalone_1.format)(css, {
@@ -161,7 +165,9 @@ var componentToLit = function (options) {
                 html = html.replace(/\n{3,}/g, '\n\n');
             }
         }
-        var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    ", "\n    import { LitElement, html, css } from 'lit';\n    import { customElement, property, state } from 'lit/decorators.js';\n\n    ", "\n\n    @customElement('", "')\n    export default class ", " extends LitElement {\n      ", "\n\n      ", "\n    \n  \n      ", "\n\n        ", "\n        ", "\n      \n        ", "\n        ", "\n        ", "\n    \n      render() {\n        return html`\n          ", "\n        `\n      }\n    }\n  "], ["\n    ", "\n    import { LitElement, html, css } from 'lit';\n    import { customElement, property, state } from 'lit/decorators.js';\n\n    ", "\n\n    @customElement('", "')\n    export default class ", " extends LitElement {\n      ", "\n\n      ", "\n    \n  \n      ", "\n\n        ", "\n        ", "\n      \n        ", "\n        ", "\n        ", "\n    \n      render() {\n        return html\\`\n          ", "\n        \\`\n      }\n    }\n  "])), (0, render_imports_1.renderPreComponent)({ component: json, target: 'lit' }), json.types ? json.types.join('\n') : '', ((_b = json.meta.useMetadata) === null || _b === void 0 ? void 0 : _b.tagName) || (0, dash_case_1.dashCase)(json.name), json.name, css.length
+        var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    ", "\n    import { LitElement, html, css } from 'lit';\n    import { customElement, property, state } from 'lit/decorators.js';\n\n    ", "\n    ", "\n\n    @customElement('", "')\n    export default class ", " extends LitElement {\n      ", "\n\n      ", "\n    \n  \n      ", "\n\n        ", "\n        ", "\n      \n        ", "\n        ", "\n        ", "\n    \n      render() {\n        return html`\n          ", "\n        `\n      }\n    }\n  "], ["\n    ", "\n    import { LitElement, html, css } from 'lit';\n    import { customElement, property, state } from 'lit/decorators.js';\n\n    ", "\n    ", "\n\n    @customElement('", "')\n    export default class ", " extends LitElement {\n      ", "\n\n      ", "\n    \n  \n      ", "\n\n        ", "\n        ", "\n      \n        ", "\n        ", "\n        ", "\n    \n      render() {\n        return html\\`\n          ", "\n        \\`\n      }\n    }\n  "])), (0, render_imports_1.renderPreComponent)({ component: json, target: 'lit' }), json.types ? json.types.join('\n') : '', hasSpread
+            ? "\n      const spread = (properties) =>\n        directive((part) => {\n          for (const property in properties) {\n            const value = properties[attr];\n            part.element[property] = value;\n          }\n        });\n    "
+            : '', ((_b = json.meta.useMetadata) === null || _b === void 0 ? void 0 : _b.tagName) || (0, dash_case_1.dashCase)(json.name), json.name, css.length
             ? "static styles = css`\n      ".concat((0, indent_1.indent)(css, 8), "`;")
             : '', Array.from(domRefs)
             .map(function (refName) { return "\n          @query('[ref=\"".concat(refName, "\"]')\n          ").concat((0, lodash_1.camelCase)(refName), "!: HTMLElement;\n          "); })
