@@ -180,7 +180,7 @@ var blockToBuilder = function (json, options, _internalOptions) {
                 componentOptions[key] = parsed;
             }
             else {
-                builderBindings["component.options.".concat(key)] = bindings[key];
+                builderBindings["component.options.".concat(key)] = bindings[key].code;
             }
         };
         for (var key in bindings) {
@@ -211,7 +211,7 @@ var blockToBuilder = function (json, options, _internalOptions) {
     }
     if (thisIsComponent) {
         for (var key in json.bindings) {
-            bindings["component.options.".concat(key)] = json.bindings[key];
+            builderBindings["component.options.".concat(key)] = json.bindings[key].code;
         }
     }
     return el(__assign(__assign(__assign(__assign({ tagName: thisIsComponent ? undefined : json.name }, (hasCss && {
@@ -224,7 +224,9 @@ var blockToBuilder = function (json, options, _internalOptions) {
     })), { code: {
             bindings: builderBindings,
             actions: actions,
-        }, properties: thisIsComponent ? undefined : omitMetaProperties(json.properties), bindings: thisIsComponent ? builderBindings : (0, lodash_1.omit)(bindings, 'css'), actions: actions, children: json.children
+        }, properties: thisIsComponent ? undefined : omitMetaProperties(json.properties), bindings: thisIsComponent
+            ? builderBindings
+            : (0, lodash_1.omit)((0, lodash_1.mapValues)(bindings, function (value) { return value === null || value === void 0 ? void 0 : value.code; }), 'css'), actions: actions, children: json.children
             .filter(filter_empty_text_nodes_1.filterEmptyTextNodes)
             .map(function (child) { return (0, exports.blockToBuilder)(child, options); }) }), options);
 };
