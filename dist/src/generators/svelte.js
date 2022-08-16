@@ -91,7 +91,7 @@ var mappers = {
             delete firstChild.properties.key;
             delete firstChild.bindings.key;
         }
-        return "\n{#each ".concat(stripStateAndProps((_c = json.bindings.each) === null || _c === void 0 ? void 0 : _c.code, options), " as ").concat(json.scope.For[0], ", ").concat(json.scope.For[1], " ").concat(keyValue ? "(".concat(keyValue, ")") : '', "}\n").concat(json.children.map(function (item) { return (0, exports.blockToSvelte)({ json: item, options: options, parentComponent: parentComponent }); }).join('\n'), "\n{/each}\n");
+        return "\n{#each ".concat(stripStateAndProps((_c = json.bindings.each) === null || _c === void 0 ? void 0 : _c.code, options), " as ").concat(json.scope.For[0]).concat(json.scope.For[1] ? ", ".concat(json.scope.For[1]) : '', " ").concat(keyValue ? "(".concat(keyValue, ")") : '', "}\n").concat(json.children.map(function (item) { return (0, exports.blockToSvelte)({ json: item, options: options, parentComponent: parentComponent }); }).join('\n'), "\n{/each}\n");
     },
     Show: function (_a) {
         var _b;
