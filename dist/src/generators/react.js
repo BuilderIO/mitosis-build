@@ -55,6 +55,7 @@ var collect_styled_components_1 = require("../helpers/styles/collect-styled-comp
 var helpers_1 = require("../helpers/styles/helpers");
 var slots_1 = require("../helpers/slots");
 var state_1 = require("../helpers/state");
+var hash_sum_1 = __importDefault(require("hash-sum"));
 var openFrag = function (options) { return getFragment('open', options); };
 var closeFrag = function (options) { return getFragment('close', options); };
 function getFragment(type, options) {
@@ -463,7 +464,13 @@ var _componentToReact = function (json, options, isSubComponent) {
     if (options.plugins) {
         json = (0, plugins_1.runPostJsonPlugins)(json, options.plugins);
     }
-    var css = stylesType === 'styled-jsx' && (0, collect_css_1.collectCss)(json);
+    var css = stylesType === 'styled-jsx'
+        ? (0, collect_css_1.collectCss)(json)
+        : stylesType === 'style-tag'
+            ? (0, collect_css_1.collectCss)(json, {
+                prefix: (0, hash_sum_1.default)(json),
+            })
+            : null;
     var styledComponentsCode = stylesType === 'styled-components' && componentHasStyles && (0, collect_styled_components_1.collectStyledComponents)(json);
     if (options.format !== 'lite') {
         (0, strip_meta_properties_1.stripMetaProperties)(json);
@@ -488,7 +495,7 @@ var _componentToReact = function (json, options, isSubComponent) {
         reactLibImports.add('useEffect');
     }
     var wrap = wrapInFragment(json) ||
-        (componentHasStyles && stylesType === 'styled-jsx') ||
+        (componentHasStyles && (stylesType === 'styled-jsx' || stylesType === 'style-tag')) ||
         isRootSpecialNode(json);
     var _p = getRefsString(json, allRefs, options), hasStateArgument = _p[0], refsString = _p[1];
     var nativeStyles = stylesType === 'react-native' && componentHasStyles && (0, react_native_1.collectReactNativeStyles)(json);
@@ -522,7 +529,11 @@ var _componentToReact = function (json, options, isSubComponent) {
         ? "useEffect(() => {\n            ".concat(processBinding(updateStateSettersInCode(json.hooks.onMount.code, options), options), "\n          }, [])")
         : '', (_l = (_k = json.hooks.onUpdate) === null || _k === void 0 ? void 0 : _k.map(function (hook) { return "useEffect(() => {\n            ".concat(processBinding(updateStateSettersInCode(hook.code, options), options), "\n          }, \n          ").concat(hook.deps ? processBinding(updateStateSettersInCode(hook.deps, options), options) : '', ")"); }).join(';')) !== null && _l !== void 0 ? _l : '', ((_m = json.hooks.onUnMount) === null || _m === void 0 ? void 0 : _m.code)
         ? "useEffect(() => {\n            return () => {\n              ".concat(processBinding(updateStateSettersInCode(json.hooks.onUnMount.code, options), options), "\n            }\n          }, [])")
-        : '', wrap ? openFrag(options) : '', json.children.map(function (item) { return (0, exports.blockToReact)(item, options); }).join('\n'), componentHasStyles && stylesType === 'styled-jsx' ? "<style jsx>{`".concat(css, "`}</style>") : '', wrap ? closeFrag(options) : '', isForwardRef ? ')' : '', !nativeStyles
+        : '', wrap ? openFrag(options) : '', json.children.map(function (item) { return (0, exports.blockToReact)(item, options); }).join('\n'), componentHasStyles && stylesType === 'styled-jsx'
+        ? "<style jsx>{`".concat(css, "`}</style>")
+        : componentHasStyles && stylesType === 'style-tag'
+            ? "<style>{`".concat(css, "`}</style>")
+            : '', wrap ? closeFrag(options) : '', isForwardRef ? ')' : '', !nativeStyles
         ? ''
         : "\n      const styles = StyleSheet.create(".concat(json5_1.default.stringify(nativeStyles), ");\n    "), styledComponentsCode ? styledComponentsCode : '');
     str = (0, replace_new_lines_in_strings_1.stripNewlinesInStrings)(str);
