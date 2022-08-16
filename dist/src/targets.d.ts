@@ -26,4 +26,5 @@ export declare const targets: {
     qwik: (userOptions?: import("./generators/qwik/component-generator").ToQwikOptions) => import(".").Transpiler;
     marko: (userOptions?: import("./generators/marko").ToMarkoOptions) => import(".").Transpiler;
     preact: (reactOptions?: import("./generators/react").ToReactOptions) => import(".").Transpiler;
+    lit: (options?: import("./generators/lit").ToLitOptions) => import(".").Transpiler;
 };

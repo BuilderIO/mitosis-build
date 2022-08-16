@@ -84,6 +84,7 @@ __exportStar(require("./generators/marko"), exports);
 __exportStar(require("./generators/mitosis"), exports);
 __exportStar(require("./generators/template"), exports);
 __exportStar(require("./generators/swift-ui"), exports);
+__exportStar(require("./generators/lit"), exports);
 __exportStar(require("./generators/react-native"), exports);
 __exportStar(require("./helpers/parse-reactive-script"), exports);
 __exportStar(require("./helpers/is-mitosis-node"), exports);

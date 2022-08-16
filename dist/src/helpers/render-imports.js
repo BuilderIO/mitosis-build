@@ -35,6 +35,8 @@ var getFileExtensionForTarget = function (target) {
             return '.vue';
         case 'marko':
             return '.marko';
+        case 'lit':
+            return '.js';
         case 'angular':
             return '';
         // these `.lite` extensions are handled in the `transpile` step of the CLI.
@@ -97,6 +99,11 @@ var renderImport = function (_a) {
     var importValue = getImportValue(importedValues);
     var isComponentImport = checkIsComponentImport(theImport);
     var shouldBeAsyncImport = asyncComponentImports && isComponentImport;
+    // For lit (components) we just want to do a plain import
+    // https://lit.dev/docs/components/rendering/#composing-templates
+    if (isComponentImport && target === 'lit') {
+        return "import '".concat(path, "';");
+    }
     if (shouldBeAsyncImport) {
         var isVueImport = target === 'vue';
         if (isVueImport && importedValues.namedImports) {
