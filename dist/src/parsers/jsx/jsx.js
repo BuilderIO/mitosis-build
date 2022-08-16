@@ -616,11 +616,8 @@ function parseJsx(jsx, options) {
                     },
                     ExportNamedDeclaration: function (path, context) {
                         var node = path.node;
-                        var newTypeStr = (0, generator_1.default)(node).code;
-                        if (babel.types.isTSInterfaceDeclaration(node.declaration)) {
-                            (0, component_types_1.collectInterfaces)(path.node, context);
-                        }
-                        if (babel.types.isTSTypeAliasDeclaration(node.declaration)) {
+                        if (babel.types.isTSInterfaceDeclaration(node.declaration) ||
+                            babel.types.isTSTypeAliasDeclaration(node.declaration)) {
                             (0, component_types_1.collectTypes)(path.node, context);
                         }
                     },
@@ -628,7 +625,7 @@ function parseJsx(jsx, options) {
                         (0, component_types_1.collectTypes)(path.node, context);
                     },
                     TSInterfaceDeclaration: function (path, context) {
-                        (0, component_types_1.collectInterfaces)(path.node, context);
+                        (0, component_types_1.collectTypes)(path.node, context);
                     },
                 },
             }); },
