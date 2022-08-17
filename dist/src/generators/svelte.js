@@ -91,7 +91,7 @@ var mappers = {
             delete firstChild.properties.key;
             delete firstChild.bindings.key;
         }
-        return "\n{#each ".concat(stripStateAndProps((_c = json.bindings.each) === null || _c === void 0 ? void 0 : _c.code, options), " as ").concat(json.scope.For[0]).concat(json.scope.For[1] ? ", ".concat(json.scope.For[1]) : '', " ").concat(keyValue ? "(".concat(keyValue, ")") : '', "}\n").concat(json.children.map(function (item) { return (0, exports.blockToSvelte)({ json: item, options: options, parentComponent: parentComponent }); }).join('\n'), "\n{/each}\n");
+        return "\n{#each ".concat(stripStateAndProps((_c = json.bindings.each) === null || _c === void 0 ? void 0 : _c.code, options), " as ").concat(json.scope.For[0], ", ").concat(json.scope.For[1], " ").concat(keyValue ? "(".concat(keyValue, ")") : '', "}\n").concat(json.children.map(function (item) { return (0, exports.blockToSvelte)({ json: item, options: options, parentComponent: parentComponent }); }).join('\n'), "\n{/each}\n");
     },
     Show: function (_a) {
         var _b;
@@ -288,7 +288,7 @@ var componentToSvelte = function (_a) {
     if (_a === void 0) { _a = {}; }
     var _b = _a.plugins, plugins = _b === void 0 ? [] : _b, userProvidedOptions = __rest(_a, ["plugins"]);
     return function (_a) {
-        var _b, _c, _d, _e, _f, _g, _h;
+        var _b, _c, _d, _e, _f, _g;
         var component = _a.component;
         var options = __assign({ stateType: 'variables', prettier: true, plugins: __spreadArray([FUNCTION_HACK_PLUGIN], plugins, true) }, userProvidedOptions);
         // Make a copy we can safely mutate, similar to babel's toolchain
@@ -336,10 +336,10 @@ var componentToSvelte = function (_a) {
             return (0, function_1.pipe)(stripStateAndProps(hookCode, options), babel_transform_1.babelTransformCode);
         };
         var str = '';
-        if ((_b = json.types) === null || _b === void 0 ? void 0 : _b.length) {
-            str += (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n      <script context='module' lang='ts'>\n        ", "\n      </script>\n      \n\n      \n\n      "], ["\n      <script context='module' lang='ts'>\n        ", "\n      </script>\n      \\n\n      \\n\n      "])), json.types ? json.types.join('\n\n') + '\n' : '');
+        if (json.propsTypeRef) {
+            str += (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n      <script context='module' lang='ts'>\n        ", "\n        ", "\n      </script>\n      \n\n      \n\n      "], ["\n      <script context='module' lang='ts'>\n        ", "\n        ", "\n      </script>\n      \\n\n      \\n\n      "])), json.types ? json.types.join('\n\n') + '\n' : '', json.interfaces ? json.interfaces.join('\n\n') + '\n' : '');
         }
-        str += (0, dedent_1.default)(templateObject_2 || (templateObject_2 = __makeTemplateObject(["\n      <script lang='ts'>\n      ", "\n      ", "\n      ", "\n      ", "\n      ", "\n\n      ", "\n      ", "\n      ", "\n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n    </script>\n\n    ", "\n\n    ", "\n  "], ["\n      <script lang='ts'>\n      ", "\n      ", "\n      ", "\n      ", "\n      ", "\n\n      ", "\n      ", "\n      ", "\n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n    </script>\n\n    ", "\n\n    ", "\n  "])), !((_c = json.hooks.onMount) === null || _c === void 0 ? void 0 : _c.code) ? '' : "import { onMount } from 'svelte'", !((_d = json.hooks.onUpdate) === null || _d === void 0 ? void 0 : _d.length) ? '' : "import { afterUpdate } from 'svelte'", !((_e = json.hooks.onUnMount) === null || _e === void 0 ? void 0 : _e.code) ? '' : "import { onDestroy } from 'svelte'", (0, render_imports_1.renderPreComponent)({ component: json, target: 'svelte' }), (0, context_1.hasContext)(component) ? 'import { getContext, setContext } from "svelte";' : '', !hasData || options.stateType === 'variables' ? '' : "import onChange from 'on-change'", (0, lodash_1.uniq)(refs.map(function (ref) { return (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(ref); }).concat(props))
+        str += (0, dedent_1.default)(templateObject_2 || (templateObject_2 = __makeTemplateObject(["\n      <script lang='ts'>\n      ", "\n      ", "\n      ", "\n      ", "\n      ", "\n\n      ", "\n      ", "\n      ", "\n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n    </script>\n\n    ", "\n\n    ", "\n  "], ["\n      <script lang='ts'>\n      ", "\n      ", "\n      ", "\n      ", "\n      ", "\n\n      ", "\n      ", "\n      ", "\n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n    </script>\n\n    ", "\n\n    ", "\n  "])), !((_b = json.hooks.onMount) === null || _b === void 0 ? void 0 : _b.code) ? '' : "import { onMount } from 'svelte'", !((_c = json.hooks.onUpdate) === null || _c === void 0 ? void 0 : _c.length) ? '' : "import { afterUpdate } from 'svelte'", !((_d = json.hooks.onUnMount) === null || _d === void 0 ? void 0 : _d.code) ? '' : "import { onDestroy } from 'svelte'", (0, render_imports_1.renderPreComponent)({ component: json, target: 'svelte' }), (0, context_1.hasContext)(component) ? 'import { getContext, setContext } from "svelte";' : '', !hasData || options.stateType === 'variables' ? '' : "import onChange from 'on-change'", (0, lodash_1.uniq)(refs.map(function (ref) { return (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(ref); }).concat(props))
             .map(function (name) {
             if (name === 'children') {
                 return '';
@@ -357,9 +357,9 @@ var componentToSvelte = function (_a) {
             ? dataString.length < 4
                 ? ''
                 : "let state = onChange(".concat(dataString, ", () => state = state)")
-            : dataString, !((_f = json.hooks.onMount) === null || _f === void 0 ? void 0 : _f.code)
+            : dataString, !((_e = json.hooks.onMount) === null || _e === void 0 ? void 0 : _e.code)
             ? ''
-            : "onMount(() => { ".concat(transformHookCode(json.hooks.onMount.code), " });"), !((_g = json.hooks.onUpdate) === null || _g === void 0 ? void 0 : _g.length)
+            : "onMount(() => { ".concat(transformHookCode(json.hooks.onMount.code), " });"), !((_f = json.hooks.onUpdate) === null || _f === void 0 ? void 0 : _f.length)
             ? ''
             : json.hooks.onUpdate
                 .map(function (_a, index) {
@@ -373,7 +373,7 @@ var componentToSvelte = function (_a) {
                     return "afterUpdate(() => { ".concat(hookCode, " })");
                 }
             })
-                .join(';'), !((_h = json.hooks.onUnMount) === null || _h === void 0 ? void 0 : _h.code)
+                .join(';'), !((_g = json.hooks.onUnMount) === null || _g === void 0 ? void 0 : _g.code)
             ? ''
             : "onDestroy(() => { ".concat(transformHookCode(json.hooks.onUnMount.code), " });"), json.children
             .map(function (item) {

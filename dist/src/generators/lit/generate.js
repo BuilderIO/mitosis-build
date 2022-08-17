@@ -159,6 +159,7 @@ var componentToLit = function (options) {
                 });
             }
             catch (err) {
+                console.warn('Could not format html', err);
                 // If can't format HTML (this can happen with lit given it is tagged template strings),
                 // at least remove excess space
                 html = html.replace(/\n{3,}/g, '\n\n');
@@ -178,7 +179,7 @@ var componentToLit = function (options) {
             ? ''
             : "disconnectedCallback() { ".concat(processBinding(json.hooks.onUnMount.code), " }"), !((_e = json.hooks.onUpdate) === null || _e === void 0 ? void 0 : _e.length)
             ? ''
-            : "updated() { \n              ".concat(json.hooks.onUpdate.map(function (hook) { return processBinding(hook.code); }).join('\n\n'), " \n            }"), (0, indent_1.indent)(html, 8));
+            : json.hooks.onUpdate.map(function (hook) { return "updated() { ".concat(processBinding(hook.code), " }"); }), (0, indent_1.indent)(html, 8));
         if (options.plugins) {
             str = (0, plugins_1.runPreCodePlugins)(str, options.plugins);
         }

@@ -36,7 +36,6 @@ var dash_case_1 = require("../../helpers/dash-case");
 var has_props_1 = require("../../helpers/has-props");
 var get_refs_1 = require("../../helpers/get-refs");
 var lodash_1 = require("lodash");
-var hash_sum_1 = __importDefault(require("hash-sum"));
 // Having issues with this, so off for now
 var USE_MARKO_PRETTIER = false;
 /**
@@ -147,9 +146,7 @@ var componentToMarko = function (userOptions) {
         if (options.plugins) {
             json = (0, plugins_1.runPreJsonPlugins)(json, options.plugins);
         }
-        var css = (0, collect_css_1.collectCss)(json, {
-            prefix: (0, hash_sum_1.default)(json),
-        });
+        var css = (0, collect_css_1.collectCss)(json);
         var domRefs = (0, get_refs_1.getRefs)(json);
         (0, map_refs_1.mapRefs)(json, function (refName) { return "this.".concat((0, lodash_1.camelCase)(refName)); });
         if (options.plugins) {

@@ -1,7 +1,7 @@
 import { BaseTranspilerOptions, Transpiler } from '../types/transpiler';
 import { MitosisNode } from '../types/mitosis-node';
 export interface ToReactOptions extends BaseTranspilerOptions {
-    stylesType?: 'emotion' | 'styled-components' | 'styled-jsx' | 'react-native' | 'style-tag';
+    stylesType?: 'emotion' | 'styled-components' | 'styled-jsx' | 'react-native';
     stateType?: 'useState' | 'mobx' | 'valtio' | 'solid' | 'builder';
     format?: 'lite' | 'safe';
     type?: 'dom' | 'native';

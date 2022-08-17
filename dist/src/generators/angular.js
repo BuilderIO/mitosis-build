@@ -193,14 +193,14 @@ exports.blockToAngular = blockToAngular;
 var componentToAngular = function (options) {
     if (options === void 0) { options = {}; }
     return function (_a) {
-        var _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m;
+        var _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o;
         var component = _a.component;
         // Make a copy we can safely mutate, similar to babel's toolchain
         var json = (0, fast_clone_1.fastClone)(component);
         if (options.plugins) {
             json = (0, plugins_1.runPreJsonPlugins)(json, options.plugins);
         }
-        var _o = (0, get_props_ref_1.getPropsRef)(json, true), forwardProp = _o[0], hasPropRef = _o[1];
+        var _p = (0, get_props_ref_1.getPropsRef)(json, true), forwardProp = _p[0], hasPropRef = _p[1];
         var childComponents = [];
         var propsTypeRef = json.propsTypeRef !== 'any' ? json.propsTypeRef : undefined;
         json.imports.forEach(function (_a) {
@@ -212,7 +212,7 @@ var componentToAngular = function (options) {
             });
         });
         var customImports = (0, get_custom_imports_1.getCustomImports)(json);
-        var _p = component.exports, localExports = _p === void 0 ? {} : _p;
+        var _q = component.exports, localExports = _q === void 0 ? {} : _q;
         var localExportVars = Object.keys(localExports)
             .filter(function (key) { return localExports[key].usedInLocal; })
             .map(function (key) { return "".concat(key, " = ").concat(key, ";"); });
@@ -289,7 +289,7 @@ var componentToAngular = function (options) {
                 });
             },
         });
-        var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    import { ", " ", " Component ", "", " } from '@angular/core';\n    ", "\n\n    ", "\n    ", "\n\n    @Component({\n      ", "\n      selector: '", "',\n      template: `\n        ", "\n      `,\n      ", "\n    })\n    export default class ", " {\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n    }\n  "], ["\n    import { ", " ", " Component ", "", " } from '@angular/core';\n    ", "\n\n    ", "\n    ", "\n\n    @Component({\n      ", "\n      selector: '", "',\n      template: \\`\n        ", "\n      \\`,\n      ", "\n    })\n    export default class ", " {\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n    }\n  "])), outputs.length ? 'Output, EventEmitter, \n' : '', ((_g = options === null || options === void 0 ? void 0 : options.experimental) === null || _g === void 0 ? void 0 : _g.inject) ? 'Inject, forwardRef,' : '', domRefs.size ? ', ViewChild, ElementRef' : '', props.size ? ', Input' : '', options.standalone ? "import { CommonModule } from '@angular/common';" : '', json.types ? json.types.join('\n') : '', (0, render_imports_1.renderPreComponent)({
+        var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    import { ", " ", " Component ", "", " } from '@angular/core';\n    ", "\n\n    ", "\n    ", "\n    ", "\n\n    @Component({\n      ", "\n      selector: '", "',\n      template: `\n        ", "\n      `,\n      ", "\n    })\n    export default class ", " {\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n    }\n  "], ["\n    import { ", " ", " Component ", "", " } from '@angular/core';\n    ", "\n\n    ", "\n    ", "\n    ", "\n\n    @Component({\n      ", "\n      selector: '", "',\n      template: \\`\n        ", "\n      \\`,\n      ", "\n    })\n    export default class ", " {\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n    }\n  "])), outputs.length ? 'Output, EventEmitter, \n' : '', ((_g = options === null || options === void 0 ? void 0 : options.experimental) === null || _g === void 0 ? void 0 : _g.inject) ? 'Inject, forwardRef,' : '', domRefs.size ? ', ViewChild, ElementRef' : '', props.size ? ', Input' : '', options.standalone ? "import { CommonModule } from '@angular/common';" : '', json.types ? json.types.join('\n') : '', json.interfaces ? (_h = json.interfaces) === null || _h === void 0 ? void 0 : _h.join('\n') : '', (0, render_imports_1.renderPreComponent)({
             component: json,
             target: 'angular',
             excludeMitosisComponents: !options.standalone,
@@ -322,23 +322,23 @@ var componentToAngular = function (options) {
         })
             .join('\n'), !hasConstructor
             ? ''
-            : "constructor(\n".concat(injectables.join(',\n'), ") {\n            ").concat(!((_h = component.hooks) === null || _h === void 0 ? void 0 : _h.onInit)
+            : "constructor(\n".concat(injectables.join(',\n'), ") {\n            ").concat(!((_j = component.hooks) === null || _j === void 0 ? void 0 : _j.onInit)
                 ? ''
-                : "\n              ".concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)((_j = component.hooks.onInit) === null || _j === void 0 ? void 0 : _j.code, {
+                : "\n              ".concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)((_k = component.hooks.onInit) === null || _k === void 0 ? void 0 : _k.code, {
                     replaceWith: 'this.',
                     contextVars: contextVars,
                     outputVars: outputVars,
                 }), "\n              "), "\n          }\n          "), !hasOnMount
             ? ''
-            : "ngOnInit() {\n              \n              ".concat(!((_k = component.hooks) === null || _k === void 0 ? void 0 : _k.onMount)
+            : "ngOnInit() {\n              \n              ".concat(!((_l = component.hooks) === null || _l === void 0 ? void 0 : _l.onMount)
                 ? ''
-                : "\n                ".concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)((_l = component.hooks.onMount) === null || _l === void 0 ? void 0 : _l.code, {
+                : "\n                ".concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)((_m = component.hooks.onMount) === null || _m === void 0 ? void 0 : _m.code, {
                     replaceWith: 'this.',
                     contextVars: contextVars,
                     outputVars: outputVars,
                     domRefs: Array.from(domRefs),
                     stateVars: stateVars,
-                }), "\n                "), "\n            }"), !((_m = component.hooks.onUpdate) === null || _m === void 0 ? void 0 : _m.length)
+                }), "\n                "), "\n            }"), !((_o = component.hooks.onUpdate) === null || _o === void 0 ? void 0 : _o.length)
             ? ''
             : "ngAfterContentChecked() {\n              ".concat(component.hooks.onUpdate.reduce(function (code, hook) {
                 code += (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(hook.code, {

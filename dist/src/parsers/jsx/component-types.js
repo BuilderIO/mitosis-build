@@ -35,7 +35,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.collectTypes = exports.isTypeOrInterface = exports.isTypeImport = exports.getPropsTypeRef = void 0;
+exports.collectInterfaces = exports.collectTypes = exports.isTypeOrInterface = exports.isTypeImport = exports.getPropsTypeRef = void 0;
 var babel = __importStar(require("@babel/core"));
 var generator_1 = __importDefault(require("@babel/generator"));
 var types = babel.types;
@@ -54,7 +54,7 @@ var getPropsTypeRef = function (node, context) {
             .replace(/;/g, '');
         if (generatedTypes.startsWith('{')) {
             var propsTypeRef = "".concat((_a = node.id) === null || _a === void 0 ? void 0 : _a.name, "Props");
-            context.builder.component.types = __spreadArray(__spreadArray([], (context.builder.component.types || []), true), [
+            context.builder.component.interfaces = __spreadArray(__spreadArray([], (context.builder.component.interfaces || []), true), [
                 "export interface ".concat(propsTypeRef, " ").concat(generatedTypes),
             ], false);
             return propsTypeRef;
@@ -86,3 +86,10 @@ var collectTypes = function (node, context) {
     context.builder.component.types = types.filter(Boolean);
 };
 exports.collectTypes = collectTypes;
+var collectInterfaces = function (node, context) {
+    var interfaceStr = (0, generator_1.default)(node).code;
+    var _a = context.builder.component.interfaces, interfaces = _a === void 0 ? [] : _a;
+    interfaces.push(interfaceStr);
+    context.builder.component.interfaces = interfaces.filter(Boolean);
+};
+exports.collectInterfaces = collectInterfaces;

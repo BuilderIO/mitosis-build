@@ -63,6 +63,7 @@ export declare const builderContentToMitosisComponent: (builderContent: BuilderC
         children: MitosisNode[];
         subComponents: import("..").MitosisComponent[];
         types?: string[] | undefined;
+        interfaces?: string[] | undefined;
         propsTypeRef?: string | undefined;
     }[];
     '@type': "@builder.io/mitosis/component";
@@ -95,6 +96,7 @@ export declare const builderContentToMitosisComponent: (builderContent: BuilderC
     };
     children: MitosisNode[];
     types?: string[] | undefined;
+    interfaces?: string[] | undefined;
     propsTypeRef?: string | undefined;
 };
 export {};
