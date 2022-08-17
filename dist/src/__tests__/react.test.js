@@ -12,7 +12,7 @@ describe('React', function () {
     test('stamped', function () {
         var component = (0, __1.parseJsx)(stamped);
         var output = (0, react_1.componentToReact)({
-            stylesType: 'styled-components',
+            stylesType: 'style-tag',
             stateType: 'useState',
         })({ component: component });
         expect(output).toMatchSnapshot();
