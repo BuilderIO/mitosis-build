@@ -28,17 +28,6 @@ var get_refs_1 = require("../../helpers/get-refs");
 var lodash_1 = require("lodash");
 var is_upper_case_1 = require("../../helpers/is-upper-case");
 var has_1 = require("../../helpers/has");
-var getCustomTagName = function (name, options) {
-    if (!name || !(0, is_upper_case_1.isUpperCase)(name[0])) {
-        return name;
-    }
-    var kebabCaseName = (0, dash_case_1.dashCase)(name);
-    if (!kebabCaseName.includes('-')) {
-        // TODO: option to choose your prefix
-        return 'my-' + kebabCaseName;
-    }
-    return kebabCaseName;
-};
 var blockToLit = function (json, options) {
     var _a, _b, _c, _d, _e;
     if (options === void 0) { options = {}; }
@@ -58,10 +47,10 @@ var blockToLit = function (json, options) {
         return "${".concat(processBinding((_d = json.bindings.when) === null || _d === void 0 ? void 0 : _d.code), " ?\n      html`").concat(json.children
             .filter(filter_empty_text_nodes_1.filterEmptyTextNodes)
             .map(function (item) { return blockToLit(item, options); })
-            .join('\n'), "`\n    : ").concat(!json.meta.else ? 'null' : "html`".concat(blockToLit(json.meta.else, options), "`"), "}");
+            .join('\n'), "`\n    : ").concat(!json.meta.else ? 'null' : blockToLit(json.meta.else, options), "}");
     }
     var str = '';
-    var tagName = getCustomTagName(json.name, options);
+    var tagName = (0, is_upper_case_1.isUpperCase)(json.name[0]) ? (0, dash_case_1.dashCase)(json.name) : json.name;
     str += "<".concat(tagName, " ");
     var classString = (0, collect_class_string_1.collectClassString)(json);
     if (classString) {
@@ -175,9 +164,9 @@ var componentToLit = function (options) {
                 html = html.replace(/\n{3,}/g, '\n\n');
             }
         }
-        var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    ", "\n    import { LitElement, html, css } from 'lit';\n    import { customElement, property, state, query } from 'lit/decorators.js';\n\n    ", "\n    ", "\n\n    @customElement('", "')\n    export default class ", " extends LitElement {\n      ", "\n\n      ", "\n    \n  \n      ", "\n\n        ", "\n        ", "\n      \n        ", "\n        ", "\n        ", "\n    \n      render() {\n        return html`\n          ", "\n        `\n      }\n    }\n  "], ["\n    ", "\n    import { LitElement, html, css } from 'lit';\n    import { customElement, property, state, query } from 'lit/decorators.js';\n\n    ", "\n    ", "\n\n    @customElement('", "')\n    export default class ", " extends LitElement {\n      ", "\n\n      ", "\n    \n  \n      ", "\n\n        ", "\n        ", "\n      \n        ", "\n        ", "\n        ", "\n    \n      render() {\n        return html\\`\n          ", "\n        \\`\n      }\n    }\n  "])), (0, render_imports_1.renderPreComponent)({ component: json, target: 'lit' }), json.types ? json.types.join('\n') : '', hasSpread
+        var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    ", "\n    import { LitElement, html, css } from 'lit';\n    import { customElement, property, state } from 'lit/decorators.js';\n\n    ", "\n    ", "\n\n    @customElement('", "')\n    export default class ", " extends LitElement {\n      ", "\n\n      ", "\n    \n  \n      ", "\n\n        ", "\n        ", "\n      \n        ", "\n        ", "\n        ", "\n    \n      render() {\n        return html`\n          ", "\n        `\n      }\n    }\n  "], ["\n    ", "\n    import { LitElement, html, css } from 'lit';\n    import { customElement, property, state } from 'lit/decorators.js';\n\n    ", "\n    ", "\n\n    @customElement('", "')\n    export default class ", " extends LitElement {\n      ", "\n\n      ", "\n    \n  \n      ", "\n\n        ", "\n        ", "\n      \n        ", "\n        ", "\n        ", "\n    \n      render() {\n        return html\\`\n          ", "\n        \\`\n      }\n    }\n  "])), (0, render_imports_1.renderPreComponent)({ component: json, target: 'lit' }), json.types ? json.types.join('\n') : '', hasSpread
             ? "\n      const spread = (properties) =>\n        directive((part) => {\n          for (const property in properties) {\n            const value = properties[attr];\n            part.element[property] = value;\n          }\n        });\n    "
-            : '', ((_b = json.meta.useMetadata) === null || _b === void 0 ? void 0 : _b.tagName) || getCustomTagName(json.name, options), json.name, css.length
+            : '', ((_b = json.meta.useMetadata) === null || _b === void 0 ? void 0 : _b.tagName) || (0, dash_case_1.dashCase)(json.name), json.name, css.length
             ? "static styles = css`\n      ".concat((0, indent_1.indent)(css, 8), "`;")
             : '', Array.from(domRefs)
             .map(function (refName) { return "\n          @query('[ref=\"".concat(refName, "\"]')\n          ").concat((0, lodash_1.camelCase)(refName), "!: HTMLElement;\n          "); })
