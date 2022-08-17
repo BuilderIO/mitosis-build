@@ -221,7 +221,7 @@ var componentToMarko = function (userOptions) {
             // Convert on-click=(...) -> on-click(...)
             .replace(/(on-[a-z]+)=\(/g, function (_match, group) { return group + '('; })
             // Fix a weird edge case where </if> becomes </if \n > which is invalid in marko
-            .replace(/<\/([a-z]+)\s+>/g, '</$1>');
+            .replace(/<\/([a-z]+)\s+>/gi, '</$1>');
         var finalStr = "\n".concat(jsString, "\n").concat(cssString, "\n").concat(htmlString, "\n    ")
             .replace(/\n{3,}/g, '\n\n')
             .trim();
