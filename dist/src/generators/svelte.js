@@ -65,6 +65,7 @@ var lodash_1 = require("lodash");
 var function_literal_prefix_1 = require("../constants/function-literal-prefix");
 var method_literal_prefix_1 = require("../constants/method-literal-prefix");
 var patterns_1 = require("../helpers/patterns");
+var is_upper_case_1 = require("../helpers/is-upper-case");
 var mappers = {
     Fragment: function (_a) {
         var _b;
@@ -174,7 +175,8 @@ var blockToSvelte = function (_a) {
     if ((_c = json.bindings._spread) === null || _c === void 0 ? void 0 : _c.code) {
         str += "{...".concat(stripStateAndProps(json.bindings._spread.code, options), "}");
     }
-    if (((_d = json.bindings.style) === null || _d === void 0 ? void 0 : _d.code) || json.properties.style) {
+    var isComponent = Boolean(tagName[0] && (0, is_upper_case_1.isUpperCase)(tagName[0]));
+    if ((((_d = json.bindings.style) === null || _d === void 0 ? void 0 : _d.code) || json.properties.style) && !isComponent) {
         var useValue = stripStateAndProps(((_e = json.bindings.style) === null || _e === void 0 ? void 0 : _e.code) || json.properties.style, options);
         str += "use:mitosis_styling={".concat(useValue, "}");
         delete json.bindings.style;
