@@ -171,6 +171,9 @@ var blockToAngular = function (json, options, blockOptions) {
             else if (BINDINGS_MAPPER[key]) {
                 str += " [".concat(BINDINGS_MAPPER[key], "]=\"").concat(useValue, "\"  ");
             }
+            else if (key.includes('-')) {
+                str += " [attr.".concat(key, "]=\"").concat(useValue, "\" ");
+            }
             else {
                 str += " [".concat(key, "]=\"").concat(useValue, "\" ");
             }
