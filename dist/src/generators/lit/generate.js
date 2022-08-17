@@ -47,7 +47,7 @@ var blockToLit = function (json, options) {
         return "${".concat(processBinding((_d = json.bindings.when) === null || _d === void 0 ? void 0 : _d.code), " ?\n      html`").concat(json.children
             .filter(filter_empty_text_nodes_1.filterEmptyTextNodes)
             .map(function (item) { return blockToLit(item, options); })
-            .join('\n'), "`\n    : ").concat(!json.meta.else ? 'null' : blockToLit(json.meta.else, options), "}");
+            .join('\n'), "`\n    : ").concat(!json.meta.else ? 'null' : "html`".concat(blockToLit(json.meta.else, options), "`"), "}");
     }
     var str = '';
     var tagName = (0, is_upper_case_1.isUpperCase)(json.name[0]) ? (0, dash_case_1.dashCase)(json.name) : json.name;
