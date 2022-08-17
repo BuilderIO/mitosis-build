@@ -105,7 +105,6 @@ function mapReactIdentifiers(json) {
                 if (item.bindings.class) {
                     // TO-DO: it's too much work to merge 2 bindings, so just remove the old one for now.
                     item.bindings.class = item.bindings.className;
-                    console.warn("[".concat(json.name, "]: Found both 'class' and 'className' bindings: removing 'className'."));
                 }
                 else {
                     item.bindings.class = item.bindings.className;
@@ -115,7 +114,6 @@ function mapReactIdentifiers(json) {
             if (item.properties.className) {
                 if (item.properties.class) {
                     item.properties.class = "".concat(item.properties.class, " ").concat(item.properties.className);
-                    console.warn("[".concat(json.name, "]: Found both 'class' and 'className' properties: merging."));
                 }
                 else {
                     item.properties.class = item.properties.className;

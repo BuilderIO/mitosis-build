@@ -96,7 +96,6 @@ export declare type MitosisComponent = {
     children: MitosisNode[];
     subComponents: MitosisComponent[];
     types?: string[];
-    interfaces?: string[];
     propsTypeRef?: string;
 };
 export {};

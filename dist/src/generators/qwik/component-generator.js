@@ -188,10 +188,9 @@ function emitUseStore(file, stateInit) {
     }
 }
 function emitTypes(file, component) {
-    var _a, _b;
+    var _a;
     if (file.options.isTypeScript) {
         (_a = component.types) === null || _a === void 0 ? void 0 : _a.forEach(function (t) { return file.src.emit(t, '\n'); });
-        (_b = component.interfaces) === null || _b === void 0 ? void 0 : _b.forEach(function (i) { return file.src.emit(i); });
     }
 }
 function emitStateMethodsAndRewriteBindings(file, component, metadata) {
