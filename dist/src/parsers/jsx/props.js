@@ -34,7 +34,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.undoPropsDestructure = void 0;
+exports.collectDefaultProps = exports.undoPropsDestructure = void 0;
 var babel = __importStar(require("@babel/core"));
 var types = babel.types;
 function undoPropsDestructure(path) {
@@ -70,3 +70,26 @@ function undoPropsDestructure(path) {
     }
 }
 exports.undoPropsDestructure = undoPropsDestructure;
+function collectDefaultProps(path, context) {
+    var _a;
+    var expressionStatements = path.node.body.filter(function (statement) {
+        return types.isExpressionStatement(statement);
+    });
+    var defaultPropsStatement = (_a = expressionStatements === null || expressionStatements === void 0 ? void 0 : expressionStatements.filter(function (i) {
+        var expression = i.expression;
+        return (types.isAssignmentExpression(expression) &&
+            types.isMemberExpression(expression.left) &&
+            types.isIdentifier(expression.left.property) &&
+            expression.left.property.name === 'defaultProps');
+    })[0]) !== null && _a !== void 0 ? _a : null;
+    if (defaultPropsStatement) {
+        defaultPropsStatement === null || defaultPropsStatement === void 0 ? void 0 : defaultPropsStatement.expression.right.properties.forEach(function (i) {
+            var _a;
+            var _b, _c, _d;
+            if ((_b = i.key) === null || _b === void 0 ? void 0 : _b.name) {
+                context.builder.component.defaultProps = __assign(__assign({}, ((_c = context.builder.component.defaultProps) !== null && _c !== void 0 ? _c : {})), (_a = {}, _a[(_d = i.key) === null || _d === void 0 ? void 0 : _d.name] = i.value.value, _a));
+            }
+        });
+    }
+}
+exports.collectDefaultProps = collectDefaultProps;

@@ -465,15 +465,21 @@ var componentToVue = function (userOptions) {
         }
         var onUpdateWithDeps = ((_d = component.hooks.onUpdate) === null || _d === void 0 ? void 0 : _d.filter(function (hook) { var _a; return (_a = hook.deps) === null || _a === void 0 ? void 0 : _a.length; })) || [];
         var onUpdateWithoutDeps = ((_e = component.hooks.onUpdate) === null || _e === void 0 ? void 0 : _e.filter(function (hook) { var _a; return !((_a = hook.deps) === null || _a === void 0 ? void 0 : _a.length); })) || [];
+        var propsDefinition = Array.from(elementProps).filter(function (prop) { return prop !== 'children' && prop !== 'class'; });
+        if (component.defaultProps) {
+            propsDefinition = propsDefinition.reduce(function (propsDefinition, curr) { return ((propsDefinition[curr] =
+                component.defaultProps && component.defaultProps.hasOwnProperty(curr)
+                    ? { default: component.defaultProps[curr] }
+                    : {}),
+                propsDefinition); }, {});
+        }
         var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    <template>\n      ", "\n    </template>\n    <script>\n    ", "\n      ", "\n\n      export default {\n        ", "\n        ", "\n        ", "\n        ", "\n\n        ", "\n        ", "\n\n        ", "\n        ", "\n        ", "\n        ", "\n\n        ", "\n        ", "\n      }\n    </script>\n    ", "\n  "], ["\n    <template>\n      ", "\n    </template>\n    <script>\n    ", "\n      ", "\n\n      export default {\n        ", "\n        ", "\n        ", "\n        ", "\n\n        ", "\n        ", "\n\n        ", "\n        ", "\n        ", "\n        ", "\n\n        ", "\n        ", "\n      }\n    </script>\n    ", "\n  "])), template, options.vueVersion >= 3 ? 'import { defineAsyncComponent } from "vue"' : '', (0, render_imports_1.renderPreComponent)({
             component: component,
             target: 'vue',
             asyncComponentImports: options.asyncComponentImports,
         }), !component.name
             ? ''
-            : "name: '".concat(path && ((_f = options.namePrefix) === null || _f === void 0 ? void 0 : _f.call(options, path)) ? ((_g = options.namePrefix) === null || _g === void 0 ? void 0 : _g.call(options, path)) + '-' : '').concat((0, lodash_1.kebabCase)(component.name), "',"), generateComponents(componentsUsed, options), elementProps.size
-            ? "props: ".concat(JSON.stringify(Array.from(elementProps).filter(function (prop) { return prop !== 'children' && prop !== 'class'; })), ",")
-            : '', dataString.length < 4
+            : "name: '".concat(path && ((_f = options.namePrefix) === null || _f === void 0 ? void 0 : _f.call(options, path)) ? ((_g = options.namePrefix) === null || _g === void 0 ? void 0 : _g.call(options, path)) + '-' : '').concat((0, lodash_1.kebabCase)(component.name), "',"), generateComponents(componentsUsed, options), elementProps.size ? "props: ".concat(JSON.stringify(propsDefinition), ",") : '', dataString.length < 4
             ? ''
             : "\n        data: () => (".concat(dataString, "),\n        "), (0, lodash_1.size)(component.context.set)
             ? "provide() {\n                const _this = this;\n                return ".concat(getContextProvideString(component, options), "\n              },")
