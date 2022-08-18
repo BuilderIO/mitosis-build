@@ -320,7 +320,7 @@ var SrcBuilder = /** @class */ (function () {
                     key = key + '$';
                     binding_1 = "(event)=>".concat(binding_1);
                 }
-                if (!binding_1 && rawKey in props) {
+                else if (!binding_1 && rawKey in props) {
                     binding_1 = quote(props[rawKey]);
                 }
                 else if (binding_1 != null && binding_1 === props[key]) {
@@ -549,7 +549,8 @@ function literalTagName(symbol) {
  */
 function isStatement(code) {
     code = code.trim();
-    if (code.startsWith('(') || code.startsWith('{') || code.endsWith('}')) {
+    if ((code.startsWith('(') && code.endsWith(')')) ||
+        (code.startsWith('{') && code.endsWith('}'))) {
         // Code starting with `(` is most likely and IFF and hence is an expression.
         return false;
     }

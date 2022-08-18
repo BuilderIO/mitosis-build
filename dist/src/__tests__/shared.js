@@ -24,7 +24,6 @@ var propsType = require('./data/types/component-props-type.raw');
 var propsInterface = require('./data/types/component-props-interface.raw');
 var preserveTyping = require('./data/types/preserve-typing.raw');
 var typeDependency = require('./data/types/type-dependency.raw');
-var defaultProps = require('./data/default-props/default-props.raw');
 var classRaw = require('./data/styles/class.raw');
 var className = require('./data/styles/className.raw');
 var classAndClassName = require('./data/styles/class-and-className.raw');
@@ -89,7 +88,6 @@ var BASIC_TESTS = {
     onMount: onMount,
     propsType: propsType,
     propsInterface: propsInterface,
-    defaultProps: defaultProps,
     preserveTyping: preserveTyping,
     typeDependency: typeDependency,
     subComponent: subComponent,

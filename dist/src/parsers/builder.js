@@ -589,19 +589,30 @@ function extractStateHook(code) {
 }
 exports.extractStateHook = extractStateHook;
 function convertExportDefaultToReturn(code) {
-    var types = babel.types;
-    var body = (0, parsers_1.parseCode)(code);
-    var newBody = body.slice();
-    for (var i = 0; i < body.length; i++) {
-        var statement = body[i];
-        if (types.isExportDefaultDeclaration(statement)) {
-            if (types.isCallExpression(statement.declaration) ||
-                types.isExpression(statement.declaration)) {
-                newBody[i] = types.returnStatement(statement.declaration);
+    try {
+        var types = babel.types;
+        var body = (0, parsers_1.parseCode)(code);
+        var newBody = body.slice();
+        for (var i = 0; i < body.length; i++) {
+            var statement = body[i];
+            if (types.isExportDefaultDeclaration(statement)) {
+                if (types.isCallExpression(statement.declaration) ||
+                    types.isExpression(statement.declaration)) {
+                    newBody[i] = types.returnStatement(statement.declaration);
+                }
             }
         }
+        return (0, generator_1.default)(types.program(newBody)).code || '';
     }
-    return (0, generator_1.default)(types.program(newBody)).code || '';
+    catch (e) {
+        var error = e;
+        if (error.code === 'BABEL_PARSE_ERROR') {
+            return code;
+        }
+        else {
+            throw e;
+        }
+    }
 }
 exports.convertExportDefaultToReturn = convertExportDefaultToReturn;
 // TODO: maybe this should be part of the builder -> Mitosis part

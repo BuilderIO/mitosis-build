@@ -518,7 +518,6 @@ function parseJsx(jsx, options) {
                                 (0, component_types_1.collectTypes)(statement, context);
                             }
                         }
-                        (0, props_1.collectDefaultProps)(path, context);
                         var exportsOrLocalVariables = path.node.body.filter(function (statement) {
                             return !isImportOrDefaultExport(statement) &&
                                 !(0, component_types_1.isTypeOrInterface)(statement) &&
