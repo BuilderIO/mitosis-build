@@ -40,29 +40,13 @@ var hash_sum_1 = __importDefault(require("hash-sum"));
 // Having issues with this, so off for now
 var USE_MARKO_PRETTIER = false;
 /**
- * Return the names of methods and functions on state
- */
-function getStateMethodNames(json) {
-    return Object.keys(json.state).filter(function (key) {
-        var _a;
-        var type = (_a = json.state[key]) === null || _a === void 0 ? void 0 : _a.type;
-        return type === 'function' || type === 'method';
-    });
-}
-/**
- * Return the names of getter and functions on state
- */
-function getStateGetterNames(json) {
-    return Object.keys(json.state).filter(function (key) { var _a; return ((_a = json.state[key]) === null || _a === void 0 ? void 0 : _a.type) === 'getter'; });
-}
-/**
  * Return the names of properties (basic literal values) on state
  */
 function getStatePropertyNames(json) {
     return Object.keys(json.state).filter(function (key) { var _a; return ((_a = json.state[key]) === null || _a === void 0 ? void 0 : _a.type) === 'property'; });
 }
 var blockToMarko = function (json, options) {
-    var _a, _b, _c, _d, _e, _f;
+    var _a, _b, _c, _d, _e, _f, _g;
     if (json.properties._text) {
         return json.properties._text;
     }
@@ -95,7 +79,7 @@ var blockToMarko = function (json, options) {
         str += " ".concat(key, "=\"").concat(value, "\" ");
     }
     for (var key in json.bindings) {
-        var _g = json.bindings[key], code = _g.code, _h = _g.arguments, cusArgs = _h === void 0 ? ['event'] : _h;
+        var _h = json.bindings[key], code = _h.code, _j = _h.arguments, cusArgs = _j === void 0 ? ['event'] : _j;
         if (key === '_spread' || key === '_forName') {
             continue;
         }
@@ -106,7 +90,7 @@ var blockToMarko = function (json, options) {
             var useKey = key === 'onChange' && json.name === 'input' ? 'onInput' : key;
             str += " ".concat((0, dash_case_1.dashCase)(useKey), "=(").concat(cusArgs.join(','), " => ").concat(processBinding(options.component, code), ") ");
         }
-        else {
+        else if (key !== 'innerHTML') {
             str += " ".concat(key, "=(").concat(processBinding(options.component, code), ") ");
         }
     }
@@ -114,6 +98,9 @@ var blockToMarko = function (json, options) {
         return str + ' />';
     }
     str += '>';
+    if ((_g = json.bindings.innerHTML) === null || _g === void 0 ? void 0 : _g.code) {
+        str += "$!{".concat(processBinding(options.component, json.bindings.innerHTML.code), "}");
+    }
     if (json.children) {
         str += json.children.map(function (item) { return blockToMarko(item, options); }).join('\n');
     }

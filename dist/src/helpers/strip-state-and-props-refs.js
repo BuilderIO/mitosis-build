@@ -28,7 +28,7 @@ var stripStateAndPropsRefs = function (code, options) {
     if (outputVars.length) {
         outputVars.forEach(function (_var) {
             // determine expression edge cases onMessage( to this.onMessage.emit(
-            var regexp = '( |;|\\()(props\\.?)' + _var + '\\(';
+            var regexp = '(^|\\s|;|\\()(props\\.?)' + _var + '\\(';
             var replacer = '$1' + context + _var + '.emit(';
             newCode = newCode.replace(new RegExp(regexp, 'g'), replacer);
         });
