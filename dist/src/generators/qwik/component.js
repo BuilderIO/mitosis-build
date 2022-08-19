@@ -21,7 +21,6 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.addCommonStyles = exports.renderUseLexicalScope = exports.addComponent = exports.createFileSet = void 0;
-var create_mitosis_node_1 = require("../../helpers/create-mitosis-node");
 var compile_away_builder_components_1 = require("../../plugins/compile-away-builder-components");
 var handlers_1 = require("./handlers");
 var jsx_1 = require("./jsx");
@@ -55,7 +54,7 @@ function getCommonStyles(fileSet) {
 }
 function addComponent(fileSet, component, opts) {
     if (opts === void 0) { opts = {}; }
-    var _opts = __assign({ isRoot: false, shareStyles: false, hostProps: null }, opts);
+    var _opts = __assign({ isRoot: false, shareStyles: false }, opts);
     (0, compile_away_builder_components_1.compileAwayBuilderComponentsFromTree)(component, __assign(__assign({}, compile_away_builder_components_1.components), { 
         // A set of components that should not be compiled away because they are implemented as runtime components.
         Image: undefined, CoreButton: undefined }));
@@ -87,15 +86,6 @@ function addComponent(fileSet, component, opts) {
     }
     var directives = new Map();
     var rootChildren = component.children;
-    if (_opts.hostProps) {
-        rootChildren = [
-            (0, create_mitosis_node_1.createMitosisNode)({
-                name: 'Host',
-                properties: _opts.hostProps,
-                children: component.children,
-            }),
-        ];
-    }
     addComponentOnMount(onRenderFile, function () {
         return this.emit('return ', (0, jsx_1.renderJSXNodes)(onRenderFile, directives, handlers, rootChildren, styles, {}), ';');
     }, componentName, component, useStyles);

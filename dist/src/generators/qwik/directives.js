@@ -45,14 +45,6 @@ exports.DIRECTIVES = {
             });
         };
     },
-    Host: function (node, blockFn) {
-        return function () {
-            var host = this.file.import(this.file.qwikModule, 'Host').localName;
-            this.jsxBegin(host, node.properties, node.bindings);
-            blockFn();
-            this.jsxEnd(host);
-        };
-    },
     Image: (0, minify_1.minify)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["", ""], ["", ""])), Image),
     CoreButton: (0, minify_1.minify)(templateObject_2 || (templateObject_2 = __makeTemplateObject(["", ""], ["", ""])), CoreButton),
     __passThroughProps__: (0, minify_1.minify)(templateObject_3 || (templateObject_3 = __makeTemplateObject(["", ""], ["", ""])), __passThroughProps__),
