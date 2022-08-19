@@ -92,6 +92,7 @@ var BASIC_TESTS = {
     defaultProps: defaultProps,
     preserveTyping: preserveTyping,
     typeDependency: typeDependency,
+    defaultValsWithTypes: require('./data/types/component-with-default-values-types.raw'),
     subComponent: subComponent,
     nestedStyles: nestedStyles,
     propsDestructure: propsDestructure,

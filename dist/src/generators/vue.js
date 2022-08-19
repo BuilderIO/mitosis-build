@@ -389,9 +389,13 @@ var generateComponents = function (componentsUsed, options) {
         return "components: { ".concat(componentsUsed.map(generateComponentImport(options)).join(','), " },");
     }
 };
+var appendToDataString = function (_a) {
+    var dataString = _a.dataString, newContent = _a.newContent;
+    return dataString.replace(/}$/, "".concat(newContent, "}"));
+};
 var componentToVue = function (userOptions) {
     return function (_a) {
-        var _b, _c, _d, _e, _f, _g, _h;
+        var _b, _c, _d, _e, _f, _g, _h, _j;
         var component = _a.component, path = _a.path;
         var options = mergeOptions(BASE_OPTIONS, userOptions);
         // Make a copy we can safely mutate, similar to babel's toolchain can be used
@@ -447,15 +451,16 @@ var componentToVue = function (userOptions) {
             // Strip out components that compile away
             .filter(function (name) { return !['For', 'Show', 'Fragment', component.name].includes(name); });
         // Append refs to data as { foo, bar, etc }
-        dataString = dataString.replace(/}$/, "".concat((0, get_custom_imports_1.getCustomImports)(component).join(','), "}"));
+        dataString = appendToDataString({
+            dataString: dataString,
+            newContent: (0, get_custom_imports_1.getCustomImports)(component).join(','),
+        });
         if (localVarAsData.length) {
-            dataString = dataString.replace(/}$/, "".concat(localVarAsData.join(','), "}"));
+            dataString = appendToDataString({ dataString: dataString, newContent: localVarAsData.join(',') });
         }
         var elementProps = (0, get_props_1.getProps)(component);
         (0, strip_meta_properties_1.stripMetaProperties)(component);
-        var template = component.children
-            .map(function (item) { return (0, exports.blockToVue)(item, options, { isRootNode: true }); })
-            .join('\n');
+        var template = (0, function_1.pipe)(component.children.map(function (item) { return (0, exports.blockToVue)(item, options, { isRootNode: true }); }).join('\n'), renameMitosisComponentsToKebabCase);
         var includeClassMapHelper = template.includes('_classStringToObject');
         if (includeClassMapHelper) {
             functionsString = functionsString.replace(/}\s*$/, "_classStringToObject(str) {\n        const obj = {};\n        if (typeof str !== 'string') { return obj }\n        const classNames = str.trim().split(/\\s+/);\n        for (const name of classNames) {\n          obj[name] = true;\n        }\n        return obj;\n      }  }");
@@ -473,19 +478,19 @@ var componentToVue = function (userOptions) {
                     : {}),
                 propsDefinition); }, {});
         }
-        var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    <template>\n      ", "\n    </template>\n    <script>\n    ", "\n      ", "\n\n      export default {\n        ", "\n        ", "\n        ", "\n        ", "\n\n        ", "\n        ", "\n\n        ", "\n        ", "\n        ", "\n        ", "\n\n        ", "\n        ", "\n      }\n    </script>\n    ", "\n  "], ["\n    <template>\n      ", "\n    </template>\n    <script>\n    ", "\n      ", "\n\n      export default {\n        ", "\n        ", "\n        ", "\n        ", "\n\n        ", "\n        ", "\n\n        ", "\n        ", "\n        ", "\n        ", "\n\n        ", "\n        ", "\n      }\n    </script>\n    ", "\n  "])), template, options.vueVersion >= 3 ? 'import { defineAsyncComponent } from "vue"' : '', (0, render_imports_1.renderPreComponent)({
+        var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    <template>\n      ", "\n    </template>\n    <script lang=\"ts\">\n    ", "\n      ", "\n\n      ", "\n\n      export default {\n        ", "\n        ", "\n        ", "\n        ", "\n\n        ", "\n        ", "\n\n        ", "\n        ", "\n        ", "\n        ", "\n\n        ", "\n        ", "\n      }\n    </script>\n    ", "\n  "], ["\n    <template>\n      ", "\n    </template>\n    <script lang=\"ts\">\n    ", "\n      ", "\n\n      ", "\n\n      export default {\n        ", "\n        ", "\n        ", "\n        ", "\n\n        ", "\n        ", "\n\n        ", "\n        ", "\n        ", "\n        ", "\n\n        ", "\n        ", "\n      }\n    </script>\n    ", "\n  "])), template, options.vueVersion >= 3 ? 'import { defineAsyncComponent } from "vue"' : '', (0, render_imports_1.renderPreComponent)({
             component: component,
             target: 'vue',
             asyncComponentImports: options.asyncComponentImports,
-        }), !component.name
+        }), ((_f = component.types) === null || _f === void 0 ? void 0 : _f.join('\n')) || '', !component.name
             ? ''
-            : "name: '".concat(path && ((_f = options.namePrefix) === null || _f === void 0 ? void 0 : _f.call(options, path)) ? ((_g = options.namePrefix) === null || _g === void 0 ? void 0 : _g.call(options, path)) + '-' : '').concat((0, lodash_1.kebabCase)(component.name), "',"), generateComponents(componentsUsed, options), elementProps.size ? "props: ".concat(JSON.stringify(propsDefinition), ",") : '', dataString.length < 4
+            : "name: '".concat(path && ((_g = options.namePrefix) === null || _g === void 0 ? void 0 : _g.call(options, path)) ? ((_h = options.namePrefix) === null || _h === void 0 ? void 0 : _h.call(options, path)) + '-' : '').concat((0, lodash_1.kebabCase)(component.name), "',"), generateComponents(componentsUsed, options), elementProps.size ? "props: ".concat(JSON.stringify(propsDefinition), ",") : '', dataString.length < 4
             ? ''
             : "\n        data: () => (".concat(dataString, "),\n        "), (0, lodash_1.size)(component.context.set)
             ? "provide() {\n                const _this = this;\n                return ".concat(getContextProvideString(component, options), "\n              },")
             : '', (0, lodash_1.size)(component.context.get)
             ? "inject: ".concat(getContextInjectString(component, options), ",")
-            : '', ((_h = component.hooks.onMount) === null || _h === void 0 ? void 0 : _h.code)
+            : '', ((_j = component.hooks.onMount) === null || _j === void 0 ? void 0 : _j.code)
             ? "mounted() {\n                ".concat(processBinding(component.hooks.onMount.code, options, component), "\n              },")
             : '', onUpdateWithoutDeps.length
             ? "updated() {\n            ".concat(onUpdateWithoutDeps
@@ -532,10 +537,7 @@ var componentToVue = function (userOptions) {
             var pattern = removePatterns_1[_i];
             str = str.replace(pattern, '');
         }
-        // Transform <FooBar> to <foo-bar> as Vue2 needs
-        return str.replace(/<\/?\w+/g, function (match) {
-            return match.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
-        });
+        return str;
     };
 };
 var componentToVue2 = function (vueOptions) {
@@ -546,6 +548,10 @@ var componentToVue3 = function (vueOptions) {
     return componentToVue(__assign(__assign({}, vueOptions), { vueVersion: 3 }));
 };
 exports.componentToVue3 = componentToVue3;
+// Transform <FooBar> to <foo-bar> as Vue2 needs
+var renameMitosisComponentsToKebabCase = function (str) {
+    return str.replace(/<\/?\w+/g, function (match) { return match.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase(); });
+};
 // Remove unused artifacts like empty script or style tags
 var removePatterns = [
     "<script>\nexport default {};\n</script>",

@@ -19,7 +19,13 @@ function getCustomImports(json) {
     var blocksString = JSON.stringify(json.children);
     var customImports = json.imports
         .map(function (item) {
-        return Object.keys(item.imports).filter(function (item) { return item && !(0, is_upper_case_1.isUpperCase)(item[0]); });
+        return Object.keys(item.imports).filter(function (item) {
+            return item &&
+                // this ignores component imports, which are CamelCased.
+                (!(0, is_upper_case_1.isUpperCase)(item[0]) ||
+                    // this includes constants which are typically CAPITALIZED.
+                    item.toUpperCase() === item);
+        });
     })
         .flat()
         // This is imperfect. Basically, if the string of this import name
