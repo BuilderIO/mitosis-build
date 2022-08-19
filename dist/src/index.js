@@ -14,7 +14,7 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.useMetadata = exports.onError = exports.useDynamicTag = exports.onUnMount = exports.onInit = exports.onCreate = exports.onUpdate = exports.onMount = exports.setContext = exports.createContext = exports.useContext = exports.useRef = exports.useState = exports.useStore = void 0;
+exports.useDefaultProps = exports.useMetadata = exports.onError = exports.useDynamicTag = exports.onUnMount = exports.onInit = exports.onCreate = exports.onUpdate = exports.onMount = exports.setContext = exports.createContext = exports.useContext = exports.useRef = exports.useState = exports.useStore = void 0;
 __exportStar(require("./flow"), exports);
 // These compile away
 var useStore = function (obj) { return obj; };
@@ -59,6 +59,8 @@ var useMetadata = function (obj) {
     return null;
 };
 exports.useMetadata = useMetadata;
+var useDefaultProps = function (value) { return null; };
+exports.useDefaultProps = useDefaultProps;
 __exportStar(require("./parsers/jsx"), exports);
 __exportStar(require("./parsers/builder"), exports);
 __exportStar(require("./parsers/angular"), exports);

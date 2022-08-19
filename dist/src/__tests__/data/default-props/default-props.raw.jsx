@@ -2,6 +2,11 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 var mitosis_1 = require("@builder.io/mitosis");
 function Button(props) {
+    (0, mitosis_1.useDefaultProps)({
+        text: 'default text',
+        link: 'https://builder.io/',
+        openLinkInNewTab: false,
+    });
     return (<>
       <mitosis_1.Show when={props.link}>
         <a {...props.attributes} href={props.link} target={props.openLinkInNewTab ? '_blank' : undefined}>
@@ -16,8 +21,3 @@ function Button(props) {
     </>);
 }
 exports.default = Button;
-Button.defaultProps = {
-    text: 'default text',
-    link: false,
-    openLinkInNewTab: false,
-};

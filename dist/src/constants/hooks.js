@@ -6,4 +6,5 @@ exports.HOOKS = {
     STATE: 'useState',
     CONTEXT: 'useContext',
     REF: 'useRef',
+    DEFAULT_PROPS: 'useDefaultProps',
 };
