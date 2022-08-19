@@ -380,27 +380,29 @@ var builderElementToMitosisNode = function (block, options, _internalOptions) {
     // Special builder properties
     // TODO: support hide and repeat
     var blockBindings = getBlockBindings(block, options);
-    var showBinding = blockBindings.show;
-    if (showBinding) {
+    var code = undefined;
+    if (blockBindings.show) {
+        code = wrapBindingIfNeeded(blockBindings.show, options);
+    }
+    else if (blockBindings.hide) {
+        code = "!(".concat(wrapBindingIfNeeded(blockBindings.hide, options), ")");
+    }
+    if (code) {
         var isFragment = ((_c = block.component) === null || _c === void 0 ? void 0 : _c.name) === 'Fragment';
         // TODO: handle having other things, like a repeat too
         if (isFragment) {
             return (0, create_mitosis_node_1.createMitosisNode)({
                 name: 'Show',
-                bindings: {
-                    when: { code: wrapBindingIfNeeded(showBinding, options) },
-                },
+                bindings: { when: { code: code } },
                 children: ((_d = block.children) === null || _d === void 0 ? void 0 : _d.map(function (child) { return (0, exports.builderElementToMitosisNode)(child, options); })) || [],
             });
         }
         else {
             return (0, create_mitosis_node_1.createMitosisNode)({
                 name: 'Show',
-                bindings: {
-                    when: { code: wrapBindingIfNeeded(showBinding, options) },
-                },
+                bindings: { when: { code: code } },
                 children: [
-                    (0, exports.builderElementToMitosisNode)(__assign(__assign({}, block), { code: __assign(__assign({}, block.code), { bindings: (0, lodash_1.omit)(blockBindings, 'show') }), bindings: (0, lodash_1.omit)(blockBindings, 'show') }), options),
+                    (0, exports.builderElementToMitosisNode)(__assign(__assign({}, block), { code: __assign(__assign({}, block.code), { bindings: (0, lodash_1.omit)(blockBindings, 'show', 'hide') }), bindings: (0, lodash_1.omit)(blockBindings, 'show', 'hide') }), options),
                 ],
             });
         }

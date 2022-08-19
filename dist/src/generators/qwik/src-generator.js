@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.iteratorProperty = exports.lastProperty = exports.isStatement = exports.iif = exports.arrowFnValue = exports.arrowFnBlock = exports.invoke = exports.quote = exports.Block = exports.Imports = exports.Symbol = exports.SrcBuilder = exports.File = void 0;
 var standalone_1 = require("prettier/standalone");
+var builder_1 = require("../../parsers/builder");
 var File = /** @class */ (function () {
     function File(filename, options, qwikModule, qrlPrefix) {
         this.imports = new Imports();
@@ -523,6 +524,9 @@ function iif(code) {
     code = code.trim();
     if (code.endsWith(_virtual_index) && !code.endsWith(return_virtual_index)) {
         code = code.substr(0, code.length - _virtual_index.length) + return_virtual_index;
+    }
+    if (code.indexOf('export') !== -1) {
+        code = (0, builder_1.convertExportDefaultToReturn)(code);
     }
     return function () {
         code && this.emit('(()=>{', code, '})()');

@@ -164,11 +164,17 @@ exports.components = {
         });
     },
     CustomCode: function (node, context, components) {
+        var _a;
+        var bindings = {};
+        if ((_a = node === null || node === void 0 ? void 0 : node.bindings) === null || _a === void 0 ? void 0 : _a.code) {
+            bindings.innerHTML = node.bindings.code;
+        }
         return wrapOutput(node, (0, create_mitosis_node_1.createMitosisNode)({
             name: node.properties.builderTag || 'div',
             properties: {
                 innerHTML: node.properties.code || '',
             },
+            bindings: bindings,
         }), components);
     },
     CoreSection: function (node, context, components) {
