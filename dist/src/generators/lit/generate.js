@@ -90,9 +90,16 @@ var blockToLit = function (json, options) {
             str += " ".concat(useKey, "=${").concat(cusArgs.join(','), " => ").concat(processBinding(code), "} ");
         }
         else {
-            // TODO: handle boolean attributes too by matching list of html boolean attributes
-            // https://lit.dev/docs/templates/expressions/#boolean-attribute-expressions
-            str += " .".concat(key, "=${").concat(processBinding(code), "} ");
+            var value = processBinding(code);
+            // If they key includes a '-' it's an attribute, not a property
+            if (key.includes('-')) {
+                str += " ".concat(key, "=${").concat(value, "} ");
+            }
+            else {
+                // TODO: handle boolean attributes too by matching list of html boolean attributes
+                // https://lit.dev/docs/templates/expressions/#boolean-attribute-expressions
+                str += " .".concat(key, "=${").concat(value, "} ");
+            }
         }
     }
     if (jsx_1.selfClosingTags.has(json.name)) {
@@ -175,7 +182,7 @@ var componentToLit = function (options) {
                 html = html.replace(/\n{3,}/g, '\n\n');
             }
         }
-        var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    ", "\n    import { LitElement, html, css } from 'lit';\n    import { customElement, property, state, query } from 'lit/decorators.js';\n\n    ", "\n    ", "\n\n    @customElement('", "')\n    export default class ", " extends LitElement {\n      ", "\n\n      ", "\n\n      ", "\n    \n  \n      ", "\n\n        ", "\n        ", "\n      \n        ", "\n        ", "\n        ", "\n    \n      render() {\n        return html`\n          ", "\n        }\n          ", "\n        `\n      }\n    }\n  "], ["\n    ", "\n    import { LitElement, html, css } from 'lit';\n    import { customElement, property, state, query } from 'lit/decorators.js';\n\n    ", "\n    ", "\n\n    @customElement('", "')\n    export default class ", " extends LitElement {\n      ", "\n\n      ", "\n\n      ", "\n    \n  \n      ", "\n\n        ", "\n        ", "\n      \n        ", "\n        ", "\n        ", "\n    \n      render() {\n        return html\\`\n          ", "\n        }\n          ", "\n        \\`\n      }\n    }\n  "])), (0, render_imports_1.renderPreComponent)({ component: json, target: 'lit' }), json.types ? json.types.join('\n') : '', hasSpread
+        var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    ", "\n    import { LitElement, html, css } from 'lit';\n    import { customElement, property, state, query } from 'lit/decorators.js';\n\n    ", "\n    ", "\n\n    @customElement('", "')\n    export default class ", " extends LitElement {\n      ", "\n\n      ", "\n\n      ", "\n    \n  \n      ", "\n\n        ", "\n        ", "\n      \n        ", "\n        ", "\n        ", "\n    \n      render() {\n        return html`\n          ", "\n          ", "\n        `\n      }\n    }\n  "], ["\n    ", "\n    import { LitElement, html, css } from 'lit';\n    import { customElement, property, state, query } from 'lit/decorators.js';\n\n    ", "\n    ", "\n\n    @customElement('", "')\n    export default class ", " extends LitElement {\n      ", "\n\n      ", "\n\n      ", "\n    \n  \n      ", "\n\n        ", "\n        ", "\n      \n        ", "\n        ", "\n        ", "\n    \n      render() {\n        return html\\`\n          ", "\n          ", "\n        \\`\n      }\n    }\n  "])), (0, render_imports_1.renderPreComponent)({ component: json, target: 'lit' }), json.types ? json.types.join('\n') : '', hasSpread
             ? "\n      const spread = (properties) =>\n        directive((part) => {\n          for (const property in properties) {\n            const value = properties[attr];\n            part.element[property] = value;\n          }\n        });\n    "
             : '', ((_b = json.meta.useMetadata) === null || _b === void 0 ? void 0 : _b.tagName) || getCustomTagName(json.name, options), json.name, options.useShadowDom
             ? ''
