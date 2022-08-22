@@ -54,7 +54,7 @@ function Image(props) {
     var jsx = props.children || [];
     var image = props.image;
     if (image) {
-        var isBuilderIoImage = !!(image || '').match(/\.builder\.io/) && !props.noWebp;
+        var isBuilderIoImage = !!(image || '').match(/\.builder\.io/);
         var isPixel = (_a = props.builderBlock) === null || _a === void 0 ? void 0 : _a.id.startsWith('builder-pixel-');
         var imgProps = {
             src: props.image,

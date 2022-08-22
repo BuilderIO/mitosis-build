@@ -467,9 +467,9 @@ var builderElementToMitosisNode = function (block, options, _internalOptions) {
             }
         }
     }
-    var properties = __assign(__assign(__assign({}, block.properties), (options.includeBuilderExtras && (_a = {},
+    var properties = __assign(__assign({}, block.properties), (options.includeBuilderExtras && (_a = {},
         _a['builder-id'] = block.id,
-        _a))), (options.includeBuilderExtras && getBuilderPropsForSymbol(block)));
+        _a)));
     if (block.layerName) {
         properties.$name = block.layerName;
     }
@@ -532,17 +532,6 @@ var builderElementToMitosisNode = function (block, options, _internalOptions) {
     return node;
 };
 exports.builderElementToMitosisNode = builderElementToMitosisNode;
-var getBuilderPropsForSymbol = function (block) {
-    var _a, _b;
-    if (((_a = block.children) === null || _a === void 0 ? void 0 : _a.length) === 1) {
-        var child = block.children[0];
-        var builderContentId = (_b = child.properties) === null || _b === void 0 ? void 0 : _b['builder-content-id'];
-        if (builderContentId) {
-            return { 'builder-content-id': builderContentId };
-        }
-    }
-    return undefined;
-};
 var getHooks = function (content) {
     var _a, _b;
     var code = convertExportDefaultToReturn(((_a = content.data) === null || _a === void 0 ? void 0 : _a.tsCode) || ((_b = content.data) === null || _b === void 0 ? void 0 : _b.jsCode) || '');
