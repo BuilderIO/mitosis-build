@@ -30,26 +30,31 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.componentToSolid = void 0;
 var dedent_1 = __importDefault(require("dedent"));
 var standalone_1 = require("prettier/standalone");
-var helpers_1 = require("../helpers/styles/helpers");
-var get_refs_1 = require("../helpers/get-refs");
-var get_state_object_string_1 = require("../helpers/get-state-object-string");
-var render_imports_1 = require("../helpers/render-imports");
-var jsx_1 = require("../parsers/jsx");
-var plugins_1 = require("../modules/plugins");
-var fast_clone_1 = require("../helpers/fast-clone");
-var strip_meta_properties_1 = require("../helpers/strip-meta-properties");
-var get_components_used_1 = require("../helpers/get-components-used");
+var helpers_1 = require("../../helpers/styles/helpers");
+var get_refs_1 = require("../../helpers/get-refs");
+var render_imports_1 = require("../../helpers/render-imports");
+var jsx_1 = require("../../parsers/jsx");
+var plugins_1 = require("../../modules/plugins");
+var fast_clone_1 = require("../../helpers/fast-clone");
+var strip_meta_properties_1 = require("../../helpers/strip-meta-properties");
+var get_components_used_1 = require("../../helpers/get-components-used");
 var traverse_1 = __importDefault(require("traverse"));
-var is_mitosis_node_1 = require("../helpers/is-mitosis-node");
-var filter_empty_text_nodes_1 = require("../helpers/filter-empty-text-nodes");
-var create_mitosis_node_1 = require("../helpers/create-mitosis-node");
-var context_1 = require("./helpers/context");
-var babel_transform_1 = require("../helpers/babel-transform");
+var is_mitosis_node_1 = require("../../helpers/is-mitosis-node");
+var filter_empty_text_nodes_1 = require("../../helpers/filter-empty-text-nodes");
+var create_mitosis_node_1 = require("../../helpers/create-mitosis-node");
+var context_1 = require("../helpers/context");
+var babel_transform_1 = require("../../helpers/babel-transform");
 var core_1 = require("@babel/core");
 var lodash_1 = require("lodash");
-var state_1 = require("../helpers/state");
-var collect_css_1 = require("../helpers/styles/collect-css");
+var state_1 = require("./state");
+var nullable_1 = require("../../helpers/nullable");
+var get_state_object_string_1 = require("../../helpers/get-state-object-string");
+var collect_css_1 = require("../../helpers/styles/collect-css");
 var hash_sum_1 = __importDefault(require("hash-sum"));
+var DEFAULT_OPTIONS = {
+    state: 'signals',
+    stylesType: 'styled-components',
+};
 // Transform <foo.bar key="value" /> to <component :is="foo.bar" key="value" />
 function processDynamicComponents(json, options) {
     var found = false;
@@ -114,22 +119,41 @@ var collectClassString = function (json, options) {
     }
     return null;
 };
-var blockToSolid = function (json, options) {
-    var _a, _b, _c;
-    if (options === void 0) { options = {}; }
+var preProcessBlockCode = function (_a) {
+    var json = _a.json, options = _a.options, component = _a.component;
+    for (var key in json.properties) {
+        var value = json.properties[key];
+        if (value) {
+            json.properties[key] = (0, state_1.updateStateCode)({ options: options, component: component, updateSetters: false })(value);
+        }
+    }
+    for (var key in json.bindings) {
+        var value = json.bindings[key];
+        if (value === null || value === void 0 ? void 0 : value.code) {
+            json.bindings[key] = {
+                arguments: value.arguments,
+                code: (0, state_1.updateStateCode)({ options: options, component: component, updateSetters: true })(value.code),
+            };
+        }
+    }
+};
+var blockToSolid = function (_a) {
+    var _b, _c, _d;
+    var json = _a.json, options = _a.options, component = _a.component;
+    preProcessBlockCode({ json: json, options: options, component: component });
     if (json.properties._text) {
         return json.properties._text;
     }
-    if ((_a = json.bindings._text) === null || _a === void 0 ? void 0 : _a.code) {
+    if ((_b = json.bindings._text) === null || _b === void 0 ? void 0 : _b.code) {
         return "{".concat(json.bindings._text.code, "}");
     }
     if (json.name === 'For') {
         var needsWrapper = json.children.length !== 1;
         // The SolidJS `<For>` component has a special index() signal function.
         // https://www.solidjs.com/docs/latest#%3Cfor%3E
-        return "<For each={".concat((_b = json.bindings.each) === null || _b === void 0 ? void 0 : _b.code, "}>\n    {(").concat(json.properties._forName, ", _index) => {\n      const index = _index();\n      return ").concat(needsWrapper ? '<>' : '').concat(json.children
+        return "<For each={".concat((_c = json.bindings.each) === null || _c === void 0 ? void 0 : _c.code, "}>\n    {(").concat(json.properties._forName, ", _index) => {\n      const index = _index();\n      return ").concat(needsWrapper ? '<>' : '').concat(json.children
             .filter(filter_empty_text_nodes_1.filterEmptyTextNodes)
-            .map(function (child) { return blockToSolid(child, options); }), "}}\n      ").concat(needsWrapper ? '</>' : '', "\n    </For>");
+            .map(function (child) { return blockToSolid({ component: component, json: child, options: options }); }), "}}\n      ").concat(needsWrapper ? '</>' : '', "\n    </For>");
     }
     var str = '';
     if (json.name === 'Fragment') {
@@ -139,13 +163,13 @@ var blockToSolid = function (json, options) {
         str += "<".concat(json.name, " ");
     }
     if (json.name === 'Show' && json.meta.else) {
-        str += "fallback={".concat(blockToSolid(json.meta.else, options), "}");
+        str += "fallback={".concat(blockToSolid({ component: component, json: json.meta.else, options: options }), "}");
     }
     var classString = collectClassString(json, options);
     if (classString) {
         str += " class=".concat(classString, " ");
     }
-    if ((_c = json.bindings._spread) === null || _c === void 0 ? void 0 : _c.code) {
+    if ((_d = json.bindings._spread) === null || _d === void 0 ? void 0 : _d.code) {
         str += " {...(".concat(json.bindings._spread.code, ")} ");
     }
     for (var key in json.properties) {
@@ -153,7 +177,7 @@ var blockToSolid = function (json, options) {
         str += " ".concat(key, "=\"").concat(value, "\" ");
     }
     for (var key in json.bindings) {
-        var _d = json.bindings[key], code = _d.code, _e = _d.arguments, cusArg = _e === void 0 ? ['event'] : _e;
+        var _e = json.bindings[key], code = _e.code, _f = _e.arguments, cusArg = _f === void 0 ? ['event'] : _f;
         if (key === '_spread' || key === '_forName') {
             continue;
         }
@@ -198,7 +222,7 @@ var blockToSolid = function (json, options) {
     if (json.children) {
         str += json.children
             .filter(filter_empty_text_nodes_1.filterEmptyTextNodes)
-            .map(function (item) { return blockToSolid(item, options); })
+            .map(function (item) { return blockToSolid({ component: component, json: item, options: options }); })
             .join('\n');
     }
     if (json.name === 'Fragment') {
@@ -226,12 +250,28 @@ function addProviderComponents(json, options) {
         ];
     }
 }
-var componentToSolid = function (_options) {
-    if (_options === void 0) { _options = {}; }
+var preProcessComponentCode = function (json, options) {
+    var _a;
+    var processCode = (0, state_1.updateStateCode)({ options: options, component: json });
+    if ((_a = json.hooks.onMount) === null || _a === void 0 ? void 0 : _a.code) {
+        json.hooks.onMount.code = processCode(json.hooks.onMount.code);
+    }
+    if (json.hooks.onUpdate) {
+        for (var _i = 0, _b = json.hooks.onUpdate; _i < _b.length; _i++) {
+            var hook = _b[_i];
+            hook.code = processCode(hook.code);
+            if (hook.deps) {
+                hook.deps = processCode(hook.deps);
+            }
+        }
+    }
+};
+var componentToSolid = function (passedOptions) {
+    if (passedOptions === void 0) { passedOptions = DEFAULT_OPTIONS; }
     return function (_a) {
-        var _b, _c, _d;
+        var _b, _c, _d, _e, _f, _g;
         var component = _a.component;
-        var options = __assign({ stylesType: 'styled-components' }, _options);
+        var options = __assign(__assign({}, DEFAULT_OPTIONS), passedOptions);
         var json = (0, fast_clone_1.fastClone)(component);
         if (options.plugins) {
             json = (0, plugins_1.runPreJsonPlugins)(json, options.plugins);
@@ -242,29 +282,28 @@ var componentToSolid = function (_options) {
         if (options.plugins) {
             json = (0, plugins_1.runPostJsonPlugins)(json, options.plugins);
         }
+        preProcessComponentCode(json, options);
         (0, strip_meta_properties_1.stripMetaProperties)(json);
         var foundDynamicComponents = processDynamicComponents(json, options);
         var css = options.stylesType === 'style-tag' &&
             (0, collect_css_1.collectCss)(json, {
                 prefix: (0, hash_sum_1.default)(json),
             });
-        var stateString = (0, get_state_object_string_1.getStateObjectStringFromComponent)(json);
-        var hasState = (0, state_1.checkHasState)(json);
+        var state = (0, state_1.getState)({ json: json, options: options });
         var componentsUsed = (0, get_components_used_1.getComponentsUsed)(json);
         var componentHasContext = (0, context_1.hasContext)(json);
         var hasShowComponent = componentsUsed.has('Show');
         var hasForComponent = componentsUsed.has('For');
-        var solidJSImports = __spreadArray([
+        var solidJSImports = __spreadArray(__spreadArray([
             componentHasContext ? 'useContext' : undefined,
             hasShowComponent ? 'Show' : undefined,
             hasForComponent ? 'For' : undefined,
             ((_b = json.hooks.onMount) === null || _b === void 0 ? void 0 : _b.code) ? 'onMount' : undefined
-        ], (((_c = json.hooks.onUpdate) === null || _c === void 0 ? void 0 : _c.length) ? ['on', 'createEffect'] : []), true).filter(Boolean);
-        var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n\n    function ", "(props) {\n      ", "\n      \n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      return (", "\n        ", "\n        ", "\n        ", ")\n    }\n\n    export default ", ";\n  "], ["\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n\n    function ", "(props) {\n      ", "\n      \n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      return (", "\n        ", "\n        ", "\n        ", ")\n    }\n\n    export default ", ";\n  "])), solidJSImports.length > 0
-            ? "import { \n          ".concat(solidJSImports.map(function (item) { return item; }).join(', '), "\n         } from 'solid-js';")
-            : '', !foundDynamicComponents ? '' : "import { Dynamic } from 'solid-js/web';", !hasState ? '' : "import { createMutable } from 'solid-js/store';", !componentHasStyles && options.stylesType === 'styled-components'
+        ], (((_c = json.hooks.onUpdate) === null || _c === void 0 ? void 0 : _c.length) ? ['on', 'createEffect'] : []), true), ((_d = state === null || state === void 0 ? void 0 : state.import.solidjs) !== null && _d !== void 0 ? _d : []), true).filter(nullable_1.checkIsDefined);
+        var storeImports = (_e = state === null || state === void 0 ? void 0 : state.import.store) !== null && _e !== void 0 ? _e : [];
+        var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n\n    function ", "(props) {\n      ", "\n      \n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      return (", "\n        ", "\n        ", "\n        ", ")\n    }\n\n    export default ", ";\n  "], ["\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n\n    function ", "(props) {\n      ", "\n      \n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      return (", "\n        ", "\n        ", "\n        ", ")\n    }\n\n    export default ", ";\n  "])), solidJSImports.length > 0 ? "import { ".concat(solidJSImports.join(', '), " } from 'solid-js';") : '', !foundDynamicComponents ? '' : "import { Dynamic } from 'solid-js/web';", storeImports.length > 0 ? "import { ".concat(storeImports.join(', '), " } from 'solid-js/store';") : '', !componentHasStyles && options.stylesType === 'styled-components'
             ? ''
-            : "import { css } from \"solid-styled-components\";", (0, render_imports_1.renderPreComponent)({ component: json, target: 'solid' }), json.name, !hasState ? '' : "const state = createMutable(".concat(stateString, ");"), getRefsString(json), getContextString(json, options), !((_d = json.hooks.onMount) === null || _d === void 0 ? void 0 : _d.code) ? '' : "onMount(() => { ".concat(json.hooks.onMount.code, " })"), json.hooks.onUpdate
+            : "import { css } from \"solid-styled-components\";", (0, render_imports_1.renderPreComponent)({ component: json, target: 'solid' }), json.name, (_f = state === null || state === void 0 ? void 0 : state.str) !== null && _f !== void 0 ? _f : '', getRefsString(json), getContextString(json, options), !((_g = json.hooks.onMount) === null || _g === void 0 ? void 0 : _g.code) ? '' : "onMount(() => { ".concat(json.hooks.onMount.code, " })"), json.hooks.onUpdate
             ? json.hooks.onUpdate
                 .map(function (hook, index) {
                 if (hook.deps) {
@@ -279,7 +318,7 @@ var componentToSolid = function (_options) {
                 .join('\n')
             : '', addWrapper ? '<>' : '', json.children
             .filter(filter_empty_text_nodes_1.filterEmptyTextNodes)
-            .map(function (item) { return blockToSolid(item, options); })
+            .map(function (item) { return blockToSolid({ component: component, json: item, options: options }); })
             .join('\n'), options.stylesType === 'style-tag' && css && css.trim().length > 4
             ? // We add the jsx attribute so prettier formats this nicely
                 "<style jsx>{`".concat(css, "`}</style>")
