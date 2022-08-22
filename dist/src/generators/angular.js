@@ -98,11 +98,12 @@ var blockToAngular = function (json, options, blockOptions) {
     var str = '';
     var needsToRenderSlots = [];
     if (json.name === 'For') {
+        var indexName = json.scope.For[1];
         str += "<ng-container *ngFor=\"let ".concat(json.properties._forName, " of ").concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)((_e = json.bindings.each) === null || _e === void 0 ? void 0 : _e.code, {
             contextVars: contextVars,
             outputVars: outputVars,
             domRefs: domRefs,
-        }), "\">");
+        })).concat(indexName ? "; let ".concat(indexName, " = index") : '', "\">");
         str += json.children.map(function (item) { return (0, exports.blockToAngular)(item, options, blockOptions); }).join('\n');
         str += "</ng-container>";
     }
