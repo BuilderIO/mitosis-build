@@ -18,6 +18,7 @@ var add_prevent_default_1 = require("./add-prevent-default");
 var convert_method_to_function_1 = require("./convert-method-to-function");
 var jsx_1 = require("./jsx");
 var src_generator_1 = require("./src-generator");
+var plugins_1 = require("../../modules/plugins");
 Error.stackTraceLimit = 9999;
 // TODO(misko): styles are not processed.
 var DEBUG = false;
@@ -28,7 +29,13 @@ var componentToQwik = function (userOptions) {
         var _component = _a.component, path = _a.path;
         // Make a copy we can safely mutate, similar to babel's toolchain
         var component = (0, fast_clone_1.fastClone)(_component);
+        if (userOptions.plugins) {
+            component = (0, plugins_1.runPreJsonPlugins)(component, userOptions.plugins);
+        }
         (0, add_prevent_default_1.addPreventDefault)(component);
+        if (userOptions.plugins) {
+            component = (0, plugins_1.runPostJsonPlugins)(component, userOptions.plugins);
+        }
         var file = new src_generator_1.File(component.name + '.js', {
             isPretty: true,
             isJSX: true,

@@ -66,6 +66,7 @@ var function_literal_prefix_1 = require("../constants/function-literal-prefix");
 var method_literal_prefix_1 = require("../constants/method-literal-prefix");
 var patterns_1 = require("../helpers/patterns");
 var is_upper_case_1 = require("../helpers/is-upper-case");
+var json5_1 = __importDefault(require("json5"));
 var mappers = {
     Fragment: function (_a) {
         var _b;
@@ -223,7 +224,7 @@ var blockToSvelte = function (_a) {
     if (json.children) {
         str += json.children
             .map(function (item) { return (0, exports.blockToSvelte)({ json: item, options: options, parentComponent: parentComponent }); })
-            .join('\n');
+            .join('');
     }
     str += "</".concat(tagName, ">");
     return str;
@@ -349,6 +350,9 @@ var componentToSvelte = function (_a) {
             var propDeclaration = "export let ".concat(name);
             if (json.propsTypeRef && json.propsTypeRef !== 'any') {
                 propDeclaration += ": ".concat(json.propsTypeRef.split(' |')[0], "['").concat(name, "']");
+            }
+            if (json.defaultProps && json.defaultProps.hasOwnProperty(name)) {
+                propDeclaration += "=".concat(json5_1.default.stringify(json.defaultProps[name]));
             }
             propDeclaration += ';';
             return propDeclaration;

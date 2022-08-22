@@ -18,6 +18,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.componentToAngular = exports.blockToAngular = void 0;
 var dedent_1 = __importDefault(require("dedent"));
+var json5_1 = __importDefault(require("json5"));
 var standalone_1 = require("prettier/standalone");
 var collect_css_1 = require("../helpers/styles/collect-css");
 var fast_clone_1 = require("../helpers/fast-clone");
@@ -97,11 +98,12 @@ var blockToAngular = function (json, options, blockOptions) {
     var str = '';
     var needsToRenderSlots = [];
     if (json.name === 'For') {
+        var indexName = json.scope.For[1];
         str += "<ng-container *ngFor=\"let ".concat(json.properties._forName, " of ").concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)((_e = json.bindings.each) === null || _e === void 0 ? void 0 : _e.code, {
             contextVars: contextVars,
             outputVars: outputVars,
             domRefs: domRefs,
-        }), "\">");
+        })).concat(indexName ? "; let ".concat(indexName, " = index") : '', "\">");
         str += json.children.map(function (item) { return (0, exports.blockToAngular)(item, options, blockOptions); }).join('\n');
         str += "</ng-container>";
     }
@@ -197,9 +199,9 @@ var componentToAngular = function (options) {
     if (options === void 0) { options = {}; }
     return function (_a) {
         var _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m;
-        var component = _a.component;
+        var _component = _a.component;
         // Make a copy we can safely mutate, similar to babel's toolchain
-        var json = (0, fast_clone_1.fastClone)(component);
+        var json = (0, fast_clone_1.fastClone)(_component);
         if (options.plugins) {
             json = (0, plugins_1.runPreJsonPlugins)(json, options.plugins);
         }
@@ -215,7 +217,7 @@ var componentToAngular = function (options) {
             });
         });
         var customImports = (0, get_custom_imports_1.getCustomImports)(json);
-        var _p = component.exports, localExports = _p === void 0 ? {} : _p;
+        var _p = json.exports, localExports = _p === void 0 ? {} : _p;
         var localExportVars = Object.keys(localExports)
             .filter(function (key) { return localExports[key].usedInLocal; })
             .map(function (key) { return "".concat(key, " = ").concat(key, ";"); });
@@ -232,14 +234,14 @@ var componentToAngular = function (options) {
             }
             return "public ".concat(variableName, " : ").concat(variableType);
         });
-        var hasConstructor = Boolean(injectables.length || ((_e = component.hooks) === null || _e === void 0 ? void 0 : _e.onInit));
-        var props = (0, get_props_1.getProps)(component);
+        var hasConstructor = Boolean(injectables.length || ((_e = json.hooks) === null || _e === void 0 ? void 0 : _e.onInit));
+        var props = (0, get_props_1.getProps)(json);
         // prevent jsx props from showing up as @Input
         if (hasPropRef) {
             props.delete(forwardProp);
         }
         props.delete('children');
-        var outputVars = (0, lodash_1.uniq)(__spreadArray(__spreadArray([], metaOutputVars, true), (0, get_prop_functions_1.getPropFunctions)(component), true));
+        var outputVars = (0, lodash_1.uniq)(__spreadArray(__spreadArray([], metaOutputVars, true), (0, get_prop_functions_1.getPropFunctions)(json), true));
         // remove props for outputs
         outputVars.forEach(function (variableName) {
             props.delete(variableName);
@@ -251,7 +253,7 @@ var componentToAngular = function (options) {
             }
             return "@Output() ".concat(variableName, " = new EventEmitter()");
         });
-        var hasOnMount = Boolean((_f = component.hooks) === null || _f === void 0 ? void 0 : _f.onMount);
+        var hasOnMount = Boolean((_f = json.hooks) === null || _f === void 0 ? void 0 : _f.onMount);
         var domRefs = (0, get_refs_1.getRefs)(json);
         var jsRefs = Object.keys(json.refs).filter(function (ref) { return !domRefs.has(ref); });
         var stateVars = Object.keys((json === null || json === void 0 ? void 0 : json.state) || {});
@@ -292,7 +294,7 @@ var componentToAngular = function (options) {
                 });
             },
         });
-        var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    import { ", " ", " Component ", "", " } from '@angular/core';\n    ", "\n\n    ", "\n    ", "\n\n    @Component({\n      ", "\n      selector: '", "',\n      template: `\n        ", "\n      `,\n      ", "\n    })\n    export default class ", " {\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n    }\n  "], ["\n    import { ", " ", " Component ", "", " } from '@angular/core';\n    ", "\n\n    ", "\n    ", "\n\n    @Component({\n      ", "\n      selector: '", "',\n      template: \\`\n        ", "\n      \\`,\n      ", "\n    })\n    export default class ", " {\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n    }\n  "])), outputs.length ? 'Output, EventEmitter, \n' : '', ((_g = options === null || options === void 0 ? void 0 : options.experimental) === null || _g === void 0 ? void 0 : _g.inject) ? 'Inject, forwardRef,' : '', domRefs.size ? ', ViewChild, ElementRef' : '', props.size ? ', Input' : '', options.standalone ? "import { CommonModule } from '@angular/common';" : '', json.types ? json.types.join('\n') : '', (0, render_imports_1.renderPreComponent)({
+        var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    import { ", " ", " Component ", "", " } from '@angular/core';\n    ", "\n\n    ", "\n    ", "\n    ", "\n\n    @Component({\n      ", "\n      selector: '", "',\n      template: `\n        ", "\n      `,\n      ", "\n    })\n    export default class ", " {\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n    }\n  "], ["\n    import { ", " ", " Component ", "", " } from '@angular/core';\n    ", "\n\n    ", "\n    ", "\n    ", "\n\n    @Component({\n      ", "\n      selector: '", "',\n      template: \\`\n        ", "\n      \\`,\n      ", "\n    })\n    export default class ", " {\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n    }\n  "])), outputs.length ? 'Output, EventEmitter, \n' : '', ((_g = options === null || options === void 0 ? void 0 : options.experimental) === null || _g === void 0 ? void 0 : _g.inject) ? 'Inject, forwardRef,' : '', domRefs.size ? ', ViewChild, ElementRef' : '', props.size ? ', Input' : '', options.standalone ? "import { CommonModule } from '@angular/common';" : '', json.types ? json.types.join('\n') : '', !json.defaultProps ? '' : "const defaultProps = ".concat(json5_1.default.stringify(json.defaultProps), "\n"), (0, render_imports_1.renderPreComponent)({
             component: json,
             target: 'angular',
             excludeMitosisComponents: !options.standalone,
@@ -301,18 +303,22 @@ var componentToAngular = function (options) {
                 "\n        standalone: true,\n        imports: [CommonModule".concat(componentsUsed.length ? ", ".concat(componentsUsed.join(', ')) : '', "],\n      ")
             : '', (0, lodash_1.kebabCase)(json.name || 'my-component'), (0, indent_1.indent)(template, 8).replace(/`/g, '\\`').replace(/\$\{/g, '\\${'), css.length
             ? "styles: [\n        `".concat((0, indent_1.indent)(css, 8), "`\n      ],")
-            : '', component.name, localExportVars.join('\n'), customImports.map(function (name) { return "".concat(name, " = ").concat(name); }).join('\n'), Array.from(props)
+            : '', json.name, localExportVars.join('\n'), customImports.map(function (name) { return "".concat(name, " = ").concat(name); }).join('\n'), Array.from(props)
             .filter(function (item) { return !(0, slots_1.isSlotProperty)(item) && item !== 'children'; })
             .map(function (item) {
             var propType = propsTypeRef ? "".concat(propsTypeRef, "[\"").concat(item, "\"]") : 'any';
-            return "@Input() ".concat(item, ": ").concat(propType);
+            var propDeclaration = "@Input() ".concat(item, ": ").concat(propType);
+            if (json.defaultProps && json.defaultProps.hasOwnProperty(item)) {
+                propDeclaration += " = defaultProps[\"".concat(item, "\"]");
+            }
+            return propDeclaration;
         })
             .join('\n'), outputs.join('\n'), Array.from(domRefs)
             .map(function (refName) { return "@ViewChild('".concat(refName, "') ").concat(refName, ": ElementRef"); })
             .join('\n'), dataString, jsRefs
             .map(function (ref) {
-            var argument = component.refs[ref].argument;
-            var typeParameter = component.refs[ref].typeParameter;
+            var argument = json.refs[ref].argument;
+            var typeParameter = json.refs[ref].typeParameter;
             return "private _".concat(ref).concat(typeParameter ? ": ".concat(typeParameter) : '').concat(argument
                 ? " = ".concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(argument, {
                     replaceWith: 'this.',
@@ -325,25 +331,25 @@ var componentToAngular = function (options) {
         })
             .join('\n'), !hasConstructor
             ? ''
-            : "constructor(\n".concat(injectables.join(',\n'), ") {\n            ").concat(!((_h = component.hooks) === null || _h === void 0 ? void 0 : _h.onInit)
+            : "constructor(\n".concat(injectables.join(',\n'), ") {\n            ").concat(!((_h = json.hooks) === null || _h === void 0 ? void 0 : _h.onInit)
                 ? ''
-                : "\n              ".concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)((_j = component.hooks.onInit) === null || _j === void 0 ? void 0 : _j.code, {
+                : "\n              ".concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)((_j = json.hooks.onInit) === null || _j === void 0 ? void 0 : _j.code, {
                     replaceWith: 'this.',
                     contextVars: contextVars,
                     outputVars: outputVars,
                 }), "\n              "), "\n          }\n          "), !hasOnMount
             ? ''
-            : "ngOnInit() {\n              \n              ".concat(!((_k = component.hooks) === null || _k === void 0 ? void 0 : _k.onMount)
+            : "ngOnInit() {\n              \n              ".concat(!((_k = json.hooks) === null || _k === void 0 ? void 0 : _k.onMount)
                 ? ''
-                : "\n                ".concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)((_l = component.hooks.onMount) === null || _l === void 0 ? void 0 : _l.code, {
+                : "\n                ".concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)((_l = json.hooks.onMount) === null || _l === void 0 ? void 0 : _l.code, {
                     replaceWith: 'this.',
                     contextVars: contextVars,
                     outputVars: outputVars,
                     domRefs: Array.from(domRefs),
                     stateVars: stateVars,
-                }), "\n                "), "\n            }"), !((_m = component.hooks.onUpdate) === null || _m === void 0 ? void 0 : _m.length)
+                }), "\n                "), "\n            }"), !((_m = json.hooks.onUpdate) === null || _m === void 0 ? void 0 : _m.length)
             ? ''
-            : "ngAfterContentChecked() {\n              ".concat(component.hooks.onUpdate.reduce(function (code, hook) {
+            : "ngAfterContentChecked() {\n              ".concat(json.hooks.onUpdate.reduce(function (code, hook) {
                 code += (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(hook.code, {
                     replaceWith: 'this.',
                     contextVars: contextVars,
@@ -352,9 +358,9 @@ var componentToAngular = function (options) {
                     stateVars: stateVars,
                 });
                 return code + '\n';
-            }, ''), "\n            }"), !component.hooks.onUnMount
+            }, ''), "\n            }"), !json.hooks.onUnMount
             ? ''
-            : "ngOnDestroy() {\n              ".concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(component.hooks.onUnMount.code, {
+            : "ngOnDestroy() {\n              ".concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(json.hooks.onUnMount.code, {
                 replaceWith: 'this.',
                 contextVars: contextVars,
                 outputVars: outputVars,

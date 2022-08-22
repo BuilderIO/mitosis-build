@@ -20,6 +20,9 @@ export declare const onUnMount: (fn: () => any) => any;
 export declare const useDynamicTag: (fn: () => any) => any;
 export declare const onError: (fn: () => any) => any;
 export declare const useMetadata: (obj: object) => any;
+export declare const useDefaultProps: <T = {
+    [key: string]: any;
+}>(value: T) => T;
 export * from './parsers/jsx';
 export * from './parsers/builder';
 export * from './parsers/angular';

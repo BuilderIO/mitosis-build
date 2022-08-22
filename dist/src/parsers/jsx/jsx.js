@@ -68,14 +68,14 @@ var jsxPlugin = require('@babel/plugin-syntax-jsx');
 var tsPreset = require('@babel/preset-typescript');
 var types = babel.types;
 var componentFunctionToJson = function (node, context) {
-    var _a;
+    var _a, _b;
     var hooks = {};
     var state = {};
     var accessedContext = {};
     var setContext = {};
     var refs = {};
-    for (var _i = 0, _b = node.body.body; _i < _b.length; _i++) {
-        var item = _b[_i];
+    for (var _i = 0, _c = node.body.body; _i < _c.length; _i++) {
+        var item = _c[_i];
         if (types.isExpressionStatement(item)) {
             var expression = item.expression;
             if (types.isCallExpression(expression)) {
@@ -167,6 +167,21 @@ var componentFunctionToJson = function (node, context) {
                                 .replace(/^{/, '')
                                 .replace(/}$/, '');
                             hooks.onInit = { code: code };
+                        }
+                    }
+                    else if (expression.callee.name === hooks_1.HOOKS.DEFAULT_PROPS) {
+                        var firstArg = expression.arguments[0];
+                        if (types.isObjectExpression(firstArg)) {
+                            var objectProperties = (_a = firstArg.properties) === null || _a === void 0 ? void 0 : _a.filter(function (i) {
+                                return types.isObjectProperty(i);
+                            });
+                            objectProperties === null || objectProperties === void 0 ? void 0 : objectProperties.forEach(function (i) {
+                                var _a;
+                                var _b, _c, _d;
+                                if ((_b = i.key) === null || _b === void 0 ? void 0 : _b.name) {
+                                    context.builder.component.defaultProps = __assign(__assign({}, ((_c = context.builder.component.defaultProps) !== null && _c !== void 0 ? _c : {})), (_a = {}, _a[(_d = i.key) === null || _d === void 0 ? void 0 : _d.name] = i.value.value, _a));
+                                }
+                            });
                         }
                     }
                 }
@@ -274,7 +289,7 @@ var componentFunctionToJson = function (node, context) {
         context.builder.component.exports = localExports;
     }
     var propsTypeRef = (0, component_types_1.getPropsTypeRef)(node, context);
-    return (0, create_mitosis_component_1.createMitosisComponent)(__assign(__assign({}, context.builder.component), { name: (_a = node.id) === null || _a === void 0 ? void 0 : _a.name, state: state, children: children, refs: refs, hooks: hooks, context: {
+    return (0, create_mitosis_component_1.createMitosisComponent)(__assign(__assign({}, context.builder.component), { name: (_b = node.id) === null || _b === void 0 ? void 0 : _b.name, state: state, children: children, refs: refs, hooks: hooks, context: {
             get: accessedContext,
             set: setContext,
         }, propsTypeRef: propsTypeRef }));

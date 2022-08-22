@@ -499,11 +499,8 @@ var _componentToReact = function (json, options, isSubComponent) {
         isRootSpecialNode(json);
     var _o = getRefsString(json, allRefs, options), hasStateArgument = _o[0], refsString = _o[1];
     var nativeStyles = stylesType === 'react-native' && componentHasStyles && (0, react_native_1.collectReactNativeStyles)(json);
-    var propsArgs = 'props';
-    if (json.propsTypeRef) {
-        propsArgs = "props: ".concat(json.propsTypeRef);
-    }
-    var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n  ", "\n  ", "\n  ", "\n  ", "\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "", "function ", "(", "", ") {\n    ", "\n      ", "\n      ", "\n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      return (\n        ", "\n        ", "\n        ", "\n        ", "\n      );\n    }", "\n\n    ", "\n\n    ", "\n  "], ["\n  ", "\n  ", "\n  ", "\n  ", "\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "", "function ", "(", "", ") {\n    ", "\n      ", "\n      ", "\n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      return (\n        ", "\n        ", "\n        ", "\n        ", "\n      );\n    }", "\n\n    ", "\n\n    ", "\n  "])), options.preact
+    var propsArgs = "props: ".concat(json.propsTypeRef || 'any');
+    var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n  ", "\n  ", "\n  ", "\n  ", "\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "", "function ", "(", "", ") {\n    ", "\n      ", "\n      ", "\n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      return (\n        ", "\n        ", "\n        ", "\n        ", "\n      );\n    }", "\n\n    ", "\n\n    ", "\n\n    ", "\n  "], ["\n  ", "\n  ", "\n  ", "\n  ", "\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "", "function ", "(", "", ") {\n    ", "\n      ", "\n      ", "\n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      return (\n        ", "\n        ", "\n        ", "\n        ", "\n      );\n    }", "\n\n    ", "\n\n    ", "\n\n    ", "\n  "])), options.preact
         ? "\n    /** @jsx h */\n    import { h, Fragment } from 'preact';\n    "
         : options.type !== 'native'
             ? "import * as React from 'react';"
@@ -533,7 +530,9 @@ var _componentToReact = function (json, options, isSubComponent) {
         ? "<style jsx>{`".concat(css, "`}</style>")
         : componentHasStyles && stylesType === 'style-tag'
             ? "<style>{`".concat(css, "`}</style>")
-            : '', wrap ? closeFrag(options) : '', isForwardRef ? ')' : '', !nativeStyles
+            : '', wrap ? closeFrag(options) : '', isForwardRef ? ')' : '', !json.defaultProps
+        ? ''
+        : "".concat(json.name || 'MyComponent', ".defaultProps = ").concat(json5_1.default.stringify(json.defaultProps), ";"), !nativeStyles
         ? ''
         : "\n      const styles = StyleSheet.create(".concat(json5_1.default.stringify(nativeStyles), ");\n    "), styledComponentsCode ? styledComponentsCode : '');
     str = (0, replace_new_lines_in_strings_1.stripNewlinesInStrings)(str);
