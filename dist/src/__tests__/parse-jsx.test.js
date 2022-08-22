@@ -1,6 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+var state_1 = require("../parsers/jsx/state");
 var jsx_1 = require("../parsers/jsx");
+var jsx_json_spec_1 = require("./data/jsx-json.spec");
 var buttonWithMetadata = require('./data/blocks/button-with-metadata.raw');
 var image = require('./data/blocks/image.raw');
 var basicOnUpdateReturn = require('./data/basic-onUpdate-return.raw');
@@ -9,6 +11,10 @@ var basicRef = require('./data/basic-ref.raw');
 var basicPropsRaw = require('./data/basic-props.raw');
 var basicPropsDestructureRaw = require('./data/basic-props-destructure.raw');
 describe('Parse JSX', function () {
+    test('parseStateObject', function () {
+        var out = (0, state_1.parseStateObjectToMitosisState)(jsx_json_spec_1.SPEC);
+        expect(out).toMatchSnapshot();
+    });
     test('metadata', function () {
         var json = (0, jsx_1.parseJsx)(buttonWithMetadata);
         expect(json).toMatchSnapshot();

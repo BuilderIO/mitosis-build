@@ -19,42 +19,35 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.componentToReact = exports.componentToPreact = exports.blockToReact = void 0;
-var core_1 = require("@babel/core");
 var dedent_1 = __importDefault(require("dedent"));
 var json5_1 = __importDefault(require("json5"));
 var lodash_1 = require("lodash");
 var standalone_1 = require("prettier/standalone");
-var traverse_1 = __importDefault(require("traverse"));
-var function_literal_prefix_1 = require("../constants/function-literal-prefix");
-var method_literal_prefix_1 = require("../constants/method-literal-prefix");
-var babel_transform_1 = require("../helpers/babel-transform");
-var capitalize_1 = require("../helpers/capitalize");
-var collect_css_1 = require("../helpers/styles/collect-css");
-var create_mitosis_node_1 = require("../helpers/create-mitosis-node");
-var fast_clone_1 = require("../helpers/fast-clone");
-var filter_empty_text_nodes_1 = require("../helpers/filter-empty-text-nodes");
-var get_refs_1 = require("../helpers/get-refs");
-var get_props_ref_1 = require("../helpers/get-props-ref");
-var get_state_object_string_1 = require("../helpers/get-state-object-string");
-var getters_to_functions_1 = require("../helpers/getters-to-functions");
-var handle_missing_state_1 = require("../helpers/handle-missing-state");
-var is_mitosis_node_1 = require("../helpers/is-mitosis-node");
-var is_valid_attribute_name_1 = require("../helpers/is-valid-attribute-name");
-var map_refs_1 = require("../helpers/map-refs");
-var process_http_requests_1 = require("../helpers/process-http-requests");
-var process_tag_references_1 = require("../helpers/process-tag-references");
-var render_imports_1 = require("../helpers/render-imports");
-var replace_new_lines_in_strings_1 = require("../helpers/replace-new-lines-in-strings");
-var strip_meta_properties_1 = require("../helpers/strip-meta-properties");
-var strip_state_and_props_refs_1 = require("../helpers/strip-state-and-props-refs");
-var plugins_1 = require("../modules/plugins");
-var jsx_1 = require("../parsers/jsx");
-var context_1 = require("./helpers/context");
-var react_native_1 = require("./react-native");
-var collect_styled_components_1 = require("../helpers/styles/collect-styled-components");
-var helpers_1 = require("../helpers/styles/helpers");
-var slots_1 = require("../helpers/slots");
-var state_1 = require("../helpers/state");
+var collect_css_1 = require("../../helpers/styles/collect-css");
+var create_mitosis_node_1 = require("../../helpers/create-mitosis-node");
+var fast_clone_1 = require("../../helpers/fast-clone");
+var filter_empty_text_nodes_1 = require("../../helpers/filter-empty-text-nodes");
+var get_refs_1 = require("../../helpers/get-refs");
+var get_props_ref_1 = require("../../helpers/get-props-ref");
+var get_state_object_string_1 = require("../../helpers/get-state-object-string");
+var getters_to_functions_1 = require("../../helpers/getters-to-functions");
+var handle_missing_state_1 = require("../../helpers/handle-missing-state");
+var is_valid_attribute_name_1 = require("../../helpers/is-valid-attribute-name");
+var map_refs_1 = require("../../helpers/map-refs");
+var process_http_requests_1 = require("../../helpers/process-http-requests");
+var process_tag_references_1 = require("../../helpers/process-tag-references");
+var render_imports_1 = require("../../helpers/render-imports");
+var replace_new_lines_in_strings_1 = require("../../helpers/replace-new-lines-in-strings");
+var strip_meta_properties_1 = require("../../helpers/strip-meta-properties");
+var plugins_1 = require("../../modules/plugins");
+var jsx_1 = require("../../parsers/jsx");
+var context_1 = require("../helpers/context");
+var react_native_1 = require("../react-native");
+var collect_styled_components_1 = require("../../helpers/styles/collect-styled-components");
+var helpers_1 = require("../../helpers/styles/helpers");
+var state_1 = require("../../helpers/state");
+var state_2 = require("./state");
+var helpers_2 = require("./helpers");
 var hash_sum_1 = __importDefault(require("hash-sum"));
 var openFrag = function (options) { return getFragment('open', options); };
 var closeFrag = function (options) { return getFragment('close', options); };
@@ -82,9 +75,9 @@ var NODE_MAPPERS = {
                 parentSlots.push({ key: propKey, value: (_a = json.bindings[key]) === null || _a === void 0 ? void 0 : _a.code });
                 return '';
             }
-            return "{".concat(processBinding('props.children', options), "}");
+            return "{".concat((0, helpers_2.processBinding)('props.children', options), "}");
         }
-        var slotProp = processBinding(json.bindings.name.code, options).replace('name=', '');
+        var slotProp = (0, helpers_2.processBinding)(json.bindings.name.code, options).replace('name=', '');
         return "{".concat(slotProp, "}");
     },
     Fragment: function (json, options) {
@@ -98,7 +91,7 @@ var NODE_MAPPERS = {
         var _a, _b;
         var wrap = wrapInFragment(json);
         var forArguments = (((_a = json === null || json === void 0 ? void 0 : json.scope) === null || _a === void 0 ? void 0 : _a.For) || []).join(',');
-        return "{".concat(processBinding((_b = json.bindings.each) === null || _b === void 0 ? void 0 : _b.code, options), "?.map((").concat(forArguments, ") => (\n      ").concat(wrap ? openFrag(options) : '').concat(json.children
+        return "{".concat((0, helpers_2.processBinding)((_b = json.bindings.each) === null || _b === void 0 ? void 0 : _b.code, options), "?.map((").concat(forArguments, ") => (\n      ").concat(wrap ? openFrag(options) : '').concat(json.children
             .filter(filter_empty_text_nodes_1.filterEmptyTextNodes)
             .map(function (item) { return (0, exports.blockToReact)(item, options); })
             .join('\n')).concat(wrap ? closeFrag(options) : '', "\n    ))}");
@@ -106,7 +99,7 @@ var NODE_MAPPERS = {
     Show: function (json, options) {
         var _a;
         var wrap = wrapInFragment(json);
-        return "{".concat(processBinding((_a = json.bindings.when) === null || _a === void 0 ? void 0 : _a.code, options), " ? (\n      ").concat(wrap ? openFrag(options) : '').concat(json.children
+        return "{".concat((0, helpers_2.processBinding)((_a = json.bindings.when) === null || _a === void 0 ? void 0 : _a.code, options), " ? (\n      ").concat(wrap ? openFrag(options) : '').concat(json.children
             .filter(filter_empty_text_nodes_1.filterEmptyTextNodes)
             .map(function (item) { return (0, exports.blockToReact)(item, options); })
             .join('\n')).concat(wrap ? closeFrag(options) : '', "\n    ) : ").concat(!json.meta.else ? 'null' : (0, exports.blockToReact)(json.meta.else, options), "}");
@@ -142,7 +135,7 @@ var blockToReact = function (json, options, parentSlots) {
         return text;
     }
     if ((_a = json.bindings._text) === null || _a === void 0 ? void 0 : _a.code) {
-        var processed = processBinding(json.bindings._text.code, options);
+        var processed = (0, helpers_2.processBinding)(json.bindings._text.code, options);
         if (options.type === 'native') {
             return "<Text>{".concat(processed, "}</Text>");
         }
@@ -151,7 +144,7 @@ var blockToReact = function (json, options, parentSlots) {
     var str = '';
     str += "<".concat(json.name, " ");
     if ((_b = json.bindings._spread) === null || _b === void 0 ? void 0 : _b.code) {
-        str += " {...(".concat(processBinding(json.bindings._spread.code, options), ")} ");
+        str += " {...(".concat((0, helpers_2.processBinding)(json.bindings._spread.code, options), ")} ");
     }
     for (var key in json.properties) {
         var value = (json.properties[key] || '').replace(/"/g, '&quot;').replace(/\n/g, '\\n');
@@ -182,10 +175,10 @@ var blockToReact = function (json, options, parentSlots) {
         if (key === 'css' && value.trim() === '{}') {
             continue;
         }
-        var useBindingValue = processBinding(value, options);
+        var useBindingValue = (0, helpers_2.processBinding)(value, options);
         if (key.startsWith('on')) {
             var _e = json.bindings[key].arguments, cusArgs = _e === void 0 ? ['event'] : _e;
-            str += " ".concat(key, "={(").concat(cusArgs.join(','), ") => ").concat(updateStateSettersInCode(useBindingValue, options), " } ");
+            str += " ".concat(key, "={(").concat(cusArgs.join(','), ") => ").concat((0, state_2.updateStateSettersInCode)(useBindingValue, options), " } ");
         }
         else if (key.startsWith('slot')) {
             // <Component slotProjected={<AnotherComponent />} />
@@ -250,86 +243,12 @@ var getRefsString = function (json, refs, options) {
         // domRefs must have null argument
         var argument = ((_b = json['refs'][ref]) === null || _b === void 0 ? void 0 : _b.argument) || (domRefs.has(ref) ? 'null' : '');
         hasStateArgument = /state\./.test(argument);
-        code += "\nconst ".concat(ref, " = useRef").concat(typeParameter ? "<".concat(typeParameter, ">") : '', "(").concat(processBinding(updateStateSettersInCode(argument, options), options), ");");
+        code += "\nconst ".concat(ref, " = useRef").concat(typeParameter ? "<".concat(typeParameter, ">") : '', "(").concat((0, state_2.processHookCode)({
+            str: argument,
+            options: options,
+        }), ");");
     }
     return [hasStateArgument, code];
-};
-/**
- * Removes all `this.` references.
- */
-var stripThisRefs = function (str, options) {
-    if (options.stateType !== 'useState') {
-        return str;
-    }
-    return str.replace(/this\.([a-zA-Z_\$0-9]+)/g, '$1');
-};
-var processBinding = function (str, options) {
-    if (options.stateType !== 'useState') {
-        return str;
-    }
-    if ((0, slots_1.isSlotProperty)(str)) {
-        return (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(str, {
-            includeState: true,
-            includeProps: false,
-        });
-    }
-    return (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(str, {
-        includeState: true,
-        includeProps: false,
-    });
-};
-var getUseStateCode = function (json, options) {
-    var _a;
-    var str = '';
-    var state = json.state;
-    var valueMapper = function (val) {
-        var x = processBinding(updateStateSettersInCode(val, options), options);
-        return stripThisRefs(x, options);
-    };
-    var lineItemDelimiter = '\n\n\n';
-    for (var key in state) {
-        var value = (_a = state[key]) === null || _a === void 0 ? void 0 : _a.code;
-        var defaultCase = "const [".concat(key, ", set").concat((0, capitalize_1.capitalize)(key), "] = useState(() => (").concat(valueMapper(json5_1.default.stringify(value)), "))");
-        if (typeof value === 'string') {
-            if (value.startsWith(function_literal_prefix_1.functionLiteralPrefix)) {
-                var useValue = value.replace(function_literal_prefix_1.functionLiteralPrefix, '');
-                var mappedVal = valueMapper(useValue);
-                str += mappedVal;
-            }
-            else if (value.startsWith(method_literal_prefix_1.methodLiteralPrefix)) {
-                var methodValue = value.replace(method_literal_prefix_1.methodLiteralPrefix, '');
-                var useValue = methodValue.replace(/^(get )?/, 'function ');
-                str += valueMapper(useValue);
-            }
-            else {
-                str += defaultCase;
-            }
-        }
-        else {
-            str += defaultCase;
-        }
-        str += lineItemDelimiter;
-    }
-    return str;
-};
-var updateStateSetters = function (json, options) {
-    if (options.stateType !== 'useState') {
-        return;
-    }
-    (0, traverse_1.default)(json).forEach(function (item) {
-        if ((0, is_mitosis_node_1.isMitosisNode)(item)) {
-            for (var key in item.bindings) {
-                var values = item.bindings[key];
-                var newValue = updateStateSettersInCode(values === null || values === void 0 ? void 0 : values.code, options);
-                if (newValue !== (values === null || values === void 0 ? void 0 : values.code)) {
-                    item.bindings[key] = {
-                        code: newValue,
-                        arguments: values === null || values === void 0 ? void 0 : values.arguments,
-                    };
-                }
-            }
-        }
-    });
 };
 function addProviderComponents(json, options) {
     for (var key in json.context.set) {
@@ -347,28 +266,6 @@ function addProviderComponents(json, options) {
         }
     }
 }
-var updateStateSettersInCode = function (value, options) {
-    if (options.stateType !== 'useState') {
-        return value;
-    }
-    return (0, babel_transform_1.babelTransformExpression)(value, {
-        AssignmentExpression: function (path) {
-            var node = path.node;
-            if (core_1.types.isMemberExpression(node.left)) {
-                if (core_1.types.isIdentifier(node.left.object)) {
-                    // TODO: utillity to properly trace this reference to the beginning
-                    if (node.left.object.name === 'state') {
-                        // TODO: ultimately support other property access like strings
-                        var propertyName = node.left.property.name;
-                        path.replaceWith(core_1.types.callExpression(core_1.types.identifier("set".concat((0, capitalize_1.capitalize)(propertyName))), [
-                            node.right,
-                        ]));
-                    }
-                }
-            }
-        },
-    });
-};
 function getContextString(component, options) {
     var str = '';
     for (var key in component.context.get) {
@@ -378,7 +275,7 @@ function getContextString(component, options) {
 }
 var getInitCode = function (json, options) {
     var _a;
-    return processBinding(((_a = json.hooks.init) === null || _a === void 0 ? void 0 : _a.code) || '', options);
+    return (0, helpers_2.processBinding)(((_a = json.hooks.init) === null || _a === void 0 ? void 0 : _a.code) || '', options);
 };
 var DEFAULT_OPTIONS = {
     stateType: 'useState',
@@ -439,7 +336,7 @@ var _componentToReact = function (json, options, isSubComponent) {
     var componentHasStyles = (0, helpers_1.hasCss)(json);
     if (options.stateType === 'useState') {
         (0, getters_to_functions_1.gettersToFunctions)(json);
-        updateStateSetters(json, options);
+        (0, state_2.updateStateSetters)(json, options);
     }
     // const domRefs = getRefs(json);
     var allRefs = Object.keys(json.refs);
@@ -460,7 +357,7 @@ var _componentToReact = function (json, options, isSubComponent) {
         // Always use state if we are generate Builder react code
         hasState = true;
     }
-    var useStateCode = stateType === 'useState' && getUseStateCode(json, options);
+    var useStateCode = stateType === 'useState' && (0, state_2.getUseStateCode)(json, options);
     if (options.plugins) {
         json = (0, plugins_1.runPostJsonPlugins)(json, options.plugins);
     }
@@ -521,11 +418,20 @@ var _componentToReact = function (json, options, isSubComponent) {
                         ? "var state = useBuilderState(".concat((0, get_state_object_string_1.getStateObjectStringFromComponent)(json), ");")
                         : "const state = useLocalProxy(".concat((0, get_state_object_string_1.getStateObjectStringFromComponent)(json), ");")
         : '', hasStateArgument ? refsString : '', getContextString(json, options), getInitCode(json, options), ((_g = json.hooks.onInit) === null || _g === void 0 ? void 0 : _g.code)
-        ? "\n          useEffect(() => {\n            ".concat(processBinding(updateStateSettersInCode(json.hooks.onInit.code, options), options), "\n          })\n          ")
+        ? "\n          useEffect(() => {\n            ".concat((0, state_2.processHookCode)({
+            str: json.hooks.onInit.code,
+            options: options,
+        }), "\n          })\n          ")
         : '', ((_h = json.hooks.onMount) === null || _h === void 0 ? void 0 : _h.code)
-        ? "useEffect(() => {\n            ".concat(processBinding(updateStateSettersInCode(json.hooks.onMount.code, options), options), "\n          }, [])")
-        : '', (_k = (_j = json.hooks.onUpdate) === null || _j === void 0 ? void 0 : _j.map(function (hook) { return "useEffect(() => {\n            ".concat(processBinding(updateStateSettersInCode(hook.code, options), options), "\n          }, \n          ").concat(hook.deps ? processBinding(updateStateSettersInCode(hook.deps, options), options) : '', ")"); }).join(';')) !== null && _k !== void 0 ? _k : '', ((_l = json.hooks.onUnMount) === null || _l === void 0 ? void 0 : _l.code)
-        ? "useEffect(() => {\n            return () => {\n              ".concat(processBinding(updateStateSettersInCode(json.hooks.onUnMount.code, options), options), "\n            }\n          }, [])")
+        ? "useEffect(() => {\n            ".concat((0, state_2.processHookCode)({
+            str: json.hooks.onMount.code,
+            options: options,
+        }), "\n          }, [])")
+        : '', (_k = (_j = json.hooks.onUpdate) === null || _j === void 0 ? void 0 : _j.map(function (hook) { return "useEffect(() => {\n            ".concat((0, state_2.processHookCode)({ str: hook.code, options: options }), "\n          }, \n          ").concat(hook.deps ? (0, state_2.processHookCode)({ str: hook.deps, options: options }) : '', ")"); }).join(';')) !== null && _k !== void 0 ? _k : '', ((_l = json.hooks.onUnMount) === null || _l === void 0 ? void 0 : _l.code)
+        ? "useEffect(() => {\n            return () => {\n              ".concat((0, state_2.processHookCode)({
+            str: json.hooks.onUnMount.code,
+            options: options,
+        }), "\n            }\n          }, [])")
         : '', wrap ? openFrag(options) : '', json.children.map(function (item) { return (0, exports.blockToReact)(item, options); }).join('\n'), componentHasStyles && stylesType === 'styled-jsx'
         ? "<style jsx>{`".concat(css, "`}</style>")
         : componentHasStyles && stylesType === 'style-tag'

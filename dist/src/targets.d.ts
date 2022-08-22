@@ -14,7 +14,7 @@ export declare const targets: {
     liquid: (options?: import("./generators/liquid").ToLiquidOptions) => import(".").Transpiler;
     react: (reactOptions?: import("./generators/react").ToReactOptions) => import(".").Transpiler;
     reactNative: (options?: import("./generators/react-native").ToReactNativeOptions) => import(".").Transpiler;
-    solid: (_options?: import("./generators/solid").ToSolidOptions) => import(".").Transpiler;
+    solid: (passedOptions?: Partial<import("./generators/solid/types").ToSolidOptions>) => import(".").Transpiler;
     svelte: ({ plugins, ...userProvidedOptions }?: import("./generators/svelte").ToSvelteOptions) => import(".").Transpiler;
     swift: (options?: import("./generators/swift-ui").ToSwiftOptions) => import(".").Transpiler;
     template: (options?: import("./generators/template").ToTemplateOptions) => import(".").Transpiler;

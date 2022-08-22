@@ -55,7 +55,6 @@ var babelTransformCode = function (code, visitor) {
 };
 exports.babelTransformCode = babelTransformCode;
 var babelTransformExpression = function (code, visitor, type) {
-    var _a;
     if (type === void 0) { type = 'unknown'; }
     if (!code) {
         return '';
@@ -77,8 +76,7 @@ var babelTransformExpression = function (code, visitor, type) {
     var result = type === 'expression'
         ? null
         : (0, lodash_1.attempt)(function () {
-            var _a;
-            var result = ((_a = (0, exports.babelTransform)(useCode, visitor)) === null || _a === void 0 ? void 0 : _a.code) || '';
+            var result = (0, exports.babelTransformCode)(useCode, visitor);
             if (type === 'functionBody') {
                 return result.replace(/^function\(\)\{/, '').replace(/\};$/, '');
             }
@@ -102,7 +100,7 @@ var babelTransformExpression = function (code, visitor, type) {
             // e.g. if the code parsed is { ... } babel will treat that as a block by deafult, unless processed as an expression
             // that is an object
             useCode = "let _ = ".concat(useCode);
-            result = (((_a = (0, exports.babelTransform)(useCode, visitor)) === null || _a === void 0 ? void 0 : _a.code) || '')
+            result = (0, exports.babelTransformCode)(useCode, visitor)
                 // Babel adds trailing semicolons, but for expressions we need those gone
                 .replace(/;$/, '')
                 // Remove our fake variable assignment

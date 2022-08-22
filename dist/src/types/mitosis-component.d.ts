@@ -58,7 +58,7 @@ export declare type MitosisExport = {
         isFunction?: boolean;
     };
 };
-declare type StateValueType = 'function' | 'getter' | 'method' | 'property';
+export declare type StateValueType = 'function' | 'getter' | 'method' | 'property';
 export declare type StateCode = _JSON;
 export interface StateValue {
     code: StateCode;
@@ -99,4 +99,3 @@ export declare type MitosisComponent = {
     propsTypeRef?: string;
     defaultProps?: JSONObject;
 };
-export {};

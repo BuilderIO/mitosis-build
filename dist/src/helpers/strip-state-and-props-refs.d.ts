@@ -16,4 +16,4 @@ export declare type StripStateAndPropsRefsOptions = {
  *
  * @todo proper ref replacement with babel
  */
-export declare const stripStateAndPropsRefs: (code?: string, options?: StripStateAndPropsRefsOptions) => string;
+export declare const stripStateAndPropsRefs: (code?: string, _options?: StripStateAndPropsRefsOptions) => string;

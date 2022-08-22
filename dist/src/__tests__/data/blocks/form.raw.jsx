@@ -45,12 +45,12 @@ var _fake_4 = require("@fake");
 function FormComponent(props) {
     var _a;
     var state = (0, mitosis_1.useStore)({
-        state: 'unsubmitted',
+        formState: 'unsubmitted',
         // TODO: separate response and error?
         responseData: null,
         formErrorMessage: '',
         get submissionState() {
-            return (sdk_1.Builder.isEditing && props.previewState) || state.state;
+            return (sdk_1.Builder.isEditing && props.previewState) || state.formState;
         },
         onSubmit: function (event) {
             var _this = this;
@@ -149,7 +149,7 @@ function FormComponent(props) {
                         return;
                     }
                 }
-                state.state = 'sending';
+                state.formState = 'sending';
                 var formUrl = "".concat(sdk_1.builder.env === 'dev' ? 'http://localhost:5000' : 'https://builder.io', "/api/v1/form-submit?apiKey=").concat(sdk_1.builder.apiKey, "&to=").concat(btoa(props.sendSubmissionsToEmail || ''), "&name=").concat(encodeURIComponent(props.name || ''));
                 fetch(props.sendSubmissionsTo === 'email'
                     ? formUrl
@@ -185,7 +185,7 @@ function FormComponent(props) {
                                     }
                                 }
                                 state.responseData = body;
-                                state.state = res.ok ? 'success' : 'error';
+                                state.formState = res.ok ? 'success' : 'error';
                                 if (res.ok) {
                                     submitSuccessEvent = new CustomEvent('submit:success', {
                                         detail: {
@@ -237,7 +237,7 @@ function FormComponent(props) {
                         }
                     }
                     state.responseData = err;
-                    state.state = 'error';
+                    state.formState = 'error';
                 });
             }
         },
