@@ -224,7 +224,7 @@ var blockToSvelte = function (_a) {
     if (json.children) {
         str += json.children
             .map(function (item) { return (0, exports.blockToSvelte)({ json: item, options: options, parentComponent: parentComponent }); })
-            .join('\n');
+            .join('');
     }
     str += "</".concat(tagName, ">");
     return str;
