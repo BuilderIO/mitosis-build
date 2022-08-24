@@ -4,22 +4,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.gettersToFunctions = void 0;
-var method_literal_prefix_1 = require("../constants/method-literal-prefix");
 var traverse_1 = __importDefault(require("traverse"));
 /**
  * Map getters like `useStore({ get foo() { ... }})` from `state.foo` to `foo()`
  */
 var gettersToFunctions = function (json) {
-    var getterKeys = Object.keys(json.state).filter(function (item) {
-        var _a;
-        var value = (_a = json.state[item]) === null || _a === void 0 ? void 0 : _a.code;
-        if (typeof value === 'string' &&
-            value.startsWith(method_literal_prefix_1.methodLiteralPrefix) &&
-            value.replace(method_literal_prefix_1.methodLiteralPrefix, '').startsWith('get ')) {
-            return true;
-        }
-        return false;
-    });
+    var getterKeys = Object.keys(json.state).filter(function (item) { var _a; return ((_a = json.state[item]) === null || _a === void 0 ? void 0 : _a.type) === 'getter'; });
     (0, traverse_1.default)(json).forEach(function (item) {
         // TODO: not all strings are expressions!
         if (typeof item === 'string') {

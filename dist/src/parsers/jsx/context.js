@@ -52,7 +52,7 @@ function extractContextComponents(json) {
                 json.context.set[refPath] = {
                     name: name_1,
                     value: value
-                        ? (0, state_1.parseStateObject)(expressionToNode(value))
+                        ? (0, state_1.parseStateObjectToMitosisState)(expressionToNode(value))
                         : undefined,
                 };
                 this.update((0, create_mitosis_node_1.createMitosisNode)({

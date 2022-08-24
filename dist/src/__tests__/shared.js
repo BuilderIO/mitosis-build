@@ -319,9 +319,15 @@ var runTestsForTarget = function (target, generator) {
         testsArray.forEach(function (tests) {
             Object.keys(tests).forEach(function (key) {
                 test(key, function () {
-                    var component = (0, jsx_1.parseJsx)(tests[key]);
-                    var output = generator({ component: component, path: path });
-                    expect(output).toMatchSnapshot();
+                    try {
+                        var component = (0, jsx_1.parseJsx)(tests[key]);
+                        var output = generator({ component: component, path: path });
+                        expect(output).toMatchSnapshot();
+                    }
+                    catch (error) {
+                        console.log('failed to parse', error);
+                        throw error;
+                    }
                 });
             });
         });

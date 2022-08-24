@@ -8,17 +8,22 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
     }
     return to.concat(ar || Array.prototype.slice.call(from));
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.componentToQwik = void 0;
 var babel_transform_1 = require("../../helpers/babel-transform");
 var fast_clone_1 = require("../../helpers/fast-clone");
 var collect_css_1 = require("../../helpers/styles/collect-css");
+var mitosis_component_1 = require("../../types/mitosis-component");
 var state_1 = require("../../helpers/state");
 var add_prevent_default_1 = require("./add-prevent-default");
 var convert_method_to_function_1 = require("./convert-method-to-function");
 var jsx_1 = require("./jsx");
 var src_generator_1 = require("./src-generator");
 var plugins_1 = require("../../modules/plugins");
+var traverse_1 = __importDefault(require("traverse"));
 Error.stackTraceLimit = 9999;
 // TODO(misko): styles are not processed.
 var DEBUG = false;
@@ -141,8 +146,8 @@ function emitUseContextProvider(file, component) {
             Object.keys(context.value).forEach(function (prop) {
                 var propValue = context.value[prop];
                 file.src.emit(prop, ':');
-                if (isGetter(propValue)) {
-                    file.src.emit('(()=>{', extractGetterBody(propValue), '})(),');
+                if ((propValue === null || propValue === void 0 ? void 0 : propValue.type) === 'getter') {
+                    file.src.emit('(()=>{', extractGetterBody(propValue.code), '})(),');
                 }
                 else if (typeof propValue == 'function') {
                     throw new Error('Qwik: Functions are not supported in context');
@@ -208,26 +213,21 @@ function emitStateMethodsAndRewriteBindings(file, component, metadata) {
     rewriteCodeExpr(component, methodMap, lexicalArgs, (_a = metadata.qwik) === null || _a === void 0 ? void 0 : _a.replace);
     return state;
 }
-function rewriteCodeExpr(obj, methodMap, lexicalArgs, replace) {
-    if (obj && typeof obj == 'object') {
-        if (Array.isArray(obj)) {
-            obj.forEach(function (item) { return rewriteCodeExpr(item, methodMap, lexicalArgs, replace); });
+var checkIsObjectWithCodeBlock = function (obj) {
+    return typeof obj == 'object' && (obj === null || obj === void 0 ? void 0 : obj.code) && typeof obj.code === 'string';
+};
+function rewriteCodeExpr(component, methodMap, lexicalArgs, replace) {
+    if (replace === void 0) { replace = {}; }
+    (0, traverse_1.default)(component).forEach(function (item) {
+        if (!((0, mitosis_component_1.checkIsCodeValue)(item) || checkIsObjectWithCodeBlock(item))) {
+            return;
         }
-        else {
-            Object.keys(obj).forEach(function (key) {
-                var value = obj[key];
-                if (typeof value == 'string') {
-                    if (value.startsWith(CODE_PREFIX) || key == 'code') {
-                        var code_1 = (0, convert_method_to_function_1.convertMethodToFunction)(value, methodMap, lexicalArgs);
-                        replace &&
-                            Object.keys(replace).forEach(function (key) { return (code_1 = code_1.replace(key, replace[key])); });
-                        obj[key] = code_1;
-                    }
-                }
-                rewriteCodeExpr(value, methodMap, lexicalArgs, replace);
-            });
-        }
-    }
+        var code = (0, convert_method_to_function_1.convertMethodToFunction)(item.code, methodMap, lexicalArgs);
+        Object.keys(replace).forEach(function (key) {
+            code = code.replace(key, replace[key]);
+        });
+        item.code = code;
+    });
 }
 function getLexicalScopeVars(component) {
     return __spreadArray(__spreadArray(['props', 'state'], Object.keys(component.refs), true), Object.keys(component.context.get), true);
@@ -243,30 +243,25 @@ function emitImports(file, component) {
         });
     });
 }
-var CODE_PREFIX = '@builder.io/mitosis/';
-var FUNCTION = CODE_PREFIX + 'function:';
-var METHOD = CODE_PREFIX + 'method:';
-var GETTER = CODE_PREFIX + 'method:get ';
 function emitStateMethods(file, componentState, lexicalArgs) {
     var stateValues = {};
     var stateInit = [stateValues];
     var methodMap = stateToMethodOrGetter(componentState);
     Object.keys(componentState).forEach(function (key) {
-        var _a;
-        var code = (_a = componentState[key]) === null || _a === void 0 ? void 0 : _a.code;
-        if (isCode(code)) {
-            var codeIisGetter = isGetter(code);
-            var prefixIdx = code.indexOf(':') + 1;
-            if (codeIisGetter) {
+        var stateValue = componentState[key];
+        if ((0, mitosis_component_1.checkIsCodeValue)(stateValue)) {
+            var code = stateValue.code;
+            var prefixIdx = 0;
+            if (stateValue.type === 'getter') {
                 prefixIdx += 'get '.length;
             }
-            else if (isFunction(code)) {
+            else if (stateValue.type === 'function') {
                 prefixIdx += 'function '.length;
             }
             code = code.substring(prefixIdx);
             code = (0, convert_method_to_function_1.convertMethodToFunction)(code, methodMap, lexicalArgs).replace('(', "(".concat(lexicalArgs.join(','), ","));
             var functionName = code.split(/\(/)[0];
-            if (codeIisGetter) {
+            if (stateValue.type === 'getter') {
                 stateInit.push("state.".concat(key, "=").concat(functionName, "(").concat(lexicalArgs.join(','), ")"));
             }
             if (!file.options.isTypeScript) {
@@ -276,22 +271,13 @@ function emitStateMethods(file, componentState, lexicalArgs) {
             file.exportConst(functionName, 'function ' + code, true);
         }
         else {
-            stateValues[key] = code;
+            stateValues[key] = stateValue === null || stateValue === void 0 ? void 0 : stateValue.code;
         }
     });
     return stateInit;
 }
 function convertTypeScriptToJS(code) {
     return (0, babel_transform_1.babelTransformExpression)(code, {});
-}
-function isGetter(code) {
-    return typeof code === 'string' && code.startsWith(GETTER);
-}
-function isCode(code) {
-    return typeof code === 'string' && code.startsWith(CODE_PREFIX);
-}
-function isFunction(code) {
-    return typeof code === 'string' && code.startsWith(FUNCTION);
 }
 function extractGetterBody(code) {
     var start = code.indexOf('{');
@@ -301,10 +287,9 @@ function extractGetterBody(code) {
 function stateToMethodOrGetter(state) {
     var methodMap = {};
     Object.keys(state).forEach(function (key) {
-        var _a;
-        var code = (_a = state[key]) === null || _a === void 0 ? void 0 : _a.code;
-        if (typeof code == 'string' && code.startsWith(METHOD)) {
-            methodMap[key] = code.startsWith(GETTER) ? 'getter' : 'method';
+        var stateVal = state[key];
+        if ((stateVal === null || stateVal === void 0 ? void 0 : stateVal.type) === 'getter' || (stateVal === null || stateVal === void 0 ? void 0 : stateVal.type) === 'method') {
+            methodMap[key] = stateVal.type;
         }
     });
     return methodMap;

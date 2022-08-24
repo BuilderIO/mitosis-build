@@ -37,11 +37,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.parseStateObjectToMitosisState = exports.parseStateObject = exports.createFunctionStringLiteralObjectProperty = exports.mapReactIdentifiers = void 0;
+exports.parseStateObjectToMitosisState = exports.parseStateObject = exports.mapReactIdentifiers = void 0;
 var babel = __importStar(require("@babel/core"));
 var generator_1 = __importDefault(require("@babel/generator"));
-var function_literal_prefix_1 = require("../../constants/function-literal-prefix");
-var method_literal_prefix_1 = require("../../constants/method-literal-prefix");
+var outdated_prefixes_1 = require("../constants/outdated-prefixes");
 var traverse_1 = __importDefault(require("traverse"));
 var babel_transform_1 = require("../../helpers/babel-transform");
 var capitalize_1 = require("../../helpers/capitalize");
@@ -49,7 +48,7 @@ var is_mitosis_node_1 = require("../../helpers/is-mitosis-node");
 var replace_idenifiers_1 = require("../../helpers/replace-idenifiers");
 var helpers_1 = require("./helpers");
 var function_1 = require("fp-ts/lib/function");
-var state_1 = require("../../helpers/state");
+var state_1 = require("../helpers/state");
 var types = babel.types;
 function mapReactIdentifiersInExpression(expression, stateProperties) {
     var setExpressions = stateProperties.map(function (propertyName) { return "set".concat((0, capitalize_1.capitalize)(propertyName)); });
@@ -75,14 +74,12 @@ function mapReactIdentifiersInExpression(expression, stateProperties) {
  *   setText(...) -> state.text = ...
  */
 function mapReactIdentifiers(json) {
-    var _a;
     var stateProperties = Object.keys(json.state);
     for (var key in json.state) {
-        var value = (_a = json.state[key]) === null || _a === void 0 ? void 0 : _a.code;
-        if (typeof value === 'string' && value.startsWith(function_literal_prefix_1.functionLiteralPrefix)) {
+        var stateVal = json.state[key];
+        if (typeof (stateVal === null || stateVal === void 0 ? void 0 : stateVal.code) === 'string' && stateVal.type === 'function') {
             json.state[key] = {
-                code: function_literal_prefix_1.functionLiteralPrefix +
-                    mapReactIdentifiersInExpression(value.replace(function_literal_prefix_1.functionLiteralPrefix, ''), stateProperties),
+                code: mapReactIdentifiersInExpression(stateVal.code, stateProperties),
                 type: 'function',
             };
         }
@@ -127,21 +124,17 @@ function mapReactIdentifiers(json) {
     });
 }
 exports.mapReactIdentifiers = mapReactIdentifiers;
-var createFunctionStringLiteral = function (node) {
-    return types.stringLiteral("".concat(function_literal_prefix_1.functionLiteralPrefix).concat((0, generator_1.default)(node).code));
-};
 var createFunctionStringLiteralObjectProperty = function (key, node) {
-    return types.objectProperty(key, createFunctionStringLiteral(node));
+    return types.objectProperty(key, types.stringLiteral("".concat(outdated_prefixes_1.__DO_NOT_USE_FUNCTION_LITERAL_PREFIX).concat((0, generator_1.default)(node).code)));
 };
-exports.createFunctionStringLiteralObjectProperty = createFunctionStringLiteralObjectProperty;
 var parseStateValue = function (item) {
     if (types.isObjectProperty(item)) {
         if (types.isFunctionExpression(item.value) || types.isArrowFunctionExpression(item.value)) {
-            return (0, exports.createFunctionStringLiteralObjectProperty)(item.key, item.value);
+            return createFunctionStringLiteralObjectProperty(item.key, item.value);
         }
     }
     if (types.isObjectMethod(item)) {
-        return types.objectProperty(item.key, types.stringLiteral("".concat(method_literal_prefix_1.methodLiteralPrefix).concat((0, generator_1.default)(__assign(__assign({}, item), { returnType: null })).code)));
+        return types.objectProperty(item.key, types.stringLiteral("".concat(outdated_prefixes_1.__DO_NOT_USE_METHOD_LITERAL_PREFIX).concat((0, generator_1.default)(__assign(__assign({}, item), { returnType: null })).code)));
     }
     // Remove typescript types, e.g. from
     // { foo: ('string' as SomeType) }

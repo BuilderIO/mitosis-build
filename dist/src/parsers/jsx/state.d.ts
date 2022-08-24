@@ -8,6 +8,5 @@ import { JSONObject } from '../../types/json';
  *   setText(...) -> state.text = ...
  */
 export declare function mapReactIdentifiers(json: MitosisComponent): void;
-export declare const createFunctionStringLiteralObjectProperty: (key: babel.types.PrivateName | babel.types.Expression, node: babel.types.Node) => babel.types.ObjectProperty;
 export declare const parseStateObject: (object: babel.types.ObjectExpression) => JSONObject;
-export declare const parseStateObjectToMitosisState: (object: babel.types.ObjectExpression) => import("../../helpers/typescript").Dictionary<import("../../types/mitosis-component").StateValue | undefined>;
+export declare const parseStateObjectToMitosisState: (object: babel.types.ObjectExpression) => import("../../types/mitosis-component").MitosisState;

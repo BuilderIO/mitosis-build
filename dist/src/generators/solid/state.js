@@ -10,10 +10,9 @@ var strip_state_and_props_refs_1 = require("../../helpers/strip-state-and-props-
 var babel_transform_1 = require("../../helpers/babel-transform");
 var capitalize_1 = require("../../helpers/capitalize");
 var get_state_object_string_1 = require("../../helpers/get-state-object-string");
-var function_literal_prefix_1 = require("../../constants/function-literal-prefix");
-var method_literal_prefix_1 = require("../../constants/method-literal-prefix");
 var function_1 = require("fp-ts/lib/function");
 var state_1 = require("../../helpers/state");
+var patterns_1 = require("../../helpers/patterns");
 var getStateSetterName = function (stateName) { return "set".concat((0, capitalize_1.capitalize)(stateName)); };
 var updateStateSettersInCode = function (options) { return function (value) {
     switch (options.state) {
@@ -76,26 +75,27 @@ var processStateValue = function (_a) {
     var options = _a.options, component = _a.component;
     var mapValue = (0, exports.updateStateCode)({ options: options, component: component });
     return function (_a) {
-        var key = _a[0], state = _a[1];
-        var code = state === null || state === void 0 ? void 0 : state.code;
-        if (typeof code === 'string') {
-            if (code.startsWith(function_literal_prefix_1.functionLiteralPrefix)) {
-                // functions
-                var useValue = code.replace(function_literal_prefix_1.functionLiteralPrefix, '');
-                var mappedVal = mapValue(useValue);
-                return mappedVal;
-            }
-            else if (code.startsWith(method_literal_prefix_1.methodLiteralPrefix)) {
-                // methods
-                var methodValue = code.replace(method_literal_prefix_1.methodLiteralPrefix, '');
-                var strippedMethodvalue = (0, function_1.pipe)(methodValue.replace('get ', ''), mapValue);
-                return "function ".concat(strippedMethodvalue);
+        var key = _a[0], stateVal = _a[1];
+        var getDefaultCase = function () {
+            return (0, function_1.pipe)(value, json5_1.default.stringify, mapValue, function (x) { return "const [".concat(key, ", ").concat(getStateSetterName(key), "] = createSignal(").concat(x, ")"); });
+        };
+        var value = stateVal === null || stateVal === void 0 ? void 0 : stateVal.code;
+        var type = stateVal === null || stateVal === void 0 ? void 0 : stateVal.type;
+        if (typeof value === 'string') {
+            switch (type) {
+                case 'getter':
+                    return (0, function_1.pipe)(value, patterns_1.replaceGetterWithFunction, mapValue);
+                case 'function':
+                    return mapValue(value);
+                case 'method':
+                    return (0, function_1.pipe)(value, patterns_1.prefixWithFunction, mapValue);
+                default:
+                    return getDefaultCase();
             }
         }
-        // Other (data)
-        var transformedValue = (0, function_1.pipe)(code, json5_1.default.stringify, mapValue);
-        var defaultCase = "const [".concat(key, ", ").concat(getStateSetterName(key), "] = createSignal(").concat(transformedValue, ")");
-        return defaultCase;
+        else {
+            return getDefaultCase();
+        }
     };
 };
 var LINE_ITEM_DELIMITER = '\n\n\n';
