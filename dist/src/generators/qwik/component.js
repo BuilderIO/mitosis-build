@@ -42,7 +42,7 @@ function createFileSet(options) {
         med: new src_generator_1.File('med.' + extension, srcOptions, opts.qwikLib, opts.qrlPrefix),
         low: new src_generator_1.File('low.' + extension, srcOptions, opts.qwikLib, opts.qrlPrefix),
     };
-    Object.defineProperty(fileSet, '_commonStyles', {
+    Object.defineProperty(fileSet, 'CommonStyles', {
         enumerable: false,
         value: { styles: new Map(), symbolName: null },
     });
@@ -50,7 +50,7 @@ function createFileSet(options) {
 }
 exports.createFileSet = createFileSet;
 function getCommonStyles(fileSet) {
-    return fileSet['_commonStyles'];
+    return fileSet['CommonStyles'];
 }
 function addComponent(fileSet, component, opts) {
     if (opts === void 0) { opts = {}; }
@@ -73,23 +73,33 @@ function addComponent(fileSet, component, opts) {
     if (styles.size) {
         if (_opts.shareStyles) {
             if (_opts.isRoot) {
-                var symbolName = componentName + '_styles';
+                var symbolName = componentName + 'Styles';
                 getCommonStyles(fileSet).symbolName = symbolName;
                 useStyles = generateStyles(onRenderFile, fileSet.low, symbolName, false);
             }
         }
         else {
-            var symbolName = componentName + '_styles';
+            var symbolName = componentName + 'Styles';
             onRenderFile.exportConst(symbolName, (0, styles_1.renderStyles)(styles));
             useStyles = generateStyles(onRenderFile, onRenderFile, symbolName, true);
         }
+    }
+    if (component.meta.cssCode) {
+        var symbolName = componentName + 'UsrStyles';
+        onRenderFile.exportConst(symbolName, JSON.stringify(component.meta.cssCode));
+        useStyles = (function (fns) {
+            return function () {
+                var _this = this;
+                fns.forEach(function (fn) { return fn.apply(_this); });
+            };
+        })([useStyles, generateStyles(onRenderFile, onRenderFile, symbolName, false)]);
     }
     var directives = new Map();
     var rootChildren = component.children;
     addComponentOnMount(onRenderFile, function () {
         return this.emit('return ', (0, jsx_1.renderJSXNodes)(onRenderFile, directives, handlers, rootChildren, styles, {}), ';');
     }, componentName, component, useStyles);
-    componentFile.exportConst(componentName, (0, src_generator_1.invoke)(componentFile.import(componentFile.qwikModule, 'componentQrl'), [generateQrl(componentFile, onRenderFile, componentName + '_onMount')], ['any', 'any']));
+    componentFile.exportConst(componentName, (0, src_generator_1.invoke)(componentFile.import(componentFile.qwikModule, 'componentQrl'), [generateQrl(componentFile, onRenderFile, componentName + 'OnMount')], ['any', 'any']));
     directives.forEach(function (code, name) {
         fileSet.med.import(fileSet.med.qwikModule, 'h');
         fileSet.med.exportConst(name, code, true);
@@ -98,7 +108,9 @@ function addComponent(fileSet, component, opts) {
 exports.addComponent = addComponent;
 function generateStyles(fromFile, dstFile, symbol, scoped) {
     return function () {
-        this.emit((0, src_generator_1.invoke)(fromFile.import(fromFile.qwikModule, scoped ? 'withScopedStylesQrl' : 'useStylesQrl'), [generateQrl(fromFile, dstFile, symbol)]), ';');
+        this.emit((0, src_generator_1.invoke)(fromFile.import(fromFile.qwikModule, scoped ? 'useStylesScopedQrl' : 'useStylesQrl'), [
+            generateQrl(fromFile, dstFile, symbol),
+        ]), ';');
     };
 }
 function addBuilderBlockClass(children) {
@@ -131,7 +143,7 @@ function addComponentOnMount(componentFile, onRenderEmit, componentName, compone
                 inputInitializer.push('if(!state.hasOwnProperty("', input.name, '"))state.', input.name, '=', JSON.stringify(input.defaultValue), ';');
         });
     }
-    componentFile.exportConst(componentName + '_onMount', function () {
+    componentFile.exportConst(componentName + 'OnMount', function () {
         var _this = this;
         this.emit((0, src_generator_1.arrowFnValue)(['props'], function () {
             var _a;

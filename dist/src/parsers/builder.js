@@ -504,11 +504,7 @@ var builderElementToMitosisNode = function (block, options, _internalOptions) {
         name: ((_r = (_q = block.component) === null || _q === void 0 ? void 0 : _q.name) === null || _r === void 0 ? void 0 : _r.replace(/[^a-z0-9]/gi, '')) ||
             block.tagName ||
             (block.linkUrl ? 'a' : 'div'),
-        properties: __assign(__assign({}, (block.component
-            ? {
-                $tagName: block.tagName,
-            }
-            : null)), properties),
+        properties: __assign(__assign(__assign({}, (block.component && { $tagName: block.tagName })), (block.class && { class: block.class })), properties),
         bindings: __assign(__assign(__assign(__assign({}, bindings), actionBindings), (styleString && {
             style: { code: styleString },
         })), (css &&
@@ -674,7 +670,7 @@ var isBuilderElement = function (el) {
 };
 exports.isBuilderElement = isBuilderElement;
 var builderContentPartToMitosisComponent = function (builderContent, options) {
-    var _a, _b, _c, _d, _e, _f, _g, _h;
+    var _a, _b, _c, _d, _e, _f, _g, _h, _j;
     if (options === void 0) { options = {}; }
     builderContent = (0, fast_clone_1.fastClone)(builderContent);
     (0, traverse_1.default)(builderContent).forEach(function (elem) {
@@ -703,24 +699,22 @@ var builderContentPartToMitosisComponent = function (builderContent, options) {
             }
         }
     });
-    var _j = extractStateHook(((_a = builderContent === null || builderContent === void 0 ? void 0 : builderContent.data) === null || _a === void 0 ? void 0 : _a.tsCode) || ((_b = builderContent === null || builderContent === void 0 ? void 0 : builderContent.data) === null || _b === void 0 ? void 0 : _b.jsCode) || ''), state = _j.state, code = _j.code;
+    var _k = extractStateHook(((_a = builderContent === null || builderContent === void 0 ? void 0 : builderContent.data) === null || _a === void 0 ? void 0 : _a.tsCode) || ((_b = builderContent === null || builderContent === void 0 ? void 0 : builderContent.data) === null || _b === void 0 ? void 0 : _b.jsCode) || ''), state = _k.state, code = _k.code;
     var customCode = convertExportDefaultToReturn(code);
     var parsed = getHooks(builderContent);
     var componentJson = (0, create_mitosis_component_1.createMitosisComponent)({
-        meta: {
-            useMetadata: {
+        meta: __assign({ useMetadata: {
                 httpRequests: (_c = builderContent.data) === null || _c === void 0 ? void 0 : _c.httpRequests,
-            },
-        },
-        inputs: (_e = (_d = builderContent.data) === null || _d === void 0 ? void 0 : _d.inputs) === null || _e === void 0 ? void 0 : _e.map(function (input) { return ({
+            } }, (((_d = builderContent.data) === null || _d === void 0 ? void 0 : _d.cssCode) && { cssCode: builderContent.data.cssCode })),
+        inputs: (_f = (_e = builderContent.data) === null || _e === void 0 ? void 0 : _e.inputs) === null || _f === void 0 ? void 0 : _f.map(function (input) { return ({
             name: input.name,
             defaultValue: input.defaultValue,
         }); }),
-        state: (parsed === null || parsed === void 0 ? void 0 : parsed.state) || __assign(__assign({}, state), (0, state_1.mapJsonObjectToStateValue)((_f = builderContent.data) === null || _f === void 0 ? void 0 : _f.state)),
-        hooks: __assign({}, ((((_g = parsed === null || parsed === void 0 ? void 0 : parsed.hooks.onMount) === null || _g === void 0 ? void 0 : _g.code) || (customCode && { code: customCode })) && {
+        state: (parsed === null || parsed === void 0 ? void 0 : parsed.state) || __assign(__assign({}, state), (0, state_1.mapJsonObjectToStateValue)((_g = builderContent.data) === null || _g === void 0 ? void 0 : _g.state)),
+        hooks: __assign({}, ((((_h = parsed === null || parsed === void 0 ? void 0 : parsed.hooks.onMount) === null || _h === void 0 ? void 0 : _h.code) || (customCode && { code: customCode })) && {
             onMount: (parsed === null || parsed === void 0 ? void 0 : parsed.hooks.onMount) || { code: customCode },
         })),
-        children: (((_h = builderContent.data) === null || _h === void 0 ? void 0 : _h.blocks) || [])
+        children: (((_j = builderContent.data) === null || _j === void 0 ? void 0 : _j.blocks) || [])
             .filter(function (item) {
             var _a, _b;
             if ((_b = (_a = item.properties) === null || _a === void 0 ? void 0 : _a.src) === null || _b === void 0 ? void 0 : _b.includes('/api/v1/pixel')) {
