@@ -36,7 +36,7 @@ exports.DIRECTIVES = {
                 var forName = node.properties._forName || '_';
                 var indexName = node.properties._indexName;
                 _this.emit('(', expr, '||[]).map(');
-                _this.isBuilder && _this.emit('('),
+                _this.isBuilder && _this.emit('(('),
                     _this.emit('function(', forName, indexName ? ',' : '', indexName ? indexName : '', '){');
                 if (_this.isBuilder) {
                     _this.emit('var state=Object.assign({},this,{', (0, src_generator_1.iteratorProperty)(expr), ':', forName, '==null?{}:', forName, '});');
