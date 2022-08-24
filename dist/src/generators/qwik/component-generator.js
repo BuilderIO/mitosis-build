@@ -25,7 +25,7 @@ var DEBUG = false;
 var componentToQwik = function (userOptions) {
     if (userOptions === void 0) { userOptions = {}; }
     return function (_a) {
-        var _b, _c, _d;
+        var _b, _c, _d, _e;
         var _component = _a.component, path = _a.path;
         // Make a copy we can safely mutate, similar to babel's toolchain
         var component = (0, fast_clone_1.fastClone)(_component);
@@ -48,7 +48,8 @@ var componentToQwik = function (userOptions) {
             emitTypes(file, component);
             var metadata = component.meta.useMetadata || {};
             var isLightComponent = ((_c = (_b = metadata === null || metadata === void 0 ? void 0 : metadata.qwik) === null || _b === void 0 ? void 0 : _b.component) === null || _c === void 0 ? void 0 : _c.isLight) || false;
-            var imports_1 = (_d = metadata === null || metadata === void 0 ? void 0 : metadata.qwik) === null || _d === void 0 ? void 0 : _d.imports;
+            var mutable_1 = ((_d = metadata === null || metadata === void 0 ? void 0 : metadata.qwik) === null || _d === void 0 ? void 0 : _d.mutable) || [];
+            var imports_1 = (_e = metadata === null || metadata === void 0 ? void 0 : metadata.qwik) === null || _e === void 0 ? void 0 : _e.imports;
             imports_1 && Object.keys(imports_1).forEach(function (key) { return file.import(imports_1[key], key); });
             var state_2 = emitStateMethodsAndRewriteBindings(file, component, metadata);
             var hasState_1 = (0, state_1.checkHasState)(component);
@@ -64,7 +65,7 @@ var componentToQwik = function (userOptions) {
                     emitUseWatch(file, component);
                     emitUseCleanup(file, component);
                     emitTagNameHack(file, component);
-                    emitJSX(file, component);
+                    emitJSX(file, component, mutable_1);
                 },
             ], [component.propsTypeRef || 'any']);
             file.src.const(component.name, isLightComponent
@@ -126,12 +127,19 @@ function emitUseCleanup(file, component) {
         file.src.emit(file.import(file.qwikModule, 'useCleanup$').localName, '(()=>{', code, '});');
     }
 }
-function emitJSX(file, component) {
+function emitJSX(file, component, mutable) {
     var directives = new Map();
     var handlers = new Map();
     var styles = new Map();
     var parentSymbolBindings = {};
-    file.src.emit('return ', (0, jsx_1.renderJSXNodes)(file, directives, handlers, component.children, styles, parentSymbolBindings));
+    var mutablePredicate = mutable.length > 0
+        ? function (code) {
+            return !!mutable.find(function (txt) {
+                return code.indexOf(txt) !== -1;
+            });
+        }
+        : undefined;
+    file.src.emit('return ', (0, jsx_1.renderJSXNodes)(file, directives, handlers, component.children, styles, parentSymbolBindings, mutablePredicate));
 }
 function emitUseContextProvider(file, component) {
     Object.keys(component.context.set).forEach(function (ctxKey) {

@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var state_1 = require("../parsers/jsx/state");
 var jsx_1 = require("../parsers/jsx");
 var jsx_json_spec_1 = require("./data/jsx-json.spec");
+var shared_1 = require("./shared");
 var buttonWithMetadata = require('./data/blocks/button-with-metadata.raw');
 var image = require('./data/blocks/image.raw');
 var basicOnUpdateReturn = require('./data/basic-onUpdate-return.raw');
@@ -40,4 +41,5 @@ describe('Parse JSX', function () {
     test('custom mitosis package', function () {
         expect((0, jsx_1.parseJsx)(basicPropsRaw)).toEqual((0, jsx_1.parseJsx)(basicPropsDestructureRaw));
     });
+    (0, shared_1.runTestsForJsx)();
 });
