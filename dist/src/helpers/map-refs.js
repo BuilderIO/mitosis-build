@@ -42,8 +42,6 @@ var traverse_1 = __importDefault(require("traverse"));
 var babel = __importStar(require("@babel/core"));
 var get_refs_1 = require("./get-refs");
 var is_mitosis_node_1 = require("./is-mitosis-node");
-var method_literal_prefix_1 = require("../constants/method-literal-prefix");
-var function_literal_prefix_1 = require("../constants/function-literal-prefix");
 var babel_transform_1 = require("./babel-transform");
 var patterns_1 = require("./patterns");
 var tsPreset = require('@babel/preset-typescript');
@@ -59,31 +57,33 @@ var replaceRefsInString = function (code, refs, mapper) {
     });
 };
 var mapRefs = function (component, mapper) {
-    var _a;
     var refSet = (0, get_refs_1.getRefs)(component);
     // grab refs not used for bindings
     Object.keys(component.refs).forEach(function (ref) { return refSet.add(ref); });
     var refs = Array.from(refSet);
-    for (var _i = 0, _b = Object.keys(component.state); _i < _b.length; _i++) {
-        var key = _b[_i];
-        var value = (_a = component.state[key]) === null || _a === void 0 ? void 0 : _a.code;
-        if (typeof value === 'string') {
-            if (value.startsWith(method_literal_prefix_1.methodLiteralPrefix)) {
-                var methodValue = value.replace(method_literal_prefix_1.methodLiteralPrefix, '');
-                var isGet = Boolean(methodValue.match(patterns_1.GETTER));
-                var isSet = Boolean(methodValue.match(patterns_1.SETTER));
-                component.state[key] = {
-                    code: method_literal_prefix_1.methodLiteralPrefix +
-                        replaceRefsInString(methodValue.replace(/^(get |set )?/, 'function '), refs, mapper).replace(/^function /, isGet ? 'get ' : isSet ? 'set ' : ''),
-                    type: isGet ? 'getter' : 'method',
-                };
-            }
-            else if (value.startsWith(function_literal_prefix_1.functionLiteralPrefix)) {
-                component.state[key] = {
-                    code: function_literal_prefix_1.functionLiteralPrefix +
-                        replaceRefsInString(value.replace(function_literal_prefix_1.functionLiteralPrefix, ''), refs, mapper),
-                    type: 'function',
-                };
+    for (var _i = 0, _a = Object.keys(component.state); _i < _a.length; _i++) {
+        var key = _a[_i];
+        var stateVal = component.state[key];
+        if (typeof (stateVal === null || stateVal === void 0 ? void 0 : stateVal.code) === 'string') {
+            var value = stateVal.code;
+            switch (stateVal.type) {
+                case 'method':
+                case 'getter':
+                    var isGet = stateVal.type === 'getter';
+                    var isSet = Boolean(value.match(patterns_1.SETTER));
+                    component.state[key] = {
+                        code: replaceRefsInString(value.replace(/^(get |set )?/, 'function '), refs, mapper).replace(/^function /, isGet ? 'get ' : isSet ? 'set ' : ''),
+                        type: stateVal.type,
+                    };
+                    break;
+                case 'function':
+                    component.state[key] = {
+                        code: replaceRefsInString(value, refs, mapper),
+                        type: 'function',
+                    };
+                    break;
+                default:
+                    break;
             }
         }
     }
@@ -98,8 +98,8 @@ var mapRefs = function (component, mapper) {
             }
         }
     });
-    for (var _c = 0, _d = Object.keys(component.hooks); _c < _d.length; _c++) {
-        var key = _d[_c];
+    for (var _b = 0, _c = Object.keys(component.hooks); _b < _c.length; _b++) {
+        var key = _c[_b];
         var hooks = component.hooks[key];
         if (Array.isArray(hooks)) {
             hooks.forEach(function (hook) {

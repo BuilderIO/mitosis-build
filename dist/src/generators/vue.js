@@ -61,7 +61,6 @@ var replace_idenifiers_1 = require("../helpers/replace-idenifiers");
 var filter_empty_text_nodes_1 = require("../helpers/filter-empty-text-nodes");
 var process_http_requests_1 = require("../helpers/process-http-requests");
 var patterns_1 = require("../helpers/patterns");
-var method_literal_prefix_1 = require("../constants/method-literal-prefix");
 var function_1 = require("fp-ts/lib/function");
 var get_custom_imports_1 = require("../helpers/get-custom-imports");
 var slots_1 = require("../helpers/slots");
@@ -348,7 +347,7 @@ var onUpdatePlugin = function (options) { return ({
                     .filter(function (hook) { var _a; return (_a = hook.deps) === null || _a === void 0 ? void 0 : _a.length; })
                     .forEach(function (hook, index) {
                     var _a;
-                    var code = "".concat(method_literal_prefix_1.methodLiteralPrefix, "get ").concat(getOnUpdateHookName(index), " () {\n            return {\n              ").concat((_a = hook.deps) === null || _a === void 0 ? void 0 : _a.slice(1, -1).split(',').map(function (dep, k) {
+                    var code = "get ".concat(getOnUpdateHookName(index), " () {\n            return {\n              ").concat((_a = hook.deps) === null || _a === void 0 ? void 0 : _a.slice(1, -1).split(',').map(function (dep, k) {
                         var val = dep.trim();
                         return "".concat(k, ": ").concat(val);
                     }).join(','), "\n            }\n          }");

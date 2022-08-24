@@ -7,13 +7,12 @@ exports.updateStateSettersInCode = exports.updateStateSetters = exports.getUseSt
 var core_1 = require("@babel/core");
 var json5_1 = __importDefault(require("json5"));
 var traverse_1 = __importDefault(require("traverse"));
-var function_literal_prefix_1 = require("../../constants/function-literal-prefix");
-var method_literal_prefix_1 = require("../../constants/method-literal-prefix");
 var babel_transform_1 = require("../../helpers/babel-transform");
 var capitalize_1 = require("../../helpers/capitalize");
 var is_mitosis_node_1 = require("../../helpers/is-mitosis-node");
 var function_1 = require("fp-ts/lib/function");
 var helpers_1 = require("./helpers");
+var patterns_1 = require("../../helpers/patterns");
 /**
  * Removes all `this.` references.
  */
@@ -37,25 +36,26 @@ var processStateValue = function (options) {
     var mapValue = valueMapper(options);
     return function (_a) {
         var key = _a[0], stateVal = _a[1];
+        var getDefaultCase = function () {
+            return (0, function_1.pipe)(value, json5_1.default.stringify, mapValue, function (x) { return "const [".concat(key, ", ").concat(getSetStateFnName(key), "] = useState(() => (").concat(x, "))"); });
+        };
         var value = stateVal === null || stateVal === void 0 ? void 0 : stateVal.code;
+        var type = stateVal === null || stateVal === void 0 ? void 0 : stateVal.type;
         if (typeof value === 'string') {
-            if (value.startsWith(function_literal_prefix_1.functionLiteralPrefix)) {
-                // functions
-                var useValue = value.replace(function_literal_prefix_1.functionLiteralPrefix, '');
-                var mappedVal = mapValue(useValue);
-                return mappedVal;
-            }
-            else if (value.startsWith(method_literal_prefix_1.methodLiteralPrefix)) {
-                // methods
-                var methodValue = value.replace(method_literal_prefix_1.methodLiteralPrefix, '');
-                var useValue = methodValue.replace(/^(get )?/, 'function ');
-                return mapValue(useValue);
+            switch (type) {
+                case 'getter':
+                    return (0, function_1.pipe)(value, patterns_1.replaceGetterWithFunction, mapValue);
+                case 'function':
+                    return mapValue(value);
+                case 'method':
+                    return (0, function_1.pipe)(value, patterns_1.prefixWithFunction, mapValue);
+                default:
+                    return getDefaultCase();
             }
         }
-        // Other (data)
-        var transformedValue = (0, function_1.pipe)(value, json5_1.default.stringify, mapValue);
-        var defaultCase = "const [".concat(key, ", ").concat(getSetStateFnName(key), "] = useState(() => (").concat(transformedValue, "))");
-        return defaultCase;
+        else {
+            return getDefaultCase();
+        }
     };
 };
 var getUseStateCode = function (json, options) {
@@ -97,9 +97,7 @@ var updateStateSettersInCode = function (value, options) {
                     if (node.left.object.name === 'state') {
                         // TODO: ultimately support other property access like strings
                         var propertyName = node.left.property.name;
-                        path.replaceWith(core_1.types.callExpression(core_1.types.identifier("".concat(getSetStateFnName(propertyName))), [
-                            node.right,
-                        ]));
+                        path.replaceWith(core_1.types.callExpression(core_1.types.identifier(getSetStateFnName(propertyName)), [node.right]));
                     }
                 }
             }

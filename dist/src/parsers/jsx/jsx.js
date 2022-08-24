@@ -50,7 +50,6 @@ exports.parseJsx = void 0;
 var babel = __importStar(require("@babel/core"));
 var generator_1 = __importDefault(require("@babel/generator"));
 var trace_reference_to_module_path_1 = require("../../helpers/trace-reference-to-module-path");
-var function_literal_prefix_1 = require("../../constants/function-literal-prefix");
 var create_mitosis_component_1 = require("../../helpers/create-mitosis-component");
 var create_mitosis_node_1 = require("../../helpers/create-mitosis-node");
 var get_bindings_1 = require("../../helpers/get-bindings");
@@ -89,7 +88,7 @@ var componentFunctionToJson = function (node, context) {
                             var valueNode = expression.arguments[1];
                             if (valueNode) {
                                 if (types.isObjectExpression(valueNode)) {
-                                    var value = (0, state_1.parseStateObject)(valueNode);
+                                    var value = (0, state_1.parseStateObjectToMitosisState)(valueNode);
                                     setContext[keyPath] = {
                                         name: keyNode.name,
                                         value: value,
@@ -190,7 +189,7 @@ var componentFunctionToJson = function (node, context) {
         if (types.isFunctionDeclaration(item)) {
             if (types.isIdentifier(item.id)) {
                 state[item.id.name] = {
-                    code: "".concat(function_literal_prefix_1.functionLiteralPrefix).concat((0, generator_1.default)(item).code),
+                    code: (0, generator_1.default)(item).code,
                     type: 'function',
                 };
             }

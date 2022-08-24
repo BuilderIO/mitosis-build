@@ -34,7 +34,7 @@ export interface ContextGetInfo {
 }
 export interface ContextSetInfo {
     name: string;
-    value?: JSONObject;
+    value?: MitosisState;
     ref?: string;
 }
 export declare type ContextGet = {
@@ -60,10 +60,16 @@ export declare type MitosisExport = {
 };
 export declare type StateValueType = 'function' | 'getter' | 'method' | 'property';
 export declare type StateCode = _JSON;
-export interface StateValue {
+declare type CodeValue = {
+    code: string;
+    type: Exclude<StateValueType, 'property'>;
+};
+export declare const checkIsCodeValue: (value: unknown) => value is CodeValue;
+export declare type StateValue = CodeValue | {
     code: StateCode;
-    type: StateValueType;
-}
+    type: Extract<StateValueType, 'property'>;
+};
+export declare type MitosisState = Dictionary<StateValue | undefined>;
 export declare type MitosisComponent = {
     '@type': '@builder.io/mitosis/component';
     name: string;
@@ -73,7 +79,7 @@ export declare type MitosisComponent = {
         useMetadata?: JSONObject;
     };
     inputs: MitosisComponentInput[];
-    state: Dictionary<StateValue | undefined>;
+    state: MitosisState;
     context: {
         get: ContextGet;
         set: ContextSet;
@@ -99,3 +105,4 @@ export declare type MitosisComponent = {
     propsTypeRef?: string;
     defaultProps?: JSONObject;
 };
+export {};

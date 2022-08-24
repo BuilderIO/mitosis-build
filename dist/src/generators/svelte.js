@@ -62,9 +62,6 @@ var function_1 = require("fp-ts/lib/function");
 var context_1 = require("./helpers/context");
 var html_tags_1 = require("../constants/html_tags");
 var lodash_1 = require("lodash");
-var function_literal_prefix_1 = require("../constants/function-literal-prefix");
-var method_literal_prefix_1 = require("../constants/method-literal-prefix");
-var patterns_1 = require("../helpers/patterns");
 var is_upper_case_1 = require("../helpers/is-upper-case");
 var json5_1 = __importDefault(require("json5"));
 var mappers = {
@@ -270,18 +267,16 @@ var stripThisRefs = function (str) {
 var FUNCTION_HACK_PLUGIN = function () { return ({
     json: {
         pre: function (json) {
-            var _a;
+            var _a, _b;
             for (var key in json.state) {
                 var value = (_a = json.state[key]) === null || _a === void 0 ? void 0 : _a.code;
-                if (typeof value === 'string' && value.startsWith(method_literal_prefix_1.methodLiteralPrefix)) {
-                    var strippedValue = value.replace(method_literal_prefix_1.methodLiteralPrefix, '');
-                    if (!Boolean(strippedValue.match(patterns_1.GETTER))) {
-                        var newValue = "".concat(function_literal_prefix_1.functionLiteralPrefix, " function ").concat(strippedValue);
-                        json.state[key] = {
-                            code: newValue,
-                            type: 'function',
-                        };
-                    }
+                var type = (_b = json.state[key]) === null || _b === void 0 ? void 0 : _b.type;
+                if (typeof value === 'string' && type === 'method') {
+                    var newValue = "function ".concat(value);
+                    json.state[key] = {
+                        code: newValue,
+                        type: 'function',
+                    };
                 }
             }
         },
@@ -322,7 +317,7 @@ var componentToSvelte = function (_a) {
             format: 'variables',
             keyPrefix: '$: ',
             valueMapper: function (code) {
-                return (0, function_1.pipe)(stripStateAndProps(code.replace(/^get ([a-zA-Z_\$0-9]+)/, '$1 = ').replace(/\)/, ') => '), options), stripThisRefs);
+                return (0, function_1.pipe)(code.replace(/^get ([a-zA-Z_\$0-9]+)/, '$1 = ').replace(/\)/, ') => '), function (str) { return stripStateAndProps(str, options); }, stripThisRefs);
             },
         }), babel_transform_1.babelTransformCode);
         var functionsString = (0, function_1.pipe)((0, get_state_object_string_1.getStateObjectStringFromComponent)(json, {

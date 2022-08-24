@@ -40,7 +40,7 @@ export declare const builderContentToMitosisComponent: (builderContent: BuilderC
             useMetadata?: JSONObject | undefined;
         };
         inputs: import("..").MitosisComponentInput[];
-        state: import("../helpers/typescript").Dictionary<import("..").StateValue | undefined>;
+        state: import("..").MitosisState;
         context: {
             get: import("..").ContextGet;
             set: import("..").ContextSet;
@@ -74,7 +74,7 @@ export declare const builderContentToMitosisComponent: (builderContent: BuilderC
         useMetadata?: JSONObject | undefined;
     };
     inputs: import("..").MitosisComponentInput[];
-    state: import("../helpers/typescript").Dictionary<import("..").StateValue | undefined>;
+    state: import("..").MitosisState;
     context: {
         get: import("..").ContextGet;
         set: import("..").ContextSet;

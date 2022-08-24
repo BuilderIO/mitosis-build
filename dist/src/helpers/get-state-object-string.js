@@ -16,10 +16,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getStateObjectStringFromComponent = exports.stringifyContextValue = exports.getMemberObjectString = void 0;
 var json5_1 = __importDefault(require("json5"));
-var function_literal_prefix_1 = require("../constants/function-literal-prefix");
-var method_literal_prefix_1 = require("../constants/method-literal-prefix");
-var patterns_1 = require("./patterns");
-var state_1 = require("./state");
 var DEFAULT_OPTIONS = {
     format: 'object',
     keyPrefix: '',
@@ -33,31 +29,38 @@ var convertStateMemberToString = function (_a) {
     return function (_a) {
         var key = _a[0], state = _a[1];
         var keyValueDelimiter = format === 'object' ? ':' : '=';
-        var code = state === null || state === void 0 ? void 0 : state.code;
-        if (typeof code === 'string') {
-            if (code.startsWith(function_literal_prefix_1.functionLiteralPrefix)) {
-                if (functions === false) {
-                    return undefined;
-                }
-                var functionValue = code.replace(function_literal_prefix_1.functionLiteralPrefix, '');
-                return "".concat(keyPrefix, " ").concat(key, " ").concat(keyValueDelimiter, " ").concat(valueMapper(functionValue, 'function'));
-            }
-            else if (code.startsWith(method_literal_prefix_1.methodLiteralPrefix)) {
-                var methodValue = code.replace(method_literal_prefix_1.methodLiteralPrefix, '');
-                var isGet = Boolean(methodValue.match(patterns_1.GETTER));
-                if (isGet && getters === false) {
-                    return undefined;
-                }
-                if (!isGet && functions === false) {
-                    return undefined;
-                }
-                return "".concat(keyPrefix, " ").concat(valueMapper(methodValue, isGet ? 'getter' : 'function'));
-            }
-        }
-        if (data === false) {
+        if (!state) {
             return undefined;
         }
-        return "".concat(keyPrefix, " ").concat(key).concat(keyValueDelimiter, " ").concat(valueMapper(json5_1.default.stringify(code), 'data'));
+        var code = state.code;
+        switch (state.type) {
+            case 'function': {
+                if (functions === false || typeof code !== 'string') {
+                    return undefined;
+                }
+                return "".concat(keyPrefix, " ").concat(key, " ").concat(keyValueDelimiter, " ").concat(valueMapper(code, 'function'));
+            }
+            case 'method': {
+                if (functions === false || typeof code !== 'string') {
+                    return undefined;
+                }
+                return "".concat(keyPrefix, " ").concat(valueMapper(code, 'function'));
+            }
+            case 'getter': {
+                if (getters === false || typeof code !== 'string') {
+                    return undefined;
+                }
+                return "".concat(keyPrefix, " ").concat(valueMapper(code, 'getter'));
+            }
+            case 'property': {
+                if (data === false) {
+                    return undefined;
+                }
+                return "".concat(keyPrefix, " ").concat(key).concat(keyValueDelimiter, " ").concat(valueMapper(json5_1.default.stringify(code), 'data'));
+            }
+            default:
+                break;
+        }
     };
 };
 var getMemberObjectString = function (object, userOptions) {
@@ -80,7 +83,7 @@ var getMemberObjectString = function (object, userOptions) {
 exports.getMemberObjectString = getMemberObjectString;
 var stringifyContextValue = function (object, userOptions) {
     if (userOptions === void 0) { userOptions = {}; }
-    return (0, exports.getMemberObjectString)((0, state_1.mapJsonObjectToStateValue)(object), userOptions);
+    return (0, exports.getMemberObjectString)(object, userOptions);
 };
 exports.stringifyContextValue = stringifyContextValue;
 var getStateObjectStringFromComponent = function (component, options) { return (0, exports.getMemberObjectString)(component.state, options); };

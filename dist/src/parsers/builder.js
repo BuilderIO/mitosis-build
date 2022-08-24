@@ -51,7 +51,7 @@ var create_mitosis_node_1 = require("../helpers/create-mitosis-node");
 var jsx_1 = require("./jsx");
 var parsers_1 = require("../helpers/parsers");
 var __1 = require("..");
-var state_1 = require("../helpers/state");
+var state_1 = require("./helpers/state");
 // Omit some superflous styles that can come from Builder's web importer
 var styleOmitList = [
     'backgroundRepeatX',
