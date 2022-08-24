@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.runTestsForTarget = void 0;
+exports.runTestsForTarget = exports.runTestsForJsx = void 0;
 var jsx_1 = require("../parsers/jsx");
 var basicForShow = require('./data/basic-for-show.raw');
 var basicOnMountUpdate = require('./data/basic-onMount-update.raw');
@@ -143,6 +143,17 @@ var ADVANCED_REF = {
 var ON_UPDATE_RETURN = {
     basicOnUpdateReturn: require('./data/basic-onUpdate-return.raw'),
 };
+var JSX_TESTS = [
+    BASIC_TESTS,
+    SLOTS_TESTS,
+    SHOW_TESTS,
+    FORWARD_REF_TESTS,
+    MULTI_ON_UPDATE_TESTS,
+    FORM_BLOCK_TESTS,
+    ADVANCED_REF,
+    ON_UPDATE_RETURN,
+    FOR_SHOW_TESTS,
+];
 var TESTS_FOR_TARGET = {
     react: [
         BASIC_TESTS,
@@ -284,6 +295,17 @@ var TESTS_FOR_TARGET = {
         FOR_SHOW_TESTS,
     ],
 };
+var runTestsForJsx = function () {
+    JSX_TESTS.forEach(function (tests) {
+        Object.keys(tests).forEach(function (key) {
+            test(key, function () {
+                var component = (0, jsx_1.parseJsx)(tests[key]);
+                expect(component).toMatchSnapshot();
+            });
+        });
+    });
+};
+exports.runTestsForJsx = runTestsForJsx;
 var runTestsForTarget = function (target, generator) {
     var testsArray = TESTS_FOR_TARGET[target];
     test('Remove Internal mitosis package', function () {
