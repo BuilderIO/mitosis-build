@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.iteratorProperty = exports.lastProperty = exports.isStatement = exports.iif = exports.arrowFnValue = exports.arrowFnBlock = exports.invoke = exports.quote = exports.Block = exports.Imports = exports.Symbol = exports.SrcBuilder = exports.File = void 0;
 var standalone_1 = require("prettier/standalone");
+var builder_1 = require("../../parsers/builder");
 var File = /** @class */ (function () {
     function File(filename, options, qwikModule, qrlPrefix) {
         this.imports = new Imports();
@@ -320,7 +321,7 @@ var SrcBuilder = /** @class */ (function () {
                     key = key + '$';
                     binding_1 = "(event)=>".concat(binding_1);
                 }
-                if (!binding_1 && rawKey in props) {
+                else if (!binding_1 && rawKey in props) {
                     binding_1 = quote(props[rawKey]);
                 }
                 else if (binding_1 != null && binding_1 === props[key]) {
@@ -524,6 +525,9 @@ function iif(code) {
     if (code.endsWith(_virtual_index) && !code.endsWith(return_virtual_index)) {
         code = code.substr(0, code.length - _virtual_index.length) + return_virtual_index;
     }
+    if (code.indexOf('export') !== -1) {
+        code = (0, builder_1.convertExportDefaultToReturn)(code);
+    }
     return function () {
         code && this.emit('(()=>{', code, '})()');
     };
@@ -549,7 +553,8 @@ function literalTagName(symbol) {
  */
 function isStatement(code) {
     code = code.trim();
-    if (code.startsWith('(') || code.startsWith('{') || code.endsWith('}')) {
+    if ((code.startsWith('(') && code.endsWith(')')) ||
+        (code.startsWith('{') && code.endsWith('}'))) {
         // Code starting with `(` is most likely and IFF and hence is an expression.
         return false;
     }

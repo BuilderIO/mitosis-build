@@ -35,22 +35,18 @@ exports.DIRECTIVES = {
             this.jsxExpression(function () {
                 var forName = node.properties._forName || '_';
                 var indexName = node.properties._indexName;
-                _this.emit('(', expr, '||[]).map(', '((', forName, indexName ? ',' : '', indexName ? indexName : '', ') => {');
+                _this.emit('(', expr, '||[]).map(');
+                _this.isBuilder && _this.emit('(('),
+                    _this.emit('function(', forName, indexName ? ',' : '', indexName ? indexName : '', '){');
                 if (_this.isBuilder) {
                     _this.emit('var state=Object.assign({},this,{', (0, src_generator_1.iteratorProperty)(expr), ':', forName, '==null?{}:', forName, '});');
                 }
                 _this.emit('return(');
                 blockFn();
-                _this.emit(');}))');
+                _this.emit(');}');
+                _this.isBuilder && _this.emit(').bind(state))');
+                _this.emit(')');
             });
-        };
-    },
-    Host: function (node, blockFn) {
-        return function () {
-            var host = this.file.import(this.file.qwikModule, 'Host').localName;
-            this.jsxBegin(host, node.properties, node.bindings);
-            blockFn();
-            this.jsxEnd(host);
         };
     },
     Image: (0, minify_1.minify)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["", ""], ["", ""])), Image),
@@ -62,7 +58,7 @@ function Image(props) {
     var jsx = props.children || [];
     var image = props.image;
     if (image) {
-        var isBuilderIoImage = !!(image || '').match(/\.builder\.io/);
+        var isBuilderIoImage = !!(image || '').match(/\.builder\.io/) && !props.noWebp;
         var isPixel = (_a = props.builderBlock) === null || _a === void 0 ? void 0 : _a.id.startsWith('builder-pixel-');
         var imgProps = {
             src: props.image,

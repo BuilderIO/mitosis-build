@@ -17,6 +17,11 @@ describe('src-generator', function () {
             expect((0, src_generator_1.isStatement)('var x; return x;')).toBe(true);
             expect((0, src_generator_1.isStatement)('var x')).toBe(true);
         });
+        test('regressions', function () {
+            expect((0, src_generator_1.isStatement)("if(state.deviceSize == \"small\"){    \r\n    return\r\n}\r\n\r\nif (state.imageLeft){    \r\n    return 'row-reverse'\r\n}\r\n\r\nreturn 'row'")).toBe(true);
+            expect((0, src_generator_1.isStatement)("if (state.imageLeft){     return 'flex-direction: row-reverse;' }")).toBe(true);
+            expect((0, src_generator_1.isStatement)('() => null')).toBe(true);
+        });
     });
     describe('import', function () {
         var options;

@@ -380,27 +380,29 @@ var builderElementToMitosisNode = function (block, options, _internalOptions) {
     // Special builder properties
     // TODO: support hide and repeat
     var blockBindings = getBlockBindings(block, options);
-    var showBinding = blockBindings.show;
-    if (showBinding) {
+    var code = undefined;
+    if (blockBindings.show) {
+        code = wrapBindingIfNeeded(blockBindings.show, options);
+    }
+    else if (blockBindings.hide) {
+        code = "!(".concat(wrapBindingIfNeeded(blockBindings.hide, options), ")");
+    }
+    if (code) {
         var isFragment = ((_c = block.component) === null || _c === void 0 ? void 0 : _c.name) === 'Fragment';
         // TODO: handle having other things, like a repeat too
         if (isFragment) {
             return (0, create_mitosis_node_1.createMitosisNode)({
                 name: 'Show',
-                bindings: {
-                    when: { code: wrapBindingIfNeeded(showBinding, options) },
-                },
+                bindings: { when: { code: code } },
                 children: ((_d = block.children) === null || _d === void 0 ? void 0 : _d.map(function (child) { return (0, exports.builderElementToMitosisNode)(child, options); })) || [],
             });
         }
         else {
             return (0, create_mitosis_node_1.createMitosisNode)({
                 name: 'Show',
-                bindings: {
-                    when: { code: wrapBindingIfNeeded(showBinding, options) },
-                },
+                bindings: { when: { code: code } },
                 children: [
-                    (0, exports.builderElementToMitosisNode)(__assign(__assign({}, block), { code: __assign(__assign({}, block.code), { bindings: (0, lodash_1.omit)(blockBindings, 'show') }), bindings: (0, lodash_1.omit)(blockBindings, 'show') }), options),
+                    (0, exports.builderElementToMitosisNode)(__assign(__assign({}, block), { code: __assign(__assign({}, block.code), { bindings: (0, lodash_1.omit)(blockBindings, 'show', 'hide') }), bindings: (0, lodash_1.omit)(blockBindings, 'show', 'hide') }), options),
                 ],
             });
         }
@@ -465,9 +467,9 @@ var builderElementToMitosisNode = function (block, options, _internalOptions) {
             }
         }
     }
-    var properties = __assign(__assign({}, block.properties), (options.includeBuilderExtras && (_a = {},
+    var properties = __assign(__assign(__assign({}, block.properties), (options.includeBuilderExtras && (_a = {},
         _a['builder-id'] = block.id,
-        _a)));
+        _a))), (options.includeBuilderExtras && getBuilderPropsForSymbol(block)));
     if (block.layerName) {
         properties.$name = block.layerName;
     }
@@ -502,11 +504,7 @@ var builderElementToMitosisNode = function (block, options, _internalOptions) {
         name: ((_r = (_q = block.component) === null || _q === void 0 ? void 0 : _q.name) === null || _r === void 0 ? void 0 : _r.replace(/[^a-z0-9]/gi, '')) ||
             block.tagName ||
             (block.linkUrl ? 'a' : 'div'),
-        properties: __assign(__assign({}, (block.component
-            ? {
-                $tagName: block.tagName,
-            }
-            : null)), properties),
+        properties: __assign(__assign(__assign({}, (block.component && { $tagName: block.tagName })), (block.class && { class: block.class })), properties),
         bindings: __assign(__assign(__assign(__assign({}, bindings), actionBindings), (styleString && {
             style: { code: styleString },
         })), (css &&
@@ -530,6 +528,17 @@ var builderElementToMitosisNode = function (block, options, _internalOptions) {
     return node;
 };
 exports.builderElementToMitosisNode = builderElementToMitosisNode;
+var getBuilderPropsForSymbol = function (block) {
+    var _a, _b;
+    if (((_a = block.children) === null || _a === void 0 ? void 0 : _a.length) === 1) {
+        var child = block.children[0];
+        var builderContentId = (_b = child.properties) === null || _b === void 0 ? void 0 : _b['builder-content-id'];
+        if (builderContentId) {
+            return { 'builder-content-id': builderContentId };
+        }
+    }
+    return undefined;
+};
 var getHooks = function (content) {
     var _a, _b;
     var code = convertExportDefaultToReturn(((_a = content.data) === null || _a === void 0 ? void 0 : _a.tsCode) || ((_b = content.data) === null || _b === void 0 ? void 0 : _b.jsCode) || '');
@@ -589,19 +598,30 @@ function extractStateHook(code) {
 }
 exports.extractStateHook = extractStateHook;
 function convertExportDefaultToReturn(code) {
-    var types = babel.types;
-    var body = (0, parsers_1.parseCode)(code);
-    var newBody = body.slice();
-    for (var i = 0; i < body.length; i++) {
-        var statement = body[i];
-        if (types.isExportDefaultDeclaration(statement)) {
-            if (types.isCallExpression(statement.declaration) ||
-                types.isExpression(statement.declaration)) {
-                newBody[i] = types.returnStatement(statement.declaration);
+    try {
+        var types = babel.types;
+        var body = (0, parsers_1.parseCode)(code);
+        var newBody = body.slice();
+        for (var i = 0; i < body.length; i++) {
+            var statement = body[i];
+            if (types.isExportDefaultDeclaration(statement)) {
+                if (types.isCallExpression(statement.declaration) ||
+                    types.isExpression(statement.declaration)) {
+                    newBody[i] = types.returnStatement(statement.declaration);
+                }
             }
         }
+        return (0, generator_1.default)(types.program(newBody)).code || '';
     }
-    return (0, generator_1.default)(types.program(newBody)).code || '';
+    catch (e) {
+        var error = e;
+        if (error.code === 'BABEL_PARSE_ERROR') {
+            return code;
+        }
+        else {
+            throw e;
+        }
+    }
 }
 exports.convertExportDefaultToReturn = convertExportDefaultToReturn;
 // TODO: maybe this should be part of the builder -> Mitosis part
@@ -650,7 +670,7 @@ var isBuilderElement = function (el) {
 };
 exports.isBuilderElement = isBuilderElement;
 var builderContentPartToMitosisComponent = function (builderContent, options) {
-    var _a, _b, _c, _d, _e, _f, _g, _h;
+    var _a, _b, _c, _d, _e, _f, _g, _h, _j;
     if (options === void 0) { options = {}; }
     builderContent = (0, fast_clone_1.fastClone)(builderContent);
     (0, traverse_1.default)(builderContent).forEach(function (elem) {
@@ -679,24 +699,22 @@ var builderContentPartToMitosisComponent = function (builderContent, options) {
             }
         }
     });
-    var _j = extractStateHook(((_a = builderContent === null || builderContent === void 0 ? void 0 : builderContent.data) === null || _a === void 0 ? void 0 : _a.tsCode) || ((_b = builderContent === null || builderContent === void 0 ? void 0 : builderContent.data) === null || _b === void 0 ? void 0 : _b.jsCode) || ''), state = _j.state, code = _j.code;
+    var _k = extractStateHook(((_a = builderContent === null || builderContent === void 0 ? void 0 : builderContent.data) === null || _a === void 0 ? void 0 : _a.tsCode) || ((_b = builderContent === null || builderContent === void 0 ? void 0 : builderContent.data) === null || _b === void 0 ? void 0 : _b.jsCode) || ''), state = _k.state, code = _k.code;
     var customCode = convertExportDefaultToReturn(code);
     var parsed = getHooks(builderContent);
     var componentJson = (0, create_mitosis_component_1.createMitosisComponent)({
-        meta: {
-            useMetadata: {
+        meta: __assign({ useMetadata: {
                 httpRequests: (_c = builderContent.data) === null || _c === void 0 ? void 0 : _c.httpRequests,
-            },
-        },
-        inputs: (_e = (_d = builderContent.data) === null || _d === void 0 ? void 0 : _d.inputs) === null || _e === void 0 ? void 0 : _e.map(function (input) { return ({
+            } }, (((_d = builderContent.data) === null || _d === void 0 ? void 0 : _d.cssCode) && { cssCode: builderContent.data.cssCode })),
+        inputs: (_f = (_e = builderContent.data) === null || _e === void 0 ? void 0 : _e.inputs) === null || _f === void 0 ? void 0 : _f.map(function (input) { return ({
             name: input.name,
             defaultValue: input.defaultValue,
         }); }),
-        state: (parsed === null || parsed === void 0 ? void 0 : parsed.state) || __assign(__assign({}, state), (0, state_1.mapJsonObjectToStateValue)((_f = builderContent.data) === null || _f === void 0 ? void 0 : _f.state)),
-        hooks: __assign({}, ((((_g = parsed === null || parsed === void 0 ? void 0 : parsed.hooks.onMount) === null || _g === void 0 ? void 0 : _g.code) || (customCode && { code: customCode })) && {
+        state: (parsed === null || parsed === void 0 ? void 0 : parsed.state) || __assign(__assign({}, state), (0, state_1.mapJsonObjectToStateValue)((_g = builderContent.data) === null || _g === void 0 ? void 0 : _g.state)),
+        hooks: __assign({}, ((((_h = parsed === null || parsed === void 0 ? void 0 : parsed.hooks.onMount) === null || _h === void 0 ? void 0 : _h.code) || (customCode && { code: customCode })) && {
             onMount: (parsed === null || parsed === void 0 ? void 0 : parsed.hooks.onMount) || { code: customCode },
         })),
-        children: (((_h = builderContent.data) === null || _h === void 0 ? void 0 : _h.blocks) || [])
+        children: (((_j = builderContent.data) === null || _j === void 0 ? void 0 : _j.blocks) || [])
             .filter(function (item) {
             var _a, _b;
             if ((_b = (_a = item.properties) === null || _a === void 0 ? void 0 : _a.src) === null || _b === void 0 ? void 0 : _b.includes('/api/v1/pixel')) {

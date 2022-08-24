@@ -16,7 +16,6 @@ export declare function createFileSet(options?: QwikOptions): FileSet;
 export declare function addComponent(fileSet: FileSet, component: MitosisComponent, opts?: {
     isRoot?: boolean;
     shareStyles?: boolean;
-    hostProps?: Record<string, string>;
 }): void;
 export declare function renderUseLexicalScope(file: File): (this: SrcBuilder) => SrcBuilder;
 export declare function addCommonStyles(fileSet: FileSet): void;

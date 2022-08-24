@@ -130,6 +130,9 @@ function convertBuilderElementToMitosisComponent(element) {
                 name: componentName,
                 options: symbolValue.data,
             },
+            properties: {
+                'builder-content-id': id,
+            },
         }),
     ];
     var mitosisComponent = __assign(__assign({}, (0, builder_1.builderContentToMitosisComponent)(elContent, {
