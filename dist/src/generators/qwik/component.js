@@ -25,6 +25,7 @@ var compile_away_builder_components_1 = require("../../plugins/compile-away-buil
 var handlers_1 = require("./handlers");
 var jsx_1 = require("./jsx");
 var src_generator_1 = require("./src-generator");
+var stable_serialize_1 = require("./stable-serialize");
 var styles_1 = require("./styles");
 function createFileSet(options) {
     if (options === void 0) { options = {}; }
@@ -86,7 +87,7 @@ function addComponent(fileSet, component, opts) {
     }
     if (component.meta.cssCode) {
         var symbolName = componentName + 'UsrStyles';
-        onRenderFile.exportConst(symbolName, JSON.stringify(component.meta.cssCode));
+        onRenderFile.exportConst(symbolName, (0, stable_serialize_1.stableJSONserialize)(component.meta.cssCode));
         useStyles = (function (fns) {
             return function () {
                 var _this = this;
@@ -140,7 +141,7 @@ function addComponentOnMount(componentFile, onRenderEmit, componentName, compone
     if (component.inputs) {
         component.inputs.forEach(function (input) {
             input.defaultValue !== undefined &&
-                inputInitializer.push('if(!state.hasOwnProperty("', input.name, '"))state.', input.name, '=', JSON.stringify(input.defaultValue), ';');
+                inputInitializer.push('if(!state.hasOwnProperty("', input.name, '"))state.', input.name, '=', (0, stable_serialize_1.stableJSONserialize)(input.defaultValue), ';');
         });
     }
     componentFile.exportConst(componentName + 'OnMount', function () {
