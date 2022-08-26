@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.iteratorProperty = exports.lastProperty = exports.isStatement = exports.iif = exports.arrowFnValue = exports.arrowFnBlock = exports.invoke = exports.quote = exports.Block = exports.Imports = exports.Symbol = exports.SrcBuilder = exports.File = void 0;
 var standalone_1 = require("prettier/standalone");
 var builder_1 = require("../../parsers/builder");
+var stable_serialize_1 = require("./stable-serialize");
 var File = /** @class */ (function () {
     function File(filename, options, qwikModule, qrlPrefix) {
         this.imports = new Imports();
@@ -477,7 +478,7 @@ function possiblyQuotePropertyName(key) {
     return /^\w[\w\d]*$/.test(key) ? key : quote(key);
 }
 function quote(text) {
-    var string = JSON.stringify(text);
+    var string = (0, stable_serialize_1.stableJSONserialize)(text);
     // So \u2028 is a line separator character and prettier treats it as such
     // https://www.fileformat.info/info/unicode/char/2028/index.htm
     // That means it can't be inside of a string, so we replace it with `\\u2028`.

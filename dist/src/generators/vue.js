@@ -57,7 +57,7 @@ var is_mitosis_node_1 = require("../helpers/is-mitosis-node");
 var traverse_1 = __importDefault(require("traverse"));
 var get_components_used_1 = require("../helpers/get-components-used");
 var lodash_1 = require("lodash");
-var replace_idenifiers_1 = require("../helpers/replace-idenifiers");
+var replace_identifiers_1 = require("../helpers/replace-identifiers");
 var filter_empty_text_nodes_1 = require("../helpers/filter-empty-text-nodes");
 var process_http_requests_1 = require("../helpers/process-http-requests");
 var patterns_1 = require("../helpers/patterns");
@@ -88,11 +88,15 @@ var addBindingsToJson = function (bindings) {
 // TODO: migrate all stripStateAndPropsRefs to use this here
 // to properly replace context refs
 function processBinding(code, _options, json) {
-    return (0, replace_idenifiers_1.replaceIdentifiers)((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(code, {
-        includeState: true,
-        includeProps: true,
-        replaceWith: 'this.',
-    }), getContextNames(json), function (name) { return "this.".concat(name); });
+    return (0, replace_identifiers_1.replaceIdentifiers)({
+        code: (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(code, {
+            includeState: true,
+            includeProps: true,
+            replaceWith: 'this.',
+        }),
+        from: getContextNames(json),
+        to: function (name) { return "this.".concat(name); },
+    });
 }
 var NODE_MAPPERS = {
     Fragment: function (json, options) {
@@ -118,7 +122,7 @@ var NODE_MAPPERS = {
     Show: function (json, options, scope) {
         var _a, _b, _c, _d, _e;
         var _f, _g;
-        var ifValue = (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)((_f = json.bindings.when) === null || _f === void 0 ? void 0 : _f.code);
+        var ifValue = (0, slots_1.replaceSlotsInString)((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)((_f = json.bindings.when) === null || _f === void 0 ? void 0 : _f.code), function (slotName) { return "$slots.".concat(slotName); });
         switch (options.vueVersion) {
             case 3:
                 return "\n        <template ".concat(SPECIAL_PROPERTIES.V_IF, "=\"").concat(encodeQuotes(ifValue), "\">\n          ").concat(json.children.map(function (item) { return (0, exports.blockToVue)(item, options); }).join('\n'), "\n        </template>\n        ").concat((0, is_mitosis_node_1.isMitosisNode)(json.meta.else)
@@ -232,12 +236,17 @@ var stringifyBinding = function (node) {
                     event_1 = 'input';
                 }
                 var isAssignmentExpression = useValue.includes('=');
+                var valueWRenamedEvent = (0, replace_identifiers_1.replaceIdentifiers)({
+                    code: useValue,
+                    from: cusArgs[0],
+                    to: '$event',
+                });
                 // TODO: proper babel transform to replace. Util for this
                 if (isAssignmentExpression) {
-                    return " @".concat(event_1, "=\"").concat(encodeQuotes((0, remove_surrounding_block_1.removeSurroundingBlock)((0, replace_idenifiers_1.replaceIdentifiers)(useValue, cusArgs[0], '$event'))), "\" ");
+                    return " @".concat(event_1, "=\"").concat(encodeQuotes((0, remove_surrounding_block_1.removeSurroundingBlock)(valueWRenamedEvent)), "\" ");
                 }
                 else {
-                    return " @".concat(event_1, "=\"").concat(encodeQuotes((0, remove_surrounding_block_1.removeSurroundingBlock)((0, remove_surrounding_block_1.removeSurroundingBlock)((0, replace_idenifiers_1.replaceIdentifiers)(useValue, cusArgs[0], '$event')))), "\" ");
+                    return " @".concat(event_1, "=\"").concat(encodeQuotes((0, remove_surrounding_block_1.removeSurroundingBlock)((0, remove_surrounding_block_1.removeSurroundingBlock)(valueWRenamedEvent))), "\" ");
                 }
             }
             else if (key === 'ref') {
