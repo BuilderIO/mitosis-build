@@ -45,7 +45,7 @@ var traverse_1 = __importDefault(require("traverse"));
 var babel_transform_1 = require("../../helpers/babel-transform");
 var capitalize_1 = require("../../helpers/capitalize");
 var is_mitosis_node_1 = require("../../helpers/is-mitosis-node");
-var replace_idenifiers_1 = require("../../helpers/replace-idenifiers");
+var replace_identifiers_1 = require("../../helpers/replace-identifiers");
 var helpers_1 = require("./helpers");
 var function_1 = require("fp-ts/lib/function");
 var state_1 = require("../helpers/state");
@@ -54,7 +54,7 @@ function mapReactIdentifiersInExpression(expression, stateProperties) {
     var setExpressions = stateProperties.map(function (propertyName) { return "set".concat((0, capitalize_1.capitalize)(propertyName)); });
     return (0, babel_transform_1.babelTransformExpression)(
     // foo -> state.foo
-    (0, replace_idenifiers_1.replaceIdentifiers)(expression, stateProperties, function (name) { return "state.".concat(name); }), {
+    (0, replace_identifiers_1.replaceIdentifiers)({ code: expression, from: stateProperties, to: function (name) { return "state.".concat(name); } }), {
         CallExpression: function (path) {
             if (types.isIdentifier(path.node.callee)) {
                 if (setExpressions.includes(path.node.callee.name)) {

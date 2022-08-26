@@ -3,7 +3,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.replaceIdentifiers = void 0;
 var core_1 = require("@babel/core");
 var babel_transform_1 = require("./babel-transform");
-var replaceIdentifiers = function (code, from, to) {
+var replaceIdentifiers = function (_a) {
+    var code = _a.code, from = _a.from, to = _a.to;
     return (0, babel_transform_1.babelTransformExpression)(code, {
         Identifier: function (path) {
             if (
