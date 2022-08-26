@@ -122,7 +122,7 @@ var NODE_MAPPERS = {
     Show: function (json, options, scope) {
         var _a, _b, _c, _d, _e;
         var _f, _g;
-        var ifValue = (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)((_f = json.bindings.when) === null || _f === void 0 ? void 0 : _f.code);
+        var ifValue = (0, slots_1.replaceSlotsInString)((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)((_f = json.bindings.when) === null || _f === void 0 ? void 0 : _f.code), function (slotName) { return "$slots.".concat(slotName); });
         switch (options.vueVersion) {
             case 3:
                 return "\n        <template ".concat(SPECIAL_PROPERTIES.V_IF, "=\"").concat(encodeQuotes(ifValue), "\">\n          ").concat(json.children.map(function (item) { return (0, exports.blockToVue)(item, options); }).join('\n'), "\n        </template>\n        ").concat((0, is_mitosis_node_1.isMitosisNode)(json.meta.else)
