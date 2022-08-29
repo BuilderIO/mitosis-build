@@ -286,7 +286,7 @@ var componentToSvelte = function (_a) {
     if (_a === void 0) { _a = {}; }
     var _b = _a.plugins, plugins = _b === void 0 ? [] : _b, userProvidedOptions = __rest(_a, ["plugins"]);
     return function (_a) {
-        var _b, _c, _d, _e, _f, _g, _h;
+        var _b, _c, _d, _e, _f, _g, _h, _j, _k;
         var component = _a.component;
         var options = __assign({ stateType: 'variables', prettier: true, plugins: __spreadArray([FUNCTION_HACK_PLUGIN], plugins, true) }, userProvidedOptions);
         // Make a copy we can safely mutate, similar to babel's toolchain
@@ -337,7 +337,21 @@ var componentToSvelte = function (_a) {
         if ((_b = json.types) === null || _b === void 0 ? void 0 : _b.length) {
             str += (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n      <script context='module' lang='ts'>\n        ", "\n      </script>\n      \n\n      \n\n      "], ["\n      <script context='module' lang='ts'>\n        ", "\n      </script>\n      \\n\n      \\n\n      "])), json.types ? json.types.join('\n\n') + '\n' : '');
         }
-        str += (0, dedent_1.default)(templateObject_2 || (templateObject_2 = __makeTemplateObject(["\n      <script lang='ts'>\n      ", "\n      ", "\n      ", "\n      ", "\n      ", "\n\n      ", "\n      ", "\n      ", "\n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n    </script>\n\n    ", "\n\n    ", "\n  "], ["\n      <script lang='ts'>\n      ", "\n      ", "\n      ", "\n      ", "\n      ", "\n\n      ", "\n      ", "\n      ", "\n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n    </script>\n\n    ", "\n\n    ", "\n  "])), !((_c = json.hooks.onMount) === null || _c === void 0 ? void 0 : _c.code) ? '' : "import { onMount } from 'svelte'", !((_d = json.hooks.onUpdate) === null || _d === void 0 ? void 0 : _d.length) ? '' : "import { afterUpdate } from 'svelte'", !((_e = json.hooks.onUnMount) === null || _e === void 0 ? void 0 : _e.code) ? '' : "import { onDestroy } from 'svelte'", (0, render_imports_1.renderPreComponent)({ component: json, target: 'svelte' }), (0, context_1.hasContext)(component) ? 'import { getContext, setContext } from "svelte";' : '', !hasData || options.stateType === 'variables' ? '' : "import onChange from 'on-change'", (0, lodash_1.uniq)(refs.map(function (ref) { return (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(ref); }).concat(props))
+        // prepare svelte imports
+        var svelteImports = [];
+        if ((_d = (_c = json.hooks.onMount) === null || _c === void 0 ? void 0 : _c.code) === null || _d === void 0 ? void 0 : _d.length) {
+            svelteImports.push('onMount');
+        }
+        if ((_e = json.hooks.onUpdate) === null || _e === void 0 ? void 0 : _e.length) {
+            svelteImports.push('afterUpdate');
+        }
+        if ((_g = (_f = json.hooks.onUnMount) === null || _f === void 0 ? void 0 : _f.code) === null || _g === void 0 ? void 0 : _g.length) {
+            svelteImports.push('onDestroy');
+        }
+        if ((0, context_1.hasContext)(component)) {
+            svelteImports.push('getContext', 'setContext');
+        }
+        str += (0, dedent_1.default)(templateObject_2 || (templateObject_2 = __makeTemplateObject(["\n      <script lang='ts'>\n      ", "\n      ", "\n\n      ", "\n      ", "\n      ", "\n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n    </script>\n\n    ", "\n\n    ", "\n  "], ["\n      <script lang='ts'>\n      ", "\n      ", "\n\n      ", "\n      ", "\n      ", "\n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n    </script>\n\n    ", "\n\n    ", "\n  "])), !svelteImports.length ? '' : "import { ".concat(svelteImports.sort().join(', '), " } from 'svelte'"), (0, render_imports_1.renderPreComponent)({ component: json, target: 'svelte' }), !hasData || options.stateType === 'variables' ? '' : "import onChange from 'on-change'", (0, lodash_1.uniq)(refs.map(function (ref) { return (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(ref); }).concat(props))
             .map(function (name) {
             if (name === 'children') {
                 return '';
@@ -358,9 +372,9 @@ var componentToSvelte = function (_a) {
             ? dataString.length < 4
                 ? ''
                 : "let state = onChange(".concat(dataString, ", () => state = state)")
-            : dataString, !((_f = json.hooks.onMount) === null || _f === void 0 ? void 0 : _f.code)
+            : dataString, !((_h = json.hooks.onMount) === null || _h === void 0 ? void 0 : _h.code)
             ? ''
-            : "onMount(() => { ".concat(transformHookCode(json.hooks.onMount.code), " });"), !((_g = json.hooks.onUpdate) === null || _g === void 0 ? void 0 : _g.length)
+            : "onMount(() => { ".concat(transformHookCode(json.hooks.onMount.code), " });"), !((_j = json.hooks.onUpdate) === null || _j === void 0 ? void 0 : _j.length)
             ? ''
             : json.hooks.onUpdate
                 .map(function (_a, index) {
@@ -374,7 +388,7 @@ var componentToSvelte = function (_a) {
                     return "afterUpdate(() => { ".concat(hookCode, " })");
                 }
             })
-                .join(';'), !((_h = json.hooks.onUnMount) === null || _h === void 0 ? void 0 : _h.code)
+                .join(';'), !((_k = json.hooks.onUnMount) === null || _k === void 0 ? void 0 : _k.code)
             ? ''
             : "onDestroy(() => { ".concat(transformHookCode(json.hooks.onUnMount.code), " });"), json.children
             .map(function (item) {
