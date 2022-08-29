@@ -528,6 +528,7 @@ var componentToVue = function (userOptions) {
                     parser: 'vue',
                     plugins: [
                         // To support running in browsers
+                        require('prettier/parser-typescript'),
                         require('prettier/parser-html'),
                         require('prettier/parser-postcss'),
                         require('prettier/parser-babel'),
