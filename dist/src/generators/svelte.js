@@ -281,7 +281,13 @@ var FUNCTION_HACK_PLUGIN = function () { return ({
                     var newValue = "function ".concat(value);
                     json.state[key] = {
                         code: newValue,
-                        type: 'function',
+                        type: 'method',
+                    };
+                }
+                else if (typeof value === 'string' && type === 'function') {
+                    json.state[key] = {
+                        code: value,
+                        type: 'method',
                     };
                 }
             }
@@ -331,7 +337,6 @@ var componentToSvelte = function (_a) {
             getters: false,
             functions: true,
             format: 'variables',
-            keyPrefix: 'const ',
             valueMapper: function (code) { return (0, function_1.pipe)(stripStateAndProps(code, options), stripThisRefs); },
         }), babel_transform_1.babelTransformCode);
         var hasData = dataString.length > 4;
