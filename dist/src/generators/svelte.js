@@ -61,7 +61,6 @@ var babel_transform_1 = require("../helpers/babel-transform");
 var function_1 = require("fp-ts/lib/function");
 var context_1 = require("./helpers/context");
 var html_tags_1 = require("../constants/html_tags");
-var lodash_1 = require("lodash");
 var is_upper_case_1 = require("../helpers/is-upper-case");
 var json5_1 = __importDefault(require("json5"));
 var mappers = {
@@ -362,7 +361,7 @@ var componentToSvelte = function (_a) {
         if ((0, context_1.hasContext)(component)) {
             svelteImports.push('getContext', 'setContext');
         }
-        str += (0, dedent_1.default)(templateObject_2 || (templateObject_2 = __makeTemplateObject(["\n      <script lang='ts'>\n      ", "\n      ", "\n\n      ", "\n      ", "\n      ", "\n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n    </script>\n\n    ", "\n\n    ", "\n  "], ["\n      <script lang='ts'>\n      ", "\n      ", "\n\n      ", "\n      ", "\n      ", "\n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n    </script>\n\n    ", "\n\n    ", "\n  "])), !svelteImports.length ? '' : "import { ".concat(svelteImports.sort().join(', '), " } from 'svelte'"), (0, render_imports_1.renderPreComponent)({ component: json, target: 'svelte' }), !hasData || options.stateType === 'variables' ? '' : "import onChange from 'on-change'", (0, lodash_1.uniq)(refs.map(function (ref) { return (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(ref); }).concat(props))
+        str += (0, dedent_1.default)(templateObject_2 || (templateObject_2 = __makeTemplateObject(["\n      <script lang='ts'>\n      ", "\n      ", "\n\n      ", "\n      ", "\n      ", "\n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n    </script>\n\n    ", "\n\n    ", "\n  "], ["\n      <script lang='ts'>\n      ", "\n      ", "\n\n      ", "\n      ", "\n      ", "\n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n    </script>\n\n    ", "\n\n    ", "\n  "])), !svelteImports.length ? '' : "import { ".concat(svelteImports.sort().join(', '), " } from 'svelte'"), (0, render_imports_1.renderPreComponent)({ component: json, target: 'svelte' }), !hasData || options.stateType === 'variables' ? '' : "import onChange from 'on-change'", props
             .map(function (name) {
             if (name === 'children') {
                 return '';
@@ -379,7 +378,7 @@ var componentToSvelte = function (_a) {
         })
             .join('\n'), (0, helpers_1.hasStyle)(json)
             ? "\n        function mitosis_styling (node, vars) {\n          Object.entries(vars).forEach(([ p, v ]) => { node.style[p] = v })\n        }\n      "
-            : '', getContextCode(json), setContextCode(json), functionsString.length < 4 ? '' : functionsString, getterString.length < 4 ? '' : getterString, options.stateType === 'proxies'
+            : '', getContextCode(json), setContextCode(json), functionsString.length < 4 ? '' : functionsString, getterString.length < 4 ? '' : getterString, refs.map(function (ref) { return "let ".concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(ref)); }).join('\n'), options.stateType === 'proxies'
             ? dataString.length < 4
                 ? ''
                 : "let state = onChange(".concat(dataString, ", () => state = state)")
