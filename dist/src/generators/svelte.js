@@ -197,7 +197,13 @@ var blockToSvelte = function (_a) {
         if (key.startsWith('on')) {
             var event_1 = key.replace('on', '').toLowerCase();
             // TODO: handle quotes in event handler values
-            str += " on:".concat(event_1, "=\"{").concat(cusArgs.join(','), " => {").concat((0, remove_surrounding_block_1.removeSurroundingBlock)(useValue), "}}\" ");
+            var valueWithoutBlock = (0, remove_surrounding_block_1.removeSurroundingBlock)(useValue);
+            if (valueWithoutBlock === key) {
+                str += " on:".concat(event_1, "={").concat(valueWithoutBlock, "} ");
+            }
+            else {
+                str += " on:".concat(event_1, "=\"{").concat(cusArgs.join(','), " => {").concat(valueWithoutBlock, "}}\" ");
+            }
         }
         else if (key === 'ref') {
             str += " bind:this={".concat(useValue, "} ");
