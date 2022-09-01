@@ -2,6 +2,7 @@ import { MitosisNode } from '../types/mitosis-node';
 import { BaseTranspilerOptions } from '../types/transpiler';
 import { OmitObj } from '../helpers/typescript';
 export declare type VueVersion = 2 | 3;
+export declare type Api = 'options' | 'composition';
 interface VueVersionOpt {
     vueVersion: VueVersion;
 }
@@ -9,6 +10,7 @@ export interface ToVueOptions extends BaseTranspilerOptions, VueVersionOpt {
     cssNamespace?: () => string;
     namePrefix?: (path: string) => string;
     asyncComponentImports?: boolean;
+    api?: Api;
 }
 declare type BlockRenderer = (json: MitosisNode, options: ToVueOptions, scope?: Scope) => string;
 interface Scope {

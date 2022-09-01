@@ -63,6 +63,7 @@ var context_1 = require("./helpers/context");
 var html_tags_1 = require("../constants/html_tags");
 var is_upper_case_1 = require("../helpers/is-upper-case");
 var json5_1 = __importDefault(require("json5"));
+var functions_1 = require("./helpers/functions");
 var mappers = {
     Fragment: function (_a) {
         var _b;
@@ -269,37 +270,13 @@ var useBindValue = function (json, options) {
 var stripThisRefs = function (str) {
     return str.replace(/this\.([a-zA-Z_\$0-9]+)/g, '$1');
 };
-var FUNCTION_HACK_PLUGIN = function () { return ({
-    json: {
-        pre: function (json) {
-            var _a, _b;
-            for (var key in json.state) {
-                var value = (_a = json.state[key]) === null || _a === void 0 ? void 0 : _a.code;
-                var type = (_b = json.state[key]) === null || _b === void 0 ? void 0 : _b.type;
-                if (typeof value === 'string' && type === 'method') {
-                    var newValue = "function ".concat(value);
-                    json.state[key] = {
-                        code: newValue,
-                        type: 'method',
-                    };
-                }
-                else if (typeof value === 'string' && type === 'function') {
-                    json.state[key] = {
-                        code: value,
-                        type: 'method',
-                    };
-                }
-            }
-        },
-    },
-}); };
 var componentToSvelte = function (_a) {
     if (_a === void 0) { _a = {}; }
     var _b = _a.plugins, plugins = _b === void 0 ? [] : _b, userProvidedOptions = __rest(_a, ["plugins"]);
     return function (_a) {
         var _b, _c, _d, _e, _f, _g, _h, _j, _k;
         var component = _a.component;
-        var options = __assign({ stateType: 'variables', prettier: true, plugins: __spreadArray([FUNCTION_HACK_PLUGIN], plugins, true) }, userProvidedOptions);
+        var options = __assign({ stateType: 'variables', prettier: true, plugins: __spreadArray([functions_1.FUNCTION_HACK_PLUGIN], plugins, true) }, userProvidedOptions);
         // Make a copy we can safely mutate, similar to babel's toolchain
         var json = (0, fast_clone_1.fastClone)(component);
         if (options.plugins) {
