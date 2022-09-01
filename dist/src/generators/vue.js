@@ -402,6 +402,7 @@ var appendToDataString = function (_a) {
     return dataString.replace(/}$/, "".concat(newContent, "}"));
 };
 var componentToVue = function (userOptions) {
+    if (userOptions === void 0) { userOptions = BASE_OPTIONS; }
     return function (_a) {
         var _b, _c, _d, _e, _f, _g, _h, _j;
         var component = _a.component, path = _a.path;
@@ -486,11 +487,12 @@ var componentToVue = function (userOptions) {
                     : {}),
                 propsDefinition); }, {});
         }
-        var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    <template>\n      ", "\n    </template>\n    <script lang=\"ts\">\n    ", "\n      ", "\n\n      ", "\n\n      export default {\n        ", "\n        ", "\n        ", "\n        ", "\n\n        ", "\n        ", "\n\n        ", "\n        ", "\n        ", "\n        ", "\n\n        ", "\n        ", "\n      }\n    </script>\n    ", "\n  "], ["\n    <template>\n      ", "\n    </template>\n    <script lang=\"ts\">\n    ", "\n      ", "\n\n      ", "\n\n      export default {\n        ", "\n        ", "\n        ", "\n        ", "\n\n        ", "\n        ", "\n\n        ", "\n        ", "\n        ", "\n        ", "\n\n        ", "\n        ", "\n      }\n    </script>\n    ", "\n  "])), template, options.vueVersion >= 3 ? 'import { defineAsyncComponent } from "vue"' : '', (0, render_imports_1.renderPreComponent)({
+        var tsLangAttribute = options.typescript ? "lang='ts'" : '';
+        var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    <template>\n      ", "\n    </template>\n    <script ", ">\n    ", "\n      ", "\n\n      ", "\n\n      export default {\n        ", "\n        ", "\n        ", "\n        ", "\n\n        ", "\n        ", "\n\n        ", "\n        ", "\n        ", "\n        ", "\n\n        ", "\n        ", "\n      }\n    </script>\n    ", "\n  "], ["\n    <template>\n      ", "\n    </template>\n    <script ", ">\n    ", "\n      ", "\n\n      ", "\n\n      export default {\n        ", "\n        ", "\n        ", "\n        ", "\n\n        ", "\n        ", "\n\n        ", "\n        ", "\n        ", "\n        ", "\n\n        ", "\n        ", "\n      }\n    </script>\n    ", "\n  "])), template, tsLangAttribute, options.vueVersion >= 3 ? 'import { defineAsyncComponent } from "vue"' : '', (0, render_imports_1.renderPreComponent)({
             component: component,
             target: 'vue',
             asyncComponentImports: options.asyncComponentImports,
-        }), ((_f = component.types) === null || _f === void 0 ? void 0 : _f.join('\n')) || '', !component.name
+        }), (options.typescript && ((_f = component.types) === null || _f === void 0 ? void 0 : _f.join('\n'))) || '', !component.name
             ? ''
             : "name: '".concat(path && ((_g = options.namePrefix) === null || _g === void 0 ? void 0 : _g.call(options, path)) ? ((_h = options.namePrefix) === null || _h === void 0 ? void 0 : _h.call(options, path)) + '-' : '').concat((0, lodash_1.kebabCase)(component.name), "',"), generateComponents(componentsUsed, options), elementProps.size ? "props: ".concat(JSON.stringify(propsDefinition), ",") : '', dataString.length < 4
             ? ''

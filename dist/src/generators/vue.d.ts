@@ -1,5 +1,5 @@
 import { MitosisNode } from '../types/mitosis-node';
-import { BaseTranspilerOptions, Transpiler } from '../types/transpiler';
+import { BaseTranspilerOptions } from '../types/transpiler';
 import { OmitObj } from '../helpers/typescript';
 export declare type VueVersion = 2 | 3;
 interface VueVersionOpt {
@@ -16,6 +16,6 @@ interface Scope {
 }
 export declare const blockToVue: BlockRenderer;
 declare type VueOptsWithoutVersion = OmitObj<ToVueOptions, VueVersionOpt>;
-export declare const componentToVue2: (vueOptions?: VueOptsWithoutVersion) => Transpiler;
-export declare const componentToVue3: (vueOptions?: VueOptsWithoutVersion) => Transpiler;
+export declare const componentToVue2: (vueOptions?: VueOptsWithoutVersion) => import("../types/transpiler").Transpiler<string>;
+export declare const componentToVue3: (vueOptions?: VueOptsWithoutVersion) => import("../types/transpiler").Transpiler<string>;
 export {};

@@ -344,8 +344,9 @@ var componentToSvelte = function (_a) {
             return (0, function_1.pipe)(stripStateAndProps(hookCode, options), babel_transform_1.babelTransformCode);
         };
         var str = '';
-        if ((_b = json.types) === null || _b === void 0 ? void 0 : _b.length) {
-            str += (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n      <script context='module' lang='ts'>\n        ", "\n      </script>\n      \n\n      \n\n      "], ["\n      <script context='module' lang='ts'>\n        ", "\n      </script>\n      \\n\n      \\n\n      "])), json.types ? json.types.join('\n\n') + '\n' : '');
+        var tsLangAttribute = options.typescript ? "lang='ts'" : '';
+        if (options.typescript && ((_b = json.types) === null || _b === void 0 ? void 0 : _b.length)) {
+            str += (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n      <script context='module' ", ">\n        ", "\n      </script>\n      \n\n      \n\n      "], ["\n      <script context='module' ", ">\n        ", "\n      </script>\n      \\n\n      \\n\n      "])), tsLangAttribute, json.types ? json.types.join('\n\n') + '\n' : '');
         }
         // prepare svelte imports
         var svelteImports = [];
@@ -361,13 +362,13 @@ var componentToSvelte = function (_a) {
         if ((0, context_1.hasContext)(component)) {
             svelteImports.push('getContext', 'setContext');
         }
-        str += (0, dedent_1.default)(templateObject_2 || (templateObject_2 = __makeTemplateObject(["\n      <script lang='ts'>\n      ", "\n      ", "\n\n      ", "\n      ", "\n      ", "\n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n    </script>\n\n    ", "\n\n    ", "\n  "], ["\n      <script lang='ts'>\n      ", "\n      ", "\n\n      ", "\n      ", "\n      ", "\n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n    </script>\n\n    ", "\n\n    ", "\n  "])), !svelteImports.length ? '' : "import { ".concat(svelteImports.sort().join(', '), " } from 'svelte'"), (0, render_imports_1.renderPreComponent)({ component: json, target: 'svelte' }), !hasData || options.stateType === 'variables' ? '' : "import onChange from 'on-change'", props
+        str += (0, dedent_1.default)(templateObject_2 || (templateObject_2 = __makeTemplateObject(["\n      <script ", ">\n      ", "\n      ", "\n\n      ", "\n      ", "\n      ", "\n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n    </script>\n\n    ", "\n\n    ", "\n  "], ["\n      <script ", ">\n      ", "\n      ", "\n\n      ", "\n      ", "\n      ", "\n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n    </script>\n\n    ", "\n\n    ", "\n  "])), tsLangAttribute, !svelteImports.length ? '' : "import { ".concat(svelteImports.sort().join(', '), " } from 'svelte'"), (0, render_imports_1.renderPreComponent)({ component: json, target: 'svelte' }), !hasData || options.stateType === 'variables' ? '' : "import onChange from 'on-change'", props
             .map(function (name) {
             if (name === 'children') {
                 return '';
             }
             var propDeclaration = "export let ".concat(name);
-            if (json.propsTypeRef && json.propsTypeRef !== 'any') {
+            if (options.typescript && json.propsTypeRef && json.propsTypeRef !== 'any') {
                 propDeclaration += ": ".concat(json.propsTypeRef.split(' |')[0], "['").concat(name, "']");
             }
             if (json.defaultProps && json.defaultProps.hasOwnProperty(name)) {

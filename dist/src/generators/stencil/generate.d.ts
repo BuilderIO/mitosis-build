@@ -1,4 +1,4 @@
-import { BaseTranspilerOptions, Transpiler } from '../../types/transpiler';
+import { BaseTranspilerOptions, TranspilerGenerator } from '../../types/transpiler';
 export interface ToStencilOptions extends BaseTranspilerOptions {
 }
-export declare const componentToStencil: (options?: ToStencilOptions) => Transpiler;
+export declare const componentToStencil: TranspilerGenerator<ToStencilOptions>;
