@@ -80,7 +80,19 @@ function parseJsx(jsx, options) {
         configFile: false,
         babelrc: false,
         comments: false,
-        presets: [[tsPreset, { isTSX: true, allExtensions: true }]],
+        presets: [
+            [
+                tsPreset,
+                {
+                    isTSX: true,
+                    allExtensions: true,
+                    // If left to its default `false`, then this will strip away:
+                    // - unused JS imports
+                    // - types imports within regular JS import syntax
+                    onlyRemoveTypeImports: true,
+                },
+            ],
+        ],
         plugins: [
             jsxPlugin,
             function () { return ({
@@ -157,7 +169,7 @@ function parseJsx(jsx, options) {
         .replace(/^\({/, '{')
         .replace(/}\);$/, '}'));
     var parsed = (0, json_1.tryParseJson)(toParse);
-    (0, state_1.mapReactIdentifiers)(parsed);
+    (0, state_1.mapStateIdentifiers)(parsed);
     (0, context_1.extractContextComponents)(parsed);
     parsed.subComponents = subComponentFunctions.map(function (item) { return parseJsx(item, useOptions); });
     return parsed;

@@ -71,6 +71,7 @@ var submitButtonBlock = require('./data/blocks/submit-button.raw');
 var text = require('./data/blocks/text.raw');
 var textarea = require('./data/blocks/textarea.raw');
 var video = require('./data/blocks/video.raw');
+var builderRenderContent = require('./data/blocks/builder-render-content.raw');
 var path = 'test-path';
 var BASIC_TESTS = {
     Basic: basic,
@@ -104,6 +105,7 @@ var BASIC_TESTS = {
     preserveTyping: preserveTyping,
     typeDependency: typeDependency,
     defaultValsWithTypes: require('./data/types/component-with-default-values-types.raw'),
+    'import types': builderRenderContent,
     subComponent: subComponent,
     nestedStyles: nestedStyles,
     propsDestructure: propsDestructure,
@@ -307,6 +309,12 @@ var TESTS_FOR_TARGET = {
     ],
 };
 var runTestsForJsx = function () {
+    test('Remove Internal mitosis package', function () {
+        var component = (0, jsx_1.parseJsx)(basicMitosis, {
+            compileAwayPackages: ['@dummy/custom-mitosis'],
+        });
+        expect(component).toMatchSnapshot();
+    });
     JSX_TESTS.forEach(function (tests) {
         Object.keys(tests).forEach(function (key) {
             test(key, function () {
