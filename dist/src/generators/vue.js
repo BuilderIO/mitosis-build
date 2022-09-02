@@ -111,11 +111,12 @@ var NODE_MAPPERS = {
     Fragment: function (json, options) {
         return json.children.map(function (item) { return (0, exports.blockToVue)(item, options); }).join('\n');
     },
-    For: function (json, options) {
+    For: function (_json, options) {
         var _a, _b;
         var _c;
+        var json = _json;
         var keyValue = json.bindings.key || { code: 'index' };
-        var forValue = "(".concat(json.properties._forName, ", index) in ").concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)((_c = json.bindings.each) === null || _c === void 0 ? void 0 : _c.code));
+        var forValue = "(".concat(json.scope.forName, ", index) in ").concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)((_c = json.bindings.each) === null || _c === void 0 ? void 0 : _c.code));
         if (options.vueVersion >= 3) {
             // TODO: tmk key goes on different element (parent vs child) based on Vue 2 vs Vue 3
             return "<template :key=\"".concat(encodeQuotes((keyValue === null || keyValue === void 0 ? void 0 : keyValue.code) || 'index'), "\" v-for=\"").concat(encodeQuotes(forValue), "\">\n        ").concat(json.children.map(function (item) { return (0, exports.blockToVue)(item, options); }).join('\n'), "\n      </template>");

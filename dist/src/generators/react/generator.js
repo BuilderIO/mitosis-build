@@ -49,6 +49,7 @@ var state_1 = require("../../helpers/state");
 var state_2 = require("./state");
 var helpers_2 = require("./helpers");
 var hash_sum_1 = __importDefault(require("hash-sum"));
+var for_1 = require("../../helpers/nodes/for");
 var openFrag = function (options) { return getFragment('open', options); };
 var closeFrag = function (options) { return getFragment('close', options); };
 function getFragment(type, options) {
@@ -87,11 +88,12 @@ var NODE_MAPPERS = {
             .map(function (item) { return (0, exports.blockToReact)(item, options); })
             .join('\n')).concat(wrap ? getFragment('close', options) : '');
     },
-    For: function (json, options) {
-        var _a, _b;
+    For: function (_json, options) {
+        var _a;
+        var json = _json;
         var wrap = wrapInFragment(json);
-        var forArguments = (((_a = json === null || json === void 0 ? void 0 : json.scope) === null || _a === void 0 ? void 0 : _a.For) || []).join(',');
-        return "{".concat((0, helpers_2.processBinding)((_b = json.bindings.each) === null || _b === void 0 ? void 0 : _b.code, options), "?.map((").concat(forArguments, ") => (\n      ").concat(wrap ? openFrag(options) : '').concat(json.children
+        var forArguments = (0, for_1.getForArguments)(json).join(', ');
+        return "{".concat((0, helpers_2.processBinding)((_a = json.bindings.each) === null || _a === void 0 ? void 0 : _a.code, options), "?.map((").concat(forArguments, ") => (\n      ").concat(wrap ? openFrag(options) : '').concat(json.children
             .filter(filter_empty_text_nodes_1.filterEmptyTextNodes)
             .map(function (item) { return (0, exports.blockToReact)(item, options); })
             .join('\n')).concat(wrap ? closeFrag(options) : '', "\n    ))}");

@@ -64,6 +64,7 @@ var html_tags_1 = require("../constants/html_tags");
 var is_upper_case_1 = require("../helpers/is-upper-case");
 var json5_1 = __importDefault(require("json5"));
 var functions_1 = require("./helpers/functions");
+var for_1 = require("../helpers/nodes/for");
 var mappers = {
     Fragment: function (_a) {
         var _b;
@@ -90,7 +91,8 @@ var mappers = {
             delete firstChild.properties.key;
             delete firstChild.bindings.key;
         }
-        return "\n{#each ".concat(stripStateAndProps((_c = json.bindings.each) === null || _c === void 0 ? void 0 : _c.code, options), " as ").concat(json.scope.For[0]).concat(json.scope.For[1] ? ", ".concat(json.scope.For[1]) : '', " ").concat(keyValue ? "(".concat(keyValue, ")") : '', "}\n").concat(json.children.map(function (item) { return (0, exports.blockToSvelte)({ json: item, options: options, parentComponent: parentComponent }); }).join('\n'), "\n{/each}\n");
+        var args = (0, for_1.getForArguments)(json, { excludeCollectionName: true }).join(', ');
+        return "\n{#each ".concat(stripStateAndProps((_c = json.bindings.each) === null || _c === void 0 ? void 0 : _c.code, options), " as ").concat(args, " ").concat(keyValue ? "(".concat(keyValue, ")") : '', "}\n").concat(json.children.map(function (item) { return (0, exports.blockToSvelte)({ json: item, options: options, parentComponent: parentComponent }); }).join('\n'), "\n{/each}\n");
     },
     Show: function (_a) {
         var _b;
@@ -156,7 +158,11 @@ var blockToSvelte = function (_a) {
     var _b, _c, _d, _e, _f;
     var json = _a.json, options = _a.options, parentComponent = _a.parentComponent;
     if (mappers[json.name]) {
-        return mappers[json.name]({ json: json, options: options, parentComponent: parentComponent });
+        return mappers[json.name]({
+            json: json,
+            options: options,
+            parentComponent: parentComponent,
+        });
     }
     var tagName = getTagName({ json: json, parentComponent: parentComponent });
     if ((0, is_children_1.default)(json)) {

@@ -40,8 +40,21 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.jsxElementToJson = void 0;
 var babel = __importStar(require("@babel/core"));
 var generator_1 = __importDefault(require("@babel/generator"));
+var nullable_1 = require("../../helpers/nullable");
 var create_mitosis_node_1 = require("../../helpers/create-mitosis-node");
+var function_1 = require("fp-ts/lib/function");
 var types = babel.types;
+var getForArguments = function (params) {
+    var _a = params
+        .filter(function (param) { return types.isIdentifier(param); })
+        .map(function (param) { return param.name; })
+        .filter(nullable_1.checkIsDefined), forName = _a[0], indexName = _a[1], collectionName = _a[2];
+    return {
+        forName: forName,
+        collectionName: collectionName,
+        indexName: indexName,
+    };
+};
 /**
  * Parses a JSX element into a MitosisNode.
  */
@@ -63,9 +76,7 @@ var jsxElementToJson = function (node) {
             var callback = node.expression.arguments[0];
             if (types.isArrowFunctionExpression(callback)) {
                 if (types.isIdentifier(callback.params[0])) {
-                    var forArguments = callback.params
-                        .map(function (param) { return param === null || param === void 0 ? void 0 : param.name; })
-                        .filter(Boolean);
+                    var forArguments = getForArguments(callback.params);
                     return (0, create_mitosis_node_1.createMitosisNode)({
                         name: 'For',
                         bindings: {
@@ -75,14 +86,7 @@ var jsxElementToJson = function (node) {
                                     .replace(/\??\.map$/, ''),
                             },
                         },
-                        scope: {
-                            For: forArguments,
-                        },
-                        properties: {
-                            _forName: forArguments[0],
-                            _indexName: forArguments[1],
-                            _collectionName: forArguments[2],
-                        },
+                        scope: forArguments,
                         children: [(0, exports.jsxElementToJson)(callback.body)],
                     });
                 }
@@ -126,8 +130,12 @@ var jsxElementToJson = function (node) {
     if (types.isJSXFragment(node)) {
         return (0, create_mitosis_node_1.createMitosisNode)({
             name: 'Fragment',
-            children: node.children.map(function (item) { return (0, exports.jsxElementToJson)(item); }).filter(Boolean),
+            children: node.children.map(exports.jsxElementToJson).filter(nullable_1.checkIsDefined),
         });
+    }
+    // TODO: support spread attributes
+    if (types.isJSXSpreadChild(node)) {
+        return null;
     }
     var nodeName = (0, generator_1.default)(node.openingElement.name).code;
     if (nodeName === 'Show') {
@@ -145,32 +153,35 @@ var jsxElementToJson = function (node) {
                 else: elseValue || undefined,
             },
             bindings: __assign({}, (whenValue ? { when: { code: whenValue } } : {})),
-            children: node.children.map(function (item) { return (0, exports.jsxElementToJson)(item); }).filter(Boolean),
+            children: node.children.map(exports.jsxElementToJson).filter(nullable_1.checkIsDefined),
         });
     }
     // <For ...> control flow component
     if (nodeName === 'For') {
-        var child = node.children.find(function (item) { return types.isJSXExpressionContainer(item); });
-        if (types.isJSXExpressionContainer(child)) {
+        var child = node.children.find(function (item) {
+            return types.isJSXExpressionContainer(item);
+        });
+        if ((0, nullable_1.checkIsDefined)(child)) {
             var childExpression = child.expression;
             if (types.isArrowFunctionExpression(childExpression)) {
-                var forArguments = childExpression === null || childExpression === void 0 ? void 0 : childExpression.params.map(function (param) { return param === null || param === void 0 ? void 0 : param.name; }).filter(Boolean);
+                var forArguments = getForArguments(childExpression === null || childExpression === void 0 ? void 0 : childExpression.params);
+                var forCode = (0, function_1.pipe)(node.openingElement.attributes[0], function (attr) {
+                    if (types.isJSXAttribute(attr) && types.isJSXExpressionContainer(attr.value)) {
+                        return (0, generator_1.default)(attr.value.expression).code;
+                    }
+                    else {
+                        // TO-DO: is an empty string valid here?
+                        return '';
+                    }
+                });
                 return (0, create_mitosis_node_1.createMitosisNode)({
                     name: 'For',
                     bindings: {
                         each: {
-                            code: (0, generator_1.default)(node.openingElement.attributes[0]
-                                .value.expression).code,
+                            code: forCode,
                         },
                     },
-                    scope: {
-                        For: forArguments,
-                    },
-                    properties: {
-                        _forName: forArguments[0],
-                        _indexName: forArguments[1],
-                        _collectionName: forArguments[2],
-                    },
+                    scope: forArguments,
                     children: [(0, exports.jsxElementToJson)(childExpression.body)],
                 });
             }
@@ -183,7 +194,7 @@ var jsxElementToJson = function (node) {
                 var key = item.name.name;
                 var value = item.value;
                 if (types.isStringLiteral(value)) {
-                    memo[key] = value;
+                    memo[key] = value.value;
                     return memo;
                 }
                 if (types.isJSXExpressionContainer(value) && types.isStringLiteral(value.expression)) {
@@ -221,12 +232,12 @@ var jsxElementToJson = function (node) {
                 // too so can do this accurately when order matters. Also tempting to not support spread,
                 // as some frameworks do not support it (e.g. Angular) tho Angular may be the only one
                 memo._spread = {
-                    code: types.stringLiteral((0, generator_1.default)(item.argument).code),
+                    code: types.stringLiteral((0, generator_1.default)(item.argument).code).value,
                 };
             }
             return memo;
         }, {}),
-        children: node.children.map(function (item) { return (0, exports.jsxElementToJson)(item); }).filter(Boolean),
+        children: node.children.map(exports.jsxElementToJson).filter(nullable_1.checkIsDefined),
     });
 };
 exports.jsxElementToJson = jsxElementToJson;

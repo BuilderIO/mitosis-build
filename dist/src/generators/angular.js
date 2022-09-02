@@ -28,6 +28,7 @@ var map_refs_1 = require("../helpers/map-refs");
 var render_imports_1 = require("../helpers/render-imports");
 var strip_state_and_props_refs_1 = require("../helpers/strip-state-and-props-refs");
 var jsx_1 = require("../parsers/jsx");
+var mitosis_node_1 = require("../types/mitosis-node");
 var plugins_1 = require("../modules/plugins");
 var is_children_1 = __importDefault(require("../helpers/is-children"));
 var get_props_1 = require("../helpers/get-props");
@@ -97,9 +98,9 @@ var blockToAngular = function (json, options, blockOptions) {
     }
     var str = '';
     var needsToRenderSlots = [];
-    if (json.name === 'For') {
-        var indexName = json.scope.For[1];
-        str += "<ng-container *ngFor=\"let ".concat(json.properties._forName, " of ").concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)((_e = json.bindings.each) === null || _e === void 0 ? void 0 : _e.code, {
+    if ((0, mitosis_node_1.checkIsForNode)(json)) {
+        var indexName = json.scope.indexName;
+        str += "<ng-container *ngFor=\"let ".concat(json.scope.forName, " of ").concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)((_e = json.bindings.each) === null || _e === void 0 ? void 0 : _e.code, {
             contextVars: contextVars,
             outputVars: outputVars,
             domRefs: domRefs,
