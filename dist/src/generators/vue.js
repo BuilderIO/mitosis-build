@@ -558,11 +558,22 @@ function generateCompositionApiScript(component, options, template, props, onUpd
     if (template.includes('_classStringToObject')) {
         methods += " function _classStringToObject(str) {\n    const obj = {};\n    if (typeof str !== 'string') { return obj }\n    const classNames = str.trim().split(/\\s+/);\n    for (const name of classNames) {\n      obj[name] = true;\n    }\n    return obj;\n    } ";
     }
-    var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    ", "\n    ", "\n\n    ", "\n\n    ", "\n\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n  "], ["\n    ", "\n    ", "\n\n    ", "\n\n    ", "\n\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n  "])), props.size ? getCompositionPropDefinition({ component: component, props: props, options: options }) : '', refs, (_a = Object.keys(component.context.get)) === null || _a === void 0 ? void 0 : _a.map(function (key) { return "const ".concat(key, " = inject(").concat(component.context.get[key].name, ")"); }).join('\n'), (_b = Object.keys(component.context.set)) === null || _b === void 0 ? void 0 : _b.map(function (key) { return "provide(".concat(component.context.set[key].name, ", ").concat(component.context.set[key].ref, ")"); }).join('\n'), (_c = Object.keys(component.refs)) === null || _c === void 0 ? void 0 : _c.map(function (key) { return "const ".concat(key, " = ref<").concat(component.refs[key].typeParameter, ">()"); }).join('\n'), !((_d = component.hooks.onMount) === null || _d === void 0 ? void 0 : _d.code)
+    var getterKeys = Object.keys((0, lodash_1.pickBy)(component.state, function (i) { return (i === null || i === void 0 ? void 0 : i.type) === 'getter'; }));
+    var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    ", "\n    ", "\n\n    ", "\n\n    ", "\n\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n\n    ", "\n    ", "\n  "], ["\n    ", "\n    ", "\n\n    ", "\n\n    ", "\n\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n\n    ", "\n    ", "\n  "])), props.size ? getCompositionPropDefinition({ component: component, props: props, options: options }) : '', refs, (_a = Object.keys(component.context.get)) === null || _a === void 0 ? void 0 : _a.map(function (key) { return "const ".concat(key, " = inject(").concat(component.context.get[key].name, ")"); }).join('\n'), (_b = Object.keys(component.context.set)) === null || _b === void 0 ? void 0 : _b.map(function (key) { return "provide(".concat(component.context.set[key].name, ", ").concat(component.context.set[key].ref, ")"); }).join('\n'), (_c = Object.keys(component.refs)) === null || _c === void 0 ? void 0 : _c.map(function (key) { return "const ".concat(key, " = ref<").concat(component.refs[key].typeParameter, ">()"); }).join('\n'), !((_d = component.hooks.onMount) === null || _d === void 0 ? void 0 : _d.code)
         ? ''
         : "onMounted(() => { ".concat(appendValueToRefs(component.hooks.onMount.code, component, options), "})"), !((_e = component.hooks.onUnMount) === null || _e === void 0 ? void 0 : _e.code)
         ? ''
-        : "onMounted(() => { ".concat(appendValueToRefs(component.hooks.onUnMount.code, component, options), "})"), !(onUpdateWithoutDeps === null || onUpdateWithoutDeps === void 0 ? void 0 : onUpdateWithoutDeps.length)
+        : "onMounted(() => { ".concat(appendValueToRefs(component.hooks.onUnMount.code, component, options), "})"), !getterKeys
+        ? ''
+        : getterKeys
+            .map(function (key) {
+            var _a, _b;
+            var code = (_b = (_a = component.state[key]) === null || _a === void 0 ? void 0 : _a.code) === null || _b === void 0 ? void 0 : _b.toString();
+            return !code
+                ? ''
+                : "const ".concat(key, " = computed(").concat(appendValueToRefs(code.replace(key, '').replace('get ()', '() =>'), component, options), ")");
+        })
+            .join('\n'), !(onUpdateWithoutDeps === null || onUpdateWithoutDeps === void 0 ? void 0 : onUpdateWithoutDeps.length)
         ? ''
         : onUpdateWithoutDeps.map(function (hook) {
             return "onUpdated(() => ".concat(appendValueToRefs(hook.code, component, options), ")");
@@ -608,6 +619,7 @@ var componentToVue = function (userOptions) {
         var template = (0, function_1.pipe)(component.children.map(function (item) { return (0, exports.blockToVue)(item, options, { isRootNode: true }); }).join('\n'), renameMitosisComponentsToKebabCase);
         var onUpdateWithDeps = ((_f = component.hooks.onUpdate) === null || _f === void 0 ? void 0 : _f.filter(function (hook) { var _a; return (_a = hook.deps) === null || _a === void 0 ? void 0 : _a.length; })) || [];
         var onUpdateWithoutDeps = ((_g = component.hooks.onUpdate) === null || _g === void 0 ? void 0 : _g.filter(function (hook) { var _a; return !((_a = hook.deps) === null || _a === void 0 ? void 0 : _a.length); })) || [];
+        var getterKeys = Object.keys((0, lodash_1.pickBy)(component.state, function (i) { return (i === null || i === void 0 ? void 0 : i.type) === 'getter'; }));
         var elementProps = (0, get_props_1.getProps)(component);
         // import from vue
         var vueImports = [];
@@ -619,6 +631,7 @@ var componentToVue = function (userOptions) {
             ((_h = component.hooks.onMount) === null || _h === void 0 ? void 0 : _h.code) && vueImports.push('onMounted');
             ((_j = component.hooks.onUnMount) === null || _j === void 0 ? void 0 : _j.code) && vueImports.push('onUnMounted');
             onUpdateWithoutDeps.length && vueImports.push('onUpdated');
+            (0, lodash_1.size)(getterKeys) && vueImports.push('computed');
             (0, lodash_1.size)(component.context.set) && vueImports.push('provide');
             (0, lodash_1.size)(component.context.get) && vueImports.push('inject');
             (0, lodash_1.size)(Object.keys(component.state).filter(function (key) { var _a; return ((_a = component.state[key]) === null || _a === void 0 ? void 0 : _a.type) === 'property'; })) && vueImports.push('ref');
