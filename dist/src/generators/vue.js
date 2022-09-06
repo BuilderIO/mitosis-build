@@ -194,6 +194,17 @@ var NODE_MAPPERS = {
                 }
         }
     },
+    Slot: function (json, options) {
+        var _a, _b;
+        if (!json.bindings.name) {
+            var key = Object.keys(json.bindings).find(Boolean);
+            if (!key)
+                return '<slot />';
+            return "\n        <template #".concat(key, ">\n        ").concat((_a = json.bindings[key]) === null || _a === void 0 ? void 0 : _a.code, "\n        </template>\n      ");
+        }
+        var strippedTextCode = (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(json.bindings.name.code);
+        return "<slot name=\"".concat((0, slots_1.stripSlotPrefix)(strippedTextCode).toLowerCase(), "\">").concat((_b = json.children) === null || _b === void 0 ? void 0 : _b.map(function (item) { return (0, exports.blockToVue)(item, options); }).join('\n'), "</slot>");
+    },
 };
 // TODO: Maybe in the future allow defining `string | function` as values
 var BINDING_MAPPERS = {
@@ -465,7 +476,7 @@ function generateOptionsApiScript(component, options, path, template, props, onU
     var componentsUsed = Array.from((0, get_components_used_1.getComponentsUsed)(component))
         .filter(function (name) { return name.length && !name.includes('.') && name[0].toUpperCase() === name[0]; })
         // Strip out components that compile away
-        .filter(function (name) { return !['For', 'Show', 'Fragment', component.name].includes(name); });
+        .filter(function (name) { return !['For', 'Show', 'Fragment', 'Slot', component.name].includes(name); });
     var propsDefinition = Array.from(props).filter(function (prop) { return prop !== 'children' && prop !== 'class'; });
     // add default props (if set)
     if (component.defaultProps) {
