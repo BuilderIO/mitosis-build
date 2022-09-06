@@ -569,8 +569,7 @@ function generateCompositionApiScript(component, options, template, props, onUpd
         }), !(onUpdateWithDeps === null || onUpdateWithDeps === void 0 ? void 0 : onUpdateWithDeps.length)
         ? ''
         : onUpdateWithDeps.map(function (hook) {
-            var _a;
-            return appendValueToRefs("watch(".concat(hook.deps, ", (").concat((_a = hook.deps) === null || _a === void 0 ? void 0 : _a.replaceAll('state.', ''), ") => { ").concat(hook.code, "})\n"), component, options);
+            return appendValueToRefs("watch(".concat(hook.deps, ", (").concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(hook.deps), ") => { ").concat(hook.code, "})\n"), component, options);
         }), (methods === null || methods === void 0 ? void 0 : methods.length) ? appendValueToRefs(methods, component, options) : '');
     str = str.replace(/this\./g, ''); // strip this elsewhere (e.g. functions)
     return str;
