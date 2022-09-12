@@ -52,14 +52,20 @@ var mappers = {
     Slot: function (json, options, blockOptions) {
         return "<ng-content ".concat(Object.keys(json.bindings)
             .map(function (binding) {
-            var _a, _b, _c;
+            var _a, _b;
             if (binding === 'name') {
                 var selector = (0, lodash_1.kebabCase)((_b = (_a = json.bindings.name) === null || _a === void 0 ? void 0 : _a.code) === null || _b === void 0 ? void 0 : _b.replace('props.slot', ''));
                 return "select=\"[".concat(selector, "]\"");
             }
-            return "".concat((_c = json.bindings[binding]) === null || _c === void 0 ? void 0 : _c.code);
         })
-            .join('\n'), "></ng-content>");
+            .join('\n'), ">").concat(Object.keys(json.bindings)
+            .map(function (binding) {
+            var _a;
+            if (binding !== 'name') {
+                return "".concat((_a = json.bindings[binding]) === null || _a === void 0 ? void 0 : _a.code);
+            }
+        })
+            .join('\n'), "</ng-content>");
     },
 };
 // TODO: Maybe in the future allow defining `string | function` as values
