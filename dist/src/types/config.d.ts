@@ -59,6 +59,6 @@ export declare type MitosisConfig = {
      * Configure a custom parser function which takes a string and returns MitosisJSON
      * Defaults to the JSXParser of this project (src/parsers/jsx)
      */
-    parser?: (code: string) => MitosisComponent;
+    parser?: (code: string, path?: string) => MitosisComponent;
 };
 export {};
