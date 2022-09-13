@@ -7,7 +7,7 @@ function Button(props) {
         link: 'https://builder.io/',
         openLinkInNewTab: false,
     });
-    return (<>
+    return (<div>
       <mitosis_1.Show when={props.link}>
         <a {...props.attributes} href={props.link} target={props.openLinkInNewTab ? '_blank' : undefined}>
           {props.text}
@@ -18,6 +18,6 @@ function Button(props) {
           {props.text}
         </button>
       </mitosis_1.Show>
-    </>);
+    </div>);
 }
 exports.default = Button;

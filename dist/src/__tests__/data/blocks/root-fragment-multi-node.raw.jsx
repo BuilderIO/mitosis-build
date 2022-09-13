@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 var mitosis_1 = require("@builder.io/mitosis");
 function Button(props) {
-    return (<div>
+    return (<>
       <mitosis_1.Show when={props.link}>
         <a {...props.attributes} href={props.link} target={props.openLinkInNewTab ? '_blank' : undefined}>
           {props.text}
@@ -13,6 +13,6 @@ function Button(props) {
           {props.text}
         </button>
       </mitosis_1.Show>
-    </div>);
+    </>);
 }
 exports.default = Button;

@@ -45,7 +45,7 @@ function Image(props) {
             window.removeEventListener('scroll', state.scrollListener);
         }
     });
-    return (<>
+    return (<div>
       <picture ref={pictureRef}>
         <mitosis_1.Show when={!state.useLazyLoading() || load}>
           <img alt={props.altText} aria-role={props.altText ? 'presentation' : undefined} css={{
@@ -60,6 +60,6 @@ function Image(props) {
         <source srcset={props.srcset}/>
       </picture>
       {props.children}
-    </>);
+    </div>);
 }
 exports.default = Image;

@@ -108,7 +108,10 @@ function processBinding(code, _options, json, includeProps) {
     });
 }
 var NODE_MAPPERS = {
-    Fragment: function (json, options) {
+    Fragment: function (json, options, scope) {
+        if (options.vueVersion === 2 && (scope === null || scope === void 0 ? void 0 : scope.isRootNode)) {
+            throw new Error('Vue 2 template should have a single root element');
+        }
         return json.children.map(function (item) { return (0, exports.blockToVue)(item, options); }).join('\n');
     },
     For: function (_json, options) {
@@ -133,12 +136,18 @@ var NODE_MAPPERS = {
         var _a, _b, _c, _d, _e;
         var _f, _g;
         var ifValue = (0, slots_1.replaceSlotsInString)((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)((_f = json.bindings.when) === null || _f === void 0 ? void 0 : _f.code), function (slotName) { return "$slots.".concat(slotName); });
+        var defaultShowTemplate = "\n    <template ".concat(SPECIAL_PROPERTIES.V_IF, "=\"").concat(encodeQuotes(ifValue), "\">\n      ").concat(json.children.map(function (item) { return (0, exports.blockToVue)(item, options); }).join('\n'), "\n    </template>\n    ").concat((0, is_mitosis_node_1.isMitosisNode)(json.meta.else)
+            ? "\n        <template ".concat(SPECIAL_PROPERTIES.V_ELSE, ">\n          ").concat((0, exports.blockToVue)(json.meta.else, options), "\n        </template>")
+            : '', "\n    ");
         switch (options.vueVersion) {
             case 3:
-                return "\n        <template ".concat(SPECIAL_PROPERTIES.V_IF, "=\"").concat(encodeQuotes(ifValue), "\">\n          ").concat(json.children.map(function (item) { return (0, exports.blockToVue)(item, options); }).join('\n'), "\n        </template>\n        ").concat((0, is_mitosis_node_1.isMitosisNode)(json.meta.else)
-                    ? "\n            <template ".concat(SPECIAL_PROPERTIES.V_ELSE, ">\n              ").concat((0, exports.blockToVue)(json.meta.else, options), "\n            </template>")
-                    : '', "\n        ");
+                return defaultShowTemplate;
             case 2:
+                // if it is not the root node, the default show template can be used
+                // as Vue 2 only has this limitation at root level
+                if (!(scope === null || scope === void 0 ? void 0 : scope.isRootNode)) {
+                    return defaultShowTemplate;
+                }
                 // Vue 2 can only handle one root element, so we just take the first one.
                 // TO-DO: warn user of multi-children Show.
                 var firstChild = json.children.filter(filter_empty_text_nodes_1.filterEmptyTextNodes)[0];
