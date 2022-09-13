@@ -17,7 +17,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.useDefaultProps = exports.useMetadata = exports.onError = exports.useDynamicTag = exports.onUnMount = exports.onInit = exports.onCreate = exports.onUpdate = exports.onMount = exports.setContext = exports.createContext = exports.useContext = exports.useRef = exports.useState = exports.useStore = void 0;
 __exportStar(require("./flow"), exports);
 // These compile away
-var useStore = function (obj) { return obj; };
+var useStore = function (obj) {
+    throw new Error('useStore: Mitosis hook should have been compiled away');
+    return obj;
+};
 exports.useStore = useStore;
 var useState = function (obj) {
     throw new Error('useState: Mitosis hook should have been compiled away');
