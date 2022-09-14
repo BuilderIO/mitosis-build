@@ -60,5 +60,10 @@ export declare type MitosisConfig = {
      * Defaults to the JSXParser of this project (src/parsers/jsx)
      */
     parser?: (code: string, path?: string) => MitosisComponent;
+    /**
+     * Configure a custom function that provides the output path for each target.
+     * If you provide this function, you must provide a value for every target yourself.
+     */
+    getTargetPath?: (target: Target) => string;
 };
 export {};

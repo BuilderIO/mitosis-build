@@ -349,7 +349,7 @@ var runTestsForTarget = function (_a) {
                 testsArray.forEach(function (tests) {
                     Object.keys(tests).forEach(function (key) {
                         test(key, function () {
-                            var component = (0, jsx_1.parseJsx)(tests[key]);
+                            var component = (0, jsx_1.parseJsx)(tests[key], { typescript: options.typescript });
                             var getOutput = function () { return generator(options)({ component: component, path: path }); };
                             try {
                                 expect(getOutput()).toMatchSnapshot();

@@ -72,10 +72,10 @@ var beforeParse = function (path) {
  * @param jsx string representation of the Mitosis component
  * @returns A JSON representation of the Mitosis component
  */
-function parseJsx(jsx, options) {
-    if (options === void 0) { options = {}; }
-    var useOptions = __assign({ format: 'react' }, options);
+function parseJsx(jsx, _options) {
+    if (_options === void 0) { _options = {}; }
     var subComponentFunctions = [];
+    var options = __assign({ typescript: false }, _options);
     var output = babel.transform(jsx, {
         configFile: false,
         babelrc: false,
@@ -89,7 +89,8 @@ function parseJsx(jsx, options) {
                     // If left to its default `false`, then this will strip away:
                     // - unused JS imports
                     // - types imports within regular JS import syntax
-                    onlyRemoveTypeImports: true,
+                    // When outputting to TS, we must set it to `true` to preserve these imports.
+                    onlyRemoveTypeImports: options.typescript,
                 },
             ],
         ],
@@ -118,7 +119,7 @@ function parseJsx(jsx, options) {
                             return !types.isExportDefaultDeclaration(node) && types.isFunctionDeclaration(node);
                         })
                             .map(function (node) { return "export default ".concat((0, generator_1.default)(node).code); });
-                        var preComponentCode = (0, function_1.pipe)(path.node.body.filter(function (statement) { return !(0, helpers_1.isImportOrDefaultExport)(statement); }), function (statements) { return (0, metadata_1.collectMetadata)(statements, context.builder.component, useOptions); }, types.program, generator_1.default, function (generatorResult) { return generatorResult.code; });
+                        var preComponentCode = (0, function_1.pipe)(path.node.body.filter(function (statement) { return !(0, helpers_1.isImportOrDefaultExport)(statement); }), function (statements) { return (0, metadata_1.collectMetadata)(statements, context.builder.component, options); }, types.program, generator_1.default, function (generatorResult) { return generatorResult.code; });
                         // TODO: support multiple? e.g. for others to add imports?
                         context.builder.component.hooks.preComponent = { code: preComponentCode };
                         path.replaceWith(types.program(keepStatements));
@@ -171,7 +172,7 @@ function parseJsx(jsx, options) {
     var parsed = (0, json_1.tryParseJson)(toParse);
     (0, state_1.mapStateIdentifiers)(parsed);
     (0, context_1.extractContextComponents)(parsed);
-    parsed.subComponents = subComponentFunctions.map(function (item) { return parseJsx(item, useOptions); });
+    parsed.subComponents = subComponentFunctions.map(function (item) { return parseJsx(item, options); });
     return parsed;
 }
 exports.parseJsx = parseJsx;
