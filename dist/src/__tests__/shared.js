@@ -15,6 +15,7 @@ exports.runTestsForTarget = exports.runTestsForJsx = void 0;
 var jsx_1 = require("../parsers/jsx");
 var getRawFile = function (path) { return require(path); };
 var basicForShow = getRawFile('./data/basic-for-show.raw');
+var basicBooleanAttribute = getRawFile('./data/basic-boolean-attribute.raw');
 var basicOnMountUpdate = getRawFile('./data/basic-onMount-update.raw');
 var basicContext = getRawFile('./data/basic-context.raw');
 var basicOutputsMeta = getRawFile('./data/basic-outputs-meta.raw');
@@ -77,6 +78,7 @@ var rootFragmentMultiNode = getRawFile('./data/blocks/root-fragment-multi-node.r
 var path = 'test-path';
 var BASIC_TESTS = {
     Basic: basic,
+    BasicBooleanAttribute: basicBooleanAttribute,
     BasicRef: basicRef,
     BasicRefPrevious: basicRefPrevious,
     BasicRefAssignment: basicRefAssignment,

@@ -208,6 +208,13 @@ var jsxElementToJson = function (node) {
             if (types.isJSXAttribute(item)) {
                 var key = item.name.name;
                 var value = item.value;
+                // boolean attribute
+                if (value === null) {
+                    memo[key] = {
+                        code: 'true',
+                    };
+                    return memo;
+                }
                 if (types.isJSXExpressionContainer(value) && !types.isStringLiteral(value.expression)) {
                     var expression = value.expression;
                     if (types.isArrowFunctionExpression(expression)) {
