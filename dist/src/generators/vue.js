@@ -133,9 +133,9 @@ var NODE_MAPPERS = {
             : '';
     },
     Show: function (json, options, scope) {
-        var _a, _b, _c, _d, _e;
-        var _f, _g;
-        var ifValue = (0, slots_1.replaceSlotsInString)((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)((_f = json.bindings.when) === null || _f === void 0 ? void 0 : _f.code), function (slotName) { return "$slots.".concat(slotName); });
+        var _a, _b, _c, _d, _e, _f;
+        var _g, _h;
+        var ifValue = (0, slots_1.replaceSlotsInString)((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)((_g = json.bindings.when) === null || _g === void 0 ? void 0 : _g.code), function (slotName) { return "$slots.".concat(slotName); });
         var defaultShowTemplate = "\n    <template ".concat(SPECIAL_PROPERTIES.V_IF, "=\"").concat(encodeQuotes(ifValue), "\">\n      ").concat(json.children.map(function (item) { return (0, exports.blockToVue)(item, options); }).join('\n'), "\n    </template>\n    ").concat((0, is_mitosis_node_1.isMitosisNode)(json.meta.else)
             ? "\n        <template ".concat(SPECIAL_PROPERTIES.V_ELSE, ">\n          ").concat((0, exports.blockToVue)(json.meta.else, options), "\n        </template>")
             : '', "\n    ");
@@ -148,54 +148,95 @@ var NODE_MAPPERS = {
                 if (!(scope === null || scope === void 0 ? void 0 : scope.isRootNode)) {
                     return defaultShowTemplate;
                 }
+                var children_1 = json.children.filter(filter_empty_text_nodes_1.filterEmptyTextNodes);
                 // Vue 2 can only handle one root element, so we just take the first one.
                 // TO-DO: warn user of multi-children Show.
-                var firstChild = json.children.filter(filter_empty_text_nodes_1.filterEmptyTextNodes)[0];
+                var firstChild = children_1[0];
                 var elseBlock = json.meta.else;
                 var hasShowChild = (firstChild === null || firstChild === void 0 ? void 0 : firstChild.name) === 'Show';
                 var childElseBlock = firstChild === null || firstChild === void 0 ? void 0 : firstChild.meta.else;
-                /**
-                 * This is special edge logic to handle 2 nested Show elements in Vue 2.
-                 * We need to invert the logic to make it work, due to no-template-root-element limitations in Vue 2.
-                 *
-                 * <show when={foo} else={else-1}>
-                 *  <show when={bar} else={else-2}>
-                 *   <if-code>
-                 *  </show>
-                 * </show>
-                 *
-                 *
-                 * foo: true && bar: true => if-code
-                 * foo: true && bar: false => else-2
-                 * foo: false && bar: true?? => else-1
-                 *
-                 *
-                 * map to:
-                 *
-                 * <else-1 if={!foo} />
-                 * <else-2 else-if={!bar} />
-                 * <if-code v-else />
-                 *
-                 */
-                if (firstChild &&
+                var allShowChildrenWithoutElse = children_1.every(function (x) { return x.name === 'Show' && !x.meta.else; });
+                if (allShowChildrenWithoutElse && (0, is_mitosis_node_1.isMitosisNode)(elseBlock)) {
+                    /**
+                     * This is when we mimic an if-else chain by only providing `Show` elements as children, none of which have an `else` block
+                     *
+                     * <show when={foo} else={else-1}>
+                     *  <show when={bar}> <bar-code> </show>
+                     *  <show when={x}> <x-code> </show>
+                     *  <show when={y}> <y-code> </show>
+                     * </show>
+                     *
+                     * What we want in this case is:
+                     *
+                     * <else-1 if={!foo} />
+                     * <bar-code v-else-if={bar} />
+                     * <x-code v-else-if={x} />
+                     * <y-code v-else />
+                     */
+                    var ifString = (0, function_1.pipe)(elseBlock, addPropertiesToJson((_a = {}, _a[SPECIAL_PROPERTIES.V_IF] = invertBooleanExpression(ifValue), _a)), function (block) { return (0, exports.blockToVue)(block, options); });
+                    var childrenStrings = children_1.map(function (child, idx) {
+                        var _a, _b;
+                        var _c;
+                        var isLast = idx === children_1.length - 1;
+                        var innerBlock = child.children.filter(filter_empty_text_nodes_1.filterEmptyTextNodes)[0];
+                        if (!isLast) {
+                            var childIfValue = (0, function_1.pipe)((_c = child.bindings.when) === null || _c === void 0 ? void 0 : _c.code, strip_state_and_props_refs_1.stripStateAndPropsRefs);
+                            var elseIfString = (0, function_1.pipe)(innerBlock, addPropertiesToJson((_a = {}, _a[SPECIAL_PROPERTIES.V_ELSE_IF] = childIfValue, _a)), function (block) { return (0, exports.blockToVue)(block, options); });
+                            return elseIfString;
+                        }
+                        else {
+                            var elseString = (0, function_1.pipe)(innerBlock, addPropertiesToJson((_b = {}, _b[SPECIAL_PROPERTIES.V_ELSE] = '', _b)), function (block) { return (0, exports.blockToVue)(block, options); });
+                            return elseString;
+                        }
+                    });
+                    return "\n            ".concat(ifString, "\n            ").concat(childrenStrings.join('\n'), "\n          ");
+                }
+                else if (firstChild &&
                     (0, is_mitosis_node_1.isMitosisNode)(elseBlock) &&
                     hasShowChild &&
                     (0, is_mitosis_node_1.isMitosisNode)(childElseBlock)) {
-                    var ifString = (0, function_1.pipe)(elseBlock, addPropertiesToJson((_a = {}, _a[SPECIAL_PROPERTIES.V_IF] = invertBooleanExpression(ifValue), _a)), function (block) { return (0, exports.blockToVue)(block, options); });
-                    var childIfValue = (0, function_1.pipe)((_g = firstChild.bindings.when) === null || _g === void 0 ? void 0 : _g.code, strip_state_and_props_refs_1.stripStateAndPropsRefs, invertBooleanExpression);
-                    var elseIfString = (0, function_1.pipe)(childElseBlock, addPropertiesToJson((_b = {}, _b[SPECIAL_PROPERTIES.V_ELSE_IF] = childIfValue, _b)), function (block) { return (0, exports.blockToVue)(block, options); });
+                    /**
+                     * This is special edge logic to handle 2 nested Show elements in Vue 2.
+                     * We need to invert the logic to make it work, due to no-template-root-element limitations in Vue 2.
+                     *
+                     * <show when={foo} else={else-1}>
+                     *  <show when={bar}> <bar-code> </show>
+                     *
+                     *  <show when={x}> <x-code> </show>
+                     *
+                     *  <show when={y}> <y-code> </show>
+                     * </show>
+                     *
+                     *
+                     *
+                     *
+                     * foo: true && bar: true => if-code
+                     * foo: true && bar: false => else-2
+                     * foo: false && bar: true?? => else-1
+                     *
+                     *
+                     * map to:
+                     *
+                     * <else-1 if={!foo} />
+                     * <else-2 v-else-if={!bar} />
+                     * <if-code v-else />
+                     *
+                     */
+                    var ifString = (0, function_1.pipe)(elseBlock, addPropertiesToJson((_b = {}, _b[SPECIAL_PROPERTIES.V_IF] = invertBooleanExpression(ifValue), _b)), function (block) { return (0, exports.blockToVue)(block, options); });
+                    var childIfValue = (0, function_1.pipe)((_h = firstChild.bindings.when) === null || _h === void 0 ? void 0 : _h.code, strip_state_and_props_refs_1.stripStateAndPropsRefs, invertBooleanExpression);
+                    var elseIfString = (0, function_1.pipe)(childElseBlock, addPropertiesToJson((_c = {}, _c[SPECIAL_PROPERTIES.V_ELSE_IF] = childIfValue, _c)), function (block) { return (0, exports.blockToVue)(block, options); });
                     var firstChildOfFirstChild = firstChild.children.filter(filter_empty_text_nodes_1.filterEmptyTextNodes)[0];
                     var elseString = firstChildOfFirstChild
-                        ? (0, function_1.pipe)(firstChildOfFirstChild, addPropertiesToJson((_c = {}, _c[SPECIAL_PROPERTIES.V_ELSE] = '', _c)), function (block) { return (0, exports.blockToVue)(block, options); })
+                        ? (0, function_1.pipe)(firstChildOfFirstChild, addPropertiesToJson((_d = {}, _d[SPECIAL_PROPERTIES.V_ELSE] = '', _d)), function (block) { return (0, exports.blockToVue)(block, options); })
                         : '';
                     return "\n\n            ".concat(ifString, "\n\n            ").concat(elseIfString, "\n\n            ").concat(elseString, "\n\n          ");
                 }
                 else {
                     var ifString = firstChild
-                        ? (0, function_1.pipe)(firstChild, addPropertiesToJson((_d = {}, _d[SPECIAL_PROPERTIES.V_IF] = ifValue, _d)), function (block) { return (0, exports.blockToVue)(block, options); })
+                        ? (0, function_1.pipe)(firstChild, addPropertiesToJson((_e = {}, _e[SPECIAL_PROPERTIES.V_IF] = ifValue, _e)), function (block) { return (0, exports.blockToVue)(block, options); })
                         : '';
                     var elseString = (0, is_mitosis_node_1.isMitosisNode)(elseBlock)
-                        ? (0, function_1.pipe)(elseBlock, addPropertiesToJson((_e = {}, _e[SPECIAL_PROPERTIES.V_ELSE] = '', _e)), function (block) {
+                        ? (0, function_1.pipe)(elseBlock, addPropertiesToJson((_f = {}, _f[SPECIAL_PROPERTIES.V_ELSE] = '', _f)), function (block) {
                             return (0, exports.blockToVue)(block, options);
                         })
                         : '';
