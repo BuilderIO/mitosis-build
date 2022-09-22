@@ -60,6 +60,7 @@ var getters_to_functions_1 = require("../helpers/getters-to-functions");
 var babel_transform_1 = require("../helpers/babel-transform");
 var function_1 = require("fp-ts/lib/function");
 var context_1 = require("./helpers/context");
+var slots_1 = require("../helpers/slots");
 var html_tags_1 = require("../constants/html_tags");
 var is_upper_case_1 = require("../helpers/is-upper-case");
 var json5_1 = __importDefault(require("json5"));
@@ -104,6 +105,18 @@ var mappers = {
                 parentComponent: parentComponent,
             }), "\n  ")
             : '', "\n{/if}");
+    },
+    Slot: function (_a) {
+        var _b, _c;
+        var json = _a.json, options = _a.options, parentComponent = _a.parentComponent;
+        if (!json.bindings.name) {
+            var key = Object.keys(json.bindings).find(Boolean);
+            if (!key)
+                return '<slot />';
+            return "\n        <span #".concat(key, ">\n        ").concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)((_b = json.bindings[key]) === null || _b === void 0 ? void 0 : _b.code), "\n        </span>\n      ");
+        }
+        var strippedTextCode = (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(json.bindings.name.code);
+        return "<slot name=\"".concat((0, slots_1.stripSlotPrefix)(strippedTextCode).toLowerCase(), "\">").concat((_c = json.children) === null || _c === void 0 ? void 0 : _c.map(function (item) { return (0, exports.blockToSvelte)({ json: item, options: options, parentComponent: parentComponent }); }).join('\n'), "</slot>");
     },
 };
 var getContextCode = function (json) {
@@ -171,8 +184,13 @@ var blockToSvelte = function (_a) {
     if (json.properties._text) {
         return json.properties._text;
     }
-    if ((_b = json.bindings._text) === null || _b === void 0 ? void 0 : _b.code) {
-        return "{".concat(stripStateAndProps(json.bindings._text.code, options), "}");
+    var textCode = (_b = json.bindings._text) === null || _b === void 0 ? void 0 : _b.code;
+    if (textCode) {
+        var strippedTextCode = stripStateAndProps(textCode, options);
+        if ((0, slots_1.isSlotProperty)(strippedTextCode)) {
+            return "<slot name=\"".concat((0, slots_1.stripSlotPrefix)(strippedTextCode).toLowerCase(), "\"/>");
+        }
+        return "{".concat(strippedTextCode, "}");
     }
     var str = '';
     str += "<".concat(tagName, " ");
@@ -322,7 +340,7 @@ var componentToSvelte = function (_a) {
             valueMapper: function (code) { return (0, function_1.pipe)(stripStateAndProps(code, options), stripThisRefs); },
         }), babel_transform_1.babelTransformCode);
         var hasData = dataString.length > 4;
-        var props = Array.from((0, get_props_1.getProps)(json));
+        var props = Array.from((0, get_props_1.getProps)(json)).filter(function (prop) { return !(0, slots_1.isSlotProperty)(prop); });
         var transformHookCode = function (hookCode) {
             return (0, function_1.pipe)(stripStateAndProps(hookCode, options), babel_transform_1.babelTransformCode);
         };
