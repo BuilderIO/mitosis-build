@@ -564,7 +564,12 @@ function generateOptionsApiScript(component, options, path, template, props, onU
         ? ''
         : " \n          computed: ".concat(getterString, ",\n        "), "\n        ").concat(functionsString.length < 4
         ? ''
-        : "\n          methods: ".concat(functionsString, ",\n        "), "\n      }");
+        : "\n          methods: ".concat(functionsString, ",\n        "), "\n        ").concat(Object.entries(component.meta.vueConfig || {})
+        .map(function (_a) {
+        var k = _a[0], v = _a[1];
+        return "".concat(k, ": ").concat(v);
+    })
+        .join(','), "\n      }");
 }
 var getCompositionPropDefinition = function (_a) {
     var options = _a.options, component = _a.component, props = _a.props;
