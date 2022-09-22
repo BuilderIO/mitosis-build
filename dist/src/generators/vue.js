@@ -540,7 +540,7 @@ function generateOptionsApiScript(component, options, path, template, props, onU
     }
     return "\n        export default {\n        ".concat(!component.name
         ? ''
-        : "name: '".concat(path && ((_a = options.namePrefix) === null || _a === void 0 ? void 0 : _a.call(options, path)) ? ((_b = options.namePrefix) === null || _b === void 0 ? void 0 : _b.call(options, path)) + '-' : '').concat((0, lodash_1.kebabCase)(component.name), "',"), "\n        ").concat(generateComponents(componentsUsed, options), "\n        ").concat(props.size ? "props: ".concat(json5_1.default.stringify(propsDefinition), ",") : '', "\n        ").concat(dataString.length < 4
+        : "name: '".concat(path && ((_a = options.namePrefix) === null || _a === void 0 ? void 0 : _a.call(options, path)) ? ((_b = options.namePrefix) === null || _b === void 0 ? void 0 : _b.call(options, path)) + '-' : '').concat((0, lodash_1.kebabCase)(component.name), "',"), "\n        ").concat(generateComponents(componentsUsed, options), "\n        ").concat(props.length ? "props: ".concat(json5_1.default.stringify(propsDefinition), ",") : '', "\n        ").concat(dataString.length < 4
         ? ''
         : "\n        data: () => (".concat(dataString, "),\n        "), "\n\n        ").concat((0, lodash_1.size)(component.context.set)
         ? "provide() {\n                const _this = this;\n                return ".concat(getContextProvideString(component, options), "\n              },")
@@ -582,7 +582,7 @@ var getCompositionPropDefinition = function (_a) {
         str += "defineProps<".concat(component.propsTypeRef, ">()");
     }
     else {
-        str += "defineProps(".concat(json5_1.default.stringify(Array.from(props)), ")");
+        str += "defineProps(".concat(json5_1.default.stringify(props), ")");
     }
     return str;
 };
@@ -625,7 +625,7 @@ function generateCompositionApiScript(component, options, template, props, onUpd
         methods += " function _classStringToObject(str) {\n    const obj = {};\n    if (typeof str !== 'string') { return obj }\n    const classNames = str.trim().split(/\\s+/);\n    for (const name of classNames) {\n      obj[name] = true;\n    }\n    return obj;\n    } ";
     }
     var getterKeys = Object.keys((0, lodash_1.pickBy)(component.state, function (i) { return (i === null || i === void 0 ? void 0 : i.type) === 'getter'; }));
-    var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    ", "\n    ", "\n\n    ", "\n\n    ", "\n\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n\n    ", "\n    ", "\n  "], ["\n    ", "\n    ", "\n\n    ", "\n\n    ", "\n\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n\n    ", "\n    ", "\n  "])), props.size ? getCompositionPropDefinition({ component: component, props: props, options: options }) : '', refs, (_a = Object.keys(component.context.get)) === null || _a === void 0 ? void 0 : _a.map(function (key) { return "const ".concat(key, " = inject(").concat(component.context.get[key].name, ")"); }).join('\n'), (_b = Object.keys(component.context.set)) === null || _b === void 0 ? void 0 : _b.map(function (key) { return "provide(".concat(component.context.set[key].name, ", ").concat(component.context.set[key].ref, ")"); }).join('\n'), (_c = Object.keys(component.refs)) === null || _c === void 0 ? void 0 : _c.map(function (key) { return "const ".concat(key, " = ref<").concat(component.refs[key].typeParameter, ">()"); }).join('\n'), !((_d = component.hooks.onMount) === null || _d === void 0 ? void 0 : _d.code)
+    var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    ", "\n    ", "\n\n    ", "\n\n    ", "\n\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n\n    ", "\n    ", "\n  "], ["\n    ", "\n    ", "\n\n    ", "\n\n    ", "\n\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n\n    ", "\n    ", "\n  "])), props.length ? getCompositionPropDefinition({ component: component, props: props, options: options }) : '', refs, (_a = Object.keys(component.context.get)) === null || _a === void 0 ? void 0 : _a.map(function (key) { return "const ".concat(key, " = inject(").concat(component.context.get[key].name, ")"); }).join('\n'), (_b = Object.keys(component.context.set)) === null || _b === void 0 ? void 0 : _b.map(function (key) { return "provide(".concat(component.context.set[key].name, ", ").concat(component.context.set[key].ref, ")"); }).join('\n'), (_c = Object.keys(component.refs)) === null || _c === void 0 ? void 0 : _c.map(function (key) { return "const ".concat(key, " = ref<").concat(component.refs[key].typeParameter, ">()"); }).join('\n'), !((_d = component.hooks.onMount) === null || _d === void 0 ? void 0 : _d.code)
         ? ''
         : "onMounted(() => { ".concat(appendValueToRefs(component.hooks.onMount.code, component, options), "})"), !((_e = component.hooks.onUnMount) === null || _e === void 0 ? void 0 : _e.code)
         ? ''
@@ -686,7 +686,7 @@ var componentToVue = function (userOptions) {
         var onUpdateWithDeps = ((_f = component.hooks.onUpdate) === null || _f === void 0 ? void 0 : _f.filter(function (hook) { var _a; return (_a = hook.deps) === null || _a === void 0 ? void 0 : _a.length; })) || [];
         var onUpdateWithoutDeps = ((_g = component.hooks.onUpdate) === null || _g === void 0 ? void 0 : _g.filter(function (hook) { var _a; return !((_a = hook.deps) === null || _a === void 0 ? void 0 : _a.length); })) || [];
         var getterKeys = Object.keys((0, lodash_1.pickBy)(component.state, function (i) { return (i === null || i === void 0 ? void 0 : i.type) === 'getter'; }));
-        var elementProps = (0, get_props_1.getProps)(component);
+        var elementProps = Array.from((0, get_props_1.getProps)(component)).filter(function (prop) { return !(0, slots_1.isSlotProperty)(prop); });
         // import from vue
         var vueImports = [];
         if (options.vueVersion >= 3 && options.asyncComponentImports) {
