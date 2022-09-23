@@ -379,7 +379,7 @@ var componentToSvelte = function (_a) {
             return propDeclaration;
         })
             .join('\n'), (0, helpers_1.hasStyle)(json)
-            ? "\n        function mitosis_styling (node, vars) {\n          Object.entries(vars).forEach(([ p, v ]) => { node.style[p] = v })\n        }\n      "
+            ? "\n        function mitosis_styling (node, vars) {\n          Object.entries(vars || {}).forEach(([ p, v ]) => { node.style[p] = v })\n        }\n      "
             : '', getContextCode(json), setContextCode(json), functionsString.length < 4 ? '' : functionsString, getterString.length < 4 ? '' : getterString, refs.map(function (ref) { return "let ".concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(ref)); }).join('\n'), options.stateType === 'proxies'
             ? dataString.length < 4
                 ? ''
