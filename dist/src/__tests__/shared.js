@@ -161,6 +161,9 @@ var ADVANCED_REF = {
 var ON_UPDATE_RETURN = {
     basicOnUpdateReturn: getRawFile('./data/basic-onUpdate-return.raw'),
 };
+var IMPORT_TEST = {
+    importRaw: getRawFile('./data/import.raw'),
+};
 var JSX_TESTS = [
     BASIC_TESTS,
     SLOTS_TESTS,
@@ -194,6 +197,7 @@ var TESTS_FOR_TARGET = {
         FOR_SHOW_TESTS,
         ADVANCED_REF,
         ON_UPDATE_RETURN,
+        IMPORT_TEST,
     ],
     lit: [
         BASIC_TESTS,
