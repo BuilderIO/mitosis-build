@@ -63,6 +63,7 @@ var componentToQwik = function (userOptions) {
             var css_1 = null;
             var componentFn = (0, src_generator_1.arrowFnBlock)(['props'], [
                 function () {
+                    var _a, _b;
                     css_1 = emitUseStyles(file, component);
                     emitUseContext(file, component);
                     emitUseRef(file, component);
@@ -71,7 +72,8 @@ var componentToQwik = function (userOptions) {
                     emitUseMount(file, component);
                     emitUseWatch(file, component);
                     emitUseCleanup(file, component);
-                    emitTagNameHack(file, component);
+                    emitTagNameHack(file, component, (_a = component.meta.useMetadata) === null || _a === void 0 ? void 0 : _a.elementTag);
+                    emitTagNameHack(file, component, (_b = component.meta.useMetadata) === null || _b === void 0 ? void 0 : _b.componentElementTag);
                     emitJSX(file, component, mutable_1);
                 },
             ], [component.propsTypeRef + (isLightComponent ? '&{key?:any}' : '') || 'any']);
@@ -95,11 +97,9 @@ var componentToQwik = function (userOptions) {
     };
 };
 exports.componentToQwik = componentToQwik;
-function emitTagNameHack(file, component) {
-    var _a;
-    var elementTag = (_a = component.meta.useMetadata) === null || _a === void 0 ? void 0 : _a.elementTag;
-    if (elementTag) {
-        file.src.emit(elementTag, '=', (0, convert_method_to_function_1.convertMethodToFunction)(elementTag, stateToMethodOrGetter(component.state), getLexicalScopeVars(component)), ';');
+function emitTagNameHack(file, component, metadataValue) {
+    if (typeof metadataValue === 'string' && metadataValue) {
+        file.src.emit(metadataValue, '=', (0, convert_method_to_function_1.convertMethodToFunction)(metadataValue, stateToMethodOrGetter(component.state), getLexicalScopeVars(component)), ';');
     }
 }
 function emitUseMount(file, component) {
@@ -215,7 +215,7 @@ function emitUseStore(file, stateInit) {
     }
     else {
         // TODO hack for now so that `state` variable is defined, even though it is never read.
-        file.src.emit('const state={tagName:""' + (file.options.isTypeScript ? 'as any' : '') + '};');
+        file.src.emit('const state' + (file.options.isTypeScript ? ': any' : '') + ' = {};');
     }
 }
 function emitTypes(file, component) {

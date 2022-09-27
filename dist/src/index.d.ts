@@ -1,5 +1,12 @@
+import { JSX } from '@builder.io/mitosis/jsx-runtime';
 export * from './flow';
-export declare type Context<T> = {};
+declare function Provider<T>(props: {
+    value: T;
+    children: JSX.Element;
+}): any;
+export declare type Context<T> = {
+    Provider: typeof Provider<T>;
+};
 export declare const useStore: <T>(obj: T) => T;
 export declare const useState: <T>(obj: T) => [T, (value: T) => void];
 export declare const useRef: <T>(obj?: void | T | null | undefined) => T;

@@ -165,6 +165,7 @@ var getTagName = function (_a) {
 var stripStateAndProps = function (code, options) {
     return (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(code, {
         includeState: options.stateType === 'variables',
+        replaceWith: function (name) { return (name === 'children' ? '$$slots.default' : name); },
     });
 };
 var blockToSvelte = function (_a) {

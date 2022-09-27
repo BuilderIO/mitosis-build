@@ -16,6 +16,9 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.useDefaultProps = exports.useMetadata = exports.onError = exports.useDynamicTag = exports.onUnMount = exports.onInit = exports.onCreate = exports.onUpdate = exports.onMount = exports.setContext = exports.createContext = exports.useContext = exports.useRef = exports.useState = exports.useStore = void 0;
 __exportStar(require("./flow"), exports);
+function Provider(props) {
+    return null;
+}
 // These compile away
 var useStore = function (obj) {
     throw new Error('useStore: Mitosis hook should have been compiled away');
