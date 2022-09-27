@@ -139,13 +139,14 @@ var renderImports = function (_a) {
 };
 exports.renderImports = renderImports;
 var renderPreComponent = function (_a) {
-    var component = _a.component, target = _a.target, excludeMitosisComponents = _a.excludeMitosisComponents, _b = _a.asyncComponentImports, asyncComponentImports = _b === void 0 ? false : _b;
+    var _b;
+    var component = _a.component, target = _a.target, excludeMitosisComponents = _a.excludeMitosisComponents, _c = _a.asyncComponentImports, asyncComponentImports = _c === void 0 ? false : _c;
     return "\n    ".concat((0, exports.renderImports)({
         imports: component.imports,
         target: target,
         asyncComponentImports: asyncComponentImports,
         excludeMitosisComponents: excludeMitosisComponents,
-    }), "\n    ").concat((0, exports.renderExportAndLocal)(component), "\n    ").concat(component.hooks.preComponent || '', "\n  ");
+    }), "\n    ").concat((0, exports.renderExportAndLocal)(component), "\n    ").concat(((_b = component.hooks.preComponent) === null || _b === void 0 ? void 0 : _b.code) || '', "\n  ");
 };
 exports.renderPreComponent = renderPreComponent;
 var renderExportAndLocal = function (component) {
