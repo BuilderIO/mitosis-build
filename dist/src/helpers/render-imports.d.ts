@@ -1,5 +1,6 @@
 import { Target } from '../types/config';
 import { MitosisComponent, MitosisImport } from '../types/mitosis-component';
+export declare const checkIsComponentImport: (theImport: MitosisImport) => boolean;
 export declare const renderImport: ({ theImport, target, asyncComponentImports, }: {
     theImport: MitosisImport;
     target: Target;

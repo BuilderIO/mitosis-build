@@ -68,6 +68,7 @@ var get_custom_imports_1 = require("../helpers/get-custom-imports");
 var slots_1 = require("../helpers/slots");
 var functions_1 = require("./helpers/functions");
 var babel_transform_1 = require("../helpers/babel-transform");
+var nullable_1 = require("../helpers/nullable");
 function encodeQuotes(string) {
     return string.replace(/"/g, '&quot;');
 }
@@ -452,12 +453,11 @@ var mergeOptions = function (_a, _b) {
 };
 var generateComponentImport = function (options) {
     return function (componentName) {
-        var key = (0, lodash_1.kebabCase)(componentName);
         if (options.vueVersion >= 3 && options.asyncComponentImports) {
-            return "'".concat(key, "': defineAsyncComponent(").concat(componentName, ")");
+            return "'".concat(componentName, "': defineAsyncComponent(").concat(componentName, ")");
         }
         else {
-            return "'".concat(key, "': ").concat(componentName);
+            return "'".concat(componentName, "': ").concat(componentName);
         }
     };
 };
@@ -523,10 +523,19 @@ function generateOptionsApiScript(component, options, path, template, props, onU
         functionsString = functionsString.replace(/}\s*$/, "".concat(localVarAsFunc.join(','), "}"));
     }
     // Component references to include in `component: { YourComponent, ... }
-    var componentsUsed = Array.from((0, get_components_used_1.getComponentsUsed)(component))
+    var componentsUsedInTemplate = Array.from((0, get_components_used_1.getComponentsUsed)(component))
         .filter(function (name) { return name.length && !name.includes('.') && name[0].toUpperCase() === name[0]; })
         // Strip out components that compile away
         .filter(function (name) { return !['For', 'Show', 'Fragment', 'Slot', component.name].includes(name); });
+    // get default imports from component files
+    var importedComponents = component.imports
+        .filter(render_imports_1.checkIsComponentImport)
+        .map(function (imp) { var _a; return (_a = Object.entries(imp.imports).find(function (_a) {
+        var _ = _a[0], value = _a[1];
+        return value === 'default';
+    })) === null || _a === void 0 ? void 0 : _a[0]; })
+        .filter(nullable_1.checkIsDefined);
+    var componentsUsed = (0, lodash_1.uniq)(__spreadArray(__spreadArray([], componentsUsedInTemplate, true), importedComponents, true));
     var propsDefinition = Array.from(props).filter(function (prop) { return prop !== 'children' && prop !== 'class'; });
     // add default props (if set)
     if (component.defaultProps) {

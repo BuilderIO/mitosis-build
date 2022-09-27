@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.renderExportAndLocal = exports.renderPreComponent = exports.renderImports = exports.renderImport = void 0;
+exports.renderExportAndLocal = exports.renderPreComponent = exports.renderImports = exports.renderImport = exports.checkIsComponentImport = void 0;
 var DEFAULT_IMPORT = 'default';
 var STAR_IMPORT = '*';
 var getStarImport = function (_a) {
@@ -48,12 +48,13 @@ var getFileExtensionForTarget = function (target) {
 var checkIsComponentImport = function (theImport) {
     return theImport.path.endsWith('.lite') && !theImport.path.endsWith('.context.lite');
 };
+exports.checkIsComponentImport = checkIsComponentImport;
 var transformImportPath = function (theImport, target) {
     // We need to drop the `.lite` from context files, because the context generator does so as well.
     if (theImport.path.endsWith('.context.lite')) {
         return theImport.path.replace('.lite', '.js');
     }
-    if (checkIsComponentImport(theImport)) {
+    if ((0, exports.checkIsComponentImport)(theImport)) {
         return theImport.path.replace('.lite', getFileExtensionForTarget(target));
     }
     return theImport.path;
@@ -97,7 +98,7 @@ var renderImport = function (_a) {
     var importedValues = getImportedValues({ theImport: theImport });
     var path = transformImportPath(theImport, target);
     var importValue = getImportValue(importedValues);
-    var isComponentImport = checkIsComponentImport(theImport);
+    var isComponentImport = (0, exports.checkIsComponentImport)(theImport);
     var shouldBeAsyncImport = asyncComponentImports && isComponentImport;
     // For lit (components) we just want to do a plain import
     // https://lit.dev/docs/components/rendering/#composing-templates
