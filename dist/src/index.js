@@ -95,6 +95,7 @@ __exportStar(require("./types/mitosis-node"), exports);
 __exportStar(require("./types/mitosis-component"), exports);
 __exportStar(require("./types/config"), exports);
 __exportStar(require("./types/transpiler"), exports);
+__exportStar(require("./types/plugins"), exports);
 __exportStar(require("./plugins/compile-away-builder-components"), exports);
 __exportStar(require("./plugins/compile-away-components"), exports);
 __exportStar(require("./plugins/map-styles"), exports);

@@ -83,7 +83,6 @@ var NODE_MAPPERS = {
     },
     Fragment: function (json, options) {
         var wrap = wrapInFragment(json);
-        var tagName = options.preact ? 'Fragment' : '';
         return "".concat(wrap ? getFragment('open', options) : '').concat(json.children
             .map(function (item) { return (0, exports.blockToReact)(item, options); })
             .join('\n')).concat(wrap ? getFragment('close', options) : '');
@@ -409,7 +408,10 @@ var _componentToReact = function (json, options, isSubComponent) {
         ? "/** @jsx jsx */\n    import { jsx } from '@emotion/react'".trim()
         : '', hasState && stateType === 'valtio' ? "import { useLocalProxy } from 'valtio/utils';" : '', hasState && stateType === 'solid' ? "import { useMutable } from 'react-solid-state';" : '', stateType === 'mobx' && hasState
         ? "import { useLocalObservable } from 'mobx-react-lite';"
-        : '', json.types ? json.types.join('\n') : '', (0, render_imports_1.renderPreComponent)({ component: json, target: 'react' }), isSubComponent ? '' : 'export default ', isForwardRef ? "forwardRef".concat(forwardRefType ? "<".concat(forwardRefType, ">") : '', "(") : '', json.name || 'MyComponent', propsArgs, isForwardRef ? ", ".concat(options.forwardRef) : '', hasStateArgument ? '' : refsString, hasState
+        : '', json.types ? json.types.join('\n') : '', (0, render_imports_1.renderPreComponent)({
+        component: json,
+        target: options.type === 'native' ? 'reactNative' : 'react',
+    }), isSubComponent ? '' : 'export default ', isForwardRef ? "forwardRef".concat(forwardRefType ? "<".concat(forwardRefType, ">") : '', "(") : '', json.name || 'MyComponent', propsArgs, isForwardRef ? ", ".concat(options.forwardRef) : '', hasStateArgument ? '' : refsString, hasState
         ? stateType === 'mobx'
             ? "const state = useLocalObservable(() => (".concat((0, get_state_object_string_1.getStateObjectStringFromComponent)(json), "));")
             : stateType === 'useState'
