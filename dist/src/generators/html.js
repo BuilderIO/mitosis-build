@@ -47,12 +47,14 @@ var get_props_1 = require("../helpers/get-props");
 var get_props_ref_1 = require("../helpers/get-props-ref");
 var get_prop_functions_1 = require("../helpers/get-prop-functions");
 var jsx_1 = require("../parsers/jsx");
+var mitosis_node_1 = require("../types/mitosis-node");
 var strip_state_and_props_refs_1 = require("../helpers/strip-state-and-props-refs");
 var plugins_1 = require("../modules/plugins");
 var is_children_1 = __importDefault(require("../helpers/is-children"));
 var strip_meta_properties_1 = require("../helpers/strip-meta-properties");
 var remove_surrounding_block_1 = require("../helpers/remove-surrounding-block");
 var render_imports_1 = require("../helpers/render-imports");
+var for_1 = require("../helpers/nodes/for");
 var isAttribute = function (key) {
     return /-/.test(key);
 };
@@ -189,7 +191,7 @@ var addOnChangeJs = function (id, options, code) {
 };
 // TODO: spread support
 var blockToHtml = function (json, options, blockOptions) {
-    var _a, _b, _c, _d, _e, _f, _g;
+    var _a, _b, _c, _d, _e, _f;
     if (blockOptions === void 0) { blockOptions = {}; }
     var ComponentName = blockOptions.ComponentName;
     var scopeVars = (blockOptions === null || blockOptions === void 0 ? void 0 : blockOptions.scopeVars) || [];
@@ -221,14 +223,14 @@ var blockToHtml = function (json, options, blockOptions) {
         return "<template data-el=\"".concat(elId, "\"><!-- ").concat((_b = json.bindings._text) === null || _b === void 0 ? void 0 : _b.code, " --></template>");
     }
     var str = '';
-    if (json.name === 'For') {
-        var forArguments = ((_c = json === null || json === void 0 ? void 0 : json.scope) === null || _c === void 0 ? void 0 : _c.For) || [];
+    if ((0, mitosis_node_1.checkIsForNode)(json)) {
+        var forArguments = (0, for_1.getForArguments)(json);
         var localScopeVars_1 = __spreadArray(__spreadArray([], scopeVars, true), forArguments, true);
         var argsStr = forArguments.map(function (arg) { return "\"".concat(arg, "\""); }).join(',');
         addOnChangeJs(elId, options, 
         // TODO: be smarter about rendering, deleting old items and adding new ones by
         // querying dom potentially
-        "\n        let array = ".concat((_d = json.bindings.each) === null || _d === void 0 ? void 0 : _d.code, ";\n        ").concat(options.format === 'class' ? 'this.' : '', "renderLoop(el, array, ").concat(argsStr, ");\n      "));
+        "\n        let array = ".concat((_c = json.bindings.each) === null || _c === void 0 ? void 0 : _c.code, ";\n        ").concat(options.format === 'class' ? 'this.' : '', "renderLoop(el, array, ").concat(argsStr, ");\n      "));
         // TODO: decide on how to handle this...
         str += "\n      <template data-el=\"".concat(elId, "\">");
         if (json.children) {
@@ -241,7 +243,7 @@ var blockToHtml = function (json, options, blockOptions) {
         str += '</template>';
     }
     else if (json.name === 'Show') {
-        var whenCondition = ((_e = json.bindings.when) === null || _e === void 0 ? void 0 : _e.code).replace(/;$/, '');
+        var whenCondition = ((_d = json.bindings.when) === null || _d === void 0 ? void 0 : _d.code).replace(/;$/, '');
         addOnChangeJs(elId, options, "\n        ".concat(addScopeVars(scopeVars, whenCondition, function (scopeVar) {
             return "const ".concat(scopeVar, " = ").concat(options.format === 'class' ? 'this.' : '', "getScope(el, \"").concat(scopeVar, "\");");
         }), "\n        const whenCondition = ").concat(whenCondition, ";\n        if (whenCondition) {\n          ").concat(options.format === 'class' ? 'this.' : '', "showContent(el)\n        }\n      "));
@@ -281,8 +283,8 @@ var blockToHtml = function (json, options, blockOptions) {
             if (key === '_spread' || key === 'css') {
                 continue;
             }
-            var value = (_f = json.bindings[key]) === null || _f === void 0 ? void 0 : _f.code;
-            var cusArg = ((_g = json.bindings[key]) === null || _g === void 0 ? void 0 : _g.arguments) || ['event'];
+            var value = (_e = json.bindings[key]) === null || _e === void 0 ? void 0 : _e.code;
+            var cusArg = ((_f = json.bindings[key]) === null || _f === void 0 ? void 0 : _f.arguments) || ['event'];
             // TODO: proper babel transform to replace. Util for this
             var useValue = value;
             if (key.startsWith('on')) {

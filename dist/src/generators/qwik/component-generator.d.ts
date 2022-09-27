@@ -1,4 +1,4 @@
-import { BaseTranspilerOptions, Transpiler } from '../../types/transpiler';
+import { BaseTranspilerOptions, TranspilerGenerator } from '../../types/transpiler';
 export interface ToQwikOptions extends BaseTranspilerOptions {
 }
-export declare const componentToQwik: (userOptions?: ToQwikOptions) => Transpiler;
+export declare const componentToQwik: TranspilerGenerator<ToQwikOptions>;

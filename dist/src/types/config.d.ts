@@ -1,8 +1,8 @@
+import { MitosisComponent } from './mitosis-component';
 export declare type Format = 'esm' | 'cjs';
 export declare type Language = 'js' | 'ts';
 interface TranspilerOptions {
     format?: Format;
-    languages?: Language[];
 }
 declare type Targets = typeof import('../targets').targets;
 export declare type Target = keyof Targets;
@@ -50,5 +50,22 @@ export declare type MitosisConfig = {
      * ```
      */
     options: Partial<GeneratorOptions>;
+    /**
+     * Configure the extension of the files you want to compile
+     * Default value: 'lite.tsx'
+     */
+    extension: string;
+    /**
+     * Configure a custom parser function which takes a string and returns MitosisJSON
+     * Defaults to the JSXParser of this project (src/parsers/jsx)
+     */
+    parser?: (code: string, path?: string) => MitosisComponent;
+    /**
+     * Configure a custom function that provides the output path for each target.
+     * If you provide this function, you must provide a value for every target yourself.
+     */
+    getTargetPath: ({ target }: {
+        target: Target;
+    }) => string;
 };
 export {};

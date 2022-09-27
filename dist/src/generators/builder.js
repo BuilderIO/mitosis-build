@@ -81,15 +81,16 @@ var componentMappers = __assign(__assign({}, (!builder_1.symbolBlocksAsChildren
         block.component.options.columns = columns;
         block.children = [];
         return block;
-    }, For: function (node, options) {
+    }, For: function (_node, options) {
         var _a;
+        var node = _node;
         return el({
             component: {
                 name: 'Core:Fragment',
             },
             repeat: {
                 collection: (_a = node.bindings.each) === null || _a === void 0 ? void 0 : _a.code,
-                itemName: node.properties._forName,
+                itemName: node.scope.forName,
             },
             children: node.children
                 .filter(filter_empty_text_nodes_1.filterEmptyTextNodes)

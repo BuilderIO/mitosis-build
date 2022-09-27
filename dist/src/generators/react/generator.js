@@ -49,6 +49,7 @@ var state_1 = require("../../helpers/state");
 var state_2 = require("./state");
 var helpers_2 = require("./helpers");
 var hash_sum_1 = __importDefault(require("hash-sum"));
+var for_1 = require("../../helpers/nodes/for");
 var openFrag = function (options) { return getFragment('open', options); };
 var closeFrag = function (options) { return getFragment('close', options); };
 function getFragment(type, options) {
@@ -82,16 +83,16 @@ var NODE_MAPPERS = {
     },
     Fragment: function (json, options) {
         var wrap = wrapInFragment(json);
-        var tagName = options.preact ? 'Fragment' : '';
         return "".concat(wrap ? getFragment('open', options) : '').concat(json.children
             .map(function (item) { return (0, exports.blockToReact)(item, options); })
             .join('\n')).concat(wrap ? getFragment('close', options) : '');
     },
-    For: function (json, options) {
-        var _a, _b;
+    For: function (_json, options) {
+        var _a;
+        var json = _json;
         var wrap = wrapInFragment(json);
-        var forArguments = (((_a = json === null || json === void 0 ? void 0 : json.scope) === null || _a === void 0 ? void 0 : _a.For) || []).join(',');
-        return "{".concat((0, helpers_2.processBinding)((_b = json.bindings.each) === null || _b === void 0 ? void 0 : _b.code, options), "?.map((").concat(forArguments, ") => (\n      ").concat(wrap ? openFrag(options) : '').concat(json.children
+        var forArguments = (0, for_1.getForArguments)(json).join(', ');
+        return "{".concat((0, helpers_2.processBinding)((_a = json.bindings.each) === null || _a === void 0 ? void 0 : _a.code, options), "?.map((").concat(forArguments, ") => (\n      ").concat(wrap ? openFrag(options) : '').concat(json.children
             .filter(filter_empty_text_nodes_1.filterEmptyTextNodes)
             .map(function (item) { return (0, exports.blockToReact)(item, options); })
             .join('\n')).concat(wrap ? closeFrag(options) : '', "\n    ))}");
@@ -407,7 +408,10 @@ var _componentToReact = function (json, options, isSubComponent) {
         ? "/** @jsx jsx */\n    import { jsx } from '@emotion/react'".trim()
         : '', hasState && stateType === 'valtio' ? "import { useLocalProxy } from 'valtio/utils';" : '', hasState && stateType === 'solid' ? "import { useMutable } from 'react-solid-state';" : '', stateType === 'mobx' && hasState
         ? "import { useLocalObservable } from 'mobx-react-lite';"
-        : '', json.types ? json.types.join('\n') : '', (0, render_imports_1.renderPreComponent)({ component: json, target: 'react' }), isSubComponent ? '' : 'export default ', isForwardRef ? "forwardRef".concat(forwardRefType ? "<".concat(forwardRefType, ">") : '', "(") : '', json.name || 'MyComponent', propsArgs, isForwardRef ? ", ".concat(options.forwardRef) : '', hasStateArgument ? '' : refsString, hasState
+        : '', json.types ? json.types.join('\n') : '', (0, render_imports_1.renderPreComponent)({
+        component: json,
+        target: options.type === 'native' ? 'reactNative' : 'react',
+    }), isSubComponent ? '' : 'export default ', isForwardRef ? "forwardRef".concat(forwardRefType ? "<".concat(forwardRefType, ">") : '', "(") : '', json.name || 'MyComponent', propsArgs, isForwardRef ? ", ".concat(options.forwardRef) : '', hasStateArgument ? '' : refsString, hasState
         ? stateType === 'mobx'
             ? "const state = useLocalObservable(() => (".concat((0, get_state_object_string_1.getStateObjectStringFromComponent)(json), "));")
             : stateType === 'useState'

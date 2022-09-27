@@ -12,6 +12,7 @@ var standalone_1 = require("prettier/standalone");
 var collect_css_1 = require("../helpers/styles/collect-css");
 var fast_clone_1 = require("../helpers/fast-clone");
 var jsx_1 = require("../parsers/jsx");
+var mitosis_node_1 = require("../types/mitosis-node");
 var plugins_1 = require("../modules/plugins");
 var dedent_1 = __importDefault(require("dedent"));
 var get_state_object_string_1 = require("../helpers/get-state-object-string");
@@ -34,8 +35,8 @@ var blockToTemplate = function (json, options) {
         return "${".concat((_a = json.bindings._text) === null || _a === void 0 ? void 0 : _a.code, "}");
     }
     var str = '';
-    if (json.name === 'For') {
-        str += "${".concat((_b = json.bindings.each) === null || _b === void 0 ? void 0 : _b.code, "?.map(").concat(json.properties._forName, " => `");
+    if ((0, mitosis_node_1.checkIsForNode)(json)) {
+        str += "${".concat((_b = json.bindings.each) === null || _b === void 0 ? void 0 : _b.code, "?.map(").concat(json.scope.forName, " => `");
         if (json.children) {
             str += json.children.map(function (item) { return blockToTemplate(item, options); }).join('\n');
         }

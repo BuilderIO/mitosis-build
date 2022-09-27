@@ -110,7 +110,7 @@ var renderImport = function (_a) {
             console.warn('Vue: Async Component imports cannot include named imports. Dropping async import. This might break your code.');
         }
         else {
-            return "const ".concat(importValue, " = () => import('").concat(path, "')");
+            return "const ".concat(importValue, " = () => import('").concat(path, "')\n      .then(x => x.default)\n      .catch(err => { \n        console.error('Error while attempting to dynamically import component ").concat(importValue, " at ").concat(path, "', err);\n        throw err;\n      });");
         }
     }
     return importValue ? "import ".concat(importValue, " from '").concat(path, "';") : "import '".concat(path, "';");

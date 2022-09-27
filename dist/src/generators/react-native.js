@@ -10,6 +10,15 @@ var __assign = (this && this.__assign) || function () {
     };
     return __assign.apply(this, arguments);
 };
+var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
+    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
+        if (ar || !(i in from)) {
+            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+            ar[i] = from[i];
+        }
+    }
+    return to.concat(ar || Array.prototype.slice.call(from));
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -66,45 +75,53 @@ var collectReactNativeStyles = function (json) {
     return styleMap;
 };
 exports.collectReactNativeStyles = collectReactNativeStyles;
-// Plugin to convert DOM tags to <View /> and <Text />
-function processReactNative() {
-    return function () { return ({
-        json: {
-            pre: function (json) {
-                (0, traverse_1.default)(json).forEach(function (node) {
-                    var _a, _b, _c, _d;
-                    if ((0, is_mitosis_node_1.isMitosisNode)(node)) {
-                        // TODO: handle TextInput, Image, etc
-                        if (node.name.toLowerCase() === node.name) {
-                            node.name = 'View';
-                        }
-                        if (((_a = node.properties._text) === null || _a === void 0 ? void 0 : _a.trim().length) || ((_d = (_c = (_b = node.bindings._text) === null || _b === void 0 ? void 0 : _b.code) === null || _c === void 0 ? void 0 : _c.trim()) === null || _d === void 0 ? void 0 : _d.length)) {
-                            node.name = 'Text';
-                        }
-                        if (node.properties.class) {
-                            delete node.properties.class;
-                        }
-                        if (node.properties.className) {
-                            delete node.properties.className;
-                        }
-                        if (node.bindings.class) {
-                            delete node.bindings.class;
-                        }
-                        if (node.bindings.className) {
-                            delete node.bindings.className;
-                        }
+/**
+ * Plugin that handles necessary transformations from React to React Native:
+ * - Converts DOM tags to <View /> and <Text />
+ * - Removes redundant `class`/`className` attributes
+ */
+var PROCESS_REACT_NATIVE_PLUGIN = function () { return ({
+    json: {
+        pre: function (json) {
+            (0, traverse_1.default)(json).forEach(function (node) {
+                var _a, _b, _c, _d;
+                if ((0, is_mitosis_node_1.isMitosisNode)(node)) {
+                    // TODO: handle TextInput, Image, etc
+                    if (node.name.toLowerCase() === node.name) {
+                        node.name = 'View';
                     }
-                });
-            },
+                    if (((_a = node.properties._text) === null || _a === void 0 ? void 0 : _a.trim().length) || ((_d = (_c = (_b = node.bindings._text) === null || _b === void 0 ? void 0 : _b.code) === null || _c === void 0 ? void 0 : _c.trim()) === null || _d === void 0 ? void 0 : _d.length)) {
+                        node.name = 'Text';
+                    }
+                    if (node.properties.class) {
+                        delete node.properties.class;
+                    }
+                    if (node.properties.className) {
+                        delete node.properties.className;
+                    }
+                    if (node.bindings.class) {
+                        delete node.bindings.class;
+                    }
+                    if (node.bindings.className) {
+                        delete node.bindings.className;
+                    }
+                }
+            });
         },
-    }); };
-}
-var componentToReactNative = function (options) {
-    if (options === void 0) { options = {}; }
+    },
+}); };
+var DEFAULT_OPTIONS = {
+    stateType: 'useState',
+    stylesType: 'react-native',
+    plugins: [PROCESS_REACT_NATIVE_PLUGIN],
+};
+var componentToReactNative = function (_options) {
+    if (_options === void 0) { _options = {}; }
     return function (_a) {
         var component = _a.component, path = _a.path;
         var json = (0, fast_clone_1.fastClone)(component);
-        return (0, react_1.componentToReact)(__assign(__assign({}, options), { plugins: (options.plugins || []).concat([processReactNative()]), stylesType: options.stylesType || 'react-native', type: 'native' }))({ component: json, path: path });
+        var options = __assign(__assign(__assign({}, DEFAULT_OPTIONS), _options), { plugins: __spreadArray(__spreadArray([], (DEFAULT_OPTIONS.plugins || []), true), (_options.plugins || []), true), type: 'native' });
+        return (0, react_1.componentToReact)(options)({ component: json, path: path });
     };
 };
 exports.componentToReactNative = componentToReactNative;
