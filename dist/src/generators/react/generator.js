@@ -253,13 +253,24 @@ var getRefsString = function (json, refs, options) {
 };
 function addProviderComponents(json, options) {
     for (var key in json.context.set) {
-        var _a = json.context.set[key], name_1 = _a.name, value = _a.value;
+        var _a = json.context.set[key], name_1 = _a.name, ref = _a.ref, value = _a.value;
         if (value) {
             json.children = [
                 (0, create_mitosis_node_1.createMitosisNode)(__assign({ name: "".concat(name_1, ".Provider"), children: json.children }, (value && {
                     bindings: {
                         value: {
                             code: (0, get_state_object_string_1.stringifyContextValue)(value),
+                        },
+                    },
+                }))),
+            ];
+        }
+        else if (ref) {
+            json.children = [
+                (0, create_mitosis_node_1.createMitosisNode)(__assign({ name: 'Context.Provider', children: json.children }, (ref && {
+                    bindings: {
+                        value: {
+                            code: ref,
                         },
                     },
                 }))),

@@ -129,8 +129,12 @@ var setContextCode = function (json) {
     var contextSetters = json.context.set;
     return Object.keys(contextSetters)
         .map(function (key) {
-        var _a = contextSetters[key], value = _a.value, name = _a.name;
-        return "setContext(".concat(name, ".key, ").concat(value ? (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)((0, get_state_object_string_1.stringifyContextValue)(value)) : 'undefined', ");");
+        var _a = contextSetters[key], ref = _a.ref, value = _a.value, name = _a.name;
+        return "setContext(".concat(value ? "".concat(name, ".key") : name, ", ").concat(value
+            ? (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)((0, get_state_object_string_1.stringifyContextValue)(value))
+            : ref
+                ? (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(ref)
+                : 'undefined', ");");
     })
         .join('\n');
 };

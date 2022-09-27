@@ -77,10 +77,10 @@ var componentFunctionToJson = function (node, context) {
                     if (expression.callee.name === 'setContext' ||
                         expression.callee.name === 'provideContext') {
                         var keyNode = expression.arguments[0];
+                        var valueNode = expression.arguments[1];
                         if (types.isIdentifier(keyNode)) {
                             var key = keyNode.name;
                             var keyPath = (0, trace_reference_to_module_path_1.traceReferenceToModulePath)(context.builder.component.imports, key);
-                            var valueNode = expression.arguments[1];
                             if (valueNode) {
                                 if (types.isObjectExpression(valueNode)) {
                                     var value = (0, state_1.parseStateObjectToMitosisState)(valueNode);
@@ -96,6 +96,14 @@ var componentFunctionToJson = function (node, context) {
                                         ref: ref,
                                     };
                                 }
+                            }
+                        }
+                        else if (types.isStringLiteral(keyNode)) {
+                            if (types.isExpression(valueNode)) {
+                                setContext[keyNode.value] = {
+                                    name: "\"".concat(keyNode.value, "\""),
+                                    ref: (0, generator_1.default)(valueNode).code,
+                                };
                             }
                         }
                     }

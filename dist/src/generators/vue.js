@@ -404,12 +404,14 @@ function getContextInjectString(component, options) {
 function getContextProvideString(component, options) {
     var str = '{';
     for (var key in component.context.set) {
-        var _a = component.context.set[key], value = _a.value, name_1 = _a.name;
+        var _a = component.context.set[key], ref = _a.ref, value = _a.value, name_1 = _a.name;
         str += "\n      ".concat(name_1, ": ").concat(value
             ? (0, get_state_object_string_1.stringifyContextValue)(value, {
                 valueMapper: function (code) { return (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(code, { replaceWith: '_this.' }); },
             })
-            : null, ",\n    ");
+            : ref
+                ? (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(ref, { replaceWith: '_this.' })
+                : null, ",\n    ");
     }
     str += '}';
     return str;
