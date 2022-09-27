@@ -13,7 +13,6 @@ var standalone_1 = require("prettier/standalone");
 var get_state_object_string_1 = require("../../helpers/get-state-object-string");
 var render_imports_1 = require("../../helpers/render-imports");
 var jsx_1 = require("../../parsers/jsx");
-var mitosis_node_1 = require("../../types/mitosis-node");
 var plugins_1 = require("../../modules/plugins");
 var fast_clone_1 = require("../../helpers/fast-clone");
 var strip_meta_properties_1 = require("../../helpers/strip-meta-properties");
@@ -49,8 +48,8 @@ var blockToLit = function (json, options) {
     if ((_a = json.bindings._text) === null || _a === void 0 ? void 0 : _a.code) {
         return "${".concat(processBinding((_b = json.bindings) === null || _b === void 0 ? void 0 : _b._text.code), "}");
     }
-    if ((0, mitosis_node_1.checkIsForNode)(json)) {
-        return "${".concat(processBinding((_c = json.bindings.each) === null || _c === void 0 ? void 0 : _c.code), "?.map((").concat(json.scope.forName, ", index) => (\n      html`").concat(json.children
+    if (json.name === 'For') {
+        return "${".concat(processBinding((_c = json.bindings.each) === null || _c === void 0 ? void 0 : _c.code), "?.map((").concat(json.properties._forName, ", index) => (\n      html`").concat(json.children
             .filter(filter_empty_text_nodes_1.filterEmptyTextNodes)
             .map(function (item) { return blockToLit(item, options); })
             .join('\n'), "`\n    ))}");

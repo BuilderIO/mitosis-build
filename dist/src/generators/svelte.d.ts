@@ -1,14 +1,15 @@
 import { MitosisComponent } from '../types/mitosis-component';
-import { BaseNode, MitosisNode } from '../types/mitosis-node';
-import { BaseTranspilerOptions, TranspilerGenerator } from '../types/transpiler';
+import { MitosisNode } from '../types/mitosis-node';
+import { BaseTranspilerOptions, Transpiler } from '../types/transpiler';
 export interface ToSvelteOptions extends BaseTranspilerOptions {
     stateType?: 'proxies' | 'variables';
 }
-declare type BlockToSvelte<T extends BaseNode = MitosisNode> = (props: {
-    json: T;
+interface BlockToSvelteProps {
+    json: MitosisNode;
     options: ToSvelteOptions;
     parentComponent: MitosisComponent;
-}) => string;
+}
+declare type BlockToSvelte = (props: BlockToSvelteProps) => string;
 export declare const blockToSvelte: BlockToSvelte;
-export declare const componentToSvelte: TranspilerGenerator<ToSvelteOptions>;
+export declare const componentToSvelte: ({ plugins, ...userProvidedOptions }?: ToSvelteOptions) => Transpiler;
 export {};

@@ -37,7 +37,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.parseStateObjectToMitosisState = exports.parseStateObject = exports.mapStateIdentifiers = void 0;
+exports.parseStateObjectToMitosisState = exports.parseStateObject = exports.mapReactIdentifiers = void 0;
 var babel = __importStar(require("@babel/core"));
 var generator_1 = __importDefault(require("@babel/generator"));
 var outdated_prefixes_1 = require("../constants/outdated-prefixes");
@@ -50,7 +50,7 @@ var helpers_1 = require("./helpers");
 var function_1 = require("fp-ts/lib/function");
 var state_1 = require("../helpers/state");
 var types = babel.types;
-function mapStateIdentifiersInExpression(expression, stateProperties) {
+function mapReactIdentifiersInExpression(expression, stateProperties) {
     var setExpressions = stateProperties.map(function (propertyName) { return "set".concat((0, capitalize_1.capitalize)(propertyName)); });
     return (0, babel_transform_1.babelTransformExpression)(
     // foo -> state.foo
@@ -73,13 +73,13 @@ function mapStateIdentifiersInExpression(expression, stateProperties) {
  *   text -> state.text
  *   setText(...) -> state.text = ...
  */
-function mapStateIdentifiers(json) {
+function mapReactIdentifiers(json) {
     var stateProperties = Object.keys(json.state);
     for (var key in json.state) {
         var stateVal = json.state[key];
         if (typeof (stateVal === null || stateVal === void 0 ? void 0 : stateVal.code) === 'string' && stateVal.type === 'function') {
             json.state[key] = {
-                code: mapStateIdentifiersInExpression(stateVal.code, stateProperties),
+                code: mapReactIdentifiersInExpression(stateVal.code, stateProperties),
                 type: 'function',
             };
         }
@@ -91,7 +91,7 @@ function mapStateIdentifiers(json) {
                 var value = item.bindings[key];
                 if (value) {
                     item.bindings[key] = {
-                        code: mapStateIdentifiersInExpression(value.code, stateProperties),
+                        code: mapReactIdentifiersInExpression(value.code, stateProperties),
                     };
                     if ((_a = value.arguments) === null || _a === void 0 ? void 0 : _a.length) {
                         item.bindings[key].arguments = value.arguments;
@@ -123,7 +123,7 @@ function mapStateIdentifiers(json) {
         }
     });
 }
-exports.mapStateIdentifiers = mapStateIdentifiers;
+exports.mapReactIdentifiers = mapReactIdentifiers;
 var createFunctionStringLiteralObjectProperty = function (key, node) {
     return types.objectProperty(key, types.stringLiteral("".concat(outdated_prefixes_1.__DO_NOT_USE_FUNCTION_LITERAL_PREFIX).concat((0, generator_1.default)(node).code)));
 };

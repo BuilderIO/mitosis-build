@@ -1,9 +1,11 @@
 import { JSONObject } from './json';
-export declare type BaseNode = {
+export declare type MitosisNode = {
     '@type': '@builder.io/mitosis/node';
-    meta: JSONObject;
     name: string;
-    scope: {};
+    meta: JSONObject;
+    scope: {
+        [key: string]: Array<string>;
+    };
     /**
      * Key-value store of string values for DOM attributes.
      * ```js
@@ -36,14 +38,3 @@ export declare type BaseNode = {
     };
     children: MitosisNode[];
 };
-export declare type SpecialNodesNames = 'For' | 'Fragment' | 'Show' | 'Slot';
-export declare type ForNode = BaseNode & {
-    name: 'For';
-    scope: {
-        forName: string | undefined;
-        indexName: string | undefined;
-        collectionName: string | undefined;
-    };
-};
-export declare type MitosisNode = BaseNode | ForNode;
-export declare const checkIsForNode: (node: MitosisNode) => node is ForNode;

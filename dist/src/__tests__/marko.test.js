@@ -10,5 +10,5 @@ describe('Marko format', function () {
     expect((0, marko_1.markoFormatHtml)(exampleCode)).toMatchSnapshot();
 });
 describe('Marko', function () {
-    (0, shared_1.runTestsForTarget)({ options: {}, target: 'marko', generator: marko_1.componentToMarko });
+    (0, shared_1.runTestsForTarget)('marko', (0, marko_1.componentToMarko)());
 });

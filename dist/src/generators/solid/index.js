@@ -34,7 +34,6 @@ var helpers_1 = require("../../helpers/styles/helpers");
 var get_refs_1 = require("../../helpers/get-refs");
 var render_imports_1 = require("../../helpers/render-imports");
 var jsx_1 = require("../../parsers/jsx");
-var mitosis_node_1 = require("../../types/mitosis-node");
 var plugins_1 = require("../../modules/plugins");
 var fast_clone_1 = require("../../helpers/fast-clone");
 var strip_meta_properties_1 = require("../../helpers/strip-meta-properties");
@@ -148,11 +147,11 @@ var blockToSolid = function (_a) {
     if ((_b = json.bindings._text) === null || _b === void 0 ? void 0 : _b.code) {
         return "{".concat(json.bindings._text.code, "}");
     }
-    if ((0, mitosis_node_1.checkIsForNode)(json)) {
+    if (json.name === 'For') {
         var needsWrapper = json.children.length !== 1;
         // The SolidJS `<For>` component has a special index() signal function.
         // https://www.solidjs.com/docs/latest#%3Cfor%3E
-        return "<For each={".concat((_c = json.bindings.each) === null || _c === void 0 ? void 0 : _c.code, "}>\n    {(").concat(json.scope.forName, ", _index) => {\n      const ").concat(json.scope.indexName || 'index', " = _index();\n      return ").concat(needsWrapper ? '<>' : '').concat(json.children
+        return "<For each={".concat((_c = json.bindings.each) === null || _c === void 0 ? void 0 : _c.code, "}>\n    {(").concat(json.properties._forName, ", _index) => {\n      const index = _index();\n      return ").concat(needsWrapper ? '<>' : '').concat(json.children
             .filter(filter_empty_text_nodes_1.filterEmptyTextNodes)
             .map(function (child) { return blockToSolid({ component: component, json: child, options: options }); }), "}}\n      ").concat(needsWrapper ? '</>' : '', "\n    </For>");
     }

@@ -6,7 +6,6 @@ var collect_css_1 = require("../helpers/styles/collect-css");
 var fast_clone_1 = require("../helpers/fast-clone");
 var strip_state_and_props_refs_1 = require("../helpers/strip-state-and-props-refs");
 var jsx_1 = require("../parsers/jsx");
-var mitosis_node_1 = require("../types/mitosis-node");
 var plugins_1 = require("../modules/plugins");
 var strip_meta_properties_1 = require("../helpers/strip-meta-properties");
 var get_state_object_string_1 = require("../helpers/get-state-object-string");
@@ -50,11 +49,12 @@ var blockToLiquid = function (json, options) {
         return "{{".concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(json.bindings._text.code), "}}");
     }
     var str = '';
-    if ((0, mitosis_node_1.checkIsForNode)(json)) {
-        if (!((0, exports.isValidLiquidBinding)((_b = json.bindings.each) === null || _b === void 0 ? void 0 : _b.code) && (0, exports.isValidLiquidBinding)(json.scope.forName))) {
+    if (json.name === 'For') {
+        if (!((0, exports.isValidLiquidBinding)((_b = json.bindings.each) === null || _b === void 0 ? void 0 : _b.code) &&
+            (0, exports.isValidLiquidBinding)(json.properties._forName))) {
             return str;
         }
-        str += "{% for ".concat(json.scope.forName, " in ").concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)((_c = json.bindings.each) === null || _c === void 0 ? void 0 : _c.code), " %}");
+        str += "{% for ".concat(json.properties._forName, " in ").concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)((_c = json.bindings.each) === null || _c === void 0 ? void 0 : _c.code), " %}");
         if (json.children) {
             str += json.children.map(function (item) { return blockToLiquid(item, options); }).join('\n');
         }

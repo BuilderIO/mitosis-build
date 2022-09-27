@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.targets = exports.builder = void 0;
+exports.targets = void 0;
 var angular_1 = require("./generators/angular");
 var builder_1 = require("./generators/builder");
 var html_1 = require("./generators/html");
@@ -18,9 +18,9 @@ var stencil_1 = require("./generators/stencil");
 var qwik_1 = require("./generators/qwik");
 var marko_1 = require("./generators/marko");
 var lit_1 = require("./generators/lit");
-exports.builder = builder_1.componentToBuilder;
 exports.targets = {
     angular: angular_1.componentToAngular,
+    builder: builder_1.componentToBuilder,
     customElement: html_1.componentToCustomElement,
     html: html_1.componentToHtml,
     mitosis: mitosis_1.componentToMitosis,

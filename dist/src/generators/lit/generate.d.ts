@@ -1,5 +1,5 @@
-import { BaseTranspilerOptions, TranspilerGenerator } from '../../types/transpiler';
+import { BaseTranspilerOptions, Transpiler } from '../../types/transpiler';
 export interface ToLitOptions extends BaseTranspilerOptions {
     useShadowDom?: boolean;
 }
-export declare const componentToLit: TranspilerGenerator<ToLitOptions>;
+export declare const componentToLit: (options?: ToLitOptions) => Transpiler;

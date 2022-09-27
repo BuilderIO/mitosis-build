@@ -35,7 +35,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.handleTypeImports = exports.collectTypes = exports.isTypeOrInterface = exports.getPropsTypeRef = void 0;
+exports.collectTypes = exports.isTypeOrInterface = exports.isTypeImport = exports.getPropsTypeRef = void 0;
 var babel = __importStar(require("@babel/core"));
 var generator_1 = __importDefault(require("@babel/generator"));
 var types = babel.types;
@@ -71,6 +71,7 @@ var isTypeImport = function (node) {
         // Babel adds an implicit JSX type import that we don't want
         ((_a = node.specifiers[0]) === null || _a === void 0 ? void 0 : _a.local.name) !== 'JSX';
 };
+exports.isTypeImport = isTypeImport;
 var isTypeOrInterface = function (node) {
     return types.isTSTypeAliasDeclaration(node) ||
         types.isTSInterfaceDeclaration(node) ||
@@ -85,17 +86,3 @@ var collectTypes = function (node, context) {
     context.builder.component.types = types.filter(Boolean);
 };
 exports.collectTypes = collectTypes;
-function handleTypeImports(path, context) {
-    for (var _i = 0, _a = path.node.body; _i < _a.length; _i++) {
-        var statement = _a[_i];
-        if (isTypeImport(statement)) {
-            var importDeclaration = statement;
-            // Remove .lite from path if exists, as that will be stripped
-            if (importDeclaration.source.value.endsWith('.lite')) {
-                importDeclaration.source.value = importDeclaration.source.value.replace(/\.lite$/, '');
-            }
-            (0, exports.collectTypes)(statement, context);
-        }
-    }
-}
-exports.handleTypeImports = handleTypeImports;

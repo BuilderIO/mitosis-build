@@ -358,8 +358,6 @@ var SrcBuilder = /** @class */ (function () {
             if (value) {
                 if (key === 'innerHTML')
                     key = 'dangerouslySetInnerHTML';
-                if (key === 'dataSet')
-                    return; // ignore
                 if (self.isJSX) {
                     self.emit(' ', key, '=');
                     if (typeof value == 'string' && value.startsWith('"') && value.endsWith('"')) {

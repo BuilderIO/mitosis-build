@@ -7,6 +7,6 @@ import { JSONObject } from '../../types/json';
  *   text -> state.text
  *   setText(...) -> state.text = ...
  */
-export declare function mapStateIdentifiers(json: MitosisComponent): void;
+export declare function mapReactIdentifiers(json: MitosisComponent): void;
 export declare const parseStateObject: (object: babel.types.ObjectExpression) => JSONObject;
 export declare const parseStateObjectToMitosisState: (object: babel.types.ObjectExpression) => import("../../types/mitosis-component").MitosisState;

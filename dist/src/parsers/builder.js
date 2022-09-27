@@ -299,8 +299,8 @@ var componentMappers = __assign(__assign({ Symbol: function (block, options) {
             bindings: {
                 each: { code: "state.".concat(block.component.options.repeat.collection) },
             },
-            scope: {
-                forName: block.component.options.repeat.itemName,
+            properties: {
+                _forName: block.component.options.repeat.itemName,
             },
             children: (block.children || []).map(function (child) { return (0, exports.builderElementToMitosisNode)(child, options); }),
         });
@@ -419,8 +419,8 @@ var builderElementToMitosisNode = function (block, options, _internalOptions) {
                         code: wrapBindingIfNeeded((_g = block.repeat) === null || _g === void 0 ? void 0 : _g.collection, options),
                     },
                 },
-                scope: {
-                    forName: ((_h = block.repeat) === null || _h === void 0 ? void 0 : _h.itemName) || 'item',
+                properties: {
+                    _forName: ((_h = block.repeat) === null || _h === void 0 ? void 0 : _h.itemName) || 'item',
                 },
                 children: ((_j = block.children) === null || _j === void 0 ? void 0 : _j.map(function (child) { return (0, exports.builderElementToMitosisNode)(child, options); })) || [],
             });
@@ -436,8 +436,8 @@ var builderElementToMitosisNode = function (block, options, _internalOptions) {
                         code: wrapBindingIfNeeded((_m = block.repeat) === null || _m === void 0 ? void 0 : _m.collection, options),
                     },
                 },
-                scope: {
-                    forName: ((_o = block.repeat) === null || _o === void 0 ? void 0 : _o.itemName) || 'item',
+                properties: {
+                    _forName: ((_o = block.repeat) === null || _o === void 0 ? void 0 : _o.itemName) || 'item',
                 },
                 children: [(0, exports.builderElementToMitosisNode)((0, lodash_1.omit)(useBlock, 'repeat'), options)],
             });

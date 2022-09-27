@@ -5,7 +5,6 @@ var __makeTemplateObject = (this && this.__makeTemplateObject) || function (cook
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CoreButton = exports.__passThroughProps__ = exports.Image = exports.DIRECTIVES = void 0;
-var for_1 = require("../../helpers/nodes/for");
 var minify_1 = require("../minify");
 var src_generator_1 = require("./src-generator");
 exports.DIRECTIVES = {
@@ -28,17 +27,17 @@ exports.DIRECTIVES = {
             });
         };
     },
-    For: function (_node, blockFn) {
+    For: function (node, blockFn) {
         return function () {
             var _this = this;
             var _a;
-            var node = _node;
             var expr = (_a = node.bindings.each) === null || _a === void 0 ? void 0 : _a.code;
             this.jsxExpression(function () {
-                var forArgs = (0, for_1.getForArguments)(node);
-                var forName = forArgs[0];
+                var forName = node.properties._forName || '_';
+                var indexName = node.properties._indexName;
                 _this.emit('(', expr, '||[]).map(');
-                _this.isBuilder && _this.emit('(('), _this.emit('function(', forArgs, '){');
+                _this.isBuilder && _this.emit('(('),
+                    _this.emit('function(', forName, indexName ? ',' : '', indexName ? indexName : '', '){');
                 if (_this.isBuilder) {
                     _this.emit('var state=Object.assign({},this,{', (0, src_generator_1.iteratorProperty)(expr), ':', forName, '==null?{}:', forName, '});');
                 }

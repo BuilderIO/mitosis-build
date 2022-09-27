@@ -24,7 +24,6 @@ var standalone_1 = require("prettier/standalone");
 var get_state_object_string_1 = require("../../helpers/get-state-object-string");
 var render_imports_1 = require("../../helpers/render-imports");
 var jsx_1 = require("../../parsers/jsx");
-var mitosis_node_1 = require("../../types/mitosis-node");
 var plugins_1 = require("../../modules/plugins");
 var fast_clone_1 = require("../../helpers/fast-clone");
 var strip_meta_properties_1 = require("../../helpers/strip-meta-properties");
@@ -38,7 +37,6 @@ var has_props_1 = require("../../helpers/has-props");
 var get_refs_1 = require("../../helpers/get-refs");
 var lodash_1 = require("lodash");
 var hash_sum_1 = __importDefault(require("hash-sum"));
-var for_1 = require("../../helpers/nodes/for");
 // Having issues with this, so off for now
 var USE_MARKO_PRETTIER = false;
 /**
@@ -48,7 +46,7 @@ function getStatePropertyNames(json) {
     return Object.keys(json.state).filter(function (key) { var _a; return ((_a = json.state[key]) === null || _a === void 0 ? void 0 : _a.type) === 'property'; });
 }
 var blockToMarko = function (json, options) {
-    var _a, _b, _c, _d, _e, _f;
+    var _a, _b, _c, _d, _e, _f, _g;
     if (json.properties._text) {
         return json.properties._text;
     }
@@ -58,22 +56,22 @@ var blockToMarko = function (json, options) {
     if (json.name === 'Fragment') {
         return json.children.map(function (child) { return blockToMarko(child, options); }).join('\n');
     }
-    if ((0, mitosis_node_1.checkIsForNode)(json)) {
-        var forArguments = (0, for_1.getForArguments)(json).join(',');
-        return "<for|".concat(forArguments, "| of=(").concat(processBinding(options.component, (_c = json.bindings.each) === null || _c === void 0 ? void 0 : _c.code), ")>\n      ").concat(json.children
+    if (json.name === 'For') {
+        var forArguments = (((_c = json === null || json === void 0 ? void 0 : json.scope) === null || _c === void 0 ? void 0 : _c.For) || []).join(',');
+        return "<for|".concat(forArguments, "| of=(").concat(processBinding(options.component, (_d = json.bindings.each) === null || _d === void 0 ? void 0 : _d.code), ")>\n      ").concat(json.children
             .filter(filter_empty_text_nodes_1.filterEmptyTextNodes)
             .map(function (item) { return blockToMarko(item, options); })
             .join('\n'), "\n    </for>");
     }
     else if (json.name === 'Show') {
-        return "<if(".concat(processBinding(options.component, (_d = json.bindings.when) === null || _d === void 0 ? void 0 : _d.code), ")>\n      ").concat(json.children
+        return "<if(".concat(processBinding(options.component, (_e = json.bindings.when) === null || _e === void 0 ? void 0 : _e.code), ")>\n      ").concat(json.children
             .filter(filter_empty_text_nodes_1.filterEmptyTextNodes)
             .map(function (item) { return blockToMarko(item, options); })
             .join('\n'), "</if>\n    ").concat(!json.meta.else ? '' : "<else>".concat(blockToMarko(json.meta.else, options), "</else>"));
     }
     var str = '';
     str += "<".concat(json.name, " ");
-    if ((_e = json.bindings._spread) === null || _e === void 0 ? void 0 : _e.code) {
+    if ((_f = json.bindings._spread) === null || _f === void 0 ? void 0 : _f.code) {
         str += " ...(".concat(json.bindings._spread.code, ") ");
     }
     for (var key in json.properties) {
@@ -81,7 +79,7 @@ var blockToMarko = function (json, options) {
         str += " ".concat(key, "=\"").concat(value, "\" ");
     }
     for (var key in json.bindings) {
-        var _g = json.bindings[key], code = _g.code, _h = _g.arguments, cusArgs = _h === void 0 ? ['event'] : _h;
+        var _h = json.bindings[key], code = _h.code, _j = _h.arguments, cusArgs = _j === void 0 ? ['event'] : _j;
         if (key === '_spread' || key === '_forName') {
             continue;
         }
@@ -100,7 +98,7 @@ var blockToMarko = function (json, options) {
         return str + ' />';
     }
     str += '>';
-    if ((_f = json.bindings.innerHTML) === null || _f === void 0 ? void 0 : _f.code) {
+    if ((_g = json.bindings.innerHTML) === null || _g === void 0 ? void 0 : _g.code) {
         str += "$!{".concat(processBinding(options.component, json.bindings.innerHTML.code), "}");
     }
     if (json.children) {

@@ -18,7 +18,6 @@ var get_state_object_string_1 = require("../helpers/get-state-object-string");
 var get_styles_1 = require("../helpers/get-styles");
 var is_children_1 = __importDefault(require("../helpers/is-children"));
 var is_mitosis_node_1 = require("../helpers/is-mitosis-node");
-var mitosis_node_1 = require("../types/mitosis-node");
 var state_1 = require("../helpers/state");
 var scrolls = function (json) {
     var _a;
@@ -92,8 +91,8 @@ var blockToSwift = function (json, options) {
         delete json.properties.placeholder;
         json.properties._ = placeholder || '';
     }
-    if ((0, mitosis_node_1.checkIsForNode)(json)) {
-        str += "ForEach(".concat(processBinding((_a = json.bindings.each) === null || _a === void 0 ? void 0 : _a.code, options), ", id: \\.self) { ").concat(json.scope.forName, " in ").concat(children
+    if (json.name === 'For') {
+        str += "ForEach(".concat(processBinding((_a = json.bindings.each) === null || _a === void 0 ? void 0 : _a.code, options), ", id: \\.self) { ").concat(json.properties._forName, " in ").concat(children
             .map(function (item) { return blockToSwift(item, options); })
             .join('\n'), " }");
     }

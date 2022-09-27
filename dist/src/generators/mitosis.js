@@ -38,7 +38,6 @@ var get_state_object_string_1 = require("../helpers/get-state-object-string");
 var map_refs_1 = require("../helpers/map-refs");
 var render_imports_1 = require("../helpers/render-imports");
 var jsx_1 = require("../parsers/jsx");
-var mitosis_node_1 = require("../types/mitosis-node");
 var react_1 = require("./react");
 var state_1 = require("../helpers/state");
 exports.DEFAULT_FORMAT = 'legacy';
@@ -58,9 +57,9 @@ var blockToMitosis = function (json, toMitosisOptions) {
             prettier: options.prettier,
         });
     }
-    if ((0, mitosis_node_1.checkIsForNode)(json)) {
+    if (json.name === 'For') {
         var needsWrapper = json.children.length !== 1;
-        return "<For each={".concat((_a = json.bindings.each) === null || _a === void 0 ? void 0 : _a.code, "}>\n    {(").concat(json.scope.forName, ", index) =>\n      ").concat(needsWrapper ? '<>' : '', "\n        ").concat(json.children.map(function (child) { return (0, exports.blockToMitosis)(child, options); }), "}\n      ").concat(needsWrapper ? '</>' : '', "\n    </For>");
+        return "<For each={".concat((_a = json.bindings.each) === null || _a === void 0 ? void 0 : _a.code, "}>\n    {(").concat(json.properties._forName, ", index) =>\n      ").concat(needsWrapper ? '<>' : '', "\n        ").concat(json.children.map(function (child) { return (0, exports.blockToMitosis)(child, options); }), "}\n      ").concat(needsWrapper ? '</>' : '', "\n    </For>");
     }
     if (json.properties._text) {
         return json.properties._text;
