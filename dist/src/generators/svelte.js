@@ -303,7 +303,7 @@ var componentToSvelte = function (_a) {
     if (_a === void 0) { _a = {}; }
     var _b = _a.plugins, plugins = _b === void 0 ? [] : _b, userProvidedOptions = __rest(_a, ["plugins"]);
     return function (_a) {
-        var _b, _c, _d, _e, _f, _g, _h, _j, _k;
+        var _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m;
         var component = _a.component;
         var options = __assign({ stateType: 'variables', prettier: true, plugins: __spreadArray([functions_1.FUNCTION_HACK_PLUGIN], plugins, true) }, userProvidedOptions);
         // Make a copy we can safely mutate, similar to babel's toolchain
@@ -368,9 +368,9 @@ var componentToSvelte = function (_a) {
         if ((0, context_1.hasContext)(component)) {
             svelteImports.push('getContext', 'setContext');
         }
-        str += (0, dedent_1.default)(templateObject_2 || (templateObject_2 = __makeTemplateObject(["\n      <script ", ">\n      ", "\n      ", "\n\n      ", "\n      ", "\n      ", "\n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n    </script>\n\n    ", "\n\n    ", "\n  "], ["\n      <script ", ">\n      ", "\n      ", "\n\n      ", "\n      ", "\n      "
+        str += (0, dedent_1.default)(templateObject_2 || (templateObject_2 = __makeTemplateObject(["\n      <script ", ">\n      ", "\n      ", "\n\n      ", "\n      ", "\n      ", "\n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n    </script>\n\n    ", "\n\n    ", "\n  "], ["\n      <script ", ">\n      ", "\n      ", "\n\n      ", "\n      ", "\n      "
             // https://svelte.dev/repl/bd9b56891f04414982517bbd10c52c82?version=3.31.0
-            , "\n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n    </script>\n\n    ", "\n\n    ", "\n  "])), tsLangAttribute, !svelteImports.length ? '' : "import { ".concat(svelteImports.sort().join(', '), " } from 'svelte'"), (0, render_imports_1.renderPreComponent)({ component: json, target: 'svelte' }), !hasData || options.stateType === 'variables' ? '' : "import onChange from 'on-change'", props
+            , "\n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n    </script>\n\n    ", "\n\n    ", "\n  "])), tsLangAttribute, !svelteImports.length ? '' : "import { ".concat(svelteImports.sort().join(', '), " } from 'svelte'"), (0, render_imports_1.renderPreComponent)({ component: json, target: 'svelte' }), !hasData || options.stateType === 'variables' ? '' : "import onChange from 'on-change'", props
             .map(function (name) {
             if (name === 'children') {
                 return '';
@@ -393,9 +393,9 @@ var componentToSvelte = function (_a) {
             ? dataString.length < 4
                 ? ''
                 : "let state = onChange(".concat(dataString, ", () => state = state)")
-            : dataString, !((_h = json.hooks.onMount) === null || _h === void 0 ? void 0 : _h.code)
+            : dataString, (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)((_j = (_h = json.hooks.onInit) === null || _h === void 0 ? void 0 : _h.code) !== null && _j !== void 0 ? _j : ''), !((_k = json.hooks.onMount) === null || _k === void 0 ? void 0 : _k.code)
             ? ''
-            : "onMount(() => { ".concat(transformHookCode(json.hooks.onMount.code), " });"), !((_j = json.hooks.onUpdate) === null || _j === void 0 ? void 0 : _j.length)
+            : "onMount(() => { ".concat(transformHookCode(json.hooks.onMount.code), " });"), !((_l = json.hooks.onUpdate) === null || _l === void 0 ? void 0 : _l.length)
             ? ''
             : json.hooks.onUpdate
                 .map(function (_a, index) {
@@ -409,7 +409,7 @@ var componentToSvelte = function (_a) {
                     return "afterUpdate(() => { ".concat(hookCode, " })");
                 }
             })
-                .join(';'), !((_k = json.hooks.onUnMount) === null || _k === void 0 ? void 0 : _k.code)
+                .join(';'), !((_m = json.hooks.onUnMount) === null || _m === void 0 ? void 0 : _m.code)
             ? ''
             : "onDestroy(() => { ".concat(transformHookCode(json.hooks.onUnMount.code), " });"), json.children
             .map(function (item) {

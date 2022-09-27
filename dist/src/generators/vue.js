@@ -476,7 +476,7 @@ var appendToDataString = function (_a) {
     return dataString.replace(/}$/, "".concat(newContent, "}"));
 };
 function generateOptionsApiScript(component, options, path, template, props, onUpdateWithDeps, onUpdateWithoutDeps) {
-    var _a, _b, _c;
+    var _a, _b, _c, _d;
     var localExports = component.exports;
     var localVarAsData = [];
     var localVarAsFunc = [];
@@ -557,7 +557,9 @@ function generateOptionsApiScript(component, options, path, template, props, onU
         ? "provide() {\n                const _this = this;\n                return ".concat(getContextProvideString(component, options), "\n              },")
         : '', "\n        ").concat((0, lodash_1.size)(component.context.get)
         ? "inject: ".concat(getContextInjectString(component, options), ",")
-        : '', "\n\n        ").concat(((_c = component.hooks.onMount) === null || _c === void 0 ? void 0 : _c.code)
+        : '', "\n        ").concat(((_c = component.hooks.onInit) === null || _c === void 0 ? void 0 : _c.code)
+        ? "created() {\n                ".concat(processBinding(component.hooks.onInit.code, options, component), "\n              },")
+        : '', "\n        ").concat(((_d = component.hooks.onMount) === null || _d === void 0 ? void 0 : _d.code)
         ? "mounted() {\n                ".concat(processBinding(component.hooks.onMount.code, options, component), "\n              },")
         : '', "\n        ").concat(onUpdateWithoutDeps.length
         ? "updated() {\n            ".concat(onUpdateWithoutDeps
@@ -614,7 +616,7 @@ function appendValueToRefs(input, component, options) {
     });
 }
 function generateCompositionApiScript(component, options, template, props, onUpdateWithDeps, onUpdateWithoutDeps) {
-    var _a, _b, _c, _d, _e;
+    var _a, _b, _c, _d, _e, _f, _g;
     var refs = (0, get_state_object_string_1.getStateObjectStringFromComponent)(component, {
         data: true,
         functions: false,
@@ -636,9 +638,9 @@ function generateCompositionApiScript(component, options, template, props, onUpd
         methods += " function _classStringToObject(str) {\n    const obj = {};\n    if (typeof str !== 'string') { return obj }\n    const classNames = str.trim().split(/\\s+/);\n    for (const name of classNames) {\n      obj[name] = true;\n    }\n    return obj;\n    } ";
     }
     var getterKeys = Object.keys((0, lodash_1.pickBy)(component.state, function (i) { return (i === null || i === void 0 ? void 0 : i.type) === 'getter'; }));
-    var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    ", "\n    ", "\n\n    ", "\n\n    ", "\n\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n\n    ", "\n    ", "\n  "], ["\n    ", "\n    ", "\n\n    ", "\n\n    ", "\n\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n\n    ", "\n    ", "\n  "])), props.length ? getCompositionPropDefinition({ component: component, props: props, options: options }) : '', refs, (_a = Object.keys(component.context.get)) === null || _a === void 0 ? void 0 : _a.map(function (key) { return "const ".concat(key, " = inject(").concat(component.context.get[key].name, ")"); }).join('\n'), (_b = Object.keys(component.context.set)) === null || _b === void 0 ? void 0 : _b.map(function (key) { return "provide(".concat(component.context.set[key].name, ", ").concat(component.context.set[key].ref, ")"); }).join('\n'), (_c = Object.keys(component.refs)) === null || _c === void 0 ? void 0 : _c.map(function (key) { return "const ".concat(key, " = ref<").concat(component.refs[key].typeParameter, ">()"); }).join('\n'), !((_d = component.hooks.onMount) === null || _d === void 0 ? void 0 : _d.code)
+    var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    ", "\n    ", "\n\n    ", "\n\n    ", "\n\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n\n    ", "\n    ", "\n  "], ["\n    ", "\n    ", "\n\n    ", "\n\n    ", "\n\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n\n    ", "\n    ", "\n  "])), props.length ? getCompositionPropDefinition({ component: component, props: props, options: options }) : '', refs, (_a = Object.keys(component.context.get)) === null || _a === void 0 ? void 0 : _a.map(function (key) { return "const ".concat(key, " = inject(").concat(component.context.get[key].name, ")"); }).join('\n'), (_b = Object.keys(component.context.set)) === null || _b === void 0 ? void 0 : _b.map(function (key) { return "provide(".concat(component.context.set[key].name, ", ").concat(component.context.set[key].ref, ")"); }).join('\n'), (_c = Object.keys(component.refs)) === null || _c === void 0 ? void 0 : _c.map(function (key) { return "const ".concat(key, " = ref<").concat(component.refs[key].typeParameter, ">()"); }).join('\n'), appendValueToRefs((_e = (_d = component.hooks.onInit) === null || _d === void 0 ? void 0 : _d.code) !== null && _e !== void 0 ? _e : '', component, options), !((_f = component.hooks.onMount) === null || _f === void 0 ? void 0 : _f.code)
         ? ''
-        : "onMounted(() => { ".concat(appendValueToRefs(component.hooks.onMount.code, component, options), "})"), !((_e = component.hooks.onUnMount) === null || _e === void 0 ? void 0 : _e.code)
+        : "onMounted(() => { ".concat(appendValueToRefs(component.hooks.onMount.code, component, options), "})"), !((_g = component.hooks.onUnMount) === null || _g === void 0 ? void 0 : _g.code)
         ? ''
         : "onMounted(() => { ".concat(appendValueToRefs(component.hooks.onUnMount.code, component, options), "})"), !getterKeys
         ? ''
