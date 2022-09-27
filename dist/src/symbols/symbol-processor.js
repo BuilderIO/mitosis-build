@@ -87,7 +87,7 @@ function convertBuilderContentToSymbolHierarchy(content, _a) {
             if (((_a = el === null || el === void 0 ? void 0 : el.component) === null || _a === void 0 ? void 0 : _a.name) === 'Symbol') {
                 if (collectComponentState) {
                     var symbol = el.component.options.symbol;
-                    var props = symbol.data;
+                    var props = symbol.data || (symbol.data = {});
                     var state = (_c = (_b = symbol.content) === null || _b === void 0 ? void 0 : _b.data) === null || _c === void 0 ? void 0 : _c.state;
                     if (state) {
                         var id = hashCodeAsString(state);
