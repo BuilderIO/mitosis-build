@@ -13,6 +13,7 @@ var standalone_1 = require("prettier/standalone");
 var get_state_object_string_1 = require("../../helpers/get-state-object-string");
 var render_imports_1 = require("../../helpers/render-imports");
 var jsx_1 = require("../../parsers/jsx");
+var mitosis_node_1 = require("../../types/mitosis-node");
 var plugins_1 = require("../../modules/plugins");
 var fast_clone_1 = require("../../helpers/fast-clone");
 var strip_meta_properties_1 = require("../../helpers/strip-meta-properties");
@@ -24,6 +25,7 @@ var dash_case_1 = require("../../helpers/dash-case");
 var collect_css_1 = require("../../helpers/styles/collect-css");
 var indent_1 = require("../../helpers/indent");
 var map_refs_1 = require("../../helpers/map-refs");
+var for_1 = require("../../helpers/nodes/for");
 var blockToStencil = function (json, options) {
     var _a, _b, _c, _d, _e;
     if (options === void 0) { options = {}; }
@@ -33,9 +35,10 @@ var blockToStencil = function (json, options) {
     if ((_a = json.bindings._text) === null || _a === void 0 ? void 0 : _a.code) {
         return "{".concat(processBinding((_b = json.bindings) === null || _b === void 0 ? void 0 : _b._text.code), "}");
     }
-    if (json.name === 'For') {
+    if ((0, mitosis_node_1.checkIsForNode)(json)) {
         var wrap = json.children.length !== 1;
-        return "{".concat(processBinding((_c = json.bindings.each) === null || _c === void 0 ? void 0 : _c.code), "?.map((").concat(json.properties._forName, ", index) => (\n      ").concat(wrap ? '<>' : '').concat(json.children
+        var forArgs = (0, for_1.getForArguments)(json).join(', ');
+        return "{".concat(processBinding((_c = json.bindings.each) === null || _c === void 0 ? void 0 : _c.code), "?.map((").concat(forArgs, ") => (\n      ").concat(wrap ? '<>' : '').concat(json.children
             .filter(filter_empty_text_nodes_1.filterEmptyTextNodes)
             .map(function (item) { return blockToStencil(item, options); })
             .join('\n')).concat(wrap ? '</>' : '', "\n    ))}");

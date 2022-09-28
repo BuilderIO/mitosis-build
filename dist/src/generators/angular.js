@@ -3,6 +3,17 @@ var __makeTemplateObject = (this && this.__makeTemplateObject) || function (cook
     if (Object.defineProperty) { Object.defineProperty(cooked, "raw", { value: raw }); } else { cooked.raw = raw; }
     return cooked;
 };
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
 var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
     if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
         if (ar || !(i in from)) {
@@ -28,6 +39,7 @@ var map_refs_1 = require("../helpers/map-refs");
 var render_imports_1 = require("../helpers/render-imports");
 var strip_state_and_props_refs_1 = require("../helpers/strip-state-and-props-refs");
 var jsx_1 = require("../parsers/jsx");
+var mitosis_node_1 = require("../types/mitosis-node");
 var plugins_1 = require("../modules/plugins");
 var is_children_1 = __importDefault(require("../helpers/is-children"));
 var get_props_1 = require("../helpers/get-props");
@@ -51,14 +63,20 @@ var mappers = {
     Slot: function (json, options, blockOptions) {
         return "<ng-content ".concat(Object.keys(json.bindings)
             .map(function (binding) {
-            var _a, _b, _c;
+            var _a, _b;
             if (binding === 'name') {
                 var selector = (0, lodash_1.kebabCase)((_b = (_a = json.bindings.name) === null || _a === void 0 ? void 0 : _a.code) === null || _b === void 0 ? void 0 : _b.replace('props.slot', ''));
                 return "select=\"[".concat(selector, "]\"");
             }
-            return "".concat((_c = json.bindings[binding]) === null || _c === void 0 ? void 0 : _c.code);
         })
-            .join('\n'), "></ng-content>");
+            .join('\n'), ">").concat(Object.keys(json.bindings)
+            .map(function (binding) {
+            var _a;
+            if (binding !== 'name') {
+                return "".concat((_a = json.bindings[binding]) === null || _a === void 0 ? void 0 : _a.code);
+            }
+        })
+            .join('\n'), "</ng-content>");
     },
 };
 // TODO: Maybe in the future allow defining `string | function` as values
@@ -97,9 +115,9 @@ var blockToAngular = function (json, options, blockOptions) {
     }
     var str = '';
     var needsToRenderSlots = [];
-    if (json.name === 'For') {
-        var indexName = json.scope.For[1];
-        str += "<ng-container *ngFor=\"let ".concat(json.properties._forName, " of ").concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)((_e = json.bindings.each) === null || _e === void 0 ? void 0 : _e.code, {
+    if ((0, mitosis_node_1.checkIsForNode)(json)) {
+        var indexName = json.scope.indexName;
+        str += "<ng-container *ngFor=\"let ".concat(json.scope.forName, " of ").concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)((_e = json.bindings.each) === null || _e === void 0 ? void 0 : _e.code, {
             contextVars: contextVars,
             outputVars: outputVars,
             domRefs: domRefs,
@@ -195,11 +213,15 @@ var blockToAngular = function (json, options, blockOptions) {
     return str;
 };
 exports.blockToAngular = blockToAngular;
-var componentToAngular = function (options) {
-    if (options === void 0) { options = {}; }
+var componentToAngular = function (userOptions) {
+    if (userOptions === void 0) { userOptions = {}; }
     return function (_a) {
         var _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m;
         var _component = _a.component;
+        var DEFAULT_OPTIONS = {
+            preserveImports: false,
+        };
+        var options = __assign(__assign({}, DEFAULT_OPTIONS), userOptions);
         // Make a copy we can safely mutate, similar to babel's toolchain
         var json = (0, fast_clone_1.fastClone)(_component);
         if (options.plugins) {
@@ -294,16 +316,29 @@ var componentToAngular = function (options) {
                 });
             },
         });
-        var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    import { ", " ", " Component ", "", " } from '@angular/core';\n    ", "\n\n    ", "\n    ", "\n    ", "\n\n    @Component({\n      ", "\n      selector: '", "',\n      template: `\n        ", "\n      `,\n      ", "\n    })\n    export default class ", " {\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n    }\n  "], ["\n    import { ", " ", " Component ", "", " } from '@angular/core';\n    ", "\n\n    ", "\n    ", "\n    ", "\n\n    @Component({\n      ", "\n      selector: '", "',\n      template: \\`\n        ", "\n      \\`,\n      ", "\n    })\n    export default class ", " {\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n    }\n  "])), outputs.length ? 'Output, EventEmitter, \n' : '', ((_g = options === null || options === void 0 ? void 0 : options.experimental) === null || _g === void 0 ? void 0 : _g.inject) ? 'Inject, forwardRef,' : '', domRefs.size ? ', ViewChild, ElementRef' : '', props.size ? ', Input' : '', options.standalone ? "import { CommonModule } from '@angular/common';" : '', json.types ? json.types.join('\n') : '', !json.defaultProps ? '' : "const defaultProps = ".concat(json5_1.default.stringify(json.defaultProps), "\n"), (0, render_imports_1.renderPreComponent)({
+        // Preparing built in component metadata parameters
+        var componentMetadata = __assign(__assign({ selector: "'".concat((0, lodash_1.kebabCase)(json.name || 'my-component'), ", ").concat(json.name, "'"), template: "`\n        ".concat((0, indent_1.indent)(template, 8).replace(/`/g, '\\`').replace(/\$\{/g, '\\${'), "\n        `") }, (css.length ? { styles: "[`".concat((0, indent_1.indent)(css, 8), "`]") } : {})), (options.standalone
+            ? // TODO: also add child component imports here as well
+                {
+                    standalone: 'true',
+                    imports: "[".concat(__spreadArray(['CommonModule'], componentsUsed, true).join(', '), "]"),
+                }
+            : {}));
+        // Taking into consideration what user has passed in options and allowing them to override the default generated metadata
+        Object.entries(json.meta.angularConfig || {}).forEach(function (_a) {
+            var key = _a[0], value = _a[1];
+            componentMetadata[key] = value;
+        });
+        var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    import { ", " ", " Component ", "", " } from '@angular/core';\n    ", "\n\n    ", "\n    ", "\n    ", "\n\n    @Component({\n      ", "\n    })\n    export default class ", " {\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n    }\n  "], ["\n    import { ", " ", " Component ", "", " } from '@angular/core';\n    ", "\n\n    ", "\n    ", "\n    ", "\n\n    @Component({\n      ", "\n    })\n    export default class ", " {\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n    }\n  "])), outputs.length ? 'Output, EventEmitter, \n' : '', ((_g = options === null || options === void 0 ? void 0 : options.experimental) === null || _g === void 0 ? void 0 : _g.inject) ? 'Inject, forwardRef,' : '', domRefs.size ? ', ViewChild, ElementRef' : '', props.size ? ', Input' : '', options.standalone ? "import { CommonModule } from '@angular/common';" : '', json.types ? json.types.join('\n') : '', !json.defaultProps ? '' : "const defaultProps = ".concat(json5_1.default.stringify(json.defaultProps), "\n"), (0, render_imports_1.renderPreComponent)({
             component: json,
             target: 'angular',
-            excludeMitosisComponents: !options.standalone,
-        }), options.standalone
-            ? // TODO: also add child component imports here as well
-                "\n        standalone: true,\n        imports: [CommonModule".concat(componentsUsed.length ? ", ".concat(componentsUsed.join(', ')) : '', "],\n      ")
-            : '', (0, lodash_1.kebabCase)(json.name || 'my-component'), (0, indent_1.indent)(template, 8).replace(/`/g, '\\`').replace(/\$\{/g, '\\${'), css.length
-            ? "styles: [\n        `".concat((0, indent_1.indent)(css, 8), "`\n      ],")
-            : '', json.name, localExportVars.join('\n'), customImports.map(function (name) { return "".concat(name, " = ").concat(name); }).join('\n'), Array.from(props)
+            excludeMitosisComponents: !options.standalone && !options.preserveImports,
+        }), Object.entries(componentMetadata)
+            .map(function (_a) {
+            var k = _a[0], v = _a[1];
+            return "".concat(k, ": ").concat(v);
+        })
+            .join(','), json.name, localExportVars.join('\n'), customImports.map(function (name) { return "".concat(name, " = ").concat(name); }).join('\n'), Array.from(props)
             .filter(function (item) { return !(0, slots_1.isSlotProperty)(item) && item !== 'children'; })
             .map(function (item) {
             var propType = propsTypeRef ? "".concat(propsTypeRef, "[\"").concat(item, "\"]") : 'any';

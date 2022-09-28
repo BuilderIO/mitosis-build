@@ -40,6 +40,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.componentToVue3 = exports.componentToVue2 = exports.blockToVue = void 0;
 var dedent_1 = __importDefault(require("dedent"));
+var json5_1 = __importDefault(require("json5"));
+var core_1 = require("@babel/core");
 var standalone_1 = require("prettier/standalone");
 var collect_css_1 = require("../helpers/styles/collect-css");
 var fast_clone_1 = require("../helpers/fast-clone");
@@ -64,6 +66,9 @@ var patterns_1 = require("../helpers/patterns");
 var function_1 = require("fp-ts/lib/function");
 var get_custom_imports_1 = require("../helpers/get-custom-imports");
 var slots_1 = require("../helpers/slots");
+var functions_1 = require("./helpers/functions");
+var babel_transform_1 = require("../helpers/babel-transform");
+var nullable_1 = require("../helpers/nullable");
 function encodeQuotes(string) {
     return string.replace(/"/g, '&quot;');
 }
@@ -72,6 +77,10 @@ var SPECIAL_PROPERTIES = {
     V_FOR: 'v-for',
     V_ELSE: 'v-else',
     V_ELSE_IF: 'v-else-if',
+};
+// Transform <FooBar> to <foo-bar> as Vue2 needs
+var renameMitosisComponentsToKebabCase = function (str) {
+    return str.replace(/<\/?\w+/g, function (match) { return match.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase(); });
 };
 function getContextNames(json) {
     return Object.keys(json.context.get);
@@ -87,26 +96,31 @@ var addBindingsToJson = function (bindings) {
 };
 // TODO: migrate all stripStateAndPropsRefs to use this here
 // to properly replace context refs
-function processBinding(code, _options, json) {
+function processBinding(code, _options, json, includeProps) {
+    if (includeProps === void 0) { includeProps = true; }
     return (0, replace_identifiers_1.replaceIdentifiers)({
         code: (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(code, {
             includeState: true,
-            includeProps: true,
+            includeProps: includeProps,
             replaceWith: 'this.',
         }),
         from: getContextNames(json),
-        to: function (name) { return "this.".concat(name); },
+        to: function (name) { return (_options.api === 'options' ? "this.".concat(name) : "".concat(name, ".value")); },
     });
 }
 var NODE_MAPPERS = {
-    Fragment: function (json, options) {
+    Fragment: function (json, options, scope) {
+        if (options.vueVersion === 2 && (scope === null || scope === void 0 ? void 0 : scope.isRootNode)) {
+            throw new Error('Vue 2 template should have a single root element');
+        }
         return json.children.map(function (item) { return (0, exports.blockToVue)(item, options); }).join('\n');
     },
-    For: function (json, options) {
+    For: function (_json, options) {
         var _a, _b;
         var _c;
+        var json = _json;
         var keyValue = json.bindings.key || { code: 'index' };
-        var forValue = "(".concat(json.properties._forName, ", index) in ").concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)((_c = json.bindings.each) === null || _c === void 0 ? void 0 : _c.code));
+        var forValue = "(".concat(json.scope.forName, ", index) in ").concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)((_c = json.bindings.each) === null || _c === void 0 ? void 0 : _c.code));
         if (options.vueVersion >= 3) {
             // TODO: tmk key goes on different element (parent vs child) based on Vue 2 vs Vue 3
             return "<template :key=\"".concat(encodeQuotes((keyValue === null || keyValue === void 0 ? void 0 : keyValue.code) || 'index'), "\" v-for=\"").concat(encodeQuotes(forValue), "\">\n        ").concat(json.children.map(function (item) { return (0, exports.blockToVue)(item, options); }).join('\n'), "\n      </template>");
@@ -120,69 +134,127 @@ var NODE_MAPPERS = {
             : '';
     },
     Show: function (json, options, scope) {
-        var _a, _b, _c, _d, _e;
-        var _f, _g;
-        var ifValue = (0, slots_1.replaceSlotsInString)((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)((_f = json.bindings.when) === null || _f === void 0 ? void 0 : _f.code), function (slotName) { return "$slots.".concat(slotName); });
+        var _a, _b, _c, _d, _e, _f;
+        var _g, _h;
+        var ifValue = (0, slots_1.replaceSlotsInString)((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)((_g = json.bindings.when) === null || _g === void 0 ? void 0 : _g.code), function (slotName) { return "$slots.".concat(slotName); });
+        var defaultShowTemplate = "\n    <template ".concat(SPECIAL_PROPERTIES.V_IF, "=\"").concat(encodeQuotes(ifValue), "\">\n      ").concat(json.children.map(function (item) { return (0, exports.blockToVue)(item, options); }).join('\n'), "\n    </template>\n    ").concat((0, is_mitosis_node_1.isMitosisNode)(json.meta.else)
+            ? "\n        <template ".concat(SPECIAL_PROPERTIES.V_ELSE, ">\n          ").concat((0, exports.blockToVue)(json.meta.else, options), "\n        </template>")
+            : '', "\n    ");
         switch (options.vueVersion) {
             case 3:
-                return "\n        <template ".concat(SPECIAL_PROPERTIES.V_IF, "=\"").concat(encodeQuotes(ifValue), "\">\n          ").concat(json.children.map(function (item) { return (0, exports.blockToVue)(item, options); }).join('\n'), "\n        </template>\n        ").concat((0, is_mitosis_node_1.isMitosisNode)(json.meta.else)
-                    ? "\n            <template ".concat(SPECIAL_PROPERTIES.V_ELSE, ">\n              ").concat((0, exports.blockToVue)(json.meta.else, options), "\n            </template>")
-                    : '', "\n        ");
+                return defaultShowTemplate;
             case 2:
+                // if it is not the root node, the default show template can be used
+                // as Vue 2 only has this limitation at root level
+                if (!(scope === null || scope === void 0 ? void 0 : scope.isRootNode)) {
+                    return defaultShowTemplate;
+                }
+                var children_1 = json.children.filter(filter_empty_text_nodes_1.filterEmptyTextNodes);
                 // Vue 2 can only handle one root element, so we just take the first one.
                 // TO-DO: warn user of multi-children Show.
-                var firstChild = json.children.filter(filter_empty_text_nodes_1.filterEmptyTextNodes)[0];
+                var firstChild = children_1[0];
                 var elseBlock = json.meta.else;
                 var hasShowChild = (firstChild === null || firstChild === void 0 ? void 0 : firstChild.name) === 'Show';
                 var childElseBlock = firstChild === null || firstChild === void 0 ? void 0 : firstChild.meta.else;
-                /**
-                 * This is special edge logic to handle 2 nested Show elements in Vue 2.
-                 * We need to invert the logic to make it work, due to no-template-root-element limitations in Vue 2.
-                 *
-                 * <show when={foo} else={else-1}>
-                 *  <show when={bar} else={else-2}>
-                 *   <if-code>
-                 *  </show>
-                 * </show>
-                 *
-                 *
-                 * foo: true && bar: true => if-code
-                 * foo: true && bar: false => else-2
-                 * foo: false && bar: true?? => else-1
-                 *
-                 *
-                 * map to:
-                 *
-                 * <else-1 if={!foo} />
-                 * <else-2 else-if={!bar} />
-                 * <if-code v-else />
-                 *
-                 */
-                if (firstChild &&
+                var allShowChildrenWithoutElse = children_1.every(function (x) { return x.name === 'Show' && !x.meta.else; });
+                if (allShowChildrenWithoutElse && (0, is_mitosis_node_1.isMitosisNode)(elseBlock)) {
+                    /**
+                     * This is when we mimic an if-else chain by only providing `Show` elements as children, none of which have an `else` block
+                     *
+                     * <show when={foo} else={else-1}>
+                     *  <show when={bar}> <bar-code> </show>
+                     *  <show when={x}> <x-code> </show>
+                     *  <show when={y}> <y-code> </show>
+                     * </show>
+                     *
+                     * What we want in this case is:
+                     *
+                     * <else-1 if={!foo} />
+                     * <bar-code v-else-if={bar} />
+                     * <x-code v-else-if={x} />
+                     * <y-code v-else />
+                     */
+                    var ifString = (0, function_1.pipe)(elseBlock, addPropertiesToJson((_a = {}, _a[SPECIAL_PROPERTIES.V_IF] = invertBooleanExpression(ifValue), _a)), function (block) { return (0, exports.blockToVue)(block, options); });
+                    var childrenStrings = children_1.map(function (child, idx) {
+                        var _a, _b;
+                        var _c;
+                        var isLast = idx === children_1.length - 1;
+                        var innerBlock = child.children.filter(filter_empty_text_nodes_1.filterEmptyTextNodes)[0];
+                        if (!isLast) {
+                            var childIfValue = (0, function_1.pipe)((_c = child.bindings.when) === null || _c === void 0 ? void 0 : _c.code, strip_state_and_props_refs_1.stripStateAndPropsRefs);
+                            var elseIfString = (0, function_1.pipe)(innerBlock, addPropertiesToJson((_a = {}, _a[SPECIAL_PROPERTIES.V_ELSE_IF] = childIfValue, _a)), function (block) { return (0, exports.blockToVue)(block, options); });
+                            return elseIfString;
+                        }
+                        else {
+                            var elseString = (0, function_1.pipe)(innerBlock, addPropertiesToJson((_b = {}, _b[SPECIAL_PROPERTIES.V_ELSE] = '', _b)), function (block) { return (0, exports.blockToVue)(block, options); });
+                            return elseString;
+                        }
+                    });
+                    return "\n            ".concat(ifString, "\n            ").concat(childrenStrings.join('\n'), "\n          ");
+                }
+                else if (firstChild &&
                     (0, is_mitosis_node_1.isMitosisNode)(elseBlock) &&
                     hasShowChild &&
                     (0, is_mitosis_node_1.isMitosisNode)(childElseBlock)) {
-                    var ifString = (0, function_1.pipe)(elseBlock, addPropertiesToJson((_a = {}, _a[SPECIAL_PROPERTIES.V_IF] = invertBooleanExpression(ifValue), _a)), function (block) { return (0, exports.blockToVue)(block, options); });
-                    var childIfValue = (0, function_1.pipe)((_g = firstChild.bindings.when) === null || _g === void 0 ? void 0 : _g.code, strip_state_and_props_refs_1.stripStateAndPropsRefs, invertBooleanExpression);
-                    var elseIfString = (0, function_1.pipe)(childElseBlock, addPropertiesToJson((_b = {}, _b[SPECIAL_PROPERTIES.V_ELSE_IF] = childIfValue, _b)), function (block) { return (0, exports.blockToVue)(block, options); });
+                    /**
+                     * This is special edge logic to handle 2 nested Show elements in Vue 2.
+                     * We need to invert the logic to make it work, due to no-template-root-element limitations in Vue 2.
+                     *
+                     * <show when={foo} else={else-1}>
+                     *  <show when={bar}> <bar-code> </show>
+                     *
+                     *  <show when={x}> <x-code> </show>
+                     *
+                     *  <show when={y}> <y-code> </show>
+                     * </show>
+                     *
+                     *
+                     *
+                     *
+                     * foo: true && bar: true => if-code
+                     * foo: true && bar: false => else-2
+                     * foo: false && bar: true?? => else-1
+                     *
+                     *
+                     * map to:
+                     *
+                     * <else-1 if={!foo} />
+                     * <else-2 v-else-if={!bar} />
+                     * <if-code v-else />
+                     *
+                     */
+                    var ifString = (0, function_1.pipe)(elseBlock, addPropertiesToJson((_b = {}, _b[SPECIAL_PROPERTIES.V_IF] = invertBooleanExpression(ifValue), _b)), function (block) { return (0, exports.blockToVue)(block, options); });
+                    var childIfValue = (0, function_1.pipe)((_h = firstChild.bindings.when) === null || _h === void 0 ? void 0 : _h.code, strip_state_and_props_refs_1.stripStateAndPropsRefs, invertBooleanExpression);
+                    var elseIfString = (0, function_1.pipe)(childElseBlock, addPropertiesToJson((_c = {}, _c[SPECIAL_PROPERTIES.V_ELSE_IF] = childIfValue, _c)), function (block) { return (0, exports.blockToVue)(block, options); });
                     var firstChildOfFirstChild = firstChild.children.filter(filter_empty_text_nodes_1.filterEmptyTextNodes)[0];
                     var elseString = firstChildOfFirstChild
-                        ? (0, function_1.pipe)(firstChildOfFirstChild, addPropertiesToJson((_c = {}, _c[SPECIAL_PROPERTIES.V_ELSE] = '', _c)), function (block) { return (0, exports.blockToVue)(block, options); })
+                        ? (0, function_1.pipe)(firstChildOfFirstChild, addPropertiesToJson((_d = {}, _d[SPECIAL_PROPERTIES.V_ELSE] = '', _d)), function (block) { return (0, exports.blockToVue)(block, options); })
                         : '';
                     return "\n\n            ".concat(ifString, "\n\n            ").concat(elseIfString, "\n\n            ").concat(elseString, "\n\n          ");
                 }
                 else {
                     var ifString = firstChild
-                        ? (0, function_1.pipe)(firstChild, addPropertiesToJson((_d = {}, _d[SPECIAL_PROPERTIES.V_IF] = ifValue, _d)), function (block) { return (0, exports.blockToVue)(block, options); })
+                        ? (0, function_1.pipe)(firstChild, addPropertiesToJson((_e = {}, _e[SPECIAL_PROPERTIES.V_IF] = ifValue, _e)), function (block) { return (0, exports.blockToVue)(block, options); })
                         : '';
                     var elseString = (0, is_mitosis_node_1.isMitosisNode)(elseBlock)
-                        ? (0, function_1.pipe)(elseBlock, addPropertiesToJson((_e = {}, _e[SPECIAL_PROPERTIES.V_ELSE] = '', _e)), function (block) {
+                        ? (0, function_1.pipe)(elseBlock, addPropertiesToJson((_f = {}, _f[SPECIAL_PROPERTIES.V_ELSE] = '', _f)), function (block) {
                             return (0, exports.blockToVue)(block, options);
                         })
                         : '';
                     return "\n                    ".concat(ifString, "\n                    ").concat(elseString, "\n                  ");
                 }
         }
+    },
+    Slot: function (json, options) {
+        var _a, _b;
+        if (!json.bindings.name) {
+            var key = Object.keys(json.bindings).find(Boolean);
+            if (!key)
+                return '<slot />';
+            return "\n        <template #".concat(key, ">\n        ").concat((_a = json.bindings[key]) === null || _a === void 0 ? void 0 : _a.code, "\n        </template>\n      ");
+        }
+        var strippedTextCode = (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(json.bindings.name.code);
+        return "<slot name=\"".concat((0, slots_1.stripSlotPrefix)(strippedTextCode).toLowerCase(), "\">").concat((_b = json.children) === null || _b === void 0 ? void 0 : _b.map(function (item) { return (0, exports.blockToVue)(item, options); }).join('\n'), "</slot>");
     },
 };
 // TODO: Maybe in the future allow defining `string | function` as values
@@ -332,18 +404,20 @@ function getContextInjectString(component, options) {
 function getContextProvideString(component, options) {
     var str = '{';
     for (var key in component.context.set) {
-        var _a = component.context.set[key], value = _a.value, name_1 = _a.name;
+        var _a = component.context.set[key], ref = _a.ref, value = _a.value, name_1 = _a.name;
         str += "\n      ".concat(name_1, ": ").concat(value
             ? (0, get_state_object_string_1.stringifyContextValue)(value, {
                 valueMapper: function (code) { return (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(code, { replaceWith: '_this.' }); },
             })
-            : null, ",\n    ");
+            : ref
+                ? (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(ref, { replaceWith: '_this.' })
+                : null, ",\n    ");
     }
     str += '}';
     return str;
 }
 /**
- * This plugin handle `onUpdate` code that watches depdendencies.
+ * This plugin handle `onUpdate` code that watches dependencies.
  * We need to apply this workaround to be able to watch specific dependencies in Vue 2: https://stackoverflow.com/a/45853349
  *
  * We add a `computed` property for the dependencies, and a matching `watch` function for the `onUpdate` code
@@ -370,8 +444,9 @@ var onUpdatePlugin = function (options) { return ({
     },
 }); };
 var BASE_OPTIONS = {
-    plugins: [onUpdatePlugin],
+    plugins: [],
     vueVersion: 2,
+    api: 'options',
 };
 var mergeOptions = function (_a, _b) {
     var _c = _a.plugins, pluginsA = _c === void 0 ? [] : _c, a = __rest(_a, ["plugins"]);
@@ -380,12 +455,11 @@ var mergeOptions = function (_a, _b) {
 };
 var generateComponentImport = function (options) {
     return function (componentName) {
-        var key = (0, lodash_1.kebabCase)(componentName);
         if (options.vueVersion >= 3 && options.asyncComponentImports) {
-            return "'".concat(key, "': defineAsyncComponent(").concat(componentName, ")");
+            return "'".concat(componentName, "': defineAsyncComponent(").concat(componentName, ")");
         }
         else {
-            return "'".concat(key, "': ").concat(componentName);
+            return "'".concat(componentName, "': ").concat(componentName);
         }
     };
 };
@@ -401,11 +475,208 @@ var appendToDataString = function (_a) {
     var dataString = _a.dataString, newContent = _a.newContent;
     return dataString.replace(/}$/, "".concat(newContent, "}"));
 };
+function generateOptionsApiScript(component, options, path, template, props, onUpdateWithDeps, onUpdateWithoutDeps) {
+    var _a, _b, _c, _d;
+    var localExports = component.exports;
+    var localVarAsData = [];
+    var localVarAsFunc = [];
+    if (localExports) {
+        Object.keys(localExports).forEach(function (key) {
+            if (localExports[key].usedInLocal) {
+                if (localExports[key].isFunction) {
+                    localVarAsFunc.push(key);
+                }
+                else {
+                    localVarAsData.push(key);
+                }
+            }
+        });
+    }
+    var dataString = (0, get_state_object_string_1.getStateObjectStringFromComponent)(component, {
+        data: true,
+        functions: false,
+        getters: false,
+    });
+    // Append refs to data as { foo, bar, etc }
+    dataString = appendToDataString({
+        dataString: dataString,
+        newContent: (0, get_custom_imports_1.getCustomImports)(component).join(','),
+    });
+    if (localVarAsData.length) {
+        dataString = appendToDataString({ dataString: dataString, newContent: localVarAsData.join(',') });
+    }
+    var getterString = (0, get_state_object_string_1.getStateObjectStringFromComponent)(component, {
+        data: false,
+        getters: true,
+        functions: false,
+        valueMapper: function (code) { return processBinding(code.replace(patterns_1.GETTER, ''), options, component); },
+    });
+    var functionsString = (0, get_state_object_string_1.getStateObjectStringFromComponent)(component, {
+        data: false,
+        getters: false,
+        functions: true,
+        valueMapper: function (code) { return processBinding(code, options, component); },
+    });
+    var includeClassMapHelper = template.includes('_classStringToObject');
+    if (includeClassMapHelper) {
+        functionsString = functionsString.replace(/}\s*$/, "_classStringToObject(str) {\n        const obj = {};\n        if (typeof str !== 'string') { return obj }\n        const classNames = str.trim().split(/\\s+/);\n        for (const name of classNames) {\n          obj[name] = true;\n        }\n        return obj;\n      }  }");
+    }
+    if (localVarAsFunc.length) {
+        functionsString = functionsString.replace(/}\s*$/, "".concat(localVarAsFunc.join(','), "}"));
+    }
+    // Component references to include in `component: { YourComponent, ... }
+    var componentsUsedInTemplate = Array.from((0, get_components_used_1.getComponentsUsed)(component))
+        .filter(function (name) { return name.length && !name.includes('.') && name[0].toUpperCase() === name[0]; })
+        // Strip out components that compile away
+        .filter(function (name) { return !['For', 'Show', 'Fragment', 'Slot', component.name].includes(name); });
+    // get default imports from component files
+    var importedComponents = component.imports
+        .filter(render_imports_1.checkIsComponentImport)
+        .map(function (imp) { var _a; return (_a = Object.entries(imp.imports).find(function (_a) {
+        var _ = _a[0], value = _a[1];
+        return value === 'default';
+    })) === null || _a === void 0 ? void 0 : _a[0]; })
+        .filter(nullable_1.checkIsDefined);
+    var componentsUsed = (0, lodash_1.uniq)(__spreadArray(__spreadArray([], componentsUsedInTemplate, true), importedComponents, true));
+    var propsDefinition = Array.from(props).filter(function (prop) { return prop !== 'children' && prop !== 'class'; });
+    // add default props (if set)
+    if (component.defaultProps) {
+        propsDefinition = propsDefinition.reduce(function (propsDefinition, curr) {
+            var _a;
+            return ((propsDefinition[curr] = ((_a = component.defaultProps) === null || _a === void 0 ? void 0 : _a.hasOwnProperty(curr))
+                ? { default: component.defaultProps[curr] }
+                : {}),
+                propsDefinition);
+        }, {});
+    }
+    return "\n        export default {\n        ".concat(!component.name
+        ? ''
+        : "name: '".concat(path && ((_a = options.namePrefix) === null || _a === void 0 ? void 0 : _a.call(options, path)) ? ((_b = options.namePrefix) === null || _b === void 0 ? void 0 : _b.call(options, path)) + '-' : '').concat((0, lodash_1.kebabCase)(component.name), "',"), "\n        ").concat(generateComponents(componentsUsed, options), "\n        ").concat(props.length ? "props: ".concat(json5_1.default.stringify(propsDefinition), ",") : '', "\n        ").concat(dataString.length < 4
+        ? ''
+        : "\n        data: () => (".concat(dataString, "),\n        "), "\n\n        ").concat((0, lodash_1.size)(component.context.set)
+        ? "provide() {\n                const _this = this;\n                return ".concat(getContextProvideString(component, options), "\n              },")
+        : '', "\n        ").concat((0, lodash_1.size)(component.context.get)
+        ? "inject: ".concat(getContextInjectString(component, options), ",")
+        : '', "\n        ").concat(((_c = component.hooks.onInit) === null || _c === void 0 ? void 0 : _c.code)
+        ? "created() {\n                ".concat(processBinding(component.hooks.onInit.code, options, component), "\n              },")
+        : '', "\n        ").concat(((_d = component.hooks.onMount) === null || _d === void 0 ? void 0 : _d.code)
+        ? "mounted() {\n                ".concat(processBinding(component.hooks.onMount.code, options, component), "\n              },")
+        : '', "\n        ").concat(onUpdateWithoutDeps.length
+        ? "updated() {\n            ".concat(onUpdateWithoutDeps
+            .map(function (hook) { return processBinding(hook.code, options, component); })
+            .join('\n'), "\n          },")
+        : '', "\n        ").concat(onUpdateWithDeps.length
+        ? "watch: {\n            ".concat(onUpdateWithDeps
+            .map(function (hook, index) {
+            return "".concat(getOnUpdateHookName(index), "() {\n                  ").concat(processBinding(hook.code, options, component), "\n                  }\n                ");
+        })
+            .join(','), "\n          },")
+        : '', "\n        ").concat(component.hooks.onUnMount
+        ? "unmounted() {\n                ".concat(processBinding(component.hooks.onUnMount.code, options, component), "\n              },")
+        : '', "\n\n        ").concat(getterString.length < 4
+        ? ''
+        : " \n          computed: ".concat(getterString, ",\n        "), "\n        ").concat(functionsString.length < 4
+        ? ''
+        : "\n          methods: ".concat(functionsString, ",\n        "), "\n        ").concat(Object.entries(component.meta.vueConfig || {})
+        .map(function (_a) {
+        var k = _a[0], v = _a[1];
+        return "".concat(k, ": ").concat(v);
+    })
+        .join(','), "\n      }");
+}
+var getCompositionPropDefinition = function (_a) {
+    var options = _a.options, component = _a.component, props = _a.props;
+    var str = 'const props = ';
+    if (component.defaultProps) {
+        var generic = options.typescript ? "<".concat(component.propsTypeRef, ">") : '';
+        str += "withDefaults(defineProps".concat(generic, "(), ").concat(json5_1.default.stringify(component.defaultProps), ")");
+    }
+    else if (options.typescript && component.propsTypeRef && component.propsTypeRef !== 'any') {
+        str += "defineProps<".concat(component.propsTypeRef, ">()");
+    }
+    else {
+        str += "defineProps(".concat(json5_1.default.stringify(props), ")");
+    }
+    return str;
+};
+function appendValueToRefs(input, component, options) {
+    var refKeys = Object.keys((0, lodash_1.pickBy)(component.state, function (i) { return (i === null || i === void 0 ? void 0 : i.type) === 'property'; }));
+    var output = processBinding(input, options, component, false);
+    return (0, babel_transform_1.babelTransformExpression)(output, {
+        Identifier: function (path) {
+            if (!(core_1.types.isFunctionDeclaration(path.parent) && path.parent.id === path.node) &&
+                !core_1.types.isCallExpression(path.parent) &&
+                (!core_1.types.isMemberExpression(path.parent) || core_1.types.isThisExpression(path.parent.object)) &&
+                path.parentPath.listKey !== 'arguments' &&
+                path.parentPath.listKey !== 'params' &&
+                refKeys.includes(path.node.name)) {
+                path.replaceWith(core_1.types.identifier("".concat(path.node.name, ".value")));
+            }
+        },
+    });
+}
+function generateCompositionApiScript(component, options, template, props, onUpdateWithDeps, onUpdateWithoutDeps) {
+    var _a, _b, _c, _d, _e, _f, _g;
+    var refs = (0, get_state_object_string_1.getStateObjectStringFromComponent)(component, {
+        data: true,
+        functions: false,
+        getters: false,
+        format: 'variables',
+        valueMapper: function (code) {
+            return processBinding("ref(".concat(code, ")"), options, component);
+        },
+        keyPrefix: 'const',
+    });
+    var methods = (0, get_state_object_string_1.getStateObjectStringFromComponent)(component, {
+        data: false,
+        getters: false,
+        functions: true,
+        valueMapper: function (code) { return processBinding(code, options, component, false); },
+        format: 'variables',
+    });
+    if (template.includes('_classStringToObject')) {
+        methods += " function _classStringToObject(str) {\n    const obj = {};\n    if (typeof str !== 'string') { return obj }\n    const classNames = str.trim().split(/\\s+/);\n    for (const name of classNames) {\n      obj[name] = true;\n    }\n    return obj;\n    } ";
+    }
+    var getterKeys = Object.keys((0, lodash_1.pickBy)(component.state, function (i) { return (i === null || i === void 0 ? void 0 : i.type) === 'getter'; }));
+    var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    ", "\n    ", "\n\n    ", "\n\n    ", "\n\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n\n    ", "\n    ", "\n  "], ["\n    ", "\n    ", "\n\n    ", "\n\n    ", "\n\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n\n    ", "\n    ", "\n  "])), props.length ? getCompositionPropDefinition({ component: component, props: props, options: options }) : '', refs, (_a = Object.keys(component.context.get)) === null || _a === void 0 ? void 0 : _a.map(function (key) { return "const ".concat(key, " = inject(").concat(component.context.get[key].name, ")"); }).join('\n'), (_b = Object.keys(component.context.set)) === null || _b === void 0 ? void 0 : _b.map(function (key) { return "provide(".concat(component.context.set[key].name, ", ").concat(component.context.set[key].ref, ")"); }).join('\n'), (_c = Object.keys(component.refs)) === null || _c === void 0 ? void 0 : _c.map(function (key) { return "const ".concat(key, " = ref<").concat(component.refs[key].typeParameter, ">()"); }).join('\n'), appendValueToRefs((_e = (_d = component.hooks.onInit) === null || _d === void 0 ? void 0 : _d.code) !== null && _e !== void 0 ? _e : '', component, options), !((_f = component.hooks.onMount) === null || _f === void 0 ? void 0 : _f.code)
+        ? ''
+        : "onMounted(() => { ".concat(appendValueToRefs(component.hooks.onMount.code, component, options), "})"), !((_g = component.hooks.onUnMount) === null || _g === void 0 ? void 0 : _g.code)
+        ? ''
+        : "onMounted(() => { ".concat(appendValueToRefs(component.hooks.onUnMount.code, component, options), "})"), !getterKeys
+        ? ''
+        : getterKeys
+            .map(function (key) {
+            var _a, _b;
+            var code = (_b = (_a = component.state[key]) === null || _a === void 0 ? void 0 : _a.code) === null || _b === void 0 ? void 0 : _b.toString();
+            return !code
+                ? ''
+                : "const ".concat(key, " = computed(").concat(appendValueToRefs(code.replace(key, '').replace('get ()', '() =>'), component, options), ")");
+        })
+            .join('\n'), !(onUpdateWithoutDeps === null || onUpdateWithoutDeps === void 0 ? void 0 : onUpdateWithoutDeps.length)
+        ? ''
+        : onUpdateWithoutDeps.map(function (hook) {
+            return "onUpdated(() => ".concat(appendValueToRefs(hook.code, component, options), ")");
+        }), !(onUpdateWithDeps === null || onUpdateWithDeps === void 0 ? void 0 : onUpdateWithDeps.length)
+        ? ''
+        : onUpdateWithDeps.map(function (hook) {
+            return appendValueToRefs("watch(".concat(hook.deps, ", (").concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(hook.deps), ") => { ").concat(hook.code, "})\n"), component, options);
+        }), (methods === null || methods === void 0 ? void 0 : methods.length) ? appendValueToRefs(methods, component, options) : '');
+    str = str.replace(/this\./g, ''); // strip this elsewhere (e.g. functions)
+    return str;
+}
 var componentToVue = function (userOptions) {
+    if (userOptions === void 0) { userOptions = BASE_OPTIONS; }
     return function (_a) {
-        var _b, _c, _d, _e, _f, _g, _h, _j;
+        var _b, _c, _d, _e, _f, _g, _h, _j, _k;
         var component = _a.component, path = _a.path;
         var options = mergeOptions(BASE_OPTIONS, userOptions);
+        if (options.api === 'options') {
+            (_b = options.plugins) === null || _b === void 0 ? void 0 : _b.unshift(onUpdatePlugin);
+        }
+        else if (options.api === 'composition') {
+            (_c = options.plugins) === null || _c === void 0 ? void 0 : _c.unshift(functions_1.FUNCTION_HACK_PLUGIN);
+            options.asyncComponentImports = false;
+        }
         // Make a copy we can safely mutate, similar to babel's toolchain can be used
         component = (0, fast_clone_1.fastClone)(component);
         (0, process_http_requests_1.processHttpRequests)(component);
@@ -414,109 +685,44 @@ var componentToVue = function (userOptions) {
         if (options.plugins) {
             component = (0, plugins_1.runPreJsonPlugins)(component, options.plugins);
         }
-        (0, map_refs_1.mapRefs)(component, function (refName) { return "this.$refs.".concat(refName); });
+        if (options.api === 'options') {
+            (0, map_refs_1.mapRefs)(component, function (refName) { return "this.$refs.".concat(refName); });
+        }
         if (options.plugins) {
             component = (0, plugins_1.runPostJsonPlugins)(component, options.plugins);
         }
         var css = (0, collect_css_1.collectCss)(component, {
-            prefix: (_c = (_b = options.cssNamespace) === null || _b === void 0 ? void 0 : _b.call(options)) !== null && _c !== void 0 ? _c : undefined,
+            prefix: (_e = (_d = options.cssNamespace) === null || _d === void 0 ? void 0 : _d.call(options)) !== null && _e !== void 0 ? _e : undefined,
         });
-        var localExports = component.exports;
-        var localVarAsData = [];
-        var localVarAsFunc = [];
-        if (localExports) {
-            Object.keys(localExports).forEach(function (key) {
-                if (localExports[key].usedInLocal) {
-                    if (localExports[key].isFunction) {
-                        localVarAsFunc.push(key);
-                    }
-                    else {
-                        localVarAsData.push(key);
-                    }
-                }
-            });
-        }
-        var dataString = (0, get_state_object_string_1.getStateObjectStringFromComponent)(component, {
-            data: true,
-            functions: false,
-            getters: false,
-        });
-        var getterString = (0, get_state_object_string_1.getStateObjectStringFromComponent)(component, {
-            data: false,
-            getters: true,
-            functions: false,
-            valueMapper: function (code) { return processBinding(code.replace(patterns_1.GETTER, ''), options, component); },
-        });
-        var functionsString = (0, get_state_object_string_1.getStateObjectStringFromComponent)(component, {
-            data: false,
-            getters: false,
-            functions: true,
-            valueMapper: function (code) { return processBinding(code, options, component); },
-        });
-        // Component references to include in `component: { YourComponent, ... }
-        var componentsUsed = Array.from((0, get_components_used_1.getComponentsUsed)(component))
-            .filter(function (name) { return name.length && !name.includes('.') && name[0].toUpperCase() === name[0]; })
-            // Strip out components that compile away
-            .filter(function (name) { return !['For', 'Show', 'Fragment', component.name].includes(name); });
-        // Append refs to data as { foo, bar, etc }
-        dataString = appendToDataString({
-            dataString: dataString,
-            newContent: (0, get_custom_imports_1.getCustomImports)(component).join(','),
-        });
-        if (localVarAsData.length) {
-            dataString = appendToDataString({ dataString: dataString, newContent: localVarAsData.join(',') });
-        }
-        var elementProps = (0, get_props_1.getProps)(component);
         (0, strip_meta_properties_1.stripMetaProperties)(component);
         var template = (0, function_1.pipe)(component.children.map(function (item) { return (0, exports.blockToVue)(item, options, { isRootNode: true }); }).join('\n'), renameMitosisComponentsToKebabCase);
-        var includeClassMapHelper = template.includes('_classStringToObject');
-        if (includeClassMapHelper) {
-            functionsString = functionsString.replace(/}\s*$/, "_classStringToObject(str) {\n        const obj = {};\n        if (typeof str !== 'string') { return obj }\n        const classNames = str.trim().split(/\\s+/);\n        for (const name of classNames) {\n          obj[name] = true;\n        }\n        return obj;\n      }  }");
+        var onUpdateWithDeps = ((_f = component.hooks.onUpdate) === null || _f === void 0 ? void 0 : _f.filter(function (hook) { var _a; return (_a = hook.deps) === null || _a === void 0 ? void 0 : _a.length; })) || [];
+        var onUpdateWithoutDeps = ((_g = component.hooks.onUpdate) === null || _g === void 0 ? void 0 : _g.filter(function (hook) { var _a; return !((_a = hook.deps) === null || _a === void 0 ? void 0 : _a.length); })) || [];
+        var getterKeys = Object.keys((0, lodash_1.pickBy)(component.state, function (i) { return (i === null || i === void 0 ? void 0 : i.type) === 'getter'; }));
+        var elementProps = Array.from((0, get_props_1.getProps)(component)).filter(function (prop) { return !(0, slots_1.isSlotProperty)(prop); });
+        // import from vue
+        var vueImports = [];
+        if (options.vueVersion >= 3 && options.asyncComponentImports) {
+            vueImports.push('defineAsyncComponent');
         }
-        if (localVarAsFunc.length) {
-            functionsString = functionsString.replace(/}\s*$/, "".concat(localVarAsFunc.join(','), "}"));
+        if (options.api === 'composition') {
+            onUpdateWithDeps.length && vueImports.push('watch');
+            ((_h = component.hooks.onMount) === null || _h === void 0 ? void 0 : _h.code) && vueImports.push('onMounted');
+            ((_j = component.hooks.onUnMount) === null || _j === void 0 ? void 0 : _j.code) && vueImports.push('onUnMounted');
+            onUpdateWithoutDeps.length && vueImports.push('onUpdated');
+            (0, lodash_1.size)(getterKeys) && vueImports.push('computed');
+            (0, lodash_1.size)(component.context.set) && vueImports.push('provide');
+            (0, lodash_1.size)(component.context.get) && vueImports.push('inject');
+            (0, lodash_1.size)(Object.keys(component.state).filter(function (key) { var _a; return ((_a = component.state[key]) === null || _a === void 0 ? void 0 : _a.type) === 'property'; })) && vueImports.push('ref');
         }
-        var onUpdateWithDeps = ((_d = component.hooks.onUpdate) === null || _d === void 0 ? void 0 : _d.filter(function (hook) { var _a; return (_a = hook.deps) === null || _a === void 0 ? void 0 : _a.length; })) || [];
-        var onUpdateWithoutDeps = ((_e = component.hooks.onUpdate) === null || _e === void 0 ? void 0 : _e.filter(function (hook) { var _a; return !((_a = hook.deps) === null || _a === void 0 ? void 0 : _a.length); })) || [];
-        var propsDefinition = Array.from(elementProps).filter(function (prop) { return prop !== 'children' && prop !== 'class'; });
-        if (component.defaultProps) {
-            propsDefinition = propsDefinition.reduce(function (propsDefinition, curr) { return ((propsDefinition[curr] =
-                component.defaultProps && component.defaultProps.hasOwnProperty(curr)
-                    ? { default: component.defaultProps[curr] }
-                    : {}),
-                propsDefinition); }, {});
-        }
-        var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    <template>\n      ", "\n    </template>\n    <script lang=\"ts\">\n    ", "\n      ", "\n\n      ", "\n\n      export default {\n        ", "\n        ", "\n        ", "\n        ", "\n\n        ", "\n        ", "\n\n        ", "\n        ", "\n        ", "\n        ", "\n\n        ", "\n        ", "\n      }\n    </script>\n    ", "\n  "], ["\n    <template>\n      ", "\n    </template>\n    <script lang=\"ts\">\n    ", "\n      ", "\n\n      ", "\n\n      export default {\n        ", "\n        ", "\n        ", "\n        ", "\n\n        ", "\n        ", "\n\n        ", "\n        ", "\n        ", "\n        ", "\n\n        ", "\n        ", "\n      }\n    </script>\n    ", "\n  "])), template, options.vueVersion >= 3 ? 'import { defineAsyncComponent } from "vue"' : '', (0, render_imports_1.renderPreComponent)({
+        var tsLangAttribute = options.typescript ? "lang='ts'" : '';
+        var str = (0, dedent_1.default)(templateObject_2 || (templateObject_2 = __makeTemplateObject(["\n    <template>\n      ", "\n    </template>\n\n\n    <script ", " ", ">\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n    </script>\n\n    ", "\n  "], ["\n    <template>\n      ", "\n    </template>\n\n\n    <script ", " ", ">\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n    </script>\n\n    ", "\n  "])), template, options.api === 'composition' ? 'setup' : '', tsLangAttribute, vueImports.length ? "import { ".concat((0, lodash_1.uniq)(vueImports).sort().join(', '), " } from \"vue\"") : '', (options.typescript && ((_k = component.types) === null || _k === void 0 ? void 0 : _k.join('\n'))) || '', (0, render_imports_1.renderPreComponent)({
             component: component,
             target: 'vue',
             asyncComponentImports: options.asyncComponentImports,
-        }), ((_f = component.types) === null || _f === void 0 ? void 0 : _f.join('\n')) || '', !component.name
-            ? ''
-            : "name: '".concat(path && ((_g = options.namePrefix) === null || _g === void 0 ? void 0 : _g.call(options, path)) ? ((_h = options.namePrefix) === null || _h === void 0 ? void 0 : _h.call(options, path)) + '-' : '').concat((0, lodash_1.kebabCase)(component.name), "',"), generateComponents(componentsUsed, options), elementProps.size ? "props: ".concat(JSON.stringify(propsDefinition), ",") : '', dataString.length < 4
-            ? ''
-            : "\n        data: () => (".concat(dataString, "),\n        "), (0, lodash_1.size)(component.context.set)
-            ? "provide() {\n                const _this = this;\n                return ".concat(getContextProvideString(component, options), "\n              },")
-            : '', (0, lodash_1.size)(component.context.get)
-            ? "inject: ".concat(getContextInjectString(component, options), ",")
-            : '', ((_j = component.hooks.onMount) === null || _j === void 0 ? void 0 : _j.code)
-            ? "mounted() {\n                ".concat(processBinding(component.hooks.onMount.code, options, component), "\n              },")
-            : '', onUpdateWithoutDeps.length
-            ? "updated() {\n            ".concat(onUpdateWithoutDeps
-                .map(function (hook) { return processBinding(hook.code, options, component); })
-                .join('\n'), "\n          },")
-            : '', onUpdateWithDeps.length
-            ? "watch: {\n            ".concat(onUpdateWithDeps
-                .map(function (hook, index) {
-                return "".concat(getOnUpdateHookName(index), "() {\n                  ").concat(processBinding(hook.code, options, component), "\n                  }\n                ");
-            })
-                .join(','), "\n          },")
-            : '', component.hooks.onUnMount
-            ? "unmounted() {\n                ".concat(processBinding(component.hooks.onUnMount.code, options, component), "\n              },")
-            : '', getterString.length < 4
-            ? ''
-            : "\n          computed: ".concat(getterString, ",\n        "), functionsString.length < 4
-            ? ''
-            : "\n          methods: ".concat(functionsString, ",\n        "), !css.trim().length
+        }), options.api === 'composition'
+            ? generateCompositionApiScript(component, options, template, elementProps, onUpdateWithDeps, onUpdateWithoutDeps)
+            : generateOptionsApiScript(component, options, path, template, elementProps, onUpdateWithDeps, onUpdateWithoutDeps), !css.trim().length
             ? ''
             : "<style scoped>\n      ".concat(css, "\n    </style>"));
         if (options.plugins) {
@@ -528,6 +734,7 @@ var componentToVue = function (userOptions) {
                     parser: 'vue',
                     plugins: [
                         // To support running in browsers
+                        require('prettier/parser-typescript'),
                         require('prettier/parser-html'),
                         require('prettier/parser-postcss'),
                         require('prettier/parser-babel'),
@@ -556,13 +763,9 @@ var componentToVue3 = function (vueOptions) {
     return componentToVue(__assign(__assign({}, vueOptions), { vueVersion: 3 }));
 };
 exports.componentToVue3 = componentToVue3;
-// Transform <FooBar> to <foo-bar> as Vue2 needs
-var renameMitosisComponentsToKebabCase = function (str) {
-    return str.replace(/<\/?\w+/g, function (match) { return match.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase(); });
-};
 // Remove unused artifacts like empty script or style tags
 var removePatterns = [
     "<script>\nexport default {};\n</script>",
     "<style>\n</style>",
 ];
-var templateObject_1;
+var templateObject_1, templateObject_2;

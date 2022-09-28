@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Show = exports.Slot = exports.For = void 0;
+exports.Fragment = exports.Show = exports.Slot = exports.For = void 0;
 /**
  * Flow control based on Solid
  *
@@ -21,3 +21,7 @@ function Show(props) {
     return null;
 }
 exports.Show = Show;
+function Fragment(props) {
+    return null;
+}
+exports.Fragment = Fragment;

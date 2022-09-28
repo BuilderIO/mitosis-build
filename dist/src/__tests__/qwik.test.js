@@ -77,7 +77,7 @@ var debugOutput = function (fileSet) { return __awaiter(void 0, void 0, void 0, 
     });
 }); };
 describe('qwik', function () {
-    (0, shared_1.runTestsForTarget)('qwik', (0, component_generator_1.componentToQwik)());
+    (0, shared_1.runTestsForTarget)({ options: {}, target: 'qwik', generator: component_generator_1.componentToQwik });
     describe('todo', function () {
         test('Todo.tsx', function () { return __awaiter(void 0, void 0, void 0, function () {
             var json, fileSet;

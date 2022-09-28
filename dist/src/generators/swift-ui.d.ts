@@ -1,5 +1,3 @@
-import { Transpiler } from '../types/transpiler';
-export declare type ToSwiftOptions = {
-    prettier?: boolean;
-};
-export declare const componentToSwift: (options?: ToSwiftOptions) => Transpiler;
+import { BaseTranspilerOptions, TranspilerGenerator } from '../types/transpiler';
+export declare type ToSwiftOptions = BaseTranspilerOptions;
+export declare const componentToSwift: TranspilerGenerator<ToSwiftOptions>;

@@ -5,6 +5,7 @@ var __makeTemplateObject = (this && this.__makeTemplateObject) || function (cook
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CoreButton = exports.__passThroughProps__ = exports.Image = exports.DIRECTIVES = void 0;
+var for_1 = require("../../helpers/nodes/for");
 var minify_1 = require("../minify");
 var src_generator_1 = require("./src-generator");
 exports.DIRECTIVES = {
@@ -27,17 +28,17 @@ exports.DIRECTIVES = {
             });
         };
     },
-    For: function (node, blockFn) {
+    For: function (_node, blockFn) {
         return function () {
             var _this = this;
             var _a;
+            var node = _node;
             var expr = (_a = node.bindings.each) === null || _a === void 0 ? void 0 : _a.code;
             this.jsxExpression(function () {
-                var forName = node.properties._forName || '_';
-                var indexName = node.properties._indexName;
+                var forArgs = (0, for_1.getForArguments)(node);
+                var forName = forArgs[0];
                 _this.emit('(', expr, '||[]).map(');
-                _this.isBuilder && _this.emit('(('),
-                    _this.emit('function(', forName, indexName ? ',' : '', indexName ? indexName : '', '){');
+                _this.isBuilder && _this.emit('(('), _this.emit('function(', forArgs, '){');
                 if (_this.isBuilder) {
                     _this.emit('var state=Object.assign({},this,{', (0, src_generator_1.iteratorProperty)(expr), ':', forName, '==null?{}:', forName, '});');
                 }
@@ -69,6 +70,10 @@ function Image(props) {
             loading: isPixel ? 'eager' : 'lazy',
             srcset: undefined,
         };
+        var qwikBugWorkaround = function (imgProps) {
+            return Object.keys(imgProps).forEach(function (k) { return imgProps[k] === undefined && delete imgProps[k]; });
+        };
+        qwikBugWorkaround(imgProps);
         if (isBuilderIoImage) {
             var webpImage_1 = updateQueryParam(image, 'format', 'webp');
             var srcset = ['100', '200', '400', '800', '1200', '1600', '2000']

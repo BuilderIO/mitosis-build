@@ -25,13 +25,14 @@
   "engines": {
     "npm": "99999999.9.9"
   },
-  "version": "0.0.56-104",
+  "version": "0.0.68",
   "homepage": "https://github.com/BuilderIO/mitosis",
   "main": "./dist/src/index.js",
   "exports": {
     ".": "./dist/src/index.js",
     "./lib/*": "./dist/src/*",
-    "./jsx-runtime": "./jsx-runtime.d.ts"
+    "./jsx-runtime": "./jsx-runtime.d.ts",
+    "./types": "./dist/src/index.d.ts"
   },
   "types": "./dist/src/index.d.ts",
   "license": "MIT",
@@ -86,8 +87,7 @@
     "svelte": "^3.30.0",
     "traverse": "^0.6.6",
     "typescript": "^4.7.3",
-    "vue": "~2.6",
-    "vue-template-compiler": "~2.6"
+    "vue": "~2.6"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.6.0",
@@ -117,6 +117,5 @@
     "ts-node": "^9.1.1",
     "typescript": "^4",
     "universalify": "^2.0.0"
-  },
-  "stableVersion": "0.0.56-103"
+  }
 }

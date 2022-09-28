@@ -7,4 +7,4 @@ import { ParseMitosisOptions } from './types';
  * @param jsx string representation of the Mitosis component
  * @returns A JSON representation of the Mitosis component
  */
-export declare function parseJsx(jsx: string, options?: Partial<ParseMitosisOptions>): MitosisComponent;
+export declare function parseJsx(jsx: string, _options?: Partial<ParseMitosisOptions>): MitosisComponent;
