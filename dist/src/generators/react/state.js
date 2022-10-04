@@ -7,12 +7,12 @@ exports.updateStateSettersInCode = exports.updateStateSetters = exports.getUseSt
 var core_1 = require("@babel/core");
 var json5_1 = __importDefault(require("json5"));
 var traverse_1 = __importDefault(require("traverse"));
-var babel_transform_1 = require("../../helpers/babel-transform");
 var capitalize_1 = require("../../helpers/capitalize");
 var is_mitosis_node_1 = require("../../helpers/is-mitosis-node");
 var function_1 = require("fp-ts/lib/function");
 var helpers_1 = require("./helpers");
 var patterns_1 = require("../../helpers/patterns");
+var transform_state_setters_1 = require("../../helpers/transform-state-setters");
 /**
  * Removes all `this.` references.
  */
@@ -88,19 +88,13 @@ var updateStateSettersInCode = function (value, options) {
     if (options.stateType !== 'useState') {
         return value;
     }
-    return (0, babel_transform_1.babelTransformExpression)(value, {
-        AssignmentExpression: function (path) {
+    return (0, transform_state_setters_1.transformStateSetters)({
+        value: value,
+        transformer: function (_a) {
+            var path = _a.path, propertyName = _a.propertyName;
             var node = path.node;
-            if (core_1.types.isMemberExpression(node.left)) {
-                if (core_1.types.isIdentifier(node.left.object)) {
-                    // TODO: utillity to properly trace this reference to the beginning
-                    if (node.left.object.name === 'state') {
-                        // TODO: ultimately support other property access like strings
-                        var propertyName = node.left.property.name;
-                        path.replaceWith(core_1.types.callExpression(core_1.types.identifier(getSetStateFnName(propertyName)), [node.right]));
-                    }
-                }
-            }
+            var newExpression = core_1.types.callExpression(core_1.types.identifier(getSetStateFnName(propertyName)), [node.right]);
+            return newExpression;
         },
     });
 };

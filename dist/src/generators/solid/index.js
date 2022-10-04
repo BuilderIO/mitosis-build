@@ -14,6 +14,29 @@ var __assign = (this && this.__assign) || function () {
     };
     return __assign.apply(this, arguments);
 };
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
     if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
         if (ar || !(i in from)) {
@@ -52,6 +75,9 @@ var nullable_1 = require("../../helpers/nullable");
 var get_state_object_string_1 = require("../../helpers/get-state-object-string");
 var collect_css_1 = require("../../helpers/styles/collect-css");
 var hash_sum_1 = __importDefault(require("hash-sum"));
+var Array_1 = require("fp-ts/lib/Array");
+var S = __importStar(require("fp-ts/string"));
+var helpers_2 = require("./state/helpers");
 var DEFAULT_OPTIONS = {
     state: 'signals',
     stylesType: 'styled-components',
@@ -125,7 +151,7 @@ var preProcessBlockCode = function (_a) {
     for (var key in json.properties) {
         var value = json.properties[key];
         if (value) {
-            json.properties[key] = (0, state_1.updateStateCode)({ options: options, component: component, updateSetters: false })(value);
+            json.properties[key] = (0, helpers_2.updateStateCode)({ options: options, component: component, updateSetters: false })(value);
         }
     }
     for (var key in json.bindings) {
@@ -133,7 +159,7 @@ var preProcessBlockCode = function (_a) {
         if (value === null || value === void 0 ? void 0 : value.code) {
             json.bindings[key] = {
                 arguments: value.arguments,
-                code: (0, state_1.updateStateCode)({ options: options, component: component, updateSetters: true })(value.code),
+                code: (0, helpers_2.updateStateCode)({ options: options, component: component, updateSetters: true })(value.code),
             };
         }
     }
@@ -253,7 +279,7 @@ function addProviderComponents(json, options) {
 }
 var preProcessComponentCode = function (json, options) {
     var _a;
-    var processCode = (0, state_1.updateStateCode)({ options: options, component: json });
+    var processCode = (0, helpers_2.updateStateCode)({ options: options, component: json });
     if ((_a = json.hooks.onMount) === null || _a === void 0 ? void 0 : _a.code) {
         json.hooks.onMount.code = processCode(json.hooks.onMount.code);
     }
@@ -295,12 +321,12 @@ var componentToSolid = function (passedOptions) {
         var componentHasContext = (0, context_1.hasContext)(json);
         var hasShowComponent = componentsUsed.has('Show');
         var hasForComponent = componentsUsed.has('For');
-        var solidJSImports = __spreadArray(__spreadArray([
+        var solidJSImports = (0, Array_1.uniq)(S.Eq)(__spreadArray(__spreadArray([
             componentHasContext ? 'useContext' : undefined,
             hasShowComponent ? 'Show' : undefined,
             hasForComponent ? 'For' : undefined,
             ((_b = json.hooks.onMount) === null || _b === void 0 ? void 0 : _b.code) ? 'onMount' : undefined
-        ], (((_c = json.hooks.onUpdate) === null || _c === void 0 ? void 0 : _c.length) ? ['on', 'createEffect'] : []), true), ((_d = state === null || state === void 0 ? void 0 : state.import.solidjs) !== null && _d !== void 0 ? _d : []), true).filter(nullable_1.checkIsDefined);
+        ], (((_c = json.hooks.onUpdate) === null || _c === void 0 ? void 0 : _c.length) ? ['on', 'createEffect'] : []), true), ((_d = state === null || state === void 0 ? void 0 : state.import.solidjs) !== null && _d !== void 0 ? _d : []), true).filter(nullable_1.checkIsDefined));
         var storeImports = (_e = state === null || state === void 0 ? void 0 : state.import.store) !== null && _e !== void 0 ? _e : [];
         var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n\n    function ", "(props) {\n      ", "\n      \n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      return (", "\n        ", "\n        ", "\n        ", ")\n    }\n\n    export default ", ";\n  "], ["\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n\n    function ", "(props) {\n      ", "\n      \n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      return (", "\n        ", "\n        ", "\n        ", ")\n    }\n\n    export default ", ";\n  "])), solidJSImports.length > 0 ? "import { ".concat(solidJSImports.join(', '), " } from 'solid-js';") : '', !foundDynamicComponents ? '' : "import { Dynamic } from 'solid-js/web';", storeImports.length > 0 ? "import { ".concat(storeImports.join(', '), " } from 'solid-js/store';") : '', !componentHasStyles && options.stylesType === 'styled-components'
             ? ''
