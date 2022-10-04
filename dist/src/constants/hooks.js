@@ -7,4 +7,5 @@ exports.HOOKS = {
     CONTEXT: 'useContext',
     REF: 'useRef',
     DEFAULT_PROPS: 'useDefaultProps',
+    STYLE: 'useStyle',
 };

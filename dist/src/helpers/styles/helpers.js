@@ -21,7 +21,11 @@ var nodeHasStyle = function (node) {
 };
 exports.nodeHasStyle = nodeHasStyle;
 var hasCss = function (component) {
-    var hasStyles = false;
+    var _a;
+    var hasStyles = !!((_a = component.style) === null || _a === void 0 ? void 0 : _a.length);
+    if (hasStyles) {
+        return true;
+    }
     (0, traverse_1.default)(component).forEach(function (item) {
         if ((0, is_mitosis_node_1.isMitosisNode)(item)) {
             if ((0, exports.nodeHasCss)(item)) {

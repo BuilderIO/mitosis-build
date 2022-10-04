@@ -30,6 +30,7 @@ export declare const useMetadata: (obj: object) => any;
 export declare const useDefaultProps: <T = {
     [key: string]: any;
 }>(value: T) => T;
+export declare const useStyle: (value: string) => any;
 export * from './parsers/jsx';
 export * from './parsers/builder';
 export * from './parsers/angular';

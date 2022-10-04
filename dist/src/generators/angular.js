@@ -317,7 +317,11 @@ var componentToAngular = function (userOptions) {
             },
         });
         // Preparing built in component metadata parameters
-        var componentMetadata = __assign(__assign({ selector: "'".concat((0, lodash_1.kebabCase)(json.name || 'my-component'), ", ").concat(json.name, "'"), template: "`\n        ".concat((0, indent_1.indent)(template, 8).replace(/`/g, '\\`').replace(/\$\{/g, '\\${'), "\n        `") }, (css.length ? { styles: "[`".concat((0, indent_1.indent)(css, 8), "`]") } : {})), (options.standalone
+        var componentMetadata = __assign(__assign({ selector: "'".concat((0, lodash_1.kebabCase)(json.name || 'my-component'), ", ").concat(json.name, "'"), template: "`\n        ".concat((0, indent_1.indent)(template, 8).replace(/`/g, '\\`').replace(/\$\{/g, '\\${'), "\n        `") }, (css.length
+            ? {
+                styles: "[`".concat((0, indent_1.indent)(css, 8), "`]"),
+            }
+            : {})), (options.standalone
             ? // TODO: also add child component imports here as well
                 {
                     standalone: 'true',

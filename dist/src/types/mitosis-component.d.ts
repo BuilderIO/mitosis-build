@@ -104,5 +104,6 @@ export declare type MitosisComponent = {
     types?: string[];
     propsTypeRef?: string;
     defaultProps?: JSONObject;
+    style?: string;
 };
 export {};

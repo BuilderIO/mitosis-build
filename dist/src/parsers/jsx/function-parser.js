@@ -186,6 +186,9 @@ var componentFunctionToJson = function (node, context) {
                             });
                         }
                     }
+                    else if (expression.callee.name === hooks_1.HOOKS.STYLE) {
+                        context.builder.component.style = (0, generator_1.default)(expression.arguments[0]).code.replace(/(^("|'|`)|("|'|`)$)/g, '');
+                    }
                 }
             }
         }

@@ -4,4 +4,5 @@ export declare const HOOKS: {
     readonly CONTEXT: "useContext";
     readonly REF: "useRef";
     readonly DEFAULT_PROPS: "useDefaultProps";
+    readonly STYLE: "useStyle";
 };

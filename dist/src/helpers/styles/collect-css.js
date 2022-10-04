@@ -58,10 +58,13 @@ var collectStyles = function (json, options) {
     return styleMap;
 };
 var collectCss = function (json, options) {
+    var _a;
     if (options === void 0) { options = {}; }
     var styles = collectStyles(json, options);
     // TODO create and use a root selector
-    return classStyleMapToCss(styles);
+    var css = classStyleMapToCss(styles);
+    css += ((_a = json.style) === null || _a === void 0 ? void 0 : _a.length) ? "\n".concat(json.style) : '';
+    return css;
 };
 exports.collectCss = collectCss;
 var classStyleMapToCss = function (map) {
