@@ -220,6 +220,7 @@ var componentToAngular = function (userOptions) {
         var _component = _a.component;
         var DEFAULT_OPTIONS = {
             preserveImports: false,
+            preserveFileExtensions: false,
         };
         var options = __assign(__assign({}, DEFAULT_OPTIONS), userOptions);
         // Make a copy we can safely mutate, similar to babel's toolchain
@@ -337,6 +338,7 @@ var componentToAngular = function (userOptions) {
             component: json,
             target: 'angular',
             excludeMitosisComponents: !options.standalone && !options.preserveImports,
+            preserveFileExtensions: options.preserveFileExtensions,
         }), Object.entries(componentMetadata)
             .map(function (_a) {
             var k = _a[0], v = _a[1];

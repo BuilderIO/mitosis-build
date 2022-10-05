@@ -40,7 +40,8 @@ var getFileExtensionForTarget = function (target) {
         case 'angular':
             return '';
         // these `.lite` extensions are handled in the `transpile` step of the CLI.
-        // TO-DO: consolidate file-extension renaming to this file, and remove `.lite` replaces from the CLI `transpile`.
+        // TO-DO: consolidate file-extension renaming to this file, and remove `.lite` replaces from the CLI `transpile`. (outdated) ?
+        // Bit team wanted to make sure React and Angular behaved the same in regards to imports - ALU 10/05/22
         default:
             return '.lite';
     }
@@ -49,12 +50,12 @@ var checkIsComponentImport = function (theImport) {
     return theImport.path.endsWith('.lite') && !theImport.path.endsWith('.context.lite');
 };
 exports.checkIsComponentImport = checkIsComponentImport;
-var transformImportPath = function (theImport, target) {
+var transformImportPath = function (theImport, target, preserveFileExtensions) {
     // We need to drop the `.lite` from context files, because the context generator does so as well.
     if (theImport.path.endsWith('.context.lite')) {
         return theImport.path.replace('.lite', '.js');
     }
-    if ((0, exports.checkIsComponentImport)(theImport)) {
+    if ((0, exports.checkIsComponentImport)(theImport) && !preserveFileExtensions) {
         return theImport.path.replace('.lite', getFileExtensionForTarget(target));
     }
     return theImport.path;
@@ -94,9 +95,9 @@ var getImportValue = function (_a) {
     }
 };
 var renderImport = function (_a) {
-    var theImport = _a.theImport, target = _a.target, asyncComponentImports = _a.asyncComponentImports;
+    var theImport = _a.theImport, target = _a.target, asyncComponentImports = _a.asyncComponentImports, _b = _a.preserveFileExtensions, preserveFileExtensions = _b === void 0 ? false : _b;
     var importedValues = getImportedValues({ theImport: theImport });
-    var path = transformImportPath(theImport, target);
+    var path = transformImportPath(theImport, target, preserveFileExtensions);
     var importValue = getImportValue(importedValues);
     var isComponentImport = (0, exports.checkIsComponentImport)(theImport);
     var shouldBeAsyncImport = asyncComponentImports && isComponentImport;
@@ -118,7 +119,7 @@ var renderImport = function (_a) {
 };
 exports.renderImport = renderImport;
 var renderImports = function (_a) {
-    var imports = _a.imports, target = _a.target, asyncComponentImports = _a.asyncComponentImports, excludeMitosisComponents = _a.excludeMitosisComponents;
+    var imports = _a.imports, target = _a.target, asyncComponentImports = _a.asyncComponentImports, excludeMitosisComponents = _a.excludeMitosisComponents, _b = _a.preserveFileExtensions, preserveFileExtensions = _b === void 0 ? false : _b;
     return imports
         .filter(function (theImport) {
         if (
@@ -135,18 +136,21 @@ var renderImports = function (_a) {
             return true;
         }
     })
-        .map(function (theImport) { return (0, exports.renderImport)({ theImport: theImport, target: target, asyncComponentImports: asyncComponentImports }); })
+        .map(function (theImport) {
+        return (0, exports.renderImport)({ theImport: theImport, target: target, asyncComponentImports: asyncComponentImports, preserveFileExtensions: preserveFileExtensions });
+    })
         .join('\n');
 };
 exports.renderImports = renderImports;
 var renderPreComponent = function (_a) {
     var _b;
-    var component = _a.component, target = _a.target, excludeMitosisComponents = _a.excludeMitosisComponents, _c = _a.asyncComponentImports, asyncComponentImports = _c === void 0 ? false : _c;
+    var component = _a.component, target = _a.target, excludeMitosisComponents = _a.excludeMitosisComponents, _c = _a.asyncComponentImports, asyncComponentImports = _c === void 0 ? false : _c, _d = _a.preserveFileExtensions, preserveFileExtensions = _d === void 0 ? false : _d;
     return "\n    ".concat((0, exports.renderImports)({
         imports: component.imports,
         target: target,
         asyncComponentImports: asyncComponentImports,
         excludeMitosisComponents: excludeMitosisComponents,
+        preserveFileExtensions: preserveFileExtensions,
     }), "\n    ").concat((0, exports.renderExportAndLocal)(component), "\n    ").concat(((_b = component.hooks.preComponent) === null || _b === void 0 ? void 0 : _b.code) || '', "\n  ");
 };
 exports.renderPreComponent = renderPreComponent;

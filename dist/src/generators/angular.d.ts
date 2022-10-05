@@ -3,6 +3,7 @@ import { BaseTranspilerOptions, TranspilerGenerator } from '../types/transpiler'
 export interface ToAngularOptions extends BaseTranspilerOptions {
     standalone?: boolean;
     preserveImports?: boolean;
+    preserveFileExtensions?: boolean;
 }
 interface AngularBlockOptions {
     contextVars?: string[];
