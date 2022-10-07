@@ -430,8 +430,10 @@ var _componentToReact = function (json, options, isSubComponent) {
                 : stateType === 'solid'
                     ? "const state = useMutable(".concat((0, get_state_object_string_1.getStateObjectStringFromComponent)(json), ");")
                     : stateType === 'builder'
-                        ? "var state = useBuilderState(".concat((0, get_state_object_string_1.getStateObjectStringFromComponent)(json), ");")
-                        : "const state = useLocalProxy(".concat((0, get_state_object_string_1.getStateObjectStringFromComponent)(json), ");")
+                        ? "const state = useBuilderState(".concat((0, get_state_object_string_1.getStateObjectStringFromComponent)(json), ");")
+                        : stateType === 'variables'
+                            ? "const state = ".concat((0, get_state_object_string_1.getStateObjectStringFromComponent)(json), ";")
+                            : "const state = useLocalProxy(".concat((0, get_state_object_string_1.getStateObjectStringFromComponent)(json), ");")
         : '', hasStateArgument ? refsString : '', getContextString(json, options), getInitCode(json, options), ((_g = json.hooks.onInit) === null || _g === void 0 ? void 0 : _g.code)
         ? "\n          useEffect(() => {\n            ".concat((0, state_2.processHookCode)({
             str: json.hooks.onInit.code,
