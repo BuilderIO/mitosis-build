@@ -27,12 +27,14 @@ exports.componentToRsc = void 0;
 var traverse_1 = __importDefault(require("traverse"));
 var fast_clone_1 = require("../helpers/fast-clone");
 var is_mitosis_node_1 = require("../helpers/is-mitosis-node");
+var is_upper_case_1 = require("../helpers/is-upper-case");
 var react_1 = require("./react");
 /**
  * Transform react to be RSC compatible, such as
  * - remove event listeners
  * - remove lifecycle hooks
  * - remove refs
+ * - transform context to prop drilling
  */
 var RSC_TRANSFORM_PLUGIN = function () { return ({
     json: {
@@ -51,6 +53,15 @@ var RSC_TRANSFORM_PLUGIN = function () { return ({
             }
             (0, traverse_1.default)(json).forEach(function (node) {
                 if ((0, is_mitosis_node_1.isMitosisNode)(node)) {
+                    if ((0, is_upper_case_1.isUpperCase)(node.name[0])) {
+                        // Drill context down, aka
+                        // function (props) { return <Component _context{props._context} /> }
+                        if (!node.bindings[react_1.contextPropDrillingKey]) {
+                            node.bindings[react_1.contextPropDrillingKey] = {
+                                code: react_1.contextPropDrillingKey,
+                            };
+                        }
+                    }
                     if (node.bindings.ref) {
                         delete node.bindings.ref;
                     }
@@ -72,7 +83,7 @@ var componentToRsc = function (_options) {
     return function (_a) {
         var component = _a.component, path = _a.path;
         var json = (0, fast_clone_1.fastClone)(component);
-        var options = __assign(__assign(__assign({}, DEFAULT_OPTIONS), _options), { plugins: __spreadArray(__spreadArray([], (DEFAULT_OPTIONS.plugins || []), true), (_options.plugins || []), true), stylesType: 'style-tag', stateType: 'variables' });
+        var options = __assign(__assign(__assign({}, DEFAULT_OPTIONS), _options), { plugins: __spreadArray(__spreadArray([], (DEFAULT_OPTIONS.plugins || []), true), (_options.plugins || []), true), stylesType: 'style-tag', stateType: 'variables', contextType: 'prop-drill' });
         return (0, react_1.componentToReact)(options)({ component: json, path: path });
     };
 };

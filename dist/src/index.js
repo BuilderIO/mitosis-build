@@ -77,6 +77,7 @@ __exportStar(require("./generators/vue"), exports);
 __exportStar(require("./generators/angular"), exports);
 __exportStar(require("./generators/context/react"), exports);
 __exportStar(require("./generators/context/qwik"), exports);
+__exportStar(require("./generators/context/rsc"), exports);
 __exportStar(require("./generators/context/solid"), exports);
 __exportStar(require("./generators/context/vue"), exports);
 __exportStar(require("./generators/context/svelte"), exports);
