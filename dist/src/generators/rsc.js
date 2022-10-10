@@ -52,11 +52,8 @@ var RSC_TRANSFORM_PLUGIN = function () { return ({
             }
             (0, traverse_1.default)(json).forEach(function (node) {
                 if ((0, is_mitosis_node_1.isMitosisNode)(node)) {
-                    // Test if a tag is a "basic" tag, like <div> or <h1>,
-                    // but not something dynamic like <Foo> or <state.foo>
-                    // also doesn't include custom elements like <foo-bar>
-                    var isBasicTag = node.name.match(/^[a-z0-9]+$/);
-                    if (!isBasicTag) {
+                    var isComponent = node.name.match(/[A-Z]/);
+                    if (isComponent) {
                         // Drill context down, aka
                         // function (props) { return <Component _context{props._context} /> }
                         if (!node.bindings[react_1.contextPropDrillingKey]) {
