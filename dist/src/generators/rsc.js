@@ -27,7 +27,6 @@ exports.componentToRsc = void 0;
 var traverse_1 = __importDefault(require("traverse"));
 var fast_clone_1 = require("../helpers/fast-clone");
 var is_mitosis_node_1 = require("../helpers/is-mitosis-node");
-var is_upper_case_1 = require("../helpers/is-upper-case");
 var react_1 = require("./react");
 /**
  * Transform react to be RSC compatible, such as
@@ -53,7 +52,11 @@ var RSC_TRANSFORM_PLUGIN = function () { return ({
             }
             (0, traverse_1.default)(json).forEach(function (node) {
                 if ((0, is_mitosis_node_1.isMitosisNode)(node)) {
-                    if ((0, is_upper_case_1.isUpperCase)(node.name[0])) {
+                    // Test if a tag is a "basic" tag, like <div> or <h1>,
+                    // but not something dynamic like <Foo> or <state.foo>
+                    // also doesn't include custom elements like <foo-bar>
+                    var isBasicTag = node.name.match(/^[a-z0-9]+$/);
+                    if (!isBasicTag) {
                         // Drill context down, aka
                         // function (props) { return <Component _context{props._context} /> }
                         if (!node.bindings[react_1.contextPropDrillingKey]) {
