@@ -258,7 +258,7 @@ function provideContext(json, options) {
         for (var key in json.context.set) {
             var _a = json.context.set[key], name_1 = _a.name, ref = _a.ref, value = _a.value;
             if (value) {
-                str += "\n          ".concat(exports.contextPropDrillingKey, ".").concat(name_1, " = {\n            ...").concat(exports.contextPropDrillingKey, ".").concat(name_1, ",\n            ...").concat((0, get_state_object_string_1.stringifyContextValue)(value), "\n          }\n        ");
+                str += "\n          ".concat(exports.contextPropDrillingKey, ".").concat(name_1, " = ").concat((0, get_state_object_string_1.stringifyContextValue)(value), ";\n        ");
             }
             // TODO: support refs. I'm not sure what those are so unclear how to support them
         }
