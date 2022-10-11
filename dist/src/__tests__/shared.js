@@ -75,6 +75,9 @@ var submitButtonBlock = getRawFile('./data/blocks/submit-button.raw');
 var text = getRawFile('./data/blocks/text.raw');
 var textarea = getRawFile('./data/blocks/textarea.raw');
 var video = getRawFile('./data/blocks/video.raw');
+var spreadAttrs = getRawFile('./data/spread/spread-attrs.raw');
+var spreadNestedProps = getRawFile('./data/spread/spread-nested-props.raw');
+var spreadProps = getRawFile('./data/spread/spread-props.raw');
 var builderRenderContent = getRawFile('./data/blocks/builder-render-content.raw');
 var rootFragmentMultiNode = getRawFile('./data/blocks/root-fragment-multi-node.raw');
 var path = 'test-path';
@@ -131,6 +134,9 @@ var BASIC_TESTS = {
     'self-referencing component with children': selfRefCompWChildren,
     'self-referencing component': selfRefComp,
     rootFragmentMultiNode: rootFragmentMultiNode,
+    spreadAttrs: spreadAttrs,
+    spreadNestedProps: spreadNestedProps,
+    spreadProps: spreadProps,
 };
 var SLOTS_TESTS = {
     ContentSlotJSX: contentSlotJsx,

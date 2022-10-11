@@ -200,7 +200,12 @@ var blockToSvelte = function (_a) {
     var str = '';
     str += "<".concat(tagName, " ");
     if ((_c = json.bindings._spread) === null || _c === void 0 ? void 0 : _c.code) {
-        str += "{...".concat(stripStateAndProps(json.bindings._spread.code, options), "}");
+        str += '{...';
+        if (json.bindings._spread.code === 'props') {
+            // svelte expects $$props so we prepend $$ here
+            str += '$$';
+        }
+        str += "".concat(stripStateAndProps(json.bindings._spread.code, options), "}");
     }
     var isComponent = Boolean(tagName[0] && (0, is_upper_case_1.isUpperCase)(tagName[0]));
     if ((((_d = json.bindings.style) === null || _d === void 0 ? void 0 : _d.code) || json.properties.style) && !isComponent) {
