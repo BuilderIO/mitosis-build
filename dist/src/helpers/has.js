@@ -10,7 +10,7 @@ var is_mitosis_node_1 = require("./is-mitosis-node");
  * Test if the component has something
  *
  * e.g.
- *    const hasSpread = has(component, node => Boolean(node.bindings._spread));
+ *    const hasSpread = has(component, node => some(node.bindings, { type: 'spread' }));
  */
 function has(json, test) {
     var found = false;

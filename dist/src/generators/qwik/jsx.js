@@ -183,7 +183,7 @@ function isSlotProjection(child) {
  * @returns
  */
 function rewriteHandlers(file, handlers, bindings, symbolBindings, mutablePredicate) {
-    var _a;
+    var _a, _b;
     var outBindings = {};
     for (var key in bindings) {
         if (Object.prototype.hasOwnProperty.call(bindings, key)) {
@@ -211,7 +211,7 @@ function rewriteHandlers(file, handlers, bindings, symbolBindings, mutablePredic
                     file.import(file.qwikModule, 'mutable');
                     bindingExpr = "mutable(".concat(bindingExpr, ")");
                 }
-                outBindings[key] = { code: bindingExpr };
+                outBindings[key] = { code: bindingExpr, type: (_b = bindings === null || bindings === void 0 ? void 0 : bindings[key]) === null || _b === void 0 ? void 0 : _b.type };
             }
         }
     }

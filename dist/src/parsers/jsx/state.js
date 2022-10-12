@@ -85,7 +85,7 @@ function mapStateIdentifiers(json) {
         }
     }
     (0, traverse_1.default)(json).forEach(function (item) {
-        var _a;
+        var _a, _b;
         if ((0, is_mitosis_node_1.isMitosisNode)(item)) {
             for (var key in item.bindings) {
                 var value = item.bindings[key];
@@ -95,6 +95,9 @@ function mapStateIdentifiers(json) {
                     };
                     if ((_a = value.arguments) === null || _a === void 0 ? void 0 : _a.length) {
                         item.bindings[key].arguments = value.arguments;
+                    }
+                    if ((_b = value.type) === null || _b === void 0 ? void 0 : _b.length) {
+                        item.bindings[key].type = value.type;
                     }
                 }
             }

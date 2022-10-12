@@ -173,7 +173,7 @@ var stripStateAndProps = function (code, options) {
     });
 };
 var blockToSvelte = function (_a) {
-    var _b, _c, _d, _e, _f;
+    var _b, _c, _d, _e;
     var json = _a.json, options = _a.options, parentComponent = _a.parentComponent;
     if (mappers[json.name]) {
         return mappers[json.name]({
@@ -199,17 +199,9 @@ var blockToSvelte = function (_a) {
     }
     var str = '';
     str += "<".concat(tagName, " ");
-    if ((_c = json.bindings._spread) === null || _c === void 0 ? void 0 : _c.code) {
-        str += '{...';
-        if (json.bindings._spread.code === 'props') {
-            // svelte expects $$props so we prepend $$ here
-            str += '$$';
-        }
-        str += "".concat(stripStateAndProps(json.bindings._spread.code, options), "}");
-    }
     var isComponent = Boolean(tagName[0] && (0, is_upper_case_1.isUpperCase)(tagName[0]));
-    if ((((_d = json.bindings.style) === null || _d === void 0 ? void 0 : _d.code) || json.properties.style) && !isComponent) {
-        var useValue = stripStateAndProps(((_e = json.bindings.style) === null || _e === void 0 ? void 0 : _e.code) || json.properties.style, options);
+    if ((((_c = json.bindings.style) === null || _c === void 0 ? void 0 : _c.code) || json.properties.style) && !isComponent) {
+        var useValue = stripStateAndProps(((_d = json.bindings.style) === null || _d === void 0 ? void 0 : _d.code) || json.properties.style, options);
         str += "use:mitosis_styling={".concat(useValue, "}");
         delete json.bindings.style;
         delete json.properties.style;
@@ -222,13 +214,17 @@ var blockToSvelte = function (_a) {
         if (key === 'innerHTML') {
             continue;
         }
-        if (key === '_spread') {
-            continue;
-        }
-        var _g = json.bindings[key], value = _g.code, _h = _g.arguments, cusArgs = _h === void 0 ? ['event'] : _h;
+        var _f = json.bindings[key], value = _f.code, _g = _f.arguments, cusArgs = _g === void 0 ? ['event'] : _g, type = _f.type;
         // TODO: proper babel transform to replace. Util for this
         var useValue = stripStateAndProps(value, options);
-        if (key.startsWith('on')) {
+        if (type === 'spread') {
+            str += ' {...';
+            if (key === 'props') {
+                str += "$$";
+            }
+            str += "".concat(useValue, "}");
+        }
+        else if (key.startsWith('on')) {
             var event_1 = key.replace('on', '').toLowerCase();
             // TODO: handle quotes in event handler values
             var valueWithoutBlock = (0, remove_surrounding_block_1.removeSurroundingBlock)(useValue);
@@ -248,7 +244,7 @@ var blockToSvelte = function (_a) {
     }
     // if we have innerHTML, it doesn't matter whether we have closing tags or not, or children or not.
     // we use the innerHTML content as children and don't render the self-closing tag.
-    if ((_f = json.bindings.innerHTML) === null || _f === void 0 ? void 0 : _f.code) {
+    if ((_e = json.bindings.innerHTML) === null || _e === void 0 ? void 0 : _e.code) {
         str += '>';
         str += BINDINGS_MAPPER.innerHTML(json, options);
         str += "</".concat(tagName, ">");

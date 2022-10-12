@@ -77,6 +77,7 @@ var updateStateSetters = function (json, options) {
                     item.bindings[key] = {
                         code: newValue,
                         arguments: values === null || values === void 0 ? void 0 : values.arguments,
+                        type: values === null || values === void 0 ? void 0 : values.type,
                     };
                 }
             }

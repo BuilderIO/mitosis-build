@@ -160,12 +160,13 @@ var preProcessBlockCode = function (_a) {
             json.bindings[key] = {
                 arguments: value.arguments,
                 code: (0, helpers_2.updateStateCode)({ options: options, component: component, updateSetters: true })(value.code),
+                type: value === null || value === void 0 ? void 0 : value.type,
             };
         }
     }
 };
 var blockToSolid = function (_a) {
-    var _b, _c, _d;
+    var _b, _c;
     var json = _a.json, options = _a.options, component = _a.component;
     preProcessBlockCode({ json: json, options: options, component: component });
     if (json.properties._text) {
@@ -196,21 +197,21 @@ var blockToSolid = function (_a) {
     if (classString) {
         str += " class=".concat(classString, " ");
     }
-    if ((_d = json.bindings._spread) === null || _d === void 0 ? void 0 : _d.code) {
-        str += " {...(".concat(json.bindings._spread.code, ")} ");
-    }
     for (var key in json.properties) {
         var value = json.properties[key];
         str += " ".concat(key, "=\"").concat(value, "\" ");
     }
     for (var key in json.bindings) {
-        var _e = json.bindings[key], code = _e.code, _f = _e.arguments, cusArg = _f === void 0 ? ['event'] : _f;
-        if (key === '_spread' || key === '_forName') {
+        var _d = json.bindings[key], code = _d.code, _e = _d.arguments, cusArg = _e === void 0 ? ['event'] : _e, type = _d.type;
+        if (key === '_forName') {
             continue;
         }
         if (!code)
             continue;
-        if (key.startsWith('on')) {
+        if (type === 'spread') {
+            str += " {...(".concat(code, ")} ");
+        }
+        else if (key.startsWith('on')) {
             var useKey = key === 'onChange' && json.name === 'input' ? 'onInput' : key;
             str += " ".concat(useKey, "={(").concat(cusArg.join(','), ") => ").concat(code, "} ");
         }

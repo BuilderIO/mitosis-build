@@ -23,7 +23,7 @@ var mappers = {
 };
 // TODO: spread support
 var blockToTemplate = function (json, options) {
-    var _a, _b, _c, _d;
+    var _a, _b, _c, _d, _e;
     if (options === void 0) { options = {}; }
     if (mappers[json.name]) {
         return mappers[json.name](json, options);
@@ -64,10 +64,10 @@ var blockToTemplate = function (json, options) {
             str += " ".concat(key, "=\"").concat(value, "\" ");
         }
         for (var key in json.bindings) {
-            if (key === '_spread' || key === 'ref' || key === 'css') {
+            if (((_d = json.bindings[key]) === null || _d === void 0 ? void 0 : _d.type) === 'spread' || key === 'ref' || key === 'css') {
                 continue;
             }
-            var value = (_d = json.bindings[key]) === null || _d === void 0 ? void 0 : _d.code;
+            var value = (_e = json.bindings[key]) === null || _e === void 0 ? void 0 : _e.code;
             // TODO: proper babel transform to replace. Util for this
             var useValue = value;
             if (key.startsWith('on')) {

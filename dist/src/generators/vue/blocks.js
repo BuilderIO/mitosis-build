@@ -186,9 +186,10 @@ var NODE_MAPPERS = {
 };
 var stringifyBinding = function (node) {
     return function (_a) {
+        var _b, _c;
         var key = _a[0], value = _a[1];
-        if (key === '_spread') {
-            return '';
+        if (((_b = node.bindings[key]) === null || _b === void 0 ? void 0 : _b.type) === 'spread') {
+            return " v-bind=\"".concat((0, helpers_1.encodeQuotes)((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)((_c = node.bindings[key]) === null || _c === void 0 ? void 0 : _c.code)), "\"");
         }
         else if (key === 'class') {
             return " :class=\"_classStringToObject(".concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(value === null || value === void 0 ? void 0 : value.code, {
@@ -201,7 +202,7 @@ var stringifyBinding = function (node) {
             // TODO: proper babel transform to replace. Util for this
             var useValue = (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(value === null || value === void 0 ? void 0 : value.code);
             if (key.startsWith('on')) {
-                var _b = value.arguments, cusArgs = _b === void 0 ? ['event'] : _b;
+                var _d = value.arguments, cusArgs = _d === void 0 ? ['event'] : _d;
                 var event_1 = key.replace('on', '').toLowerCase();
                 if (event_1 === 'change' && node.name === 'input') {
                     event_1 = 'input';
@@ -233,7 +234,7 @@ var stringifyBinding = function (node) {
     };
 };
 var blockToVue = function (node, options, scope) {
-    var _a, _b;
+    var _a;
     var nodeMapper = NODE_MAPPERS[node.name];
     if (nodeMapper) {
         return nodeMapper(node, options, scope);
@@ -260,9 +261,6 @@ var blockToVue = function (node, options, scope) {
     }
     var str = '';
     str += "<".concat(node.name, " ");
-    if ((_b = node.bindings._spread) === null || _b === void 0 ? void 0 : _b.code) {
-        str += "v-bind=\"".concat((0, helpers_1.encodeQuotes)((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(node.bindings._spread.code)), "\"");
-    }
     for (var key in node.properties) {
         var value = node.properties[key];
         if (key === 'className') {

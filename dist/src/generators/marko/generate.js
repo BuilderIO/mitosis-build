@@ -48,7 +48,7 @@ function getStatePropertyNames(json) {
     return Object.keys(json.state).filter(function (key) { var _a; return ((_a = json.state[key]) === null || _a === void 0 ? void 0 : _a.type) === 'property'; });
 }
 var blockToMarko = function (json, options) {
-    var _a, _b, _c, _d, _e, _f;
+    var _a, _b, _c, _d, _e;
     if (json.properties._text) {
         return json.properties._text;
     }
@@ -73,19 +73,19 @@ var blockToMarko = function (json, options) {
     }
     var str = '';
     str += "<".concat(json.name, " ");
-    if ((_e = json.bindings._spread) === null || _e === void 0 ? void 0 : _e.code) {
-        str += " ...(".concat(json.bindings._spread.code, ") ");
-    }
     for (var key in json.properties) {
         var value = json.properties[key];
         str += " ".concat(key, "=\"").concat(value, "\" ");
     }
     for (var key in json.bindings) {
-        var _g = json.bindings[key], code = _g.code, _h = _g.arguments, cusArgs = _h === void 0 ? ['event'] : _h;
-        if (key === '_spread' || key === '_forName') {
+        var _f = json.bindings[key], code = _f.code, _g = _f.arguments, cusArgs = _g === void 0 ? ['event'] : _g, type = _f.type;
+        if (key === '_forName') {
             continue;
         }
-        if (key === 'ref') {
+        if (type === 'spread') {
+            str += " ...(".concat(code, ") ");
+        }
+        else if (key === 'ref') {
             str += " key=\"".concat((0, lodash_1.camelCase)(code), "\" ");
         }
         else if (key.startsWith('on')) {
@@ -100,7 +100,7 @@ var blockToMarko = function (json, options) {
         return str + ' />';
     }
     str += '>';
-    if ((_f = json.bindings.innerHTML) === null || _f === void 0 ? void 0 : _f.code) {
+    if ((_e = json.bindings.innerHTML) === null || _e === void 0 ? void 0 : _e.code) {
         str += "$!{".concat(processBinding(options.component, json.bindings.innerHTML.code), "}");
     }
     if (json.children) {

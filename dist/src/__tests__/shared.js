@@ -76,6 +76,7 @@ var submitButtonBlock = getRawFile('./data/blocks/submit-button.raw');
 var text = getRawFile('./data/blocks/text.raw');
 var textarea = getRawFile('./data/blocks/textarea.raw');
 var video = getRawFile('./data/blocks/video.raw');
+var multipleSpreads = getRawFile('./data/spread/multiple-spreads.raw');
 var spreadAttrs = getRawFile('./data/spread/spread-attrs.raw');
 var spreadNestedProps = getRawFile('./data/spread/spread-nested-props.raw');
 var spreadProps = getRawFile('./data/spread/spread-props.raw');
@@ -136,6 +137,7 @@ var BASIC_TESTS = {
     'self-referencing component with children': selfRefCompWChildren,
     'self-referencing component': selfRefComp,
     rootFragmentMultiNode: rootFragmentMultiNode,
+    multipleSpreads: multipleSpreads,
     spreadAttrs: spreadAttrs,
     spreadNestedProps: spreadNestedProps,
     spreadProps: spreadProps,

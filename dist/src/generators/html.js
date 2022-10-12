@@ -191,7 +191,7 @@ var addOnChangeJs = function (id, options, code) {
 };
 // TODO: spread support
 var blockToHtml = function (json, options, blockOptions) {
-    var _a, _b, _c, _d, _e, _f;
+    var _a, _b, _c, _d, _e, _f, _g;
     if (blockOptions === void 0) { blockOptions = {}; }
     var ComponentName = blockOptions.ComponentName;
     var scopeVars = (blockOptions === null || blockOptions === void 0 ? void 0 : blockOptions.scopeVars) || [];
@@ -280,11 +280,11 @@ var blockToHtml = function (json, options, blockOptions) {
         var injectOnce = false;
         var startInjectVar = '%%START_VARS%%';
         for (var key in json.bindings) {
-            if (key === '_spread' || key === 'css') {
+            if (((_e = json.bindings[key]) === null || _e === void 0 ? void 0 : _e.type) === 'spread' || key === 'css') {
                 continue;
             }
-            var value = (_e = json.bindings[key]) === null || _e === void 0 ? void 0 : _e.code;
-            var cusArg = ((_f = json.bindings[key]) === null || _f === void 0 ? void 0 : _f.arguments) || ['event'];
+            var value = (_f = json.bindings[key]) === null || _f === void 0 ? void 0 : _f.code;
+            var cusArg = ((_g = json.bindings[key]) === null || _g === void 0 ? void 0 : _g.arguments) || ['event'];
             // TODO: proper babel transform to replace. Util for this
             var useValue = value;
             if (key.startsWith('on')) {

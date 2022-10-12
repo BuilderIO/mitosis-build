@@ -85,7 +85,7 @@ var BINDINGS_MAPPER = {
     style: 'ngStyle',
 };
 var blockToAngular = function (json, options, blockOptions) {
-    var _a, _b, _c, _d, _e, _f;
+    var _a, _b, _c, _d, _e, _f, _g;
     if (options === void 0) { options = {}; }
     if (blockOptions === void 0) { blockOptions = {}; }
     var contextVars = (blockOptions === null || blockOptions === void 0 ? void 0 : blockOptions.contextVars) || [];
@@ -153,13 +153,13 @@ var blockToAngular = function (json, options, blockOptions) {
             str += " ".concat(key, "=\"").concat(value, "\" ");
         }
         for (var key in json.bindings) {
-            if (key === '_spread') {
+            if (((_g = json.bindings[key]) === null || _g === void 0 ? void 0 : _g.type) === 'spread') {
                 continue;
             }
             if (key.startsWith('$')) {
                 continue;
             }
-            var _g = json.bindings[key], code = _g.code, _h = _g.arguments, cusArgs = _h === void 0 ? ['event'] : _h;
+            var _h = json.bindings[key], code = _h.code, _j = _h.arguments, cusArgs = _j === void 0 ? ['event'] : _j;
             // TODO: proper babel transform to replace. Util for this
             var useValue = (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(code, {
                 contextVars: contextVars,

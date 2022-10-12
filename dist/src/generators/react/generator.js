@@ -144,9 +144,6 @@ var blockToReact = function (json, options, parentSlots) {
     }
     var str = '';
     str += "<".concat(json.name, " ");
-    if ((_b = json.bindings._spread) === null || _b === void 0 ? void 0 : _b.code) {
-        str += " {...(".concat((0, helpers_2.processBinding)(json.bindings._spread.code, options), ")} ");
-    }
     for (var key in json.properties) {
         var value = (json.properties[key] || '').replace(/"/g, '&quot;').replace(/\n/g, '\\n');
         if (key === 'class') {
@@ -169,15 +166,15 @@ var blockToReact = function (json, options, parentSlots) {
         }
     }
     for (var key in json.bindings) {
-        var value = String((_c = json.bindings[key]) === null || _c === void 0 ? void 0 : _c.code);
-        if (key === '_spread') {
-            continue;
-        }
+        var value = String((_b = json.bindings[key]) === null || _b === void 0 ? void 0 : _b.code);
         if (key === 'css' && value.trim() === '{}') {
             continue;
         }
         var useBindingValue = (0, helpers_2.processBinding)(value, options);
-        if (key.startsWith('on')) {
+        if (((_c = json.bindings[key]) === null || _c === void 0 ? void 0 : _c.type) === 'spread') {
+            str += " {...(".concat(value, ")} ");
+        }
+        else if (key.startsWith('on')) {
             var _e = json.bindings[key].arguments, cusArgs = _e === void 0 ? ['event'] : _e;
             str += " ".concat(key, "={(").concat(cusArgs.join(','), ") => ").concat((0, state_2.updateStateSettersInCode)(useBindingValue, options), " } ");
         }
