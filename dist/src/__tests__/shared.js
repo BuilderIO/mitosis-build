@@ -43,6 +43,7 @@ var className = getRawFile('./data/styles/className.raw');
 var classAndClassName = getRawFile('./data/styles/class-and-className.raw');
 var classState = getRawFile('./data/styles/classState.raw');
 var useStyle = getRawFile('./data/styles/use-style.raw');
+var useStyleOutsideComponent = getRawFile('./data/styles/use-style-outside-component.raw');
 var useStyleAndCss = getRawFile('./data/styles/use-style-and-css.raw');
 var button = getRawFile('./data/blocks/button.raw');
 var classNameJsx = getRawFile('./data/blocks/classname-jsx.raw');
@@ -131,6 +132,7 @@ var BASIC_TESTS = {
     'class + ClassName + css': classAndClassName,
     'use-style': useStyle,
     'use-style-and-css': useStyleAndCss,
+    'use-style-outside-component': useStyleOutsideComponent,
     'self-referencing component with children': selfRefCompWChildren,
     'self-referencing component': selfRefComp,
     rootFragmentMultiNode: rootFragmentMultiNode,

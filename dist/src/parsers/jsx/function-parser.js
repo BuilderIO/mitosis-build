@@ -46,7 +46,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.componentFunctionToJson = void 0;
+exports.componentFunctionToJson = exports.generateUseStyleCode = void 0;
 var babel = __importStar(require("@babel/core"));
 var generator_1 = __importDefault(require("@babel/generator"));
 var trace_reference_to_module_path_1 = require("../../helpers/trace-reference-to-module-path");
@@ -58,6 +58,10 @@ var helpers_1 = require("./helpers");
 var component_types_1 = require("./component-types");
 var element_parser_1 = require("./element-parser");
 var types = babel.types;
+function generateUseStyleCode(expression) {
+    return (0, generator_1.default)(expression.arguments[0]).code.replace(/(^("|'|`)|("|'|`)$)/g, '');
+}
+exports.generateUseStyleCode = generateUseStyleCode;
 /**
  * Parses function declarations within the Mitosis copmonent's body to JSON
  */
@@ -187,7 +191,7 @@ var componentFunctionToJson = function (node, context) {
                         }
                     }
                     else if (expression.callee.name === hooks_1.HOOKS.STYLE) {
-                        context.builder.component.style = (0, generator_1.default)(expression.arguments[0]).code.replace(/(^("|'|`)|("|'|`)$)/g, '');
+                        context.builder.component.style = generateUseStyleCode(expression);
                     }
                 }
             }

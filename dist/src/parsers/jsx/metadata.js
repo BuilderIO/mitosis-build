@@ -25,6 +25,8 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.collectMetadata = exports.METADATA_HOOK_NAME = void 0;
 var babel = __importStar(require("@babel/core"));
+var hooks_1 = require("../../constants/hooks");
+var function_parser_1 = require("./function-parser");
 var helpers_1 = require("./helpers");
 var types = babel.types;
 var getHook = function (node) {
@@ -54,14 +56,20 @@ var collectMetadata = function (nodes, component, options) {
         if (!hook) {
             return true;
         }
-        if (types.isIdentifier(hook.callee) && hookNames.has(hook.callee.name)) {
-            try {
-                component.meta[hook.callee.name] = (0, helpers_1.parseCodeJson)(hook.arguments[0]);
-                return false;
+        if (types.isIdentifier(hook.callee)) {
+            if (hookNames.has(hook.callee.name)) {
+                try {
+                    component.meta[hook.callee.name] = (0, helpers_1.parseCodeJson)(hook.arguments[0]);
+                    return false;
+                }
+                catch (e) {
+                    console.error("Error parsing metadata hook ".concat(hook.callee.name));
+                    throw e;
+                }
             }
-            catch (e) {
-                console.error("Error parsing metadata hook ".concat(hook.callee.name));
-                throw e;
+            else if (hook.callee.name === hooks_1.HOOKS.STYLE) {
+                component.style = (0, function_parser_1.generateUseStyleCode)(hook);
+                return false;
             }
         }
         return true;
