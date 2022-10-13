@@ -351,9 +351,6 @@ var componentToSolid = function (passedOptions) {
             ? // We add the jsx attribute so prettier formats this nicely
                 "<style jsx>{`".concat(css, "`}</style>")
             : '', addWrapper ? '</>' : '', json.name);
-        // HACK: for some reason we are generating `state.state.foo` instead of `state.foo`
-        // need a full fix, but this unblocks a lot in the short term
-        str = str.replace(/state\.state\./g, 'state.');
         if (options.plugins) {
             str = (0, plugins_1.runPreCodePlugins)(str, options.plugins);
         }
