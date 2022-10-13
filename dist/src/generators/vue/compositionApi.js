@@ -3,6 +3,15 @@ var __makeTemplateObject = (this && this.__makeTemplateObject) || function (cook
     if (Object.defineProperty) { Object.defineProperty(cooked, "raw", { value: raw }); } else { cooked.raw = raw; }
     return cooked;
 };
+var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
+    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
+        if (ar || !(i in from)) {
+            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+            ar[i] = from[i];
+        }
+    }
+    return to.concat(ar || Array.prototype.slice.call(from));
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -31,17 +40,43 @@ var getCompositionPropDefinition = function (_a) {
     }
     return str;
 };
+function shouldAppendValueToRef(path) {
+    var parent = path.parent, node = path.node;
+    if (core_1.types.isFunctionDeclaration(parent) && parent.id === node) {
+        return false;
+    }
+    if (core_1.types.isCallExpression(parent)) {
+        return false;
+    }
+    var isMemberExpression = core_1.types.isMemberExpression(parent);
+    if (isMemberExpression &&
+        core_1.types.isThisExpression(parent.object) &&
+        core_1.types.isProgram(path.scope.block) &&
+        path.scope.hasReference(node.name)) {
+        return false;
+    }
+    if (isMemberExpression &&
+        core_1.types.isIdentifier(parent.object) &&
+        core_1.types.isIdentifier(parent.property) &&
+        parent.property.name === node.name) {
+        return false;
+    }
+    if (Object.keys(path.scope.bindings).includes(path.node.name)) {
+        return false;
+    }
+    if (path.parentPath.listKey === 'arguments' || path.parentPath.listKey === 'params') {
+        return false;
+    }
+    return true;
+}
 function appendValueToRefs(input, component, options) {
-    var refKeys = Object.keys((0, lodash_1.pickBy)(component.state, function (i) { return (i === null || i === void 0 ? void 0 : i.type) === 'property'; }));
+    var refKeys = Object.keys(component.refs);
+    var stateKeys = Object.keys((0, lodash_1.pickBy)(component.state, function (i) { return (i === null || i === void 0 ? void 0 : i.type) === 'property'; }));
+    var allKeys = __spreadArray(__spreadArray([], refKeys, true), stateKeys, true);
     var output = (0, helpers_1.processBinding)({ code: input, options: options, json: component, includeProps: false });
     return (0, babel_transform_1.babelTransformExpression)(output, {
         Identifier: function (path) {
-            if (!(core_1.types.isFunctionDeclaration(path.parent) && path.parent.id === path.node) &&
-                !core_1.types.isCallExpression(path.parent) &&
-                (!core_1.types.isMemberExpression(path.parent) || core_1.types.isThisExpression(path.parent.object)) &&
-                path.parentPath.listKey !== 'arguments' &&
-                path.parentPath.listKey !== 'params' &&
-                refKeys.includes(path.node.name)) {
+            if (allKeys.includes(path.node.name) && shouldAppendValueToRef(path)) {
                 path.replaceWith(core_1.types.identifier("".concat(path.node.name, ".value")));
             }
         },

@@ -47,7 +47,7 @@ var isValidAttributeName = function (str) {
     return Boolean(str && /^[$a-z0-9\-_:]+$/i.test(str));
 };
 var blockToMitosis = function (json, toMitosisOptions) {
-    var _a, _b, _c, _d, _e;
+    var _a, _b, _c, _d, _e, _f;
     if (toMitosisOptions === void 0) { toMitosisOptions = {}; }
     var options = __assign({ format: exports.DEFAULT_FORMAT }, toMitosisOptions);
     if (options.format === 'react') {
@@ -70,9 +70,6 @@ var blockToMitosis = function (json, toMitosisOptions) {
     }
     var str = '';
     str += "<".concat(json.name, " ");
-    if ((_d = json.bindings._spread) === null || _d === void 0 ? void 0 : _d.code) {
-        str += " {...(".concat(json.bindings._spread.code, ")} ");
-    }
     for (var key in json.properties) {
         var value = (json.properties[key] || '').replace(/"/g, '&quot;').replace(/\n/g, '\\n');
         if (!isValidAttributeName(key)) {
@@ -83,11 +80,11 @@ var blockToMitosis = function (json, toMitosisOptions) {
         }
     }
     for (var key in json.bindings) {
-        var value = (_e = json.bindings[key]) === null || _e === void 0 ? void 0 : _e.code;
-        if (key === '_spread') {
-            continue;
+        var value = (_d = json.bindings[key]) === null || _d === void 0 ? void 0 : _d.code;
+        if (((_e = json.bindings[key]) === null || _e === void 0 ? void 0 : _e.type) === 'spread') {
+            str += " {...(".concat((_f = json.bindings[key]) === null || _f === void 0 ? void 0 : _f.code, ")} ");
         }
-        if (key.startsWith('on')) {
+        else if (key.startsWith('on')) {
             str += " ".concat(key, "={event => ").concat(value.replace(/\s*;$/, ''), "} ");
         }
         else {

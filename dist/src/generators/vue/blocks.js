@@ -16,6 +16,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.blockToVue = void 0;
 var function_1 = require("fp-ts/lib/function");
+var lodash_1 = require("lodash");
 var filter_empty_text_nodes_1 = require("../../helpers/filter-empty-text-nodes");
 var is_children_1 = __importDefault(require("../../helpers/is-children"));
 var is_mitosis_node_1 = require("../../helpers/is-mitosis-node");
@@ -186,9 +187,10 @@ var NODE_MAPPERS = {
 };
 var stringifyBinding = function (node) {
     return function (_a) {
+        var _b;
         var key = _a[0], value = _a[1];
-        if (key === '_spread') {
-            return '';
+        if (((_b = node.bindings[key]) === null || _b === void 0 ? void 0 : _b.type) === 'spread') {
+            return ''; // we handle this after
         }
         else if (key === 'class') {
             return " :class=\"_classStringToObject(".concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(value === null || value === void 0 ? void 0 : value.code, {
@@ -201,7 +203,7 @@ var stringifyBinding = function (node) {
             // TODO: proper babel transform to replace. Util for this
             var useValue = (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(value === null || value === void 0 ? void 0 : value.code);
             if (key.startsWith('on')) {
-                var _b = value.arguments, cusArgs = _b === void 0 ? ['event'] : _b;
+                var _c = value.arguments, cusArgs = _c === void 0 ? ['event'] : _c;
                 var event_1 = key.replace('on', '').toLowerCase();
                 if (event_1 === 'change' && node.name === 'input') {
                     event_1 = 'input';
@@ -233,7 +235,7 @@ var stringifyBinding = function (node) {
     };
 };
 var blockToVue = function (node, options, scope) {
-    var _a, _b;
+    var _a;
     var nodeMapper = NODE_MAPPERS[node.name];
     if (nodeMapper) {
         return nodeMapper(node, options, scope);
@@ -260,9 +262,6 @@ var blockToVue = function (node, options, scope) {
     }
     var str = '';
     str += "<".concat(node.name, " ");
-    if ((_b = node.bindings._spread) === null || _b === void 0 ? void 0 : _b.code) {
-        str += "v-bind=\"".concat((0, helpers_1.encodeQuotes)((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(node.bindings._spread.code)), "\"");
-    }
     for (var key in node.properties) {
         var value = node.properties[key];
         if (key === 'className') {
@@ -282,6 +281,17 @@ var blockToVue = function (node, options, scope) {
     })
         .join('');
     str += stringifiedBindings;
+    // spreads
+    var spreads = (0, lodash_1.filter)(node.bindings, function (binding) { return (binding === null || binding === void 0 ? void 0 : binding.type) === 'spread'; }).map(function (value) { return value === null || value === void 0 ? void 0 : value.code; });
+    if (spreads === null || spreads === void 0 ? void 0 : spreads.length) {
+        if (spreads.length > 1) {
+            var spreadsString = "{...".concat(spreads.join(', ...'), "}");
+            str += " v-bind=\"".concat((0, helpers_1.encodeQuotes)((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(spreadsString)), "\"");
+        }
+        else {
+            str += " v-bind=\"".concat((0, helpers_1.encodeQuotes)((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(spreads.join(''))), "\"");
+        }
+    }
     if (jsx_1.selfClosingTags.has(node.name)) {
         return str + ' />';
     }

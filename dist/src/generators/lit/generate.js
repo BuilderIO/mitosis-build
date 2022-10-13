@@ -41,7 +41,7 @@ var getCustomTagName = function (name, options) {
     return kebabCaseName;
 };
 var blockToLit = function (json, options) {
-    var _a, _b, _c, _d, _e;
+    var _a, _b, _c, _d;
     if (options === void 0) { options = {}; }
     if (json.properties._text) {
         return json.properties._text;
@@ -68,19 +68,19 @@ var blockToLit = function (json, options) {
     if (classString) {
         str += " class=".concat(classString, " ");
     }
-    if ((_e = json.bindings._spread) === null || _e === void 0 ? void 0 : _e.code) {
-        str += " ${spread(".concat(json.bindings._spread.code, ")} ");
-    }
     for (var key in json.properties) {
         var value = json.properties[key];
         str += " ".concat(key, "=\"").concat(value, "\" ");
     }
     for (var key in json.bindings) {
-        var _f = json.bindings[key], code = _f.code, _g = _f.arguments, cusArgs = _g === void 0 ? ['event'] : _g;
-        if (key === '_spread' || key === '_forName') {
+        var _e = json.bindings[key], code = _e.code, _f = _e.arguments, cusArgs = _f === void 0 ? ['event'] : _f, type = _e.type;
+        if (key === '_forName') {
             continue;
         }
-        if (key === 'ref') {
+        if (type === 'spread') {
+            str += " ${spread(".concat(code, ")} ");
+        }
+        else if (key === 'ref') {
             // TODO: maybe use ref directive instead
             // https://lit.dev/docs/templates/directives/#ref
             str += " ref=\"".concat(code, "\" ");
@@ -160,7 +160,7 @@ var componentToLit = function (options) {
             }
         }
         var html = json.children.map(function (item) { return blockToLit(item, options); }).join('\n');
-        var hasSpread = (0, has_1.has)(json, function (node) { return Boolean(node.bindings._spread); });
+        var hasSpread = (0, has_1.has)(json, function (node) { return (0, lodash_1.some)(node.bindings, { type: 'spread' }); });
         if (options.prettier !== false) {
             try {
                 css = (0, standalone_1.format)(css, {

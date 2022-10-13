@@ -27,7 +27,7 @@ var indent_1 = require("../../helpers/indent");
 var map_refs_1 = require("../../helpers/map-refs");
 var for_1 = require("../../helpers/nodes/for");
 var blockToStencil = function (json, options) {
-    var _a, _b, _c, _d, _e;
+    var _a, _b, _c, _d;
     if (options === void 0) { options = {}; }
     if (json.properties._text) {
         return json.properties._text;
@@ -56,19 +56,19 @@ var blockToStencil = function (json, options) {
     if (classString) {
         str += " class=".concat(classString, " ");
     }
-    if ((_e = json.bindings._spread) === null || _e === void 0 ? void 0 : _e.code) {
-        str += " {...(".concat(json.bindings._spread.code, ")} ");
-    }
     for (var key in json.properties) {
         var value = json.properties[key];
         str += " ".concat(key, "=\"").concat(value, "\" ");
     }
     for (var key in json.bindings) {
-        var _f = json.bindings[key], code = _f.code, _g = _f.arguments, cusArgs = _g === void 0 ? ['event'] : _g;
-        if (key === '_spread' || key === '_forName') {
+        var _e = json.bindings[key], code = _e.code, _f = _e.arguments, cusArgs = _f === void 0 ? ['event'] : _f, type = _e.type;
+        if (key === '_forName') {
             continue;
         }
-        if (key === 'ref') {
+        if (type === 'spread') {
+            str += " {...(".concat(code, ")} ");
+        }
+        else if (key === 'ref') {
             str += " ref={(el) => this.".concat(code, " = el} ");
         }
         else if (key.startsWith('on')) {

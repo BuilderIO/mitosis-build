@@ -43,6 +43,7 @@ var className = getRawFile('./data/styles/className.raw');
 var classAndClassName = getRawFile('./data/styles/class-and-className.raw');
 var classState = getRawFile('./data/styles/classState.raw');
 var useStyle = getRawFile('./data/styles/use-style.raw');
+var useStyleOutsideComponent = getRawFile('./data/styles/use-style-outside-component.raw');
 var useStyleAndCss = getRawFile('./data/styles/use-style-and-css.raw');
 var button = getRawFile('./data/blocks/button.raw');
 var classNameJsx = getRawFile('./data/blocks/classname-jsx.raw');
@@ -75,6 +76,10 @@ var submitButtonBlock = getRawFile('./data/blocks/submit-button.raw');
 var text = getRawFile('./data/blocks/text.raw');
 var textarea = getRawFile('./data/blocks/textarea.raw');
 var video = getRawFile('./data/blocks/video.raw');
+var multipleSpreads = getRawFile('./data/spread/multiple-spreads.raw');
+var spreadAttrs = getRawFile('./data/spread/spread-attrs.raw');
+var spreadNestedProps = getRawFile('./data/spread/spread-nested-props.raw');
+var spreadProps = getRawFile('./data/spread/spread-props.raw');
 var builderRenderContent = getRawFile('./data/blocks/builder-render-content.raw');
 var rootFragmentMultiNode = getRawFile('./data/blocks/root-fragment-multi-node.raw');
 var path = 'test-path';
@@ -128,9 +133,14 @@ var BASIC_TESTS = {
     'class + ClassName + css': classAndClassName,
     'use-style': useStyle,
     'use-style-and-css': useStyleAndCss,
+    'use-style-outside-component': useStyleOutsideComponent,
     'self-referencing component with children': selfRefCompWChildren,
     'self-referencing component': selfRefComp,
     rootFragmentMultiNode: rootFragmentMultiNode,
+    multipleSpreads: multipleSpreads,
+    spreadAttrs: spreadAttrs,
+    spreadNestedProps: spreadNestedProps,
+    spreadProps: spreadProps,
 };
 var SLOTS_TESTS = {
     ContentSlotJSX: contentSlotJsx,

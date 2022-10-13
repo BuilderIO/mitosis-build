@@ -301,7 +301,7 @@ var SrcBuilder = /** @class */ (function () {
             }
         }
         var _loop_1 = function (rawKey) {
-            if (rawKey === '_spread') {
+            if (bindings[rawKey].type === 'spread') {
                 if (this_1.isJSX) {
                     this_1.emit('{...', bindings[rawKey].code, '}');
                 }
