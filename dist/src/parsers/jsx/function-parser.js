@@ -70,7 +70,6 @@ function parseDefaultPropsHook(component, expression) {
         objectProperties === null || objectProperties === void 0 ? void 0 : objectProperties.forEach(function (i) {
             var _a;
             var _b, _c, _d;
-            console.log({ i: i });
             if ((_b = i.key) === null || _b === void 0 ? void 0 : _b.name) {
                 component.defaultProps = __assign(__assign({}, ((_c = component.defaultProps) !== null && _c !== void 0 ? _c : {})), (_a = {}, _a[(_d = i.key) === null || _d === void 0 ? void 0 : _d.name] = i.value.value, _a));
             }
