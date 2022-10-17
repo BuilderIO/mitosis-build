@@ -71,6 +71,9 @@ var collectMetadata = function (nodes, component, options) {
                 component.style = (0, function_parser_1.generateUseStyleCode)(hook);
                 return false;
             }
+            else if (hook.callee.name === hooks_1.HOOKS.DEFAULT_PROPS) {
+                (0, function_parser_1.parseDefaultPropsHook)(component, hook);
+            }
         }
         return true;
     });

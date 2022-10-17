@@ -38,6 +38,7 @@ var propsInterface = getRawFile('./data/types/component-props-interface.raw');
 var preserveTyping = getRawFile('./data/types/preserve-typing.raw');
 var typeDependency = getRawFile('./data/types/type-dependency.raw');
 var defaultProps = getRawFile('./data/default-props/default-props.raw');
+var defaultPropsOutsideComponent = getRawFile('./data/default-props/default-props-outside-component.raw');
 var classRaw = getRawFile('./data/styles/class.raw');
 var className = getRawFile('./data/styles/className.raw');
 var classAndClassName = getRawFile('./data/styles/class-and-className.raw');
@@ -113,6 +114,7 @@ var BASIC_TESTS = {
     propsType: propsType,
     propsInterface: propsInterface,
     defaultProps: defaultProps,
+    defaultPropsOutsideComponent: defaultPropsOutsideComponent,
     preserveTyping: preserveTyping,
     typeDependency: typeDependency,
     defaultValsWithTypes: getRawFile('./data/types/component-with-default-values-types.raw'),
