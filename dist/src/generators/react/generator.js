@@ -18,7 +18,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.componentToReact = exports.componentToPreact = exports.blockToReact = void 0;
+exports.componentToReact = exports.componentToPreact = exports.blockToReact = exports.contextPropDrillingKey = void 0;
 var dedent_1 = __importDefault(require("dedent"));
 var json5_1 = __importDefault(require("json5"));
 var lodash_1 = require("lodash");
@@ -50,6 +50,7 @@ var state_2 = require("./state");
 var helpers_2 = require("./helpers");
 var hash_sum_1 = __importDefault(require("hash-sum"));
 var for_1 = require("../../helpers/nodes/for");
+exports.contextPropDrillingKey = '_context';
 var openFrag = function (options) { return getFragment('open', options); };
 var closeFrag = function (options) { return getFragment('close', options); };
 function getFragment(type, options) {
@@ -248,37 +249,55 @@ var getRefsString = function (json, refs, options) {
     }
     return [hasStateArgument, code];
 };
-function addProviderComponents(json, options) {
-    for (var key in json.context.set) {
-        var _a = json.context.set[key], name_1 = _a.name, ref = _a.ref, value = _a.value;
-        if (value) {
-            json.children = [
-                (0, create_mitosis_node_1.createMitosisNode)(__assign({ name: "".concat(name_1, ".Provider"), children: json.children }, (value && {
-                    bindings: {
-                        value: {
-                            code: (0, get_state_object_string_1.stringifyContextValue)(value),
-                        },
-                    },
-                }))),
-            ];
+function provideContext(json, options) {
+    if (options.contextType === 'prop-drill') {
+        var str = '';
+        for (var key in json.context.set) {
+            var _a = json.context.set[key], name_1 = _a.name, ref = _a.ref, value = _a.value;
+            if (value) {
+                str += "\n          ".concat(exports.contextPropDrillingKey, ".").concat(name_1, " = ").concat((0, get_state_object_string_1.stringifyContextValue)(value), ";\n        ");
+            }
+            // TODO: support refs. I'm not sure what those are so unclear how to support them
         }
-        else if (ref) {
-            json.children = [
-                (0, create_mitosis_node_1.createMitosisNode)(__assign({ name: 'Context.Provider', children: json.children }, (ref && {
-                    bindings: {
-                        value: {
-                            code: ref,
+        return str;
+    }
+    else {
+        for (var key in json.context.set) {
+            var _b = json.context.set[key], name_2 = _b.name, ref = _b.ref, value = _b.value;
+            if (value) {
+                json.children = [
+                    (0, create_mitosis_node_1.createMitosisNode)(__assign({ name: "".concat(name_2, ".Provider"), children: json.children }, (value && {
+                        bindings: {
+                            value: {
+                                code: (0, get_state_object_string_1.stringifyContextValue)(value),
+                            },
                         },
-                    },
-                }))),
-            ];
+                    }))),
+                ];
+            }
+            else if (ref) {
+                json.children = [
+                    (0, create_mitosis_node_1.createMitosisNode)(__assign({ name: 'Context.Provider', children: json.children }, (ref && {
+                        bindings: {
+                            value: {
+                                code: ref,
+                            },
+                        },
+                    }))),
+                ];
+            }
         }
     }
 }
 function getContextString(component, options) {
     var str = '';
     for (var key in component.context.get) {
-        str += "\n      const ".concat(key, " = useContext(").concat(component.context.get[key].name, ");\n    ");
+        if (options.contextType === 'prop-drill') {
+            str += "\n        const ".concat(key, " = ").concat(exports.contextPropDrillingKey, "['").concat(component.context.get[key].name, "'];\n      ");
+        }
+        else {
+            str += "\n        const ".concat(key, " = useContext(").concat(component.context.get[key].name, ");\n      ");
+        }
     }
     return str;
 }
@@ -341,7 +360,7 @@ var _componentToReact = function (json, options, isSubComponent) {
     (0, process_http_requests_1.processHttpRequests)(json);
     (0, handle_missing_state_1.handleMissingState)(json);
     (0, process_tag_references_1.processTagReferences)(json);
-    addProviderComponents(json, options);
+    var contextStr = provideContext(json, options);
     var componentHasStyles = (0, helpers_1.hasCss)(json);
     if (options.stateType === 'useState') {
         (0, getters_to_functions_1.gettersToFunctions)(json);
@@ -385,7 +404,7 @@ var _componentToReact = function (json, options, isSubComponent) {
     if (useStateCode && useStateCode.includes('useState')) {
         reactLibImports.add('useState');
     }
-    if ((0, context_1.hasContext)(json)) {
+    if ((0, context_1.hasContext)(json) && options.contextType !== 'prop-drill') {
         reactLibImports.add('useContext');
     }
     if (allRefs.length) {
@@ -406,7 +425,7 @@ var _componentToReact = function (json, options, isSubComponent) {
     var _o = getRefsString(json, allRefs, options), hasStateArgument = _o[0], refsString = _o[1];
     var nativeStyles = stylesType === 'react-native' && componentHasStyles && (0, react_native_1.collectReactNativeStyles)(json);
     var propsArgs = "props: ".concat(json.propsTypeRef || 'any');
-    var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n  ", "\n  ", "\n  ", "\n  ", "\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "", "function ", "(", "", ") {\n    ", "\n      ", "\n      ", "\n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      return (\n        ", "\n        ", "\n        ", "\n        ", "\n      );\n    }", "\n\n    ", "\n\n    ", "\n\n    ", "\n  "], ["\n  ", "\n  ", "\n  ", "\n  ", "\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "", "function ", "(", "", ") {\n    ", "\n      ", "\n      ", "\n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      return (\n        ", "\n        ", "\n        ", "\n        ", "\n      );\n    }", "\n\n    ", "\n\n    ", "\n\n    ", "\n  "])), options.preact
+    var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n  ", "\n  ", "\n  ", "\n  ", "\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "", "function ", "(", "", ") {\n    ", "\n    ", "\n      ", "\n      ", "\n      ", "\n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      return (\n        ", "\n        ", "\n        ", "\n        ", "\n      );\n    }", "\n\n    ", "\n\n    ", "\n\n    ", "\n  "], ["\n  ", "\n  ", "\n  ", "\n  ", "\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "", "function ", "(", "", ") {\n    ", "\n    ", "\n      ", "\n      ", "\n      ", "\n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      return (\n        ", "\n        ", "\n        ", "\n        ", "\n      );\n    }", "\n\n    ", "\n\n    ", "\n\n    ", "\n  "])), options.preact
         ? "\n    /** @jsx h */\n    import { h, Fragment } from 'preact';\n    "
         : options.type !== 'native'
             ? "import * as React from 'react';"
@@ -419,7 +438,9 @@ var _componentToReact = function (json, options, isSubComponent) {
         : '', json.types ? json.types.join('\n') : '', (0, render_imports_1.renderPreComponent)({
         component: json,
         target: options.type === 'native' ? 'reactNative' : 'react',
-    }), isSubComponent ? '' : 'export default ', isForwardRef ? "forwardRef".concat(forwardRefType ? "<".concat(forwardRefType, ">") : '', "(") : '', json.name || 'MyComponent', propsArgs, isForwardRef ? ", ".concat(options.forwardRef) : '', hasStateArgument ? '' : refsString, hasState
+    }), isSubComponent ? '' : 'export default ', isForwardRef ? "forwardRef".concat(forwardRefType ? "<".concat(forwardRefType, ">") : '', "(") : '', json.name || 'MyComponent', propsArgs, isForwardRef ? ", ".concat(options.forwardRef) : '', options.contextType === 'prop-drill'
+        ? "const ".concat(exports.contextPropDrillingKey, " = { ...props['").concat(exports.contextPropDrillingKey, "'] };")
+        : '', hasStateArgument ? '' : refsString, hasState
         ? stateType === 'mobx'
             ? "const state = useLocalObservable(() => (".concat((0, get_state_object_string_1.getStateObjectStringFromComponent)(json), "));")
             : stateType === 'useState'
@@ -427,9 +448,11 @@ var _componentToReact = function (json, options, isSubComponent) {
                 : stateType === 'solid'
                     ? "const state = useMutable(".concat((0, get_state_object_string_1.getStateObjectStringFromComponent)(json), ");")
                     : stateType === 'builder'
-                        ? "var state = useBuilderState(".concat((0, get_state_object_string_1.getStateObjectStringFromComponent)(json), ");")
-                        : "const state = useLocalProxy(".concat((0, get_state_object_string_1.getStateObjectStringFromComponent)(json), ");")
-        : '', hasStateArgument ? refsString : '', getContextString(json, options), getInitCode(json, options), ((_g = json.hooks.onInit) === null || _g === void 0 ? void 0 : _g.code)
+                        ? "const state = useBuilderState(".concat((0, get_state_object_string_1.getStateObjectStringFromComponent)(json), ");")
+                        : stateType === 'variables'
+                            ? "const state = ".concat((0, get_state_object_string_1.getStateObjectStringFromComponent)(json), ";")
+                            : "const state = useLocalProxy(".concat((0, get_state_object_string_1.getStateObjectStringFromComponent)(json), ");")
+        : '', hasStateArgument ? refsString : '', getContextString(json, options), getInitCode(json, options), contextStr || '', ((_g = json.hooks.onInit) === null || _g === void 0 ? void 0 : _g.code)
         ? "\n          useEffect(() => {\n            ".concat((0, state_2.processHookCode)({
             str: json.hooks.onInit.code,
             options: options,

@@ -20,4 +20,5 @@ export declare const targets: {
     readonly marko: import(".").TranspilerGenerator<import("./generators/marko").ToMarkoOptions, string>;
     readonly preact: import(".").TranspilerGenerator<import("./generators/react").ToReactOptions, string>;
     readonly lit: import(".").TranspilerGenerator<import("./generators/lit").ToLitOptions, string>;
+    readonly rsc: import(".").TranspilerGenerator<import("./generators/rsc").ToRscOptions, string>;
 };

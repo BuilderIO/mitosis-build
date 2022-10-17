@@ -18,6 +18,7 @@ var stencil_1 = require("./generators/stencil");
 var qwik_1 = require("./generators/qwik");
 var marko_1 = require("./generators/marko");
 var lit_1 = require("./generators/lit");
+var rsc_1 = require("./generators/rsc");
 exports.builder = builder_1.componentToBuilder;
 exports.targets = {
     angular: angular_1.componentToAngular,
@@ -40,4 +41,5 @@ exports.targets = {
     marko: marko_1.componentToMarko,
     preact: react_2.componentToPreact,
     lit: lit_1.componentToLit,
+    rsc: rsc_1.componentToRsc,
 };
