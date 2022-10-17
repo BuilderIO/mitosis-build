@@ -76,7 +76,7 @@ var componentToQwik = function (userOptions) {
                     emitTagNameHack(file, component, (_b = component.meta.useMetadata) === null || _b === void 0 ? void 0 : _b.componentElementTag);
                     emitJSX(file, component, mutable_1);
                 },
-            ], [component.propsTypeRef + (isLightComponent ? '&{key?:any}' : '') || 'any']);
+            ], [(component.propsTypeRef || 'any') + (isLightComponent ? '&{key?:any}' : '')]);
             file.src.const(component.name, isLightComponent
                 ? componentFn
                 : (0, src_generator_1.invoke)(file.import(file.qwikModule, 'component$'), [componentFn]), true, true);
