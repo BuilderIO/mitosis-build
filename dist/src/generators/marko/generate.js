@@ -79,9 +79,6 @@ var blockToMarko = function (json, options) {
     }
     for (var key in json.bindings) {
         var _f = json.bindings[key], code = _f.code, _g = _f.arguments, cusArgs = _g === void 0 ? ['event'] : _g, type = _f.type;
-        if (key === '_forName') {
-            continue;
-        }
         if (type === 'spread') {
             str += " ...(".concat(code, ") ");
         }

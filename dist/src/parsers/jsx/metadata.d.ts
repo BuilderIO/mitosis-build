@@ -1,6 +1,7 @@
 import * as babel from '@babel/core';
 import { MitosisComponent } from '../../types/mitosis-component';
 import { ParseMitosisOptions } from './types';
+declare const types: typeof babel.types;
 export declare const METADATA_HOOK_NAME = "useMetadata";
 /**
  * Transform useMetadata({...}) onto the component JSON as
@@ -10,3 +11,4 @@ export declare const METADATA_HOOK_NAME = "useMetadata";
  * the returned nodes array
  */
 export declare const collectMetadata: (nodes: babel.types.Statement[], component: MitosisComponent, options: ParseMitosisOptions) => babel.types.Statement[];
+export {};

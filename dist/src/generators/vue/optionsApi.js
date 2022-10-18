@@ -153,25 +153,19 @@ function generateOptionsApiScript(component, options, path, template, props, onU
         : '', "\n        ").concat((0, lodash_1.size)(component.context.get)
         ? "inject: ".concat(getContextInjectString(component, options), ",")
         : '', "\n        ").concat(((_c = component.hooks.onInit) === null || _c === void 0 ? void 0 : _c.code)
-        ? "created() {\n                ".concat((0, helpers_1.processBinding)({ code: component.hooks.onInit.code, options: options, json: component }), "\n              },")
+        ? "created() {\n                ".concat(component.hooks.onInit.code, "\n              },")
         : '', "\n        ").concat(((_d = component.hooks.onMount) === null || _d === void 0 ? void 0 : _d.code)
-        ? "mounted() {\n                ".concat((0, helpers_1.processBinding)({ code: component.hooks.onMount.code, options: options, json: component }), "\n              },")
+        ? "mounted() {\n                ".concat(component.hooks.onMount.code, "\n              },")
         : '', "\n        ").concat(onUpdateWithoutDeps.length
-        ? "updated() {\n            ".concat(onUpdateWithoutDeps
-            .map(function (hook) { return (0, helpers_1.processBinding)({ code: hook.code, options: options, json: component }); })
-            .join('\n'), "\n          },")
+        ? "updated() {\n            ".concat(onUpdateWithoutDeps.map(function (hook) { return hook.code; }).join('\n'), "\n          },")
         : '', "\n        ").concat(onUpdateWithDeps.length
         ? "watch: {\n            ".concat(onUpdateWithDeps
             .map(function (hook, index) {
-            return "".concat((0, helpers_1.getOnUpdateHookName)(index), "() {\n                  ").concat((0, helpers_1.processBinding)({ code: hook.code, options: options, json: component }), "\n                  }\n                ");
+            return "".concat((0, helpers_1.getOnUpdateHookName)(index), "() {\n                  ").concat(hook.code, "\n                  }\n                ");
         })
             .join(','), "\n          },")
         : '', "\n        ").concat(component.hooks.onUnMount
-        ? "unmounted() {\n                ".concat((0, helpers_1.processBinding)({
-            code: component.hooks.onUnMount.code,
-            options: options,
-            json: component,
-        }), "\n              },")
+        ? "unmounted() {\n                ".concat(component.hooks.onUnMount.code, "\n              },")
         : '', "\n\n        ").concat(getterString.length < 4
         ? ''
         : " \n          computed: ".concat(getterString, ",\n        "), "\n        ").concat(functionsString.length < 4

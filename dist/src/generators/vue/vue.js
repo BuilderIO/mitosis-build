@@ -14,26 +14,6 @@ var __assign = (this && this.__assign) || function () {
     };
     return __assign.apply(this, arguments);
 };
-var __rest = (this && this.__rest) || function (s, e) {
-    var t = {};
-    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
-        t[p] = s[p];
-    if (s != null && typeof Object.getOwnPropertySymbols === "function")
-        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
-            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
-                t[p[i]] = s[p[i]];
-        }
-    return t;
-};
-var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
-    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
-        if (ar || !(i in from)) {
-            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
-            ar[i] = from[i];
-        }
-    }
-    return to.concat(ar || Array.prototype.slice.call(from));
-};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -59,6 +39,9 @@ var helpers_1 = require("./helpers");
 var optionsApi_1 = require("./optionsApi");
 var compositionApi_1 = require("./compositionApi");
 var blocks_1 = require("./blocks");
+var merge_options_1 = require("../../helpers/merge-options");
+var process_code_1 = require("../../helpers/plugins/process-code");
+var strip_state_and_props_refs_1 = require("../../helpers/strip-state-and-props-refs");
 // Transform <foo.bar key="value" /> to <component :is="foo.bar" key="value" />
 function processDynamicComponents(json, _options) {
     (0, traverse_1.default)(json).forEach(function (node) {
@@ -115,22 +98,41 @@ var BASE_OPTIONS = {
     vueVersion: 2,
     api: 'options',
 };
-var mergeOptions = function (_a, _b) {
-    var _c = _a.plugins, pluginsA = _c === void 0 ? [] : _c, a = __rest(_a, ["plugins"]);
-    var _d = _b.plugins, pluginsB = _d === void 0 ? [] : _d, b = __rest(_b, ["plugins"]);
-    return (__assign(__assign(__assign({}, a), b), { plugins: __spreadArray(__spreadArray([], pluginsA, true), pluginsB, true) }));
-};
 var componentToVue = function (userOptions) {
-    if (userOptions === void 0) { userOptions = BASE_OPTIONS; }
     return function (_a) {
-        var _b, _c, _d, _e, _f, _g, _h, _j, _k;
+        var _b, _c, _d, _e, _f, _g, _h;
         var component = _a.component, path = _a.path;
-        var options = mergeOptions(BASE_OPTIONS, userOptions);
+        var options = (0, merge_options_1.mergeOptions)(BASE_OPTIONS, userOptions);
+        options.plugins.unshift((0, process_code_1.CODE_PROCESSOR_PLUGIN)(function (codeType) {
+            if (options.api === 'composition') {
+                switch (codeType) {
+                    case 'hooks':
+                        return function (code) { return (0, compositionApi_1.appendValueToRefs)(code, component, options); };
+                    case 'bindings':
+                        return function (c) { return (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(c); };
+                    case 'hooks-deps':
+                        return function (c) { return (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(c, { includeProps: false }); };
+                    case 'properties':
+                        return function (c) { return c; };
+                }
+            }
+            else {
+                switch (codeType) {
+                    case 'hooks':
+                        return function (code) { return (0, helpers_1.processBinding)({ code: code, options: options, json: component }); };
+                    case 'bindings':
+                        return function (c) { return (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(c); };
+                    case 'properties':
+                    case 'hooks-deps':
+                        return function (c) { return c; };
+                }
+            }
+        }));
         if (options.api === 'options') {
-            (_b = options.plugins) === null || _b === void 0 ? void 0 : _b.unshift(onUpdatePlugin);
+            options.plugins.unshift(onUpdatePlugin);
         }
         else if (options.api === 'composition') {
-            (_c = options.plugins) === null || _c === void 0 ? void 0 : _c.unshift(functions_1.FUNCTION_HACK_PLUGIN);
+            options.plugins.unshift(functions_1.FUNCTION_HACK_PLUGIN);
             options.asyncComponentImports = false;
         }
         // Make a copy we can safely mutate, similar to babel's toolchain can be used
@@ -138,24 +140,21 @@ var componentToVue = function (userOptions) {
         (0, process_http_requests_1.processHttpRequests)(component);
         processDynamicComponents(component, options);
         processForKeys(component, options);
-        if (options.plugins) {
-            component = (0, plugins_1.runPreJsonPlugins)(component, options.plugins);
-        }
+        // need to run this before we process the component's code
+        var elementProps = Array.from((0, get_props_1.getProps)(component)).filter(function (prop) { return !(0, slots_1.isSlotProperty)(prop); });
+        component = (0, plugins_1.runPreJsonPlugins)(component, options.plugins);
         if (options.api === 'options') {
             (0, map_refs_1.mapRefs)(component, function (refName) { return "this.$refs.".concat(refName); });
         }
-        if (options.plugins) {
-            component = (0, plugins_1.runPostJsonPlugins)(component, options.plugins);
-        }
+        component = (0, plugins_1.runPostJsonPlugins)(component, options.plugins);
         var css = (0, collect_css_1.collectCss)(component, {
-            prefix: (_e = (_d = options.cssNamespace) === null || _d === void 0 ? void 0 : _d.call(options)) !== null && _e !== void 0 ? _e : undefined,
+            prefix: (_c = (_b = options.cssNamespace) === null || _b === void 0 ? void 0 : _b.call(options)) !== null && _c !== void 0 ? _c : undefined,
         });
         (0, strip_meta_properties_1.stripMetaProperties)(component);
         var template = (0, function_1.pipe)(component.children.map(function (item) { return (0, blocks_1.blockToVue)(item, options, { isRootNode: true }); }).join('\n'), helpers_1.renameMitosisComponentsToKebabCase);
-        var onUpdateWithDeps = ((_f = component.hooks.onUpdate) === null || _f === void 0 ? void 0 : _f.filter(function (hook) { var _a; return (_a = hook.deps) === null || _a === void 0 ? void 0 : _a.length; })) || [];
-        var onUpdateWithoutDeps = ((_g = component.hooks.onUpdate) === null || _g === void 0 ? void 0 : _g.filter(function (hook) { var _a; return !((_a = hook.deps) === null || _a === void 0 ? void 0 : _a.length); })) || [];
+        var onUpdateWithDeps = ((_d = component.hooks.onUpdate) === null || _d === void 0 ? void 0 : _d.filter(function (hook) { var _a; return (_a = hook.deps) === null || _a === void 0 ? void 0 : _a.length; })) || [];
+        var onUpdateWithoutDeps = ((_e = component.hooks.onUpdate) === null || _e === void 0 ? void 0 : _e.filter(function (hook) { var _a; return !((_a = hook.deps) === null || _a === void 0 ? void 0 : _a.length); })) || [];
         var getterKeys = Object.keys((0, lodash_1.pickBy)(component.state, function (i) { return (i === null || i === void 0 ? void 0 : i.type) === 'getter'; }));
-        var elementProps = Array.from((0, get_props_1.getProps)(component)).filter(function (prop) { return !(0, slots_1.isSlotProperty)(prop); });
         // import from vue
         var vueImports = [];
         if (options.vueVersion >= 3 && options.asyncComponentImports) {
@@ -163,8 +162,8 @@ var componentToVue = function (userOptions) {
         }
         if (options.api === 'composition') {
             onUpdateWithDeps.length && vueImports.push('watch');
-            ((_h = component.hooks.onMount) === null || _h === void 0 ? void 0 : _h.code) && vueImports.push('onMounted');
-            ((_j = component.hooks.onUnMount) === null || _j === void 0 ? void 0 : _j.code) && vueImports.push('onUnMounted');
+            ((_f = component.hooks.onMount) === null || _f === void 0 ? void 0 : _f.code) && vueImports.push('onMounted');
+            ((_g = component.hooks.onUnMount) === null || _g === void 0 ? void 0 : _g.code) && vueImports.push('onUnMounted');
             onUpdateWithoutDeps.length && vueImports.push('onUpdated');
             (0, lodash_1.size)(getterKeys) && vueImports.push('computed');
             (0, lodash_1.size)(component.context.set) && vueImports.push('provide');
@@ -172,7 +171,7 @@ var componentToVue = function (userOptions) {
             (0, lodash_1.size)(Object.keys(component.state).filter(function (key) { var _a; return ((_a = component.state[key]) === null || _a === void 0 ? void 0 : _a.type) === 'property'; })) && vueImports.push('ref');
         }
         var tsLangAttribute = options.typescript ? "lang='ts'" : '';
-        var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    <template>\n      ", "\n    </template>\n\n\n    <script ", " ", ">\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n    </script>\n\n    ", "\n  "], ["\n    <template>\n      ", "\n    </template>\n\n\n    <script ", " ", ">\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n    </script>\n\n    ", "\n  "])), template, options.api === 'composition' ? 'setup' : '', tsLangAttribute, vueImports.length ? "import { ".concat((0, lodash_1.uniq)(vueImports).sort().join(', '), " } from \"vue\"") : '', (options.typescript && ((_k = component.types) === null || _k === void 0 ? void 0 : _k.join('\n'))) || '', (0, render_imports_1.renderPreComponent)({
+        var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    <template>\n      ", "\n    </template>\n\n\n    <script ", " ", ">\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n    </script>\n\n    ", "\n  "], ["\n    <template>\n      ", "\n    </template>\n\n\n    <script ", " ", ">\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n    </script>\n\n    ", "\n  "])), template, options.api === 'composition' ? 'setup' : '', tsLangAttribute, vueImports.length ? "import { ".concat((0, lodash_1.uniq)(vueImports).sort().join(', '), " } from \"vue\"") : '', (options.typescript && ((_h = component.types) === null || _h === void 0 ? void 0 : _h.join('\n'))) || '', (0, render_imports_1.renderPreComponent)({
             component: component,
             target: 'vue',
             asyncComponentImports: options.asyncComponentImports,
@@ -181,9 +180,7 @@ var componentToVue = function (userOptions) {
             : (0, optionsApi_1.generateOptionsApiScript)(component, options, path, template, elementProps, onUpdateWithDeps, onUpdateWithoutDeps), !css.trim().length
             ? ''
             : "<style scoped>\n      ".concat(css, "\n    </style>"));
-        if (options.plugins) {
-            str = (0, plugins_1.runPreCodePlugins)(str, options.plugins);
-        }
+        str = (0, plugins_1.runPreCodePlugins)(str, options.plugins);
         if (true || options.prettier !== false) {
             try {
                 str = (0, standalone_1.format)(str, {
@@ -201,9 +198,7 @@ var componentToVue = function (userOptions) {
                 console.warn('Could not prettify', { string: str }, err);
             }
         }
-        if (options.plugins) {
-            str = (0, plugins_1.runPostCodePlugins)(str, options.plugins);
-        }
+        str = (0, plugins_1.runPostCodePlugins)(str, options.plugins);
         for (var _i = 0, removePatterns_1 = removePatterns; _i < removePatterns_1.length; _i++) {
             var pattern = removePatterns_1[_i];
             str = str.replace(pattern, '');

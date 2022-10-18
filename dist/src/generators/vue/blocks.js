@@ -23,7 +23,6 @@ var is_mitosis_node_1 = require("../../helpers/is-mitosis-node");
 var remove_surrounding_block_1 = require("../../helpers/remove-surrounding-block");
 var replace_identifiers_1 = require("../../helpers/replace-identifiers");
 var slots_1 = require("../../helpers/slots");
-var strip_state_and_props_refs_1 = require("../../helpers/strip-state-and-props-refs");
 var jsx_1 = require("../../parsers/jsx");
 var helpers_1 = require("./helpers");
 var SPECIAL_PROPERTIES = {
@@ -48,7 +47,7 @@ var NODE_MAPPERS = {
         var _c;
         var json = _json;
         var keyValue = json.bindings.key || { code: 'index' };
-        var forValue = "(".concat(json.scope.forName, ", index) in ").concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)((_c = json.bindings.each) === null || _c === void 0 ? void 0 : _c.code));
+        var forValue = "(".concat(json.scope.forName, ", index) in ").concat((_c = json.bindings.each) === null || _c === void 0 ? void 0 : _c.code);
         if (options.vueVersion >= 3) {
             // TODO: tmk key goes on different element (parent vs child) based on Vue 2 vs Vue 3
             return "<template :key=\"".concat((0, helpers_1.encodeQuotes)((keyValue === null || keyValue === void 0 ? void 0 : keyValue.code) || 'index'), "\" v-for=\"").concat((0, helpers_1.encodeQuotes)(forValue), "\">\n        ").concat(json.children.map(function (item) { return (0, exports.blockToVue)(item, options); }).join('\n'), "\n      </template>");
@@ -64,7 +63,7 @@ var NODE_MAPPERS = {
     Show: function (json, options, scope) {
         var _a, _b, _c, _d, _e, _f;
         var _g, _h;
-        var ifValue = (0, slots_1.replaceSlotsInString)((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)((_g = json.bindings.when) === null || _g === void 0 ? void 0 : _g.code), function (slotName) { return "$slots.".concat(slotName); });
+        var ifValue = (0, slots_1.replaceSlotsInString)(((_g = json.bindings.when) === null || _g === void 0 ? void 0 : _g.code) || '', function (slotName) { return "$slots.".concat(slotName); });
         var defaultShowTemplate = "\n    <template ".concat(SPECIAL_PROPERTIES.V_IF, "=\"").concat((0, helpers_1.encodeQuotes)(ifValue), "\">\n      ").concat(json.children.map(function (item) { return (0, exports.blockToVue)(item, options); }).join('\n'), "\n    </template>\n    ").concat((0, is_mitosis_node_1.isMitosisNode)(json.meta.else)
             ? "\n        <template ".concat(SPECIAL_PROPERTIES.V_ELSE, ">\n          ").concat((0, exports.blockToVue)(json.meta.else, options), "\n        </template>")
             : '', "\n    ");
@@ -109,7 +108,7 @@ var NODE_MAPPERS = {
                         var isLast = idx === children_1.length - 1;
                         var innerBlock = child.children.filter(filter_empty_text_nodes_1.filterEmptyTextNodes)[0];
                         if (!isLast) {
-                            var childIfValue = (0, function_1.pipe)((_c = child.bindings.when) === null || _c === void 0 ? void 0 : _c.code, strip_state_and_props_refs_1.stripStateAndPropsRefs);
+                            var childIfValue = (_c = child.bindings.when) === null || _c === void 0 ? void 0 : _c.code;
                             var elseIfString = (0, function_1.pipe)(innerBlock, (0, helpers_1.addPropertiesToJson)((_a = {}, _a[SPECIAL_PROPERTIES.V_ELSE_IF] = childIfValue, _a)), function (block) { return (0, exports.blockToVue)(block, options); });
                             return elseIfString;
                         }
@@ -152,7 +151,7 @@ var NODE_MAPPERS = {
                      *
                      */
                     var ifString = (0, function_1.pipe)(elseBlock, (0, helpers_1.addPropertiesToJson)((_b = {}, _b[SPECIAL_PROPERTIES.V_IF] = (0, helpers_1.invertBooleanExpression)(ifValue), _b)), function (block) { return (0, exports.blockToVue)(block, options); });
-                    var childIfValue = (0, function_1.pipe)((_h = firstChild.bindings.when) === null || _h === void 0 ? void 0 : _h.code, strip_state_and_props_refs_1.stripStateAndPropsRefs, helpers_1.invertBooleanExpression);
+                    var childIfValue = (0, function_1.pipe)(((_h = firstChild.bindings.when) === null || _h === void 0 ? void 0 : _h.code) || '', helpers_1.invertBooleanExpression);
                     var elseIfString = (0, function_1.pipe)(childElseBlock, (0, helpers_1.addPropertiesToJson)((_c = {}, _c[SPECIAL_PROPERTIES.V_ELSE_IF] = childIfValue, _c)), function (block) { return (0, exports.blockToVue)(block, options); });
                     var firstChildOfFirstChild = firstChild.children.filter(filter_empty_text_nodes_1.filterEmptyTextNodes)[0];
                     var elseString = firstChildOfFirstChild
@@ -181,8 +180,7 @@ var NODE_MAPPERS = {
                 return '<slot />';
             return "\n        <template #".concat(key, ">\n        ").concat((_a = json.bindings[key]) === null || _a === void 0 ? void 0 : _a.code, "\n        </template>\n      ");
         }
-        var strippedTextCode = (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(json.bindings.name.code);
-        return "<slot name=\"".concat((0, slots_1.stripSlotPrefix)(strippedTextCode).toLowerCase(), "\">").concat((_b = json.children) === null || _b === void 0 ? void 0 : _b.map(function (item) { return (0, exports.blockToVue)(item, options); }).join('\n'), "</slot>");
+        return "<slot name=\"".concat((0, slots_1.stripSlotPrefix)(json.bindings.name.code).toLowerCase(), "\">").concat((_b = json.children) === null || _b === void 0 ? void 0 : _b.map(function (item) { return (0, exports.blockToVue)(item, options); }).join('\n'), "</slot>");
     },
 };
 var stringifyBinding = function (node) {
@@ -193,15 +191,13 @@ var stringifyBinding = function (node) {
             return ''; // we handle this after
         }
         else if (key === 'class') {
-            return " :class=\"_classStringToObject(".concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(value === null || value === void 0 ? void 0 : value.code, {
-                replaceWith: '',
-            }), ")\" ");
+            return " :class=\"_classStringToObject(".concat(value === null || value === void 0 ? void 0 : value.code, ")\" ");
             // TODO: support dynamic classes as objects somehow like Vue requires
             // https://vuejs.org/v2/guide/class-and-style.html
         }
         else {
             // TODO: proper babel transform to replace. Util for this
-            var useValue = (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(value === null || value === void 0 ? void 0 : value.code);
+            var useValue = (value === null || value === void 0 ? void 0 : value.code) || '';
             if (key.startsWith('on')) {
                 var _c = value.arguments, cusArgs = _c === void 0 ? ['event'] : _c;
                 var event_1 = key.replace('on', '').toLowerCase();
@@ -254,11 +250,10 @@ var blockToVue = function (node, options, scope) {
     }
     var textCode = (_a = node.bindings._text) === null || _a === void 0 ? void 0 : _a.code;
     if (textCode) {
-        var strippedTextCode = (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(textCode);
-        if ((0, slots_1.isSlotProperty)(strippedTextCode)) {
-            return "<slot name=\"".concat((0, slots_1.stripSlotPrefix)(strippedTextCode).toLowerCase(), "\"/>");
+        if ((0, slots_1.isSlotProperty)(textCode)) {
+            return "<slot name=\"".concat((0, slots_1.stripSlotPrefix)(textCode).toLowerCase(), "\"/>");
         }
-        return "{{".concat(strippedTextCode, "}}");
+        return "{{".concat(textCode, "}}");
     }
     var str = '';
     str += "<".concat(node.name, " ");
@@ -286,10 +281,10 @@ var blockToVue = function (node, options, scope) {
     if (spreads === null || spreads === void 0 ? void 0 : spreads.length) {
         if (spreads.length > 1) {
             var spreadsString = "{...".concat(spreads.join(', ...'), "}");
-            str += " v-bind=\"".concat((0, helpers_1.encodeQuotes)((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(spreadsString)), "\"");
+            str += " v-bind=\"".concat((0, helpers_1.encodeQuotes)(spreadsString), "\"");
         }
         else {
-            str += " v-bind=\"".concat((0, helpers_1.encodeQuotes)((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(spreads.join(''))), "\"");
+            str += " v-bind=\"".concat((0, helpers_1.encodeQuotes)(spreads.join('')), "\"");
         }
     }
     if (jsx_1.selfClosingTags.has(node.name)) {

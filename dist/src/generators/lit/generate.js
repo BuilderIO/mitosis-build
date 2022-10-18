@@ -74,9 +74,6 @@ var blockToLit = function (json, options) {
     }
     for (var key in json.bindings) {
         var _e = json.bindings[key], code = _e.code, _f = _e.arguments, cusArgs = _f === void 0 ? ['event'] : _f, type = _e.type;
-        if (key === '_forName') {
-            continue;
-        }
         if (type === 'spread') {
             str += " ${spread(".concat(code, ")} ");
         }

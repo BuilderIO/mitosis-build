@@ -78,10 +78,8 @@ var hash_sum_1 = __importDefault(require("hash-sum"));
 var Array_1 = require("fp-ts/lib/Array");
 var S = __importStar(require("fp-ts/string"));
 var helpers_2 = require("./state/helpers");
-var DEFAULT_OPTIONS = {
-    state: 'signals',
-    stylesType: 'styled-components',
-};
+var merge_options_1 = require("../../helpers/merge-options");
+var process_code_1 = require("../../helpers/plugins/process-code");
 // Transform <foo.bar key="value" /> to <component :is="foo.bar" key="value" />
 function processDynamicComponents(json, options) {
     var found = false;
@@ -168,7 +166,6 @@ var preProcessBlockCode = function (_a) {
 var blockToSolid = function (_a) {
     var _b, _c;
     var json = _a.json, options = _a.options, component = _a.component;
-    preProcessBlockCode({ json: json, options: options, component: component });
     if (json.properties._text) {
         return json.properties._text;
     }
@@ -203,9 +200,6 @@ var blockToSolid = function (_a) {
     }
     for (var key in json.bindings) {
         var _d = json.bindings[key], code = _d.code, _e = _d.arguments, cusArg = _e === void 0 ? ['event'] : _e, type = _d.type;
-        if (key === '_forName') {
-            continue;
-        }
         if (!code)
             continue;
         if (type === 'spread') {
@@ -278,29 +272,26 @@ function addProviderComponents(json, options) {
         ];
     }
 }
-var preProcessComponentCode = function (json, options) {
-    var _a;
-    var processCode = (0, helpers_2.updateStateCode)({ options: options, component: json });
-    if ((_a = json.hooks.onMount) === null || _a === void 0 ? void 0 : _a.code) {
-        json.hooks.onMount.code = processCode(json.hooks.onMount.code);
-    }
-    if (json.hooks.onUpdate) {
-        for (var _i = 0, _b = json.hooks.onUpdate; _i < _b.length; _i++) {
-            var hook = _b[_i];
-            hook.code = processCode(hook.code);
-            if (hook.deps) {
-                hook.deps = processCode(hook.deps);
-            }
-        }
-    }
+var DEFAULT_OPTIONS = {
+    state: 'signals',
+    stylesType: 'styled-components',
+    plugins: [],
 };
 var componentToSolid = function (passedOptions) {
-    if (passedOptions === void 0) { passedOptions = DEFAULT_OPTIONS; }
     return function (_a) {
         var _b, _c, _d, _e, _f, _g;
         var component = _a.component;
-        var options = __assign(__assign({}, DEFAULT_OPTIONS), passedOptions);
         var json = (0, fast_clone_1.fastClone)(component);
+        var options = (0, merge_options_1.mergeOptions)(DEFAULT_OPTIONS, passedOptions);
+        options.plugins = __spreadArray(__spreadArray([], (options.plugins || []), true), [
+            (0, process_code_1.CODE_PROCESSOR_PLUGIN)(function (codeType) {
+                return (0, helpers_2.updateStateCode)({
+                    component: json,
+                    options: options,
+                    updateSetters: codeType === 'properties' ? false : true,
+                });
+            }),
+        ], false);
         if (options.plugins) {
             json = (0, plugins_1.runPreJsonPlugins)(json, options.plugins);
         }
@@ -310,7 +301,6 @@ var componentToSolid = function (passedOptions) {
         if (options.plugins) {
             json = (0, plugins_1.runPostJsonPlugins)(json, options.plugins);
         }
-        preProcessComponentCode(json, options);
         (0, strip_meta_properties_1.stripMetaProperties)(json);
         var foundDynamicComponents = processDynamicComponents(json, options);
         var css = options.stylesType === 'style-tag' &&
