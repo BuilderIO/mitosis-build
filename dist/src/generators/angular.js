@@ -53,6 +53,7 @@ var slots_1 = require("../helpers/slots");
 var get_custom_imports_1 = require("../helpers/get-custom-imports");
 var get_components_used_1 = require("../helpers/get-components-used");
 var is_upper_case_1 = require("../helpers/is-upper-case");
+var html_tags_1 = require("../constants/html_tags");
 var BUILT_IN_COMPONENTS = new Set(['Show', 'For', 'Fragment']);
 var mappers = {
     Fragment: function (json, options, blockOptions) {
@@ -92,6 +93,7 @@ var blockToAngular = function (json, options, blockOptions) {
     var outputVars = (blockOptions === null || blockOptions === void 0 ? void 0 : blockOptions.outputVars) || [];
     var childComponents = (blockOptions === null || blockOptions === void 0 ? void 0 : blockOptions.childComponents) || [];
     var domRefs = (blockOptions === null || blockOptions === void 0 ? void 0 : blockOptions.domRefs) || [];
+    var isValidHtmlTag = html_tags_1.VALID_HTML_TAGS.includes(json.name.trim());
     if (mappers[json.name]) {
         return mappers[json.name](json, options, blockOptions);
     }
@@ -191,11 +193,12 @@ var blockToAngular = function (json, options, blockOptions) {
             else if (BINDINGS_MAPPER[key]) {
                 str += " [".concat(BINDINGS_MAPPER[key], "]=\"").concat(useValue, "\"  ");
             }
-            else if (key.includes('-')) {
+            else if (isValidHtmlTag || key.includes('-')) {
+                // standard html elements need the attr to satisfy the compiler in many cases: eg: svg elements and [fill]
                 str += " [attr.".concat(key, "]=\"").concat(useValue, "\" ");
             }
             else {
-                str += " [".concat(key, "]=\"").concat(useValue, "\" ");
+                str += "[".concat(key, "]=\"").concat(useValue, "\" ");
             }
         }
         if (jsx_1.selfClosingTags.has(json.name)) {
@@ -380,7 +383,7 @@ var componentToAngular = function (userOptions) {
                     outputVars: outputVars,
                 }), "\n              "), "\n          }\n          "), !hasOnMount
             ? ''
-            : "ngOnInit() {\n              \n              ".concat(!((_k = json.hooks) === null || _k === void 0 ? void 0 : _k.onMount)
+            : "ngOnInit() {\n\n              ".concat(!((_k = json.hooks) === null || _k === void 0 ? void 0 : _k.onMount)
                 ? ''
                 : "\n                ".concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)((_l = json.hooks.onMount) === null || _l === void 0 ? void 0 : _l.code, {
                     replaceWith: 'this.',
