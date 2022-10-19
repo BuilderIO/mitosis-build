@@ -16,89 +16,32 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.componentToSvelte = exports.blockToSvelte = void 0;
+exports.componentToSvelte = void 0;
 var dedent_1 = __importDefault(require("dedent"));
 var standalone_1 = require("prettier/standalone");
 var traverse_1 = __importDefault(require("traverse"));
-var collect_css_1 = require("../helpers/styles/collect-css");
-var helpers_1 = require("../helpers/styles/helpers");
-var fast_clone_1 = require("../helpers/fast-clone");
-var get_props_1 = require("../helpers/get-props");
-var get_refs_1 = require("../helpers/get-refs");
-var get_state_object_string_1 = require("../helpers/get-state-object-string");
-var is_mitosis_node_1 = require("../helpers/is-mitosis-node");
-var render_imports_1 = require("../helpers/render-imports");
-var strip_state_and_props_refs_1 = require("../helpers/strip-state-and-props-refs");
-var jsx_1 = require("../parsers/jsx");
-var plugins_1 = require("../modules/plugins");
-var is_children_1 = __importDefault(require("../helpers/is-children"));
-var strip_meta_properties_1 = require("../helpers/strip-meta-properties");
-var remove_surrounding_block_1 = require("../helpers/remove-surrounding-block");
-var getters_to_functions_1 = require("../helpers/getters-to-functions");
-var babel_transform_1 = require("../helpers/babel-transform");
+var collect_css_1 = require("../../helpers/styles/collect-css");
+var helpers_1 = require("../../helpers/styles/helpers");
+var fast_clone_1 = require("../../helpers/fast-clone");
+var get_props_1 = require("../../helpers/get-props");
+var get_refs_1 = require("../../helpers/get-refs");
+var get_state_object_string_1 = require("../../helpers/get-state-object-string");
+var is_mitosis_node_1 = require("../../helpers/is-mitosis-node");
+var render_imports_1 = require("../../helpers/render-imports");
+var strip_state_and_props_refs_1 = require("../../helpers/strip-state-and-props-refs");
+var plugins_1 = require("../../modules/plugins");
+var strip_meta_properties_1 = require("../../helpers/strip-meta-properties");
+var getters_to_functions_1 = require("../../helpers/getters-to-functions");
+var babel_transform_1 = require("../../helpers/babel-transform");
 var function_1 = require("fp-ts/lib/function");
-var context_1 = require("./helpers/context");
-var slots_1 = require("../helpers/slots");
-var html_tags_1 = require("../constants/html_tags");
-var is_upper_case_1 = require("../helpers/is-upper-case");
+var context_1 = require("../helpers/context");
+var slots_1 = require("../../helpers/slots");
 var json5_1 = __importDefault(require("json5"));
-var functions_1 = require("./helpers/functions");
-var for_1 = require("../helpers/nodes/for");
-var merge_options_1 = require("../helpers/merge-options");
-var process_code_1 = require("../helpers/plugins/process-code");
-var mappers = {
-    Fragment: function (_a) {
-        var _b;
-        var json = _a.json, options = _a.options, parentComponent = _a.parentComponent;
-        if ((_b = json.bindings.innerHTML) === null || _b === void 0 ? void 0 : _b.code) {
-            return BINDINGS_MAPPER.innerHTML(json, options);
-        }
-        else if (json.children.length > 0) {
-            return "".concat(json.children
-                .map(function (item) { return (0, exports.blockToSvelte)({ json: item, options: options, parentComponent: parentComponent }); })
-                .join('\n'));
-        }
-        else {
-            return '';
-        }
-    },
-    For: function (_a) {
-        var _b, _c;
-        var json = _a.json, options = _a.options, parentComponent = _a.parentComponent;
-        var firstChild = json.children[0];
-        var keyValue = firstChild.properties.key || ((_b = firstChild.bindings.key) === null || _b === void 0 ? void 0 : _b.code);
-        if (keyValue) {
-            // we remove extraneous prop which Svelte does not use
-            delete firstChild.properties.key;
-            delete firstChild.bindings.key;
-        }
-        var args = (0, for_1.getForArguments)(json, { excludeCollectionName: true }).join(', ');
-        return "\n{#each ".concat(stripStateAndProps((_c = json.bindings.each) === null || _c === void 0 ? void 0 : _c.code, options), " as ").concat(args, " ").concat(keyValue ? "(".concat(keyValue, ")") : '', "}\n").concat(json.children.map(function (item) { return (0, exports.blockToSvelte)({ json: item, options: options, parentComponent: parentComponent }); }).join('\n'), "\n{/each}\n");
-    },
-    Show: function (_a) {
-        var _b;
-        var json = _a.json, options = _a.options, parentComponent = _a.parentComponent;
-        return "\n{#if ".concat(stripStateAndProps((_b = json.bindings.when) === null || _b === void 0 ? void 0 : _b.code, options), " }\n").concat(json.children.map(function (item) { return (0, exports.blockToSvelte)({ json: item, options: options, parentComponent: parentComponent }); }).join('\n'), "\n\n  ").concat(json.meta.else
-            ? "\n  {:else}\n  ".concat((0, exports.blockToSvelte)({
-                json: json.meta.else,
-                options: options,
-                parentComponent: parentComponent,
-            }), "\n  ")
-            : '', "\n{/if}");
-    },
-    Slot: function (_a) {
-        var _b, _c;
-        var json = _a.json, options = _a.options, parentComponent = _a.parentComponent;
-        if (!json.bindings.name) {
-            var key = Object.keys(json.bindings).find(Boolean);
-            if (!key)
-                return '<slot />';
-            return "\n        <span #".concat(key, ">\n        ").concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)((_b = json.bindings[key]) === null || _b === void 0 ? void 0 : _b.code), "\n        </span>\n      ");
-        }
-        var strippedTextCode = (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(json.bindings.name.code);
-        return "<slot name=\"".concat((0, slots_1.stripSlotPrefix)(strippedTextCode).toLowerCase(), "\">").concat((_c = json.children) === null || _c === void 0 ? void 0 : _c.map(function (item) { return (0, exports.blockToSvelte)({ json: item, options: options, parentComponent: parentComponent }); }).join('\n'), "</slot>");
-    },
-};
+var functions_1 = require("../helpers/functions");
+var merge_options_1 = require("../../helpers/merge-options");
+var process_code_1 = require("../../helpers/plugins/process-code");
+var helpers_2 = require("./helpers");
+var blocks_1 = require("./blocks");
 var getContextCode = function (json) {
     var contextGetters = json.context.get;
     return Object.keys(contextGetters)
@@ -118,132 +61,6 @@ var setContextCode = function (json) {
     })
         .join('\n');
 };
-var BINDINGS_MAPPER = {
-    innerHTML: function (json, options) { var _a; return "{@html ".concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)((_a = json.bindings.innerHTML) === null || _a === void 0 ? void 0 : _a.code), "}"); },
-};
-var SVELTE_SPECIAL_TAGS = {
-    COMPONENT: 'svelte:component',
-    ELEMENT: 'svelte:element',
-    SELF: 'svelte:self',
-};
-var getTagName = function (_a) {
-    var json = _a.json, parentComponent = _a.parentComponent;
-    if (parentComponent && json.name === parentComponent.name) {
-        return SVELTE_SPECIAL_TAGS.SELF;
-    }
-    var isValidHtmlTag = html_tags_1.VALID_HTML_TAGS.includes(json.name);
-    var isSpecialSvelteTag = json.name.startsWith('svelte:');
-    // Check if any import matches `json.name`
-    var hasMatchingImport = parentComponent.imports.some(function (_a) {
-        var imports = _a.imports;
-        return Object.keys(imports).some(function (name) { return name === json.name; });
-    });
-    // TO-DO: no way to decide between <svelte:component> and <svelte:element>...need to do that through metadata
-    // overrides for now
-    if (!isValidHtmlTag && !isSpecialSvelteTag && !hasMatchingImport) {
-        json.bindings.this = { code: json.name };
-        return SVELTE_SPECIAL_TAGS.COMPONENT;
-    }
-    return json.name;
-};
-var stripStateAndProps = function (code, options) {
-    return (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(code, {
-        includeState: options.stateType === 'variables',
-        replaceWith: function (name) { return (name === 'children' ? '$$slots.default' : name); },
-    });
-};
-var stringifyBinding = function (options) {
-    return function (_a) {
-        var key = _a[0], binding = _a[1];
-        if (key === 'innerHTML' || !binding) {
-            return '';
-        }
-        var code = binding.code, _b = binding.arguments, cusArgs = _b === void 0 ? ['event'] : _b, type = binding.type;
-        var useValue = stripStateAndProps(code, options);
-        if (type === 'spread') {
-            var spreadValue = key === 'props' ? '$$props' : useValue;
-            return " {...".concat(spreadValue, "} ");
-        }
-        else if (key.startsWith('on')) {
-            var event_1 = key.replace('on', '').toLowerCase();
-            // TODO: handle quotes in event handler values
-            var valueWithoutBlock = (0, remove_surrounding_block_1.removeSurroundingBlock)(useValue);
-            if (valueWithoutBlock === key) {
-                return " on:".concat(event_1, "={").concat(valueWithoutBlock, "} ");
-            }
-            else {
-                return " on:".concat(event_1, "=\"{").concat(cusArgs.join(','), " => {").concat(valueWithoutBlock, "}}\" ");
-            }
-        }
-        else if (key === 'ref') {
-            return " bind:this={".concat(useValue, "} ");
-        }
-        else {
-            return " ".concat(key, "={").concat(useValue, "} ");
-        }
-    };
-};
-var blockToSvelte = function (_a) {
-    var _b, _c, _d, _e;
-    var json = _a.json, options = _a.options, parentComponent = _a.parentComponent;
-    if (mappers[json.name]) {
-        return mappers[json.name]({
-            json: json,
-            options: options,
-            parentComponent: parentComponent,
-        });
-    }
-    var tagName = getTagName({ json: json, parentComponent: parentComponent });
-    if ((0, is_children_1.default)(json)) {
-        return "<slot></slot>";
-    }
-    if (json.properties._text) {
-        return json.properties._text;
-    }
-    var textCode = (_b = json.bindings._text) === null || _b === void 0 ? void 0 : _b.code;
-    if (textCode) {
-        var strippedTextCode = stripStateAndProps(textCode, options);
-        if ((0, slots_1.isSlotProperty)(strippedTextCode)) {
-            return "<slot name=\"".concat((0, slots_1.stripSlotPrefix)(strippedTextCode).toLowerCase(), "\"/>");
-        }
-        return "{".concat(strippedTextCode, "}");
-    }
-    var str = '';
-    str += "<".concat(tagName, " ");
-    var isComponent = Boolean(tagName[0] && (0, is_upper_case_1.isUpperCase)(tagName[0]));
-    if ((((_c = json.bindings.style) === null || _c === void 0 ? void 0 : _c.code) || json.properties.style) && !isComponent) {
-        var useValue = stripStateAndProps(((_d = json.bindings.style) === null || _d === void 0 ? void 0 : _d.code) || json.properties.style, options);
-        str += "use:mitosis_styling={".concat(useValue, "}");
-        delete json.bindings.style;
-        delete json.properties.style;
-    }
-    for (var key in json.properties) {
-        var value = json.properties[key];
-        str += " ".concat(key, "=\"").concat(value, "\" ");
-    }
-    var stringifiedBindings = Object.entries(json.bindings).map(stringifyBinding(options)).join('');
-    str += stringifiedBindings;
-    // if we have innerHTML, it doesn't matter whether we have closing tags or not, or children or not.
-    // we use the innerHTML content as children and don't render the self-closing tag.
-    if ((_e = json.bindings.innerHTML) === null || _e === void 0 ? void 0 : _e.code) {
-        str += '>';
-        str += BINDINGS_MAPPER.innerHTML(json, options);
-        str += "</".concat(tagName, ">");
-        return str;
-    }
-    if (jsx_1.selfClosingTags.has(tagName)) {
-        return str + ' />';
-    }
-    str += '>';
-    if (json.children) {
-        str += json.children
-            .map(function (item) { return (0, exports.blockToSvelte)({ json: item, options: options, parentComponent: parentComponent }); })
-            .join('');
-    }
-    str += "</".concat(tagName, ">");
-    return str;
-};
-exports.blockToSvelte = blockToSvelte;
 /**
  * Replace
  *    <input value={state.name} onChange={event => state.name = event.target.value}
@@ -287,7 +104,7 @@ var DEFAULT_OPTIONS = {
     plugins: [functions_1.FUNCTION_HACK_PLUGIN],
 };
 var transformHookCode = function (options) { return function (hookCode) {
-    return (0, function_1.pipe)(stripStateAndProps(hookCode, options), babel_transform_1.babelTransformCode);
+    return (0, function_1.pipe)((0, helpers_2.stripStateAndProps)(hookCode, options), babel_transform_1.babelTransformCode);
 }; };
 var componentToSvelte = function (userProvidedOptions) {
     return function (_a) {
@@ -325,7 +142,7 @@ var componentToSvelte = function (userProvidedOptions) {
             getters: false,
             format: options.stateType === 'proxies' ? 'object' : 'variables',
             keyPrefix: options.stateType === 'variables' ? 'let ' : '',
-            valueMapper: function (code) { return stripStateAndProps(code, options); },
+            valueMapper: function (code) { return (0, helpers_2.stripStateAndProps)(code, options); },
         }), babel_transform_1.babelTransformCode);
         var getterString = (0, function_1.pipe)((0, get_state_object_string_1.getStateObjectStringFromComponent)(json, {
             data: false,
@@ -334,7 +151,7 @@ var componentToSvelte = function (userProvidedOptions) {
             format: 'variables',
             keyPrefix: '$: ',
             valueMapper: function (code) {
-                return (0, function_1.pipe)(code.replace(/^get ([a-zA-Z_\$0-9]+)/, '$1 = ').replace(/\)/, ') => '), function (str) { return stripStateAndProps(str, options); }, stripThisRefs);
+                return (0, function_1.pipe)(code.replace(/^get ([a-zA-Z_\$0-9]+)/, '$1 = ').replace(/\)/, ') => '), function (str) { return (0, helpers_2.stripStateAndProps)(str, options); }, stripThisRefs);
             },
         }), babel_transform_1.babelTransformCode);
         var functionsString = (0, function_1.pipe)((0, get_state_object_string_1.getStateObjectStringFromComponent)(json, {
@@ -342,7 +159,7 @@ var componentToSvelte = function (userProvidedOptions) {
             getters: false,
             functions: true,
             format: 'variables',
-            valueMapper: function (code) { return (0, function_1.pipe)(stripStateAndProps(code, options), stripThisRefs); },
+            valueMapper: function (code) { return (0, function_1.pipe)((0, helpers_2.stripStateAndProps)(code, options), stripThisRefs); },
         }), babel_transform_1.babelTransformCode);
         var hasData = dataString.length > 4;
         var str = '';
@@ -395,10 +212,10 @@ var componentToSvelte = function (userProvidedOptions) {
                 return "afterUpdate(() => { ".concat(code, " });");
             }
             var fnName = "onUpdateFn_".concat(index);
-            return "\n              function ".concat(fnName, "() {\n                ").concat(code, "\n              }\n              $: ").concat(fnName, "(...").concat(stripStateAndProps(deps, options), ")\n            ");
+            return "\n              function ".concat(fnName, "() {\n                ").concat(code, "\n              }\n              $: ").concat(fnName, "(...").concat((0, helpers_2.stripStateAndProps)(deps, options), ")\n            ");
         }).join(';')) || '', !((_m = json.hooks.onUnMount) === null || _m === void 0 ? void 0 : _m.code) ? '' : "onDestroy(() => { ".concat(json.hooks.onUnMount.code, " });"), json.children
             .map(function (item) {
-            return (0, exports.blockToSvelte)({
+            return (0, blocks_1.blockToSvelte)({
                 json: item,
                 options: options,
                 parentComponent: json,

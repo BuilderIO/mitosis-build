@@ -8,7 +8,7 @@ export declare const targets: {
     readonly react: import(".").TranspilerGenerator<import("./generators/react").ToReactOptions, string>;
     readonly reactNative: import(".").TranspilerGenerator<import("./generators/react-native").ToReactNativeOptions, string>;
     readonly solid: import(".").TranspilerGenerator<Partial<import("./generators/solid/types").ToSolidOptions>, string>;
-    readonly svelte: import(".").TranspilerGenerator<import("./generators/svelte").ToSvelteOptions, string>;
+    readonly svelte: import(".").TranspilerGenerator<import("./generators/svelte/types").ToSvelteOptions, string>;
     readonly swift: import(".").TranspilerGenerator<import(".").BaseTranspilerOptions, string>;
     readonly template: import(".").TranspilerGenerator<import("./generators/template").ToTemplateOptions, string>;
     readonly webcomponent: import(".").TranspilerGenerator<import("./generators/html").ToHtmlOptions, string>;
