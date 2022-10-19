@@ -126,9 +126,6 @@ var componentToSvelte = function (userProvidedOptions) {
         // Make a copy we can safely mutate, similar to babel's toolchain
         var json = (0, fast_clone_1.fastClone)(component);
         json = (0, plugins_1.runPreJsonPlugins)(json, options.plugins);
-        if (json.name === 'RenderBlock') {
-            console.log(json.hooks.preComponent);
-        }
         var refs = Array.from((0, get_refs_1.getRefs)(json));
         useBindValue(json, options);
         (0, getters_to_functions_1.gettersToFunctions)(json);
