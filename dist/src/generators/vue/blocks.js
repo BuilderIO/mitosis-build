@@ -269,12 +269,7 @@ var blockToVue = function (node, options, scope) {
             str += " ".concat(key, "=\"").concat((0, helpers_1.encodeQuotes)(value), "\" ");
         }
     }
-    var stringifiedBindings = Object.entries(node.bindings)
-        .map(function (_a) {
-        var k = _a[0], v = _a[1];
-        return stringifyBinding(node)([k, v]);
-    })
-        .join('');
+    var stringifiedBindings = Object.entries(node.bindings).map(stringifyBinding(node)).join('');
     str += stringifiedBindings;
     // spreads
     var spreads = (0, lodash_1.filter)(node.bindings, function (binding) { return (binding === null || binding === void 0 ? void 0 : binding.type) === 'spread'; }).map(function (value) { return value === null || value === void 0 ? void 0 : value.code; });

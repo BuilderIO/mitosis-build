@@ -140,12 +140,12 @@ var componentToVue = function (userOptions) {
         (0, process_http_requests_1.processHttpRequests)(component);
         processDynamicComponents(component, options);
         processForKeys(component, options);
-        // need to run this before we process the component's code
-        var elementProps = Array.from((0, get_props_1.getProps)(component)).filter(function (prop) { return !(0, slots_1.isSlotProperty)(prop); });
         component = (0, plugins_1.runPreJsonPlugins)(component, options.plugins);
         if (options.api === 'options') {
             (0, map_refs_1.mapRefs)(component, function (refName) { return "this.$refs.".concat(refName); });
         }
+        // need to run this before we process the component's code
+        var elementProps = Array.from((0, get_props_1.getProps)(component)).filter(function (prop) { return !(0, slots_1.isSlotProperty)(prop); });
         component = (0, plugins_1.runPostJsonPlugins)(component, options.plugins);
         var css = (0, collect_css_1.collectCss)(component, {
             prefix: (_c = (_b = options.cssNamespace) === null || _b === void 0 ? void 0 : _b.call(options)) !== null && _c !== void 0 ? _c : undefined,

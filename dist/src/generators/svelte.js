@@ -3,28 +3,6 @@ var __makeTemplateObject = (this && this.__makeTemplateObject) || function (cook
     if (Object.defineProperty) { Object.defineProperty(cooked, "raw", { value: raw }); } else { cooked.raw = raw; }
     return cooked;
 };
-var __assign = (this && this.__assign) || function () {
-    __assign = Object.assign || function(t) {
-        for (var s, i = 1, n = arguments.length; i < n; i++) {
-            s = arguments[i];
-            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-                t[p] = s[p];
-        }
-        return t;
-    };
-    return __assign.apply(this, arguments);
-};
-var __rest = (this && this.__rest) || function (s, e) {
-    var t = {};
-    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
-        t[p] = s[p];
-    if (s != null && typeof Object.getOwnPropertySymbols === "function")
-        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
-            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
-                t[p[i]] = s[p[i]];
-        }
-    return t;
-};
 var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
     if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
         if (ar || !(i in from)) {
@@ -66,6 +44,8 @@ var is_upper_case_1 = require("../helpers/is-upper-case");
 var json5_1 = __importDefault(require("json5"));
 var functions_1 = require("./helpers/functions");
 var for_1 = require("../helpers/nodes/for");
+var merge_options_1 = require("../helpers/merge-options");
+var process_code_1 = require("../helpers/plugins/process-code");
 var mappers = {
     Fragment: function (_a) {
         var _b;
@@ -172,6 +152,37 @@ var stripStateAndProps = function (code, options) {
         replaceWith: function (name) { return (name === 'children' ? '$$slots.default' : name); },
     });
 };
+var stringifyBinding = function (options) {
+    return function (_a) {
+        var key = _a[0], binding = _a[1];
+        if (key === 'innerHTML' || !binding) {
+            return '';
+        }
+        var code = binding.code, _b = binding.arguments, cusArgs = _b === void 0 ? ['event'] : _b, type = binding.type;
+        var useValue = stripStateAndProps(code, options);
+        if (type === 'spread') {
+            var spreadValue = key === 'props' ? '$$props' : useValue;
+            return " {...".concat(spreadValue, "} ");
+        }
+        else if (key.startsWith('on')) {
+            var event_1 = key.replace('on', '').toLowerCase();
+            // TODO: handle quotes in event handler values
+            var valueWithoutBlock = (0, remove_surrounding_block_1.removeSurroundingBlock)(useValue);
+            if (valueWithoutBlock === key) {
+                return " on:".concat(event_1, "={").concat(valueWithoutBlock, "} ");
+            }
+            else {
+                return " on:".concat(event_1, "=\"{").concat(cusArgs.join(','), " => {").concat(valueWithoutBlock, "}}\" ");
+            }
+        }
+        else if (key === 'ref') {
+            return " bind:this={".concat(useValue, "} ");
+        }
+        else {
+            return " ".concat(key, "={").concat(useValue, "} ");
+        }
+    };
+};
 var blockToSvelte = function (_a) {
     var _b, _c, _d, _e;
     var json = _a.json, options = _a.options, parentComponent = _a.parentComponent;
@@ -210,38 +221,8 @@ var blockToSvelte = function (_a) {
         var value = json.properties[key];
         str += " ".concat(key, "=\"").concat(value, "\" ");
     }
-    for (var key in json.bindings) {
-        if (key === 'innerHTML') {
-            continue;
-        }
-        var _f = json.bindings[key], value = _f.code, _g = _f.arguments, cusArgs = _g === void 0 ? ['event'] : _g, type = _f.type;
-        // TODO: proper babel transform to replace. Util for this
-        var useValue = stripStateAndProps(value, options);
-        if (type === 'spread') {
-            str += ' {...';
-            if (key === 'props') {
-                str += "$$";
-            }
-            str += "".concat(useValue, "}");
-        }
-        else if (key.startsWith('on')) {
-            var event_1 = key.replace('on', '').toLowerCase();
-            // TODO: handle quotes in event handler values
-            var valueWithoutBlock = (0, remove_surrounding_block_1.removeSurroundingBlock)(useValue);
-            if (valueWithoutBlock === key) {
-                str += " on:".concat(event_1, "={").concat(valueWithoutBlock, "} ");
-            }
-            else {
-                str += " on:".concat(event_1, "=\"{").concat(cusArgs.join(','), " => {").concat(valueWithoutBlock, "}}\" ");
-            }
-        }
-        else if (key === 'ref') {
-            str += " bind:this={".concat(useValue, "} ");
-        }
-        else {
-            str += " ".concat(key, "={").concat(useValue, "} ");
-        }
-    }
+    var stringifiedBindings = Object.entries(json.bindings).map(stringifyBinding(options)).join('');
+    str += stringifiedBindings;
     // if we have innerHTML, it doesn't matter whether we have closing tags or not, or children or not.
     // we use the innerHTML content as children and don't render the self-closing tag.
     if ((_e = json.bindings.innerHTML) === null || _e === void 0 ? void 0 : _e.code) {
@@ -300,24 +281,42 @@ var useBindValue = function (json, options) {
 var stripThisRefs = function (str) {
     return str.replace(/this\.([a-zA-Z_\$0-9]+)/g, '$1');
 };
-var componentToSvelte = function (_a) {
-    if (_a === void 0) { _a = {}; }
-    var _b = _a.plugins, plugins = _b === void 0 ? [] : _b, userProvidedOptions = __rest(_a, ["plugins"]);
+var DEFAULT_OPTIONS = {
+    stateType: 'variables',
+    prettier: true,
+    plugins: [functions_1.FUNCTION_HACK_PLUGIN],
+};
+var transformHookCode = function (options) { return function (hookCode) {
+    return (0, function_1.pipe)(stripStateAndProps(hookCode, options), babel_transform_1.babelTransformCode);
+}; };
+var componentToSvelte = function (userProvidedOptions) {
     return function (_a) {
         var _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m;
         var component = _a.component;
-        var options = __assign({ stateType: 'variables', prettier: true, plugins: __spreadArray([functions_1.FUNCTION_HACK_PLUGIN], plugins, true) }, userProvidedOptions);
+        var options = (0, merge_options_1.mergeOptions)(DEFAULT_OPTIONS, userProvidedOptions);
+        options.plugins = __spreadArray(__spreadArray([], (options.plugins || []), true), [
+            (0, process_code_1.CODE_PROCESSOR_PLUGIN)(function (codeType) {
+                switch (codeType) {
+                    case 'hooks':
+                        return transformHookCode(options);
+                    case 'bindings':
+                    case 'hooks-deps':
+                    case 'properties':
+                        return function (c) { return c; };
+                }
+            }),
+        ], false);
         // Make a copy we can safely mutate, similar to babel's toolchain
         var json = (0, fast_clone_1.fastClone)(component);
-        if (options.plugins) {
-            json = (0, plugins_1.runPreJsonPlugins)(json, options.plugins);
+        json = (0, plugins_1.runPreJsonPlugins)(json, options.plugins);
+        if (json.name === 'RenderBlock') {
+            console.log(json.hooks.preComponent);
         }
         var refs = Array.from((0, get_refs_1.getRefs)(json));
         useBindValue(json, options);
         (0, getters_to_functions_1.gettersToFunctions)(json);
-        if (options.plugins) {
-            json = (0, plugins_1.runPostJsonPlugins)(json, options.plugins);
-        }
+        var props = Array.from((0, get_props_1.getProps)(json)).filter(function (prop) { return !(0, slots_1.isSlotProperty)(prop); });
+        json = (0, plugins_1.runPostJsonPlugins)(json, options.plugins);
         var css = (0, collect_css_1.collectCss)(json);
         (0, strip_meta_properties_1.stripMetaProperties)(json);
         var dataString = (0, function_1.pipe)((0, get_state_object_string_1.getStateObjectStringFromComponent)(json, {
@@ -346,10 +345,6 @@ var componentToSvelte = function (_a) {
             valueMapper: function (code) { return (0, function_1.pipe)(stripStateAndProps(code, options), stripThisRefs); },
         }), babel_transform_1.babelTransformCode);
         var hasData = dataString.length > 4;
-        var props = Array.from((0, get_props_1.getProps)(json)).filter(function (prop) { return !(0, slots_1.isSlotProperty)(prop); });
-        var transformHookCode = function (hookCode) {
-            return (0, function_1.pipe)(stripStateAndProps(hookCode, options), babel_transform_1.babelTransformCode);
-        };
         var str = '';
         var tsLangAttribute = options.typescript ? "lang='ts'" : '';
         if (options.typescript && ((_b = json.types) === null || _b === void 0 ? void 0 : _b.length)) {
@@ -369,9 +364,9 @@ var componentToSvelte = function (_a) {
         if ((0, context_1.hasContext)(component)) {
             svelteImports.push('getContext', 'setContext');
         }
-        str += (0, dedent_1.default)(templateObject_2 || (templateObject_2 = __makeTemplateObject(["\n      <script ", ">\n      ", "\n      ", "\n\n      ", "\n      ", "\n      ", "\n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n    </script>\n\n    ", "\n\n    ", "\n  "], ["\n      <script ", ">\n      ", "\n      ", "\n\n      ", "\n      ", "\n      "
+        str += (0, dedent_1.default)(templateObject_2 || (templateObject_2 = __makeTemplateObject(["\n      <script ", ">\n      ", "\n      ", "\n\n      ", "\n      ", "\n      ", "\n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n      ", "\n      \n      ", "\n\n      ", "\n\n      ", "\n    </script>\n\n    ", "\n\n    ", "\n  "], ["\n      <script ", ">\n      ", "\n      ", "\n\n      ", "\n      ", "\n      "
             // https://svelte.dev/repl/bd9b56891f04414982517bbd10c52c82?version=3.31.0
-            , "\n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n    </script>\n\n    ", "\n\n    ", "\n  "])), tsLangAttribute, !svelteImports.length ? '' : "import { ".concat(svelteImports.sort().join(', '), " } from 'svelte'"), (0, render_imports_1.renderPreComponent)({ component: json, target: 'svelte' }), !hasData || options.stateType === 'variables' ? '' : "import onChange from 'on-change'", props
+            , "\n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n      ", "\n      \n      ", "\n\n      ", "\n\n      ", "\n    </script>\n\n    ", "\n\n    ", "\n  "])), tsLangAttribute, !svelteImports.length ? '' : "import { ".concat(svelteImports.sort().join(', '), " } from 'svelte'"), (0, render_imports_1.renderPreComponent)({ component: json, target: 'svelte' }), !hasData || options.stateType === 'variables' ? '' : "import onChange from 'on-change'", props
             .map(function (name) {
             if (name === 'children') {
                 return '';
@@ -394,25 +389,14 @@ var componentToSvelte = function (_a) {
             ? dataString.length < 4
                 ? ''
                 : "let state = onChange(".concat(dataString, ", () => state = state)")
-            : dataString, (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)((_j = (_h = json.hooks.onInit) === null || _h === void 0 ? void 0 : _h.code) !== null && _j !== void 0 ? _j : ''), !((_k = json.hooks.onMount) === null || _k === void 0 ? void 0 : _k.code)
-            ? ''
-            : "onMount(() => { ".concat(transformHookCode(json.hooks.onMount.code), " });"), !((_l = json.hooks.onUpdate) === null || _l === void 0 ? void 0 : _l.length)
-            ? ''
-            : json.hooks.onUpdate
-                .map(function (_a, index) {
-                var code = _a.code, deps = _a.deps;
-                var hookCode = transformHookCode(code);
-                if (deps) {
-                    var fnName = "onUpdateFn_".concat(index);
-                    return "\n                    function ".concat(fnName, "() {\n                      ").concat(hookCode, "\n                    }\n                    $: ").concat(fnName, "(...").concat(stripStateAndProps(deps, options), ")\n                    ");
-                }
-                else {
-                    return "afterUpdate(() => { ".concat(hookCode, " })");
-                }
-            })
-                .join(';'), !((_m = json.hooks.onUnMount) === null || _m === void 0 ? void 0 : _m.code)
-            ? ''
-            : "onDestroy(() => { ".concat(transformHookCode(json.hooks.onUnMount.code), " });"), json.children
+            : dataString, (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)((_j = (_h = json.hooks.onInit) === null || _h === void 0 ? void 0 : _h.code) !== null && _j !== void 0 ? _j : ''), !((_k = json.hooks.onMount) === null || _k === void 0 ? void 0 : _k.code) ? '' : "onMount(() => { ".concat(json.hooks.onMount.code, " });"), ((_l = json.hooks.onUpdate) === null || _l === void 0 ? void 0 : _l.map(function (_a, index) {
+            var code = _a.code, deps = _a.deps;
+            if (!deps) {
+                return "afterUpdate(() => { ".concat(code, " });");
+            }
+            var fnName = "onUpdateFn_".concat(index);
+            return "\n              function ".concat(fnName, "() {\n                ").concat(code, "\n              }\n              $: ").concat(fnName, "(...").concat(stripStateAndProps(deps, options), ")\n            ");
+        }).join(';')) || '', !((_m = json.hooks.onUnMount) === null || _m === void 0 ? void 0 : _m.code) ? '' : "onDestroy(() => { ".concat(json.hooks.onUnMount.code, " });"), json.children
             .map(function (item) {
             return (0, exports.blockToSvelte)({
                 json: item,
@@ -423,9 +407,7 @@ var componentToSvelte = function (_a) {
             .join('\n'), !css.trim().length
             ? ''
             : "<style>\n      ".concat(css, "\n    </style>"));
-        if (options.plugins) {
-            str = (0, plugins_1.runPreCodePlugins)(str, options.plugins);
-        }
+        str = (0, plugins_1.runPreCodePlugins)(str, options.plugins);
         if (options.prettier !== false) {
             try {
                 str = (0, standalone_1.format)(str, {
@@ -445,9 +427,7 @@ var componentToSvelte = function (_a) {
                 console.warn({ string: str }, err);
             }
         }
-        if (options.plugins) {
-            str = (0, plugins_1.runPostCodePlugins)(str, options.plugins);
-        }
+        str = (0, plugins_1.runPostCodePlugins)(str, options.plugins);
         return str;
     };
 };

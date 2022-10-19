@@ -29,7 +29,7 @@ var preProcessBlockCode = function (_a) {
 var CODE_PROCESSOR_PLUGIN = function (codeProcessor) {
     return function () { return ({
         json: {
-            pre: function (json) {
+            post: function (json) {
                 var processCode = codeProcessor('hooks');
                 /**
                  * process code in hooks
