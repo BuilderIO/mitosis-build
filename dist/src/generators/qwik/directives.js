@@ -70,6 +70,10 @@ function Image(props) {
             loading: isPixel ? 'eager' : 'lazy',
             srcset: undefined,
         };
+        var qwikBugWorkaround = function (imgProps) {
+            return Object.keys(imgProps).forEach(function (k) { return imgProps[k] === undefined && delete imgProps[k]; });
+        };
+        qwikBugWorkaround(imgProps);
         if (isBuilderIoImage) {
             var webpImage_1 = updateQueryParam(image, 'format', 'webp');
             var srcset = ['100', '200', '400', '800', '1200', '1600', '2000']
