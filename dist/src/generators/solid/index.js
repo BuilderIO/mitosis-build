@@ -285,11 +285,19 @@ var componentToSolid = function (passedOptions) {
         var options = (0, merge_options_1.mergeOptions)(DEFAULT_OPTIONS, passedOptions);
         options.plugins = __spreadArray(__spreadArray([], (options.plugins || []), true), [
             (0, process_code_1.CODE_PROCESSOR_PLUGIN)(function (codeType) {
-                return (0, helpers_2.updateStateCode)({
-                    component: json,
-                    options: options,
-                    updateSetters: codeType === 'properties' ? false : true,
-                });
+                switch (codeType) {
+                    case 'state':
+                        return function (c) { return c; };
+                    case 'bindings':
+                    case 'hooks':
+                    case 'hooks-deps':
+                    case 'properties':
+                        return (0, helpers_2.updateStateCode)({
+                            component: json,
+                            options: options,
+                            updateSetters: codeType === 'properties' ? false : true,
+                        });
+                }
             }),
         ], false);
         if (options.plugins) {

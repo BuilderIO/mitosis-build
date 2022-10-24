@@ -21,6 +21,7 @@ var basicContext = getRawFile('./data/basic-context.raw');
 var basicOutputsMeta = getRawFile('./data/basic-outputs-meta.raw');
 var basicOutputs = getRawFile('./data/basic-outputs.raw');
 var subComponent = getRawFile('./data/sub-component.lite.jsx');
+var componentWithContext = require('./data/context/component-with-context.lite');
 var basic = getRawFile('./data/basic.raw');
 var basicMitosis = getRawFile('./data/basic-custom-mitosis-package.raw');
 var basicChildComponent = getRawFile('./data/basic-child-component.raw');
@@ -180,6 +181,9 @@ var ON_UPDATE_RETURN = {
 var IMPORT_TEST = {
     importRaw: getRawFile('./data/import.raw'),
 };
+var CONTEXT_TEST = {
+    componentWithContext: componentWithContext,
+};
 var JSX_TESTS = [
     BASIC_TESTS,
     SLOTS_TESTS,
@@ -190,9 +194,11 @@ var JSX_TESTS = [
     ADVANCED_REF,
     ON_UPDATE_RETURN,
     FOR_SHOW_TESTS,
+    CONTEXT_TEST,
 ];
 var TESTS_FOR_TARGET = {
     react: [
+        CONTEXT_TEST,
         BASIC_TESTS,
         SLOTS_TESTS,
         SHOW_TESTS,
@@ -204,6 +210,7 @@ var TESTS_FOR_TARGET = {
         // FOR_SHOW_TESTS,
     ],
     rsc: [
+        CONTEXT_TEST,
         BASIC_TESTS,
         SLOTS_TESTS,
         SHOW_TESTS,
@@ -215,6 +222,7 @@ var TESTS_FOR_TARGET = {
         // FOR_SHOW_TESTS,
     ],
     angular: [
+        CONTEXT_TEST,
         BASIC_TESTS,
         SLOTS_TESTS,
         SHOW_TESTS,
@@ -227,6 +235,7 @@ var TESTS_FOR_TARGET = {
         IMPORT_TEST,
     ],
     lit: [
+        CONTEXT_TEST,
         BASIC_TESTS,
         SLOTS_TESTS,
         SHOW_TESTS,
@@ -238,6 +247,7 @@ var TESTS_FOR_TARGET = {
         ON_UPDATE_RETURN,
     ],
     marko: [
+        CONTEXT_TEST,
         BASIC_TESTS,
         SLOTS_TESTS,
         SHOW_TESTS,
@@ -249,6 +259,7 @@ var TESTS_FOR_TARGET = {
         ON_UPDATE_RETURN,
     ],
     webcomponent: [
+        CONTEXT_TEST,
         BASIC_TESTS,
         SLOTS_TESTS,
         SHOW_TESTS,
@@ -260,6 +271,7 @@ var TESTS_FOR_TARGET = {
         // FORM_BLOCK_TESTS
     ],
     vue: [
+        CONTEXT_TEST,
         BASIC_TESTS,
         SLOTS_TESTS,
         SHOW_TESTS,
@@ -271,6 +283,7 @@ var TESTS_FOR_TARGET = {
         ON_UPDATE_RETURN,
     ],
     svelte: [
+        CONTEXT_TEST,
         BASIC_TESTS,
         SHOW_TESTS,
         FORWARD_REF_TESTS,
@@ -281,6 +294,7 @@ var TESTS_FOR_TARGET = {
         ON_UPDATE_RETURN,
     ],
     html: [
+        CONTEXT_TEST,
         BASIC_TESTS,
         SLOTS_TESTS,
         SHOW_TESTS,
@@ -292,6 +306,7 @@ var TESTS_FOR_TARGET = {
         // FORM_BLOCK_TESTS
     ],
     stencil: [
+        CONTEXT_TEST,
         BASIC_TESTS,
         SLOTS_TESTS,
         // ROOT_SHOW_TESTS,
@@ -303,6 +318,7 @@ var TESTS_FOR_TARGET = {
         // FOR_SHOW_TESTS
     ],
     solid: [
+        CONTEXT_TEST,
         BASIC_TESTS,
         SLOTS_TESTS,
         SHOW_TESTS,
@@ -314,6 +330,7 @@ var TESTS_FOR_TARGET = {
         ON_UPDATE_RETURN,
     ],
     reactNative: [
+        CONTEXT_TEST,
         BASIC_TESTS,
         SLOTS_TESTS,
         SHOW_TESTS,
@@ -325,6 +342,7 @@ var TESTS_FOR_TARGET = {
         // FOR_SHOW_TESTS,
     ],
     liquid: [
+        CONTEXT_TEST,
         BASIC_TESTS,
         SLOTS_TESTS,
         SHOW_TESTS,

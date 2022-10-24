@@ -30,7 +30,7 @@ var CODE_PROCESSOR_PLUGIN = function (codeProcessor) {
     return function () { return ({
         json: {
             post: function (json) {
-                var processCode = codeProcessor('hooks');
+                var processHookCode = codeProcessor('hooks');
                 /**
                  * process code in hooks
                  */
@@ -40,17 +40,23 @@ var CODE_PROCESSOR_PLUGIN = function (codeProcessor) {
                     if ((0, nullable_1.checkIsDefined)(hooks) && Array.isArray(hooks)) {
                         for (var _i = 0, hooks_1 = hooks; _i < hooks_1.length; _i++) {
                             var hook = hooks_1[_i];
-                            hook.code = processCode(hook.code);
+                            hook.code = processHookCode(hook.code);
                             if (hook.deps) {
                                 hook.deps = codeProcessor('hooks-deps')(hook.deps);
                             }
                         }
                     }
                     else if ((0, nullable_1.checkIsDefined)(hooks)) {
-                        hooks.code = processCode(hooks.code);
+                        hooks.code = processHookCode(hooks.code);
                         if (hooks.deps) {
-                            hooks.deps = processCode(hooks.deps);
+                            hooks.deps = codeProcessor('hooks-deps')(hooks.deps);
                         }
+                    }
+                }
+                for (var key in json.state) {
+                    var state = json.state[key];
+                    if (state && state.type !== 'property') {
+                        state.code = codeProcessor('state')(state.code);
                     }
                 }
                 (0, traverse_nodes_1.tarverseNodes)(json, function (node) {

@@ -118,6 +118,7 @@ var componentToSvelte = function (userProvidedOptions) {
                         return transformHookCode(options);
                     case 'bindings':
                     case 'hooks-deps':
+                    case 'state':
                     case 'properties':
                         return function (c) { return c; };
                 }

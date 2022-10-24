@@ -1,4 +1,5 @@
-import { MitosisComponent } from '../../types/mitosis-component';
+import { Nullable } from '../../helpers/nullable';
+import { ContextSetInfo, MitosisComponent } from '../../types/mitosis-component';
 import { MitosisNode } from '../../types/mitosis-node';
 import { ToVueOptions } from './types';
 export declare const addPropertiesToJson: (properties: MitosisNode['properties']) => (json: MitosisNode) => MitosisNode;
@@ -8,9 +9,14 @@ export declare const invertBooleanExpression: (expression: string) => string;
 export declare function encodeQuotes(string: string): string;
 export declare const renameMitosisComponentsToKebabCase: (str: string) => string;
 export declare function getContextNames(json: MitosisComponent): string[];
-export declare function processBinding({ code, options, json, includeProps, }: {
+export declare const processBinding: ({ code, options, json, includeProps, }: {
     code: string;
     options: ToVueOptions;
     json: MitosisComponent;
-    includeProps?: boolean;
-}): string;
+    includeProps?: boolean | undefined;
+}) => string;
+export declare const getContextValue: ({ options, json }: {
+    options: ToVueOptions;
+    json: MitosisComponent;
+}) => ({ name, ref, value }: ContextSetInfo) => Nullable<string>;
+export declare const getContextProvideString: (json: MitosisComponent, options: ToVueOptions) => string;
