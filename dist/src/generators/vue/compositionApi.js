@@ -76,7 +76,6 @@ function generateCompositionApiScript(component, options, template, props, onUpd
     }).join('\n')) || '', (onUpdateWithoutDeps === null || onUpdateWithoutDeps === void 0 ? void 0 : onUpdateWithoutDeps.map(function (hook) { return "onUpdated(() => ".concat(hook.code, ")"); }).join('\n')) || '', (onUpdateWithDeps === null || onUpdateWithDeps === void 0 ? void 0 : onUpdateWithDeps.map(function (hook) {
         return "watch(() => ".concat(hook.deps, ", (").concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(hook.deps), ") => { ").concat(hook.code, " })");
     }).join('\n')) || '', methods !== null && methods !== void 0 ? methods : '');
-    str = str.replace(/this\./g, ''); // strip this elsewhere (e.g. functions)
     return str;
 }
 exports.generateCompositionApiScript = generateCompositionApiScript;
