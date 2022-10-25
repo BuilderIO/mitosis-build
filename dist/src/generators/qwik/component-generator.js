@@ -53,6 +53,7 @@ var componentToQwik = function (userOptions) {
         try {
             emitImports(file, component);
             emitTypes(file, component);
+            emitExports(file, component);
             var metadata = component.meta.useMetadata || {};
             var isLightComponent = ((_c = (_b = metadata === null || metadata === void 0 ? void 0 : metadata.qwik) === null || _b === void 0 ? void 0 : _b.component) === null || _c === void 0 ? void 0 : _c.isLight) || false;
             var mutable_1 = ((_d = metadata === null || metadata === void 0 ? void 0 : metadata.qwik) === null || _d === void 0 ? void 0 : _d.mutable) || [];
@@ -97,6 +98,13 @@ var componentToQwik = function (userOptions) {
     };
 };
 exports.componentToQwik = componentToQwik;
+function emitExports(file, component) {
+    component.exports &&
+        Object.keys(component.exports).forEach(function (key) {
+            var exportObj = component.exports[key];
+            file.src.emit(exportObj.code);
+        });
+}
 function emitTagNameHack(file, component, metadataValue) {
     if (typeof metadataValue === 'string' && metadataValue) {
         file.src.emit(metadataValue, '=', (0, convert_method_to_function_1.convertMethodToFunction)(metadataValue, stateToMethodOrGetter(component.state), getLexicalScopeVars(component)), ';');
@@ -144,14 +152,7 @@ function emitJSX(file, component, mutable) {
     var handlers = new Map();
     var styles = new Map();
     var parentSymbolBindings = {};
-    var mutablePredicate = mutable.length > 0
-        ? function (code) {
-            return !!mutable.find(function (txt) {
-                return code.indexOf(txt) !== -1;
-            });
-        }
-        : undefined;
-    file.src.emit('return ', (0, jsx_1.renderJSXNodes)(file, directives, handlers, component.children, styles, parentSymbolBindings, mutablePredicate));
+    file.src.emit('return ', (0, jsx_1.renderJSXNodes)(file, directives, handlers, component.children, styles, parentSymbolBindings));
 }
 function emitUseContextProvider(file, component) {
     Object.keys(component.context.set).forEach(function (ctxKey) {

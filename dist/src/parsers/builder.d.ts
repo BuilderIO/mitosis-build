@@ -35,7 +35,7 @@ export declare const builderContentToMitosisComponent: (builderContent: BuilderC
         name: string;
         '@type': "@builder.io/mitosis/component";
         imports: import("..").MitosisImport[];
-        exports?: import("..").MitosisExport | undefined;
+        exports?: import("..").MitosisExports | undefined;
         meta: JSONObject & {
             useMetadata?: JSONObject | undefined;
         };
@@ -70,7 +70,7 @@ export declare const builderContentToMitosisComponent: (builderContent: BuilderC
     '@type': "@builder.io/mitosis/component";
     name: string;
     imports: import("..").MitosisImport[];
-    exports?: import("..").MitosisExport | undefined;
+    exports?: import("..").MitosisExports | undefined;
     meta: JSONObject & {
         useMetadata?: JSONObject | undefined;
     };

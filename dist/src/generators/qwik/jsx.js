@@ -36,7 +36,7 @@ var src_generator_1 = require("./src-generator");
  * @param root True if this is the root JSX, and may need a Fragment wrapper.
  * @returns
  */
-function renderJSXNodes(file, directives, handlers, children, styles, parentSymbolBindings, mutablePredicate, root) {
+function renderJSXNodes(file, directives, handlers, children, styles, parentSymbolBindings, root) {
     if (root === void 0) { root = true; }
     return function () {
         var _this = this;
@@ -121,9 +121,9 @@ function renderJSXNodes(file, directives, handlers, children, styles, parentSymb
                         }
                     }
                     var symbolBindings = {};
-                    var bindings = rewriteHandlers(file, handlers, child.bindings, symbolBindings, mutablePredicate);
+                    var bindings = rewriteHandlers(file, handlers, child.bindings, symbolBindings);
                     _this.jsxBegin(childName, props, __assign(__assign(__assign({}, bindings), parentSymbolBindings), specialBindings));
-                    renderJSXNodes(file, directives, handlers, child.children, styles, symbolBindings, mutablePredicate, false).call(_this);
+                    renderJSXNodes(file, directives, handlers, child.children, styles, symbolBindings, false).call(_this);
                     _this.jsxEnd(childName);
                 }
             }
@@ -138,7 +138,7 @@ function renderJSXNodes(file, directives, handlers, children, styles, parentSymb
                 children = children.filter(function (c) { return !isEmptyTextNode(c); });
                 var childNeedsFragment = children.length > 1 || (children.length && isTextNode(children[0]));
                 childNeedsFragment && srcBuilder.jsxBeginFragment(fragmentSymbol);
-                renderJSXNodes(file, directives, handlers, children, styles, {}, mutablePredicate, false).call(srcBuilder);
+                renderJSXNodes(file, directives, handlers, children, styles, {}, false).call(srcBuilder);
                 childNeedsFragment && srcBuilder.jsxEndFragment();
             };
         }
@@ -182,7 +182,7 @@ function isSlotProjection(child) {
  * @param symbolBindings Options record which will receive the symbol bindings
  * @returns
  */
-function rewriteHandlers(file, handlers, bindings, symbolBindings, mutablePredicate) {
+function rewriteHandlers(file, handlers, bindings, symbolBindings) {
     var _a, _b;
     var outBindings = {};
     for (var key in bindings) {
@@ -206,10 +206,6 @@ function rewriteHandlers(file, handlers, bindings, symbolBindings, mutablePredic
                 }
                 else if (key.startsWith('component.options.')) {
                     key = (0, src_generator_1.lastProperty)(key);
-                }
-                if (mutablePredicate && bindingExpr && mutablePredicate(bindingExpr)) {
-                    file.import(file.qwikModule, 'mutable');
-                    bindingExpr = "mutable(".concat(bindingExpr, ")");
                 }
                 outBindings[key] = { code: bindingExpr, type: (_b = bindings === null || bindings === void 0 ? void 0 : bindings[key]) === null || _b === void 0 ? void 0 : _b.type };
             }

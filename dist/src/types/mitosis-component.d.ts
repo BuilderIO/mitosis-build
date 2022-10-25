@@ -51,13 +51,14 @@ export declare type MitosisComponentInput = {
     name: string;
     defaultValue: any;
 };
-export declare type MitosisExport = {
-    [name: string]: {
-        code: string;
-        usedInLocal?: boolean;
-        isFunction?: boolean;
-    };
+export declare type MitosisExports = {
+    [name: string]: MitosisExport;
 };
+export interface MitosisExport {
+    code: string;
+    usedInLocal?: boolean;
+    isFunction?: boolean;
+}
 export declare type StateValueType = 'function' | 'getter' | 'method' | 'property';
 export declare type StateCode = _JSON;
 declare type CodeValue = {
@@ -74,7 +75,7 @@ export declare type MitosisComponent = {
     '@type': '@builder.io/mitosis/component';
     name: string;
     imports: MitosisImport[];
-    exports?: MitosisExport;
+    exports?: MitosisExports;
     meta: JSONObject & {
         useMetadata?: JSONObject;
     };
