@@ -4,6 +4,8 @@ export interface ToAngularOptions extends BaseTranspilerOptions {
     standalone?: boolean;
     preserveImports?: boolean;
     preserveFileExtensions?: boolean;
+    importMapper?: Function;
+    bootstrapMapper?: Function;
 }
 interface AngularBlockOptions {
     contextVars?: string[];

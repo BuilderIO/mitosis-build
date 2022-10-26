@@ -80,6 +80,9 @@ var mappers = {
             .join('\n'), "</ng-content>");
     },
 };
+var generateNgModule = function (content, name, componentsUsed, component, bootstrapMapper) {
+    return "import { NgModule } from \"@angular/core\";\nimport { BrowserModule } from \"@angular/platform-browser\";\n\n".concat(content, "\n\n@NgModule({\n  declarations: [").concat(name, "],\n  imports: [BrowserModule").concat(componentsUsed.length ? ', ' + componentsUsed.map(function (comp) { return "".concat(comp, "Module"); }).join(', ') : '', "],\n  exports: [").concat(name, "],\n  ").concat(bootstrapMapper ? bootstrapMapper(name, componentsUsed, component) : '', "\n})\nexport class ").concat(name, "Module {}");
+};
 // TODO: Maybe in the future allow defining `string | function` as values
 var BINDINGS_MAPPER = {
     innerHTML: 'innerHTML',
@@ -283,7 +286,9 @@ var componentToAngular = function (userOptions) {
         var domRefs = (0, get_refs_1.getRefs)(json);
         var jsRefs = Object.keys(json.refs).filter(function (ref) { return !domRefs.has(ref); });
         var stateVars = Object.keys((json === null || json === void 0 ? void 0 : json.state) || {});
-        var componentsUsed = Array.from((0, get_components_used_1.getComponentsUsed)(json)).filter(function (item) { return item.length && (0, is_upper_case_1.isUpperCase)(item[0]) && !BUILT_IN_COMPONENTS.has(item); });
+        var componentsUsed = Array.from((0, get_components_used_1.getComponentsUsed)(json)).filter(function (item) {
+            return item.length && (0, is_upper_case_1.isUpperCase)(item[0]) && !BUILT_IN_COMPONENTS.has(item);
+        });
         (0, map_refs_1.mapRefs)(json, function (refName) {
             var isDomRef = domRefs.has(refName);
             return "this.".concat(isDomRef ? '' : '_').concat(refName).concat(isDomRef ? '.nativeElement' : '');
@@ -337,11 +342,13 @@ var componentToAngular = function (userOptions) {
             var key = _a[0], value = _a[1];
             componentMetadata[key] = value;
         });
-        var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    import { ", " ", " Component ", "", " } from '@angular/core';\n    ", "\n\n    ", "\n    ", "\n    ", "\n\n    @Component({\n      ", "\n    })\n    export default class ", " {\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n    }\n  "], ["\n    import { ", " ", " Component ", "", " } from '@angular/core';\n    ", "\n\n    ", "\n    ", "\n    ", "\n\n    @Component({\n      ", "\n    })\n    export default class ", " {\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n    }\n  "])), outputs.length ? 'Output, EventEmitter, \n' : '', ((_g = options === null || options === void 0 ? void 0 : options.experimental) === null || _g === void 0 ? void 0 : _g.inject) ? 'Inject, forwardRef,' : '', domRefs.size ? ', ViewChild, ElementRef' : '', props.size ? ', Input' : '', options.standalone ? "import { CommonModule } from '@angular/common';" : '', json.types ? json.types.join('\n') : '', !json.defaultProps ? '' : "const defaultProps = ".concat(json5_1.default.stringify(json.defaultProps), "\n"), (0, render_imports_1.renderPreComponent)({
+        var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    import { ", " ", " Component ", "", " } from '@angular/core';\n    ", "\n\n    ", "\n    ", "\n    ", "\n\n    @Component({\n      ", "\n    })\n    export class ", " {\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n    }\n  "], ["\n    import { ", " ", " Component ", "", " } from '@angular/core';\n    ", "\n\n    ", "\n    ", "\n    ", "\n\n    @Component({\n      ", "\n    })\n    export class ", " {\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n    }\n  "])), outputs.length ? 'Output, EventEmitter, \n' : '', ((_g = options === null || options === void 0 ? void 0 : options.experimental) === null || _g === void 0 ? void 0 : _g.inject) ? 'Inject, forwardRef,' : '', domRefs.size ? ', ViewChild, ElementRef' : '', props.size ? ', Input' : '', options.standalone ? "import { CommonModule } from '@angular/common';" : '', json.types ? json.types.join('\n') : '', !json.defaultProps ? '' : "const defaultProps = ".concat(json5_1.default.stringify(json.defaultProps), "\n"), (0, render_imports_1.renderPreComponent)({
             component: json,
             target: 'angular',
             excludeMitosisComponents: !options.standalone && !options.preserveImports,
             preserveFileExtensions: options.preserveFileExtensions,
+            componentsUsed: componentsUsed,
+            importMapper: options === null || options === void 0 ? void 0 : options.importMapper,
         }), Object.entries(componentMetadata)
             .map(function (_a) {
             var k = _a[0], v = _a[1];
@@ -411,6 +418,7 @@ var componentToAngular = function (userOptions) {
                 domRefs: Array.from(domRefs),
                 stateVars: stateVars,
             }), "\n            }"));
+        str = generateNgModule(str, json.name, componentsUsed, json, options.bootstrapMapper);
         if (options.plugins) {
             str = (0, plugins_1.runPreCodePlugins)(str, options.plugins);
         }

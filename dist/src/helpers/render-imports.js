@@ -95,7 +95,7 @@ var getImportValue = function (_a) {
     }
 };
 var renderImport = function (_a) {
-    var theImport = _a.theImport, target = _a.target, asyncComponentImports = _a.asyncComponentImports, _b = _a.preserveFileExtensions, preserveFileExtensions = _b === void 0 ? false : _b;
+    var theImport = _a.theImport, target = _a.target, asyncComponentImports = _a.asyncComponentImports, _b = _a.preserveFileExtensions, preserveFileExtensions = _b === void 0 ? false : _b, _c = _a.component, component = _c === void 0 ? undefined : _c, _d = _a.componentsUsed, componentsUsed = _d === void 0 ? [] : _d, importMapper = _a.importMapper;
     var importedValues = getImportedValues({ theImport: theImport });
     var path = transformImportPath(theImport, target, preserveFileExtensions);
     var importValue = getImportValue(importedValues);
@@ -115,11 +115,14 @@ var renderImport = function (_a) {
             return "const ".concat(importValue, " = () => import('").concat(path, "')\n      .then(x => x.default)\n      .catch(err => { \n        console.error('Error while attempting to dynamically import component ").concat(importValue, " at ").concat(path, "', err);\n        throw err;\n      });");
         }
     }
+    if (importMapper) {
+        return importMapper(component, theImport, importedValues, componentsUsed);
+    }
     return importValue ? "import ".concat(importValue, " from '").concat(path, "';") : "import '".concat(path, "';");
 };
 exports.renderImport = renderImport;
 var renderImports = function (_a) {
-    var imports = _a.imports, target = _a.target, asyncComponentImports = _a.asyncComponentImports, excludeMitosisComponents = _a.excludeMitosisComponents, _b = _a.preserveFileExtensions, preserveFileExtensions = _b === void 0 ? false : _b;
+    var imports = _a.imports, target = _a.target, asyncComponentImports = _a.asyncComponentImports, excludeMitosisComponents = _a.excludeMitosisComponents, _b = _a.preserveFileExtensions, preserveFileExtensions = _b === void 0 ? false : _b, component = _a.component, componentsUsed = _a.componentsUsed, importMapper = _a.importMapper;
     return imports
         .filter(function (theImport) {
         if (
@@ -137,20 +140,31 @@ var renderImports = function (_a) {
         }
     })
         .map(function (theImport) {
-        return (0, exports.renderImport)({ theImport: theImport, target: target, asyncComponentImports: asyncComponentImports, preserveFileExtensions: preserveFileExtensions });
+        return (0, exports.renderImport)({
+            theImport: theImport,
+            target: target,
+            asyncComponentImports: asyncComponentImports,
+            preserveFileExtensions: preserveFileExtensions,
+            component: component,
+            componentsUsed: componentsUsed,
+            importMapper: importMapper,
+        });
     })
         .join('\n');
 };
 exports.renderImports = renderImports;
 var renderPreComponent = function (_a) {
     var _b;
-    var component = _a.component, target = _a.target, excludeMitosisComponents = _a.excludeMitosisComponents, _c = _a.asyncComponentImports, asyncComponentImports = _c === void 0 ? false : _c, _d = _a.preserveFileExtensions, preserveFileExtensions = _d === void 0 ? false : _d;
+    var component = _a.component, target = _a.target, excludeMitosisComponents = _a.excludeMitosisComponents, _c = _a.asyncComponentImports, asyncComponentImports = _c === void 0 ? false : _c, _d = _a.preserveFileExtensions, preserveFileExtensions = _d === void 0 ? false : _d, _e = _a.componentsUsed, componentsUsed = _e === void 0 ? [] : _e, importMapper = _a.importMapper;
     return "\n    ".concat((0, exports.renderImports)({
         imports: component.imports,
         target: target,
         asyncComponentImports: asyncComponentImports,
         excludeMitosisComponents: excludeMitosisComponents,
         preserveFileExtensions: preserveFileExtensions,
+        component: component,
+        componentsUsed: componentsUsed,
+        importMapper: importMapper,
     }), "\n    ").concat((0, exports.renderExportAndLocal)(component), "\n    ").concat(((_b = component.hooks.preComponent) === null || _b === void 0 ? void 0 : _b.code) || '', "\n  ");
 };
 exports.renderPreComponent = renderPreComponent;
