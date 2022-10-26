@@ -107,9 +107,13 @@ var NODE_MAPPERS = {
             .join('\n')).concat(wrap ? closeFrag(options) : '', "\n    ) : ").concat(!json.meta.else ? 'null' : (0, exports.blockToReact)(json.meta.else, options), "}");
     },
 };
+var ATTTRIBUTE_MAPPERS = {
+    spellcheck: 'spellCheck',
+    autocapitalize: 'autoCapitalize',
+    autocomplete: 'autoComplete',
+};
 // TODO: Maybe in the future allow defining `string | function` as values
-var BINDING_MAPPERS = {
-    ref: function (ref, value, options) {
+var BINDING_MAPPERS = __assign({ ref: function (ref, value, options) {
         var regexp = /(.+)?props\.(.+)( |\)|;|\()?$/m;
         if (regexp.test(value)) {
             var match = regexp.exec(value);
@@ -119,11 +123,9 @@ var BINDING_MAPPERS = {
             }
         }
         return [ref, value];
-    },
-    innerHTML: function (_key, value) {
+    }, innerHTML: function (_key, value) {
         return ['dangerouslySetInnerHTML', "{__html: ".concat(value.replace(/\s+/g, ' '), "}")];
-    },
-};
+    } }, ATTTRIBUTE_MAPPERS);
 var blockToReact = function (json, options, parentSlots) {
     var _a, _b, _c;
     if (NODE_MAPPERS[json.name]) {

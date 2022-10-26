@@ -23,6 +23,7 @@ var basicOutputs = getRawFile('./data/basic-outputs.raw');
 var subComponent = getRawFile('./data/sub-component.lite.jsx');
 var componentWithContext = require('./data/context/component-with-context.lite');
 var basic = getRawFile('./data/basic.raw');
+var basicAttribute = getRawFile('./data/basic-attribute.raw.tsx');
 var basicMitosis = getRawFile('./data/basic-custom-mitosis-package.raw');
 var basicChildComponent = getRawFile('./data/basic-child-component.raw');
 var basicFor = getRawFile('./data/basic-for.raw');
@@ -87,6 +88,7 @@ var rootFragmentMultiNode = getRawFile('./data/blocks/root-fragment-multi-node.r
 var path = 'test-path';
 var BASIC_TESTS = {
     Basic: basic,
+    BasicAttribute: basicAttribute,
     BasicBooleanAttribute: basicBooleanAttribute,
     BasicRef: basicRef,
     BasicRefPrevious: basicRefPrevious,
