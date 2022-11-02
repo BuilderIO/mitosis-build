@@ -147,7 +147,7 @@ var BASIC_TESTS = {
     spreadAttrs: spreadAttrs,
     spreadNestedProps: spreadNestedProps,
     spreadProps: spreadProps,
-    // renderContentExample,
+    renderContentExample: renderContentExample,
 };
 var SLOTS_TESTS = {
     ContentSlotJSX: contentSlotJsx,
