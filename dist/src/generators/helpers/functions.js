@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.FUNCTION_HACK_PLUGIN = void 0;
+var patterns_1 = require("../../helpers/patterns");
 var FUNCTION_HACK_PLUGIN = function () { return ({
     json: {
         pre: function (json) {
@@ -9,7 +10,7 @@ var FUNCTION_HACK_PLUGIN = function () { return ({
                 var value = (_a = json.state[key]) === null || _a === void 0 ? void 0 : _a.code;
                 var type = (_b = json.state[key]) === null || _b === void 0 ? void 0 : _b.type;
                 if (typeof value === 'string' && type === 'method') {
-                    var newValue = "function ".concat(value);
+                    var newValue = (0, patterns_1.prefixWithFunction)(value);
                     json.state[key] = {
                         code: newValue,
                         type: 'method',

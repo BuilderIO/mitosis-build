@@ -19,7 +19,6 @@ var get_components_used_1 = require("../../helpers/get-components-used");
 var get_custom_imports_1 = require("../../helpers/get-custom-imports");
 var get_state_object_string_1 = require("../../helpers/get-state-object-string");
 var nullable_1 = require("../../helpers/nullable");
-var patterns_1 = require("../../helpers/patterns");
 var render_imports_1 = require("../../helpers/render-imports");
 var helpers_1 = require("./helpers");
 function getContextInjectString(component, options) {
@@ -86,15 +85,11 @@ function generateOptionsApiScript(component, options, path, template, props, onU
         data: false,
         getters: true,
         functions: false,
-        valueMapper: function (code) {
-            return (0, helpers_1.processBinding)({ code: code.replace(patterns_1.GETTER, ''), options: options, json: component });
-        },
     });
     var functionsString = (0, get_state_object_string_1.getStateObjectStringFromComponent)(component, {
         data: false,
         getters: false,
         functions: true,
-        valueMapper: function (code) { return (0, helpers_1.processBinding)({ code: code, options: options, json: component }); },
     });
     var includeClassMapHelper = template.includes('_classStringToObject');
     if (includeClassMapHelper) {

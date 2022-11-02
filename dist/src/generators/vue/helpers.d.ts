@@ -9,11 +9,11 @@ export declare const invertBooleanExpression: (expression: string) => string;
 export declare function encodeQuotes(string: string): string;
 export declare const renameMitosisComponentsToKebabCase: (str: string) => string;
 export declare function getContextNames(json: MitosisComponent): string[];
-export declare const processBinding: ({ code, options, json, includeProps, }: {
+export declare const processBinding: ({ code, options, json, preserveGetter, }: {
     code: string;
     options: ToVueOptions;
     json: MitosisComponent;
-    includeProps?: boolean | undefined;
+    preserveGetter?: boolean | undefined;
 }) => string;
 export declare const getContextValue: ({ options, json }: {
     options: ToVueOptions;

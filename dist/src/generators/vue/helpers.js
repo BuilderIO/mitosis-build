@@ -27,6 +27,7 @@ var function_1 = require("fp-ts/lib/function");
 var babel_transform_1 = require("../../helpers/babel-transform");
 var core_1 = require("@babel/core");
 var lodash_1 = require("lodash");
+var patterns_1 = require("../../helpers/patterns");
 var addPropertiesToJson = function (properties) {
     return function (json) { return (__assign(__assign({}, json), { properties: __assign(__assign({}, json.properties), properties) })); };
 };
@@ -103,10 +104,12 @@ function processRefs(input, component, options) {
 // TODO: migrate all stripStateAndPropsRefs to use this here
 // to properly replace context refs
 var processBinding = function (_a) {
-    var code = _a.code, options = _a.options, json = _a.json, _b = _a.includeProps, includeProps = _b === void 0 ? true : _b;
+    var code = _a.code, options = _a.options, json = _a.json, _b = _a.preserveGetter, preserveGetter = _b === void 0 ? false : _b;
     return (0, function_1.pipe)((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(code, {
         includeState: true,
-        includeProps: includeProps,
+        // we don't want to process `props` in the Composition API because it has a `props` ref,
+        // therefore we can keep pointing to `props.${value}`
+        includeProps: options.api === 'options',
         replaceWith: function (name) {
             switch (options.api) {
                 case 'composition':
@@ -118,7 +121,12 @@ var processBinding = function (_a) {
                     return "this.".concat(name);
             }
         },
-    }), function (c) { return processRefs(c, json, options); });
+    }), function (x) {
+        var wasGetter = x.match(patterns_1.GETTER);
+        return (0, function_1.pipe)(x, 
+        // workaround so that getter code is valid and parseable by babel.
+        patterns_1.stripGetter, function (code) { return processRefs(code, json, options); }, function (code) { return (preserveGetter && wasGetter ? "get ".concat(code) : code); });
+    });
 };
 exports.processBinding = processBinding;
 var getContextValue = function (_a) {
@@ -127,10 +135,10 @@ var getContextValue = function (_a) {
         var name = _a.name, ref = _a.ref, value = _a.value;
         var valueStr = value
             ? (0, get_state_object_string_1.stringifyContextValue)(value, {
-                valueMapper: function (code) { return (0, exports.processBinding)({ code: code, options: options, json: json }); },
+                valueMapper: function (code) { return (0, exports.processBinding)({ code: code, options: options, json: json, preserveGetter: true }); },
             })
             : ref
-                ? (0, exports.processBinding)({ code: ref, options: options, json: json })
+                ? (0, exports.processBinding)({ code: ref, options: options, json: json, preserveGetter: true })
                 : null;
         return valueStr;
     };

@@ -32,7 +32,7 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
     return to.concat(ar || Array.prototype.slice.call(from));
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.babelTransformExpression = exports.babelTransformCode = exports.babelTransform = void 0;
+exports.babelTransformExpression = exports.getType = exports.babelTransformCode = exports.babelTransform = void 0;
 var babel = __importStar(require("@babel/core"));
 var jsxPlugin = require('@babel/plugin-syntax-jsx');
 var tsPreset = require('@babel/preset-typescript');
@@ -63,12 +63,7 @@ var handleErrorOrExpression = function (_a) {
     }
     catch (err) {
         console.error('Error parsing code:\n', code, '\n', result);
-        try {
-            return (0, exports.babelTransformExpression)(code, visitor, 'functionBody');
-        }
-        catch (err) {
-            throw err;
-        }
+        throw err;
     }
 };
 var babelTransform = function (code, visitor) {
@@ -96,25 +91,27 @@ var trimExpression = function (type) { return function (code) {
             return trimSemicolons(code);
     }
 }; };
-var babelTransformExpression = function (code, visitor, type) {
-    if (type === void 0) { type = 'unknown'; }
+var getType = function (code, initialType) {
+    // match for object literal like { foo: ... }
+    if (initialType === 'unknown' && code.trim().match(/^\s*{\s*[a-z0-9]+:/i)) {
+        return 'expression';
+    }
+    // For Builder content
+    if (initialType === 'unknown' &&
+        (code.includes('return _virtual_index') || code.trim().startsWith('return ')) &&
+        !code.trim().startsWith('function')) {
+        return 'functionBody';
+    }
+    return initialType;
+};
+exports.getType = getType;
+var babelTransformExpression = function (code, visitor, initialType) {
+    if (initialType === void 0) { initialType = 'unknown'; }
     if (!code) {
         return '';
     }
-    // match for object literal like { foo: ... }
-    if (type === 'unknown' && code.trim().match(/^\s*{\s*[a-z0-9]+:/i)) {
-        type = 'expression';
-    }
-    // For Builder content
-    if (type === 'unknown' &&
-        (code.includes('return _virtual_index') || code.trim().startsWith('return ')) &&
-        !code.trim().startsWith('function')) {
-        type = 'functionBody';
-    }
-    var useCode = code;
-    if (type === 'functionBody') {
-        useCode = "function(){".concat(useCode, "}");
-    }
+    var type = (0, exports.getType)(code, initialType);
+    var useCode = type === 'functionBody' ? "function(){".concat(code, "}") : code;
     if (type !== 'expression') {
         try {
             return (0, function_1.pipe)((0, exports.babelTransformCode)(useCode, visitor), trimExpression(type));

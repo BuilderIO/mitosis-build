@@ -14,7 +14,7 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.useStyle = exports.useDefaultProps = exports.useMetadata = exports.onError = exports.useDynamicTag = exports.onUnMount = exports.onInit = exports.onCreate = exports.onUpdate = exports.onMount = exports.setContext = exports.createContext = exports.useContext = exports.useRef = exports.useState = exports.useStore = void 0;
+exports.useStyle = exports.useDefaultProps = exports.useMetadata = exports.onError = exports.useDynamicTag = exports.onUnMount = exports.onInit = exports.onUpdate = exports.onMount = exports.setContext = exports.createContext = exports.useContext = exports.useRef = exports.useState = exports.useStore = void 0;
 __exportStar(require("./flow"), exports);
 function Provider(props) {
     return null;
@@ -50,8 +50,6 @@ var onMount = function (fn) {
 exports.onMount = onMount;
 var onUpdate = function (fn, deps) { return null; };
 exports.onUpdate = onUpdate;
-var onCreate = function (fn) { return null; };
-exports.onCreate = onCreate;
 var onInit = function (fn) { return null; };
 exports.onInit = onInit;
 var onUnMount = function (fn) { return null; };

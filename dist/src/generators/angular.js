@@ -100,7 +100,7 @@ var blockToAngular = function (json, options, blockOptions) {
     if (mappers[json.name]) {
         return mappers[json.name](json, options, blockOptions);
     }
-    if ((0, is_children_1.default)(json)) {
+    if ((0, is_children_1.default)({ node: json })) {
         return "<ng-content></ng-content>";
     }
     if (json.properties._text) {

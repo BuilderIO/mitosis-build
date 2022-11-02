@@ -11,7 +11,7 @@ var hasBindingsText = function (json) {
     var has = false;
     (0, traverse_1.default)(json).forEach(function (node) {
         var _a;
-        if ((0, is_mitosis_node_1.isMitosisNode)(node) && !(0, is_children_1.default)(node) && ((_a = node.bindings._text) === null || _a === void 0 ? void 0 : _a.code)) {
+        if ((0, is_mitosis_node_1.isMitosisNode)(node) && !(0, is_children_1.default)({ node: node }) && ((_a = node.bindings._text) === null || _a === void 0 ? void 0 : _a.code)) {
             has = true;
             this.stop();
         }

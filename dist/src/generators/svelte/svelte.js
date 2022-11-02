@@ -28,7 +28,6 @@ var get_refs_1 = require("../../helpers/get-refs");
 var get_state_object_string_1 = require("../../helpers/get-state-object-string");
 var is_mitosis_node_1 = require("../../helpers/is-mitosis-node");
 var render_imports_1 = require("../../helpers/render-imports");
-var strip_state_and_props_refs_1 = require("../../helpers/strip-state-and-props-refs");
 var plugins_1 = require("../../modules/plugins");
 var strip_meta_properties_1 = require("../../helpers/strip-meta-properties");
 var getters_to_functions_1 = require("../../helpers/getters-to-functions");
@@ -42,22 +41,30 @@ var merge_options_1 = require("../../helpers/merge-options");
 var process_code_1 = require("../../helpers/plugins/process-code");
 var helpers_2 = require("./helpers");
 var blocks_1 = require("./blocks");
+var patterns_1 = require("../../helpers/patterns");
 var getContextCode = function (json) {
     var contextGetters = json.context.get;
-    return Object.keys(contextGetters)
-        .map(function (key) { return "let ".concat(key, " = getContext(").concat(contextGetters[key].name, ".key);"); })
+    return Object.entries(contextGetters)
+        .map(function (_a) {
+        var key = _a[0], context = _a[1];
+        var name = context.name;
+        return "let ".concat(key, " = getContext(").concat(name, ".key);");
+    })
         .join('\n');
 };
-var setContextCode = function (json) {
-    var contextSetters = json.context.set;
-    return Object.keys(contextSetters)
-        .map(function (key) {
-        var _a = contextSetters[key], ref = _a.ref, value = _a.value, name = _a.name;
-        return "setContext(".concat(value ? "".concat(name, ".key") : name, ", ").concat(value
-            ? (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)((0, get_state_object_string_1.stringifyContextValue)(value))
+var setContextCode = function (_a) {
+    var json = _a.json, options = _a.options;
+    var processCode = (0, helpers_2.stripStateAndProps)({ json: json, options: options });
+    return Object.values(json.context.set)
+        .map(function (context) {
+        var value = context.value, name = context.name, ref = context.ref;
+        var key = value ? "".concat(name, ".key") : name;
+        var valueStr = value
+            ? processCode((0, get_state_object_string_1.stringifyContextValue)(value))
             : ref
-                ? (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(ref)
-                : 'undefined', ");");
+                ? processCode(ref)
+                : 'undefined';
+        return "setContext(".concat(key, ", ").concat(valueStr, ");");
     })
         .join('\n');
 };
@@ -92,20 +99,11 @@ var useBindValue = function (json, options) {
         }
     });
 };
-/**
- * Removes all `this.` references.
- */
-var stripThisRefs = function (str) {
-    return str.replace(/this\.([a-zA-Z_\$0-9]+)/g, '$1');
-};
 var DEFAULT_OPTIONS = {
     stateType: 'variables',
     prettier: true,
     plugins: [functions_1.FUNCTION_HACK_PLUGIN],
 };
-var transformHookCode = function (options) { return function (hookCode) {
-    return (0, function_1.pipe)((0, helpers_2.stripStateAndProps)(hookCode, options), babel_transform_1.babelTransformCode);
-}; };
 var componentToSvelte = function (userProvidedOptions) {
     return function (_a) {
         var _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m;
@@ -115,12 +113,13 @@ var componentToSvelte = function (userProvidedOptions) {
             (0, process_code_1.CODE_PROCESSOR_PLUGIN)(function (codeType) {
                 switch (codeType) {
                     case 'hooks':
-                        return transformHookCode(options);
+                        return (0, function_1.flow)((0, helpers_2.stripStateAndProps)({ json: json, options: options }), babel_transform_1.babelTransformCode);
                     case 'bindings':
                     case 'hooks-deps':
                     case 'state':
+                        return (0, function_1.flow)((0, helpers_2.stripStateAndProps)({ json: json, options: options }), patterns_1.stripGetter);
                     case 'properties':
-                        return function (c) { return c; };
+                        return (0, helpers_2.stripStateAndProps)({ json: json, options: options });
                 }
             }),
         ], false);
@@ -140,7 +139,6 @@ var componentToSvelte = function (userProvidedOptions) {
             getters: false,
             format: options.stateType === 'proxies' ? 'object' : 'variables',
             keyPrefix: options.stateType === 'variables' ? 'let ' : '',
-            valueMapper: function (code) { return (0, helpers_2.stripStateAndProps)(code, options); },
         }), babel_transform_1.babelTransformCode);
         var getterString = (0, function_1.pipe)((0, get_state_object_string_1.getStateObjectStringFromComponent)(json, {
             data: false,
@@ -149,7 +147,10 @@ var componentToSvelte = function (userProvidedOptions) {
             format: 'variables',
             keyPrefix: '$: ',
             valueMapper: function (code) {
-                return (0, function_1.pipe)(code.replace(/^get ([a-zA-Z_\$0-9]+)/, '$1 = ').replace(/\)/, ') => '), function (str) { return (0, helpers_2.stripStateAndProps)(str, options); }, stripThisRefs);
+                return code
+                    .trim()
+                    .replace(/^([a-zA-Z_\$0-9]+)/, '$1 = ')
+                    .replace(/\)/, ') => ');
             },
         }), babel_transform_1.babelTransformCode);
         var functionsString = (0, function_1.pipe)((0, get_state_object_string_1.getStateObjectStringFromComponent)(json, {
@@ -157,7 +158,6 @@ var componentToSvelte = function (userProvidedOptions) {
             getters: false,
             functions: true,
             format: 'variables',
-            valueMapper: function (code) { return (0, function_1.pipe)((0, helpers_2.stripStateAndProps)(code, options), stripThisRefs); },
         }), babel_transform_1.babelTransformCode);
         var hasData = dataString.length > 4;
         var str = '';
@@ -167,6 +167,7 @@ var componentToSvelte = function (userProvidedOptions) {
         }
         // prepare svelte imports
         var svelteImports = [];
+        var svelteStoreImports = [];
         if ((_d = (_c = json.hooks.onMount) === null || _c === void 0 ? void 0 : _c.code) === null || _d === void 0 ? void 0 : _d.length) {
             svelteImports.push('onMount');
         }
@@ -179,9 +180,11 @@ var componentToSvelte = function (userProvidedOptions) {
         if ((0, context_1.hasContext)(component)) {
             svelteImports.push('getContext', 'setContext');
         }
-        str += (0, dedent_1.default)(templateObject_2 || (templateObject_2 = __makeTemplateObject(["\n      <script ", ">\n      ", "\n      ", "\n\n      ", "\n      ", "\n      ", "\n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n      ", "\n      \n      ", "\n\n      ", "\n\n      ", "\n    </script>\n\n    ", "\n\n    ", "\n  "], ["\n      <script ", ">\n      ", "\n      ", "\n\n      ", "\n      ", "\n      "
+        str += (0, dedent_1.default)(templateObject_2 || (templateObject_2 = __makeTemplateObject(["\n      <script ", ">\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n      ", "\n      ", "\n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n      ", "\n      \n      ", "\n\n      ", "\n\n      ", "\n    </script>\n\n    ", "\n\n    ", "\n  "], ["\n      <script ", ">\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n      ", "\n      "
             // https://svelte.dev/repl/bd9b56891f04414982517bbd10c52c82?version=3.31.0
-            , "\n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n      ", "\n      \n      ", "\n\n      ", "\n\n      ", "\n    </script>\n\n    ", "\n\n    ", "\n  "])), tsLangAttribute, !svelteImports.length ? '' : "import { ".concat(svelteImports.sort().join(', '), " } from 'svelte'"), (0, render_imports_1.renderPreComponent)({ component: json, target: 'svelte' }), !hasData || options.stateType === 'variables' ? '' : "import onChange from 'on-change'", props
+            , "\n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n      ", "\n      \n      ", "\n\n      ", "\n\n      ", "\n    </script>\n\n    ", "\n\n    ", "\n  "])), tsLangAttribute, !svelteImports.length ? '' : "import { ".concat(svelteImports.sort().join(', '), " } from 'svelte'"), !svelteStoreImports.length
+            ? ''
+            : "import { ".concat(svelteStoreImports.sort().join(', '), " } from 'svelte/store'"), (0, render_imports_1.renderPreComponent)({ component: json, target: 'svelte' }), !hasData || options.stateType === 'variables' ? '' : "import onChange from 'on-change'", props
             .map(function (name) {
             if (name === 'children') {
                 return '';
@@ -200,17 +203,17 @@ var componentToSvelte = function (userProvidedOptions) {
         // https://svelte.dev/repl/bd9b56891f04414982517bbd10c52c82?version=3.31.0
         (0, helpers_1.hasStyle)(json)
             ? "\n        function mitosis_styling (node, vars) {\n          Object.entries(vars || {}).forEach(([ p, v ]) => {\n            if (p.startsWith('--')) {\n              node.style.setProperty(p, v);\n            } else {\n              node.style[p] = v;\n            }\n          })\n        }\n      "
-            : '', getContextCode(json), setContextCode(json), functionsString.length < 4 ? '' : functionsString, getterString.length < 4 ? '' : getterString, refs.map(function (ref) { return "let ".concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(ref)); }).join('\n'), options.stateType === 'proxies'
+            : '', getContextCode(json), setContextCode({ json: json, options: options }), functionsString.length < 4 ? '' : functionsString, getterString.length < 4 ? '' : getterString, refs.map(function (ref) { return "let ".concat((0, helpers_2.stripStateAndProps)({ json: json, options: options })(ref)); }).join('\n'), options.stateType === 'proxies'
             ? dataString.length < 4
                 ? ''
                 : "let state = onChange(".concat(dataString, ", () => state = state)")
-            : dataString, (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)((_j = (_h = json.hooks.onInit) === null || _h === void 0 ? void 0 : _h.code) !== null && _j !== void 0 ? _j : ''), !((_k = json.hooks.onMount) === null || _k === void 0 ? void 0 : _k.code) ? '' : "onMount(() => { ".concat(json.hooks.onMount.code, " });"), ((_l = json.hooks.onUpdate) === null || _l === void 0 ? void 0 : _l.map(function (_a, index) {
+            : dataString, (_j = (_h = json.hooks.onInit) === null || _h === void 0 ? void 0 : _h.code) !== null && _j !== void 0 ? _j : '', !((_k = json.hooks.onMount) === null || _k === void 0 ? void 0 : _k.code) ? '' : "onMount(() => { ".concat(json.hooks.onMount.code, " });"), ((_l = json.hooks.onUpdate) === null || _l === void 0 ? void 0 : _l.map(function (_a, index) {
             var code = _a.code, deps = _a.deps;
             if (!deps) {
                 return "afterUpdate(() => { ".concat(code, " });");
             }
             var fnName = "onUpdateFn_".concat(index);
-            return "\n              function ".concat(fnName, "() {\n                ").concat(code, "\n              }\n              $: ").concat(fnName, "(...").concat((0, helpers_2.stripStateAndProps)(deps, options), ")\n            ");
+            return "\n              function ".concat(fnName, "() {\n                ").concat(code, "\n              }\n              $: ").concat(fnName, "(...").concat(deps, ")\n            ");
         }).join(';')) || '', !((_m = json.hooks.onUnMount) === null || _m === void 0 ? void 0 : _m.code) ? '' : "onDestroy(() => { ".concat(json.hooks.onUnMount.code, " });"), json.children
             .map(function (item) {
             return (0, blocks_1.blockToSvelte)({

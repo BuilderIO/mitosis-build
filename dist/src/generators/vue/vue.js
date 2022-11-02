@@ -42,7 +42,6 @@ var blocks_1 = require("./blocks");
 var merge_options_1 = require("../../helpers/merge-options");
 var process_code_1 = require("../../helpers/plugins/process-code");
 var strip_state_and_props_refs_1 = require("../../helpers/strip-state-and-props-refs");
-var patterns_1 = require("../../helpers/patterns");
 // Transform <foo.bar key="value" /> to <component :is="foo.bar" key="value" />
 function processDynamicComponents(json, _options) {
     (0, traverse_1.default)(json).forEach(function (node) {
@@ -108,31 +107,9 @@ var componentToVue = function (userOptions) {
             if (options.api === 'composition') {
                 switch (codeType) {
                     case 'hooks':
-                        return function (code) {
-                            return (0, helpers_1.processBinding)({
-                                code: code,
-                                options: options,
-                                json: component,
-                                // we don't want to process `props`, because Vue 3 code has a `props` ref, and
-                                // therefore we can keep pointing to `props.${value}`
-                                includeProps: false,
-                            });
-                        };
+                        return function (code) { return (0, helpers_1.processBinding)({ code: code, options: options, json: component }); };
                     case 'state':
-                        return function (code) {
-                            return (0, function_1.pipe)(
-                            // workaround so that getter code is valid and parseable by babel.
-                            code.replace(patterns_1.GETTER, ''), function (c) {
-                                return (0, helpers_1.processBinding)({
-                                    code: c,
-                                    options: options,
-                                    json: component,
-                                    // we don't want to process `props`, because Vue 3 code has a `props` ref, and
-                                    // therefore we can keep pointing to `props.${value}`
-                                    includeProps: false,
-                                });
-                            });
-                        };
+                        return function (code) { return (0, helpers_1.processBinding)({ code: code, options: options, json: component }); };
                     case 'bindings':
                         return function (c) { return (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(c); };
                     case 'hooks-deps':
@@ -149,8 +126,9 @@ var componentToVue = function (userOptions) {
                         return function (c) { return (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(c); };
                     case 'properties':
                     case 'hooks-deps':
-                    case 'state':
                         return function (c) { return c; };
+                    case 'state':
+                        return function (c) { return (0, helpers_1.processBinding)({ code: c, options: options, json: component }); };
                 }
             }
         }));

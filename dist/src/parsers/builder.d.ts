@@ -42,8 +42,8 @@ export declare const builderContentToMitosisComponent: (builderContent: BuilderC
         inputs: import("..").MitosisComponentInput[];
         state: import("..").MitosisState;
         context: {
-            get: import("..").ContextGet;
-            set: import("..").ContextSet;
+            get: import("../helpers/typescript").Dictionary<import("..").ContextGetInfo>;
+            set: import("../helpers/typescript").Dictionary<import("..").ContextSetInfo>;
         };
         refs: {
             [useRef: string]: {
@@ -77,8 +77,8 @@ export declare const builderContentToMitosisComponent: (builderContent: BuilderC
     inputs: import("..").MitosisComponentInput[];
     state: import("..").MitosisState;
     context: {
-        get: import("..").ContextGet;
-        set: import("..").ContextSet;
+        get: import("../helpers/typescript").Dictionary<import("..").ContextGetInfo>;
+        set: import("../helpers/typescript").Dictionary<import("..").ContextSetInfo>;
     };
     refs: {
         [useRef: string]: {

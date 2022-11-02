@@ -37,12 +37,6 @@ export interface ContextSetInfo {
     value?: MitosisState;
     ref?: string;
 }
-export declare type ContextGet = {
-    [key: string]: ContextGetInfo;
-};
-export declare type ContextSet = {
-    [key: string]: ContextSetInfo;
-};
 export declare type extendedHook = {
     code: string;
     deps?: string;
@@ -82,8 +76,8 @@ export declare type MitosisComponent = {
     inputs: MitosisComponentInput[];
     state: MitosisState;
     context: {
-        get: ContextGet;
-        set: ContextSet;
+        get: Dictionary<ContextGetInfo>;
+        set: Dictionary<ContextSetInfo>;
     };
     refs: {
         [useRef: string]: {

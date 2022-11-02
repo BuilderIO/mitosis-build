@@ -85,6 +85,7 @@ var spreadNestedProps = getRawFile('./data/spread/spread-nested-props.raw');
 var spreadProps = getRawFile('./data/spread/spread-props.raw');
 var builderRenderContent = getRawFile('./data/blocks/builder-render-content.raw');
 var rootFragmentMultiNode = getRawFile('./data/blocks/root-fragment-multi-node.raw');
+var renderContentExample = getRawFile('./data/render-content.raw');
 var path = 'test-path';
 var BASIC_TESTS = {
     Basic: basic,
@@ -146,6 +147,7 @@ var BASIC_TESTS = {
     spreadAttrs: spreadAttrs,
     spreadNestedProps: spreadNestedProps,
     spreadProps: spreadProps,
+    // renderContentExample,
 };
 var SLOTS_TESTS = {
     ContentSlotJSX: contentSlotJsx,

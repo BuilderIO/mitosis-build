@@ -236,7 +236,7 @@ var blockToVue = function (node, options, scope) {
     if (nodeMapper) {
         return nodeMapper(node, options, scope);
     }
-    if ((0, is_children_1.default)(node)) {
+    if ((0, is_children_1.default)({ node: node })) {
         return "<slot/>";
     }
     if (node.name === 'style') {

@@ -59,7 +59,7 @@ var blockToSwift = function (json, options) {
     // TODO: Add support for `{props.children}` bindings
     // Right now we return an empty string because the generated code
     // is very likely wrong.
-    if ((0, is_children_1.default)(json)) {
+    if ((0, is_children_1.default)({ node: json })) {
         return '/* `props.children` is not supported yet for SwiftUI */';
     }
     if (json.properties._text) {
