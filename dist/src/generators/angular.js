@@ -57,9 +57,9 @@ var html_tags_1 = require("../constants/html_tags");
 var BUILT_IN_COMPONENTS = new Set(['Show', 'For', 'Fragment']);
 var mappers = {
     Fragment: function (json, options, blockOptions) {
-        return "<div>".concat(json.children
+        return "<ng-container>".concat(json.children
             .map(function (item) { return (0, exports.blockToAngular)(item, options, blockOptions); })
-            .join('\n'), "</div>");
+            .join('\n'), "</ng-container>");
     },
     Slot: function (json, options, blockOptions) {
         return "<ng-content ".concat(Object.keys(json.bindings)
