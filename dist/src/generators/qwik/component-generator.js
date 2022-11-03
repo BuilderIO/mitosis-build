@@ -70,6 +70,7 @@ var componentToQwik = function (userOptions) {
                     emitUseRef(file, component);
                     hasState_1 && emitUseStore(file, state_2);
                     emitUseContextProvider(file, component);
+                    emitUseClientEffect(file, component);
                     emitUseMount(file, component);
                     emitUseWatch(file, component);
                     emitUseCleanup(file, component);
@@ -110,12 +111,18 @@ function emitTagNameHack(file, component, metadataValue) {
         file.src.emit(metadataValue, '=', (0, convert_method_to_function_1.convertMethodToFunction)(metadataValue, stateToMethodOrGetter(component.state), getLexicalScopeVars(component)), ';');
     }
 }
-function emitUseMount(file, component) {
+function emitUseClientEffect(file, component) {
     if (component.hooks.onMount) {
         // This is called useMount, but in practice it is used as
         // useClientEffect. Not sure if this is correct, but for now.
         var code = component.hooks.onMount.code;
         file.src.emit(file.import(file.qwikModule, 'useClientEffect$').localName, '(()=>{', code, '});');
+    }
+}
+function emitUseMount(file, component) {
+    if (component.hooks.onInit) {
+        var code = component.hooks.onInit.code;
+        file.src.emit(file.import(file.qwikModule, 'useMount$').localName, '(()=>{', code, '});');
     }
 }
 function emitUseWatch(file, component) {
