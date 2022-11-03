@@ -35,6 +35,9 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 var fs_extra_promise_1 = require("fs-extra-promise");
 var qwik_1 = require("../generators/qwik");
@@ -45,8 +48,8 @@ var jsx_1 = require("../parsers/jsx");
 var compile_away_builder_components_1 = require("../plugins/compile-away-builder-components");
 var symbol_processor_1 = require("../symbols/symbol-processor");
 var shared_1 = require("./shared");
-var todo = require('../../../../examples/todo/src/components/todo.lite');
-var todos = require('../../../../examples/todo/src/components/todos.lite');
+var todo_lite_tsx_raw_1 = __importDefault(require("../../../../examples/todo/src/components/todo.lite.tsx?raw"));
+var todos_lite_tsx_raw_1 = __importDefault(require("../../../../examples/todo/src/components/todos.lite.tsx?raw"));
 var debugFiles = true;
 var debugOutput = function (fileSet) { return __awaiter(void 0, void 0, void 0, function () {
     var testName, base, _a, _b, _i, key, file;
@@ -54,7 +57,7 @@ var debugOutput = function (fileSet) { return __awaiter(void 0, void 0, void 0, 
         switch (_c.label) {
             case 0:
                 testName = expect.getState().currentTestName;
-                base = 'dist/test/' + testName.split(' ').join('/') + '/';
+                base = 'dist/test/' + (testName === null || testName === void 0 ? void 0 : testName.split(' ').join('/')) + '/';
                 if (!debugFiles) return [3 /*break*/, 4];
                 _a = [];
                 for (_b in fileSet)
@@ -84,7 +87,7 @@ describe('qwik', function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        json = (0, jsx_1.parseJsx)(todo);
+                        json = (0, jsx_1.parseJsx)(todo_lite_tsx_raw_1.default);
                         fileSet = (0, index_1.createFileSet)({ output: 'ts' });
                         (0, index_1.addComponent)(fileSet, json);
                         return [4 /*yield*/, debugOutput(fileSet)];
@@ -100,7 +103,7 @@ describe('qwik', function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        json = (0, jsx_1.parseJsx)(todo);
+                        json = (0, jsx_1.parseJsx)(todo_lite_tsx_raw_1.default);
                         fileSet = (0, index_1.createFileSet)({ output: 'cjs', jsx: false });
                         (0, index_1.addComponent)(fileSet, json);
                         return [4 /*yield*/, debugOutput(fileSet)];
@@ -116,7 +119,7 @@ describe('qwik', function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        json = (0, jsx_1.parseJsx)(todo);
+                        json = (0, jsx_1.parseJsx)(todo_lite_tsx_raw_1.default);
                         fileSet = (0, index_1.createFileSet)({
                             output: 'mjs',
                             jsx: false,
@@ -137,7 +140,7 @@ describe('qwik', function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        json = (0, jsx_1.parseJsx)(todos);
+                        json = (0, jsx_1.parseJsx)(todos_lite_tsx_raw_1.default);
                         fileSet = (0, index_1.createFileSet)({ output: 'ts' });
                         (0, index_1.addComponent)(fileSet, json);
                         return [4 /*yield*/, debugOutput(fileSet)];
@@ -434,13 +437,13 @@ describe('qwik', function () {
     describe('src-generator', function () {
         var file;
         beforeEach(function () {
-            return (file = new qwik_1.File('test.js', {
+            file = new qwik_1.File('test.js', {
                 isPretty: true,
                 isTypeScript: false,
                 isJSX: true,
                 isModule: true,
                 isBuilder: true,
-            }, '', ''));
+            }, '', '');
         });
         test('should format code', function () {
             file.src.emit('const x=1');
