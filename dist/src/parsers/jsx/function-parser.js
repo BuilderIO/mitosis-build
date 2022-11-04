@@ -57,6 +57,7 @@ var state_1 = require("./state");
 var helpers_1 = require("./helpers");
 var component_types_1 = require("./component-types");
 var element_parser_1 = require("./element-parser");
+var metadata_1 = require("./metadata");
 var types = babel.types;
 function generateUseStyleCode(expression) {
     return (0, generator_1.default)(expression.arguments[0]).code.replace(/(^("|'|`)|("|'|`)$)/g, '');
@@ -195,6 +196,9 @@ var componentFunctionToJson = function (node, context) {
                     }
                     else if (expression.callee.name === hooks_1.HOOKS.STYLE) {
                         context.builder.component.style = generateUseStyleCode(expression);
+                    }
+                    else if (expression.callee.name === metadata_1.METADATA_HOOK_NAME) {
+                        context.builder.component.meta[metadata_1.METADATA_HOOK_NAME] = __assign(__assign({}, context.builder.component.meta[metadata_1.METADATA_HOOK_NAME]), (0, helpers_1.parseCodeJson)(expression.arguments[0]));
                     }
                 }
             }
