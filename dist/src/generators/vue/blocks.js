@@ -272,7 +272,9 @@ var blockToVue = function (node, options, scope) {
     var stringifiedBindings = Object.entries(node.bindings).map(stringifyBinding(node)).join('');
     str += stringifiedBindings;
     // spreads
-    var spreads = (0, lodash_1.filter)(node.bindings, function (binding) { return (binding === null || binding === void 0 ? void 0 : binding.type) === 'spread'; }).map(function (value) { return value === null || value === void 0 ? void 0 : value.code; });
+    var spreads = (0, lodash_1.filter)(node.bindings, function (binding) { return (binding === null || binding === void 0 ? void 0 : binding.type) === 'spread'; }).map(function (value) {
+        return (value === null || value === void 0 ? void 0 : value.code) === 'props' ? '$props' : value === null || value === void 0 ? void 0 : value.code;
+    });
     if (spreads === null || spreads === void 0 ? void 0 : spreads.length) {
         if (spreads.length > 1) {
             var spreadsString = "{...".concat(spreads.join(', ...'), "}");
