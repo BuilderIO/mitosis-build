@@ -32,31 +32,31 @@ var convertStateMemberToString = function (_a) {
         if (!state) {
             return undefined;
         }
-        var code = state.code;
+        var code = state.code, typeParameter = state.typeParameter;
         switch (state.type) {
             case 'function': {
                 if (functions === false || typeof code !== 'string') {
                     return undefined;
                 }
-                return "".concat(keyPrefix, " ").concat(key, " ").concat(keyValueDelimiter, " ").concat(valueMapper(code, 'function'));
+                return "".concat(keyPrefix, " ").concat(key, " ").concat(keyValueDelimiter, " ").concat(valueMapper(code, 'function', typeParameter));
             }
             case 'method': {
                 if (functions === false || typeof code !== 'string') {
                     return undefined;
                 }
-                return "".concat(keyPrefix, " ").concat(valueMapper(code, 'function'));
+                return "".concat(keyPrefix, " ").concat(valueMapper(code, 'function', typeParameter));
             }
             case 'getter': {
                 if (getters === false || typeof code !== 'string') {
                     return undefined;
                 }
-                return "".concat(keyPrefix, " ").concat(valueMapper(code, 'getter'));
+                return "".concat(keyPrefix, " ").concat(valueMapper(code, 'getter', typeParameter));
             }
             case 'property': {
                 if (data === false) {
                     return undefined;
                 }
-                return "".concat(keyPrefix, " ").concat(key).concat(keyValueDelimiter, " ").concat(valueMapper(json5_1.default.stringify(code), 'data'));
+                return "".concat(keyPrefix, " ").concat(key).concat(keyValueDelimiter, " ").concat(valueMapper(json5_1.default.stringify(code), 'data', typeParameter));
             }
             default:
                 break;

@@ -4,7 +4,7 @@ interface GetStateObjectStringOptions {
     data?: boolean;
     functions?: boolean;
     getters?: boolean;
-    valueMapper?: (code: string, type: 'data' | 'function' | 'getter') => string;
+    valueMapper?: (code: string, type: 'data' | 'function' | 'getter', typeParameter?: string) => string;
     format?: 'object' | 'class' | 'variables';
     keyPrefix?: string;
 }

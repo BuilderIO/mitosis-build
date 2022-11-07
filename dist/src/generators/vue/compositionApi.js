@@ -36,7 +36,9 @@ function generateCompositionApiScript(component, options, template, props, onUpd
         functions: false,
         getters: false,
         format: 'variables',
-        valueMapper: function (code) { return "ref(".concat(code, ")"); },
+        valueMapper: function (code, _, typeParameter) {
+            return options.typescript && typeParameter ? "ref<".concat(typeParameter, ">(").concat(code, ")") : "ref(".concat(code, ")");
+        },
         keyPrefix: 'const',
     });
     var methods = (0, get_state_object_string_1.getStateObjectStringFromComponent)(component, {

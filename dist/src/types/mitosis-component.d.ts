@@ -58,11 +58,13 @@ export declare type StateCode = _JSON;
 declare type CodeValue = {
     code: string;
     type: Exclude<StateValueType, 'property'>;
+    typeParameter?: string;
 };
 export declare const checkIsCodeValue: (value: unknown) => value is CodeValue;
 export declare type StateValue = CodeValue | {
     code: StateCode;
     type: Extract<StateValueType, 'property'>;
+    typeParameter?: string;
 };
 export declare type MitosisState = Dictionary<StateValue | undefined>;
 export declare type MitosisComponent = {

@@ -237,6 +237,10 @@ var componentFunctionToJson = function (node, context) {
                                 type: 'property',
                             };
                         }
+                        // Typescript Parameter
+                        if (types.isTSTypeParameterInstantiation(init.typeParameters)) {
+                            state[varName].typeParameter = (0, generator_1.default)(init.typeParameters.params[0]).code;
+                        }
                     }
                 }
                 // Legacy format, like:
