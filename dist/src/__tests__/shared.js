@@ -94,6 +94,7 @@ var basicRefAssignment = getRawFile('./data/basic-ref-assignment.raw');
 var propsDestructure = getRawFile('./data/basic-props-destructure.raw');
 var nestedStyles = getRawFile('./data/nested-styles.raw');
 var preserveExportOrLocalStatement = getRawFile('./data/basic-preserve-export-or-local-statement.raw');
+var arrowFunctionInUseStore = getRawFile('./data/arrow-function-in-use-store.raw');
 var propsType = getRawFile('./data/types/component-props-type.raw');
 var propsInterface = getRawFile('./data/types/component-props-interface.raw');
 var preserveTyping = getRawFile('./data/types/preserve-typing.raw');
@@ -207,6 +208,7 @@ var BASIC_TESTS = {
     spreadNestedProps: spreadNestedProps,
     spreadProps: spreadProps,
     renderContentExample: renderContentExample,
+    arrowFunctionInUseStore: arrowFunctionInUseStore,
 };
 var SLOTS_TESTS = {
     ContentSlotJSX: contentSlotJsx,

@@ -132,8 +132,13 @@ var createFunctionStringLiteralObjectProperty = function (key, node) {
 };
 var parseStateValue = function (item) {
     if (types.isObjectProperty(item)) {
-        if (types.isFunctionExpression(item.value) || types.isArrowFunctionExpression(item.value)) {
+        if (types.isFunctionExpression(item.value)) {
             return createFunctionStringLiteralObjectProperty(item.key, item.value);
+        }
+        else if (types.isArrowFunctionExpression(item.value)) {
+            // convert this to an object method instead
+            var n = babel.types.objectMethod('method', item.key, item.value.params, item.value.body);
+            return types.objectProperty(item.key, types.stringLiteral("".concat(outdated_prefixes_1.__DO_NOT_USE_METHOD_LITERAL_PREFIX).concat((0, generator_1.default)(n).code)));
         }
     }
     if (types.isObjectMethod(item)) {

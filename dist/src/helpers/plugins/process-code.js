@@ -59,7 +59,7 @@ var CODE_PROCESSOR_PLUGIN = function (codeProcessor) {
                         state.code = codeProcessor('state')(state.code);
                     }
                 }
-                (0, traverse_nodes_1.tarverseNodes)(json, function (node) {
+                (0, traverse_nodes_1.traverseNodes)(json, function (node) {
                     preProcessBlockCode({ json: node, codeProcessor: codeProcessor });
                 });
             },
