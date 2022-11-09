@@ -262,6 +262,18 @@ var JSX_TESTS = [
     CONTEXT_TEST,
 ];
 var TESTS_FOR_TARGET = {
+    alpine: [
+        CONTEXT_TEST,
+        BASIC_TESTS,
+        SLOTS_TESTS,
+        SHOW_TESTS,
+        FORWARD_REF_TESTS,
+        MULTI_ON_UPDATE_TESTS,
+        FORM_BLOCK_TESTS,
+        FOR_SHOW_TESTS,
+        ADVANCED_REF,
+        ON_UPDATE_RETURN,
+    ],
     react: [
         CONTEXT_TEST,
         BASIC_TESTS,

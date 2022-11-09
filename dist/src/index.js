@@ -72,6 +72,7 @@ __exportStar(require("./parsers/builder"), exports);
 __exportStar(require("./parsers/angular"), exports);
 __exportStar(require("./parsers/context"), exports);
 __exportStar(require("./generators/vue"), exports);
+__exportStar(require("./generators/alpine"), exports);
 __exportStar(require("./generators/angular"), exports);
 __exportStar(require("./generators/context/react"), exports);
 __exportStar(require("./generators/context/qwik"), exports);

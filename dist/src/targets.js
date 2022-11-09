@@ -4,6 +4,7 @@ exports.targets = exports.builder = void 0;
 var angular_1 = require("./generators/angular");
 var builder_1 = require("./generators/builder");
 var html_1 = require("./generators/html");
+var alpine_1 = require("./generators/alpine");
 var mitosis_1 = require("./generators/mitosis");
 var liquid_1 = require("./generators/liquid");
 var react_1 = require("./generators/react");
@@ -21,6 +22,7 @@ var lit_1 = require("./generators/lit");
 var rsc_1 = require("./generators/rsc");
 exports.builder = builder_1.componentToBuilder;
 exports.targets = {
+    alpine: alpine_1.componentToAlpine,
     angular: angular_1.componentToAngular,
     customElement: html_1.componentToCustomElement,
     html: html_1.componentToHtml,
