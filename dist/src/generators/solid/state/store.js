@@ -8,13 +8,9 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
     }
     return to.concat(ar || Array.prototype.slice.call(from));
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getStoreCode = void 0;
 var core_1 = require("@babel/core");
-var json5_1 = __importDefault(require("json5"));
 var babel_transform_1 = require("../../../helpers/babel-transform");
 var capitalize_1 = require("../../../helpers/capitalize");
 var function_1 = require("fp-ts/lib/function");
@@ -45,12 +41,15 @@ var getStoreCode = function (_a) {
     var mapValue = (0, helpers_1.updateStateCode)({ options: options, component: component });
     var stateUpdater = function (_a) {
         var key = _a[0], stateVal = _a[1];
+        if (!stateVal) {
+            return '';
+        }
         var getCreateStoreStr = function (initialValue) {
             return "const [".concat(key, ", ").concat((0, helpers_1.getStateSetterName)(key), "] = createStore(").concat(initialValue, ")");
         };
-        var getDefaultCase = function () { return (0, function_1.pipe)(value, json5_1.default.stringify, mapValue, getCreateStoreStr); };
-        var value = stateVal === null || stateVal === void 0 ? void 0 : stateVal.code;
-        var type = stateVal === null || stateVal === void 0 ? void 0 : stateVal.type;
+        var getDefaultCase = function () { return (0, function_1.pipe)(value, mapValue, getCreateStoreStr); };
+        var value = stateVal.code;
+        var type = stateVal.type;
         if (typeof value === 'string') {
             switch (type) {
                 case 'getter':

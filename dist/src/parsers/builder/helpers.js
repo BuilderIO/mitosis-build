@@ -20,7 +20,7 @@ var mapJsonToStateValue = function (value) {
             return { type: type, code: strippedValue };
         }
     }
-    return { type: 'property', code: value };
+    return { type: 'property', code: JSON.stringify(value) };
 };
 var mapBuilderContentStateToMitosisState = function (value) { return (0, lodash_1.mapValues)(value, mapJsonToStateValue); };
 exports.mapBuilderContentStateToMitosisState = mapBuilderContentStateToMitosisState;

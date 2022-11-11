@@ -16,7 +16,6 @@ exports.componentToQwik = void 0;
 var babel_transform_1 = require("../../helpers/babel-transform");
 var fast_clone_1 = require("../../helpers/fast-clone");
 var collect_css_1 = require("../../helpers/styles/collect-css");
-var mitosis_component_1 = require("../../types/mitosis-component");
 var state_1 = require("../../helpers/state");
 var add_prevent_default_1 = require("./add-prevent-default");
 var convert_method_to_function_1 = require("./convert-method-to-function");
@@ -25,6 +24,7 @@ var src_generator_1 = require("./src-generator");
 var plugins_1 = require("../../modules/plugins");
 var traverse_1 = __importDefault(require("traverse"));
 var stable_serialize_1 = require("./stable-serialize");
+var stable_inject_1 = require("./stable-inject");
 Error.stackTraceLimit = 9999;
 // TODO(misko): styles are not processed.
 var DEBUG = false;
@@ -108,7 +108,7 @@ function emitExports(file, component) {
 }
 function emitTagNameHack(file, component, metadataValue) {
     if (typeof metadataValue === 'string' && metadataValue) {
-        file.src.emit(metadataValue, '=', (0, convert_method_to_function_1.convertMethodToFunction)(metadataValue, stateToMethodOrGetter(component.state), getLexicalScopeVars(component)), ';');
+        file.src.emit(metadataValue, '=', (0, convert_method_to_function_1.convertMethodToFunction)(metadataValue, getStateMethodsAndGetters(component.state), getLexicalScopeVars(component)), ';');
     }
 }
 function emitUseClientEffect(file, component) {
@@ -218,7 +218,7 @@ function emitUseStore(file, stateInit) {
             file.src.emit('<any>');
         }
         file.src.emit('(');
-        file.src.emit((0, stable_serialize_1.stableJSONserialize)(state));
+        file.src.emit((0, stable_inject_1.stableInject)(state));
         file.src.emit(');');
     }
     else {
@@ -236,7 +236,7 @@ function emitStateMethodsAndRewriteBindings(file, component, metadata) {
     var _a;
     var lexicalArgs = getLexicalScopeVars(component);
     var state = emitStateMethods(file, component.state, lexicalArgs);
-    var methodMap = stateToMethodOrGetter(component.state);
+    var methodMap = getStateMethodsAndGetters(component.state);
     rewriteCodeExpr(component, methodMap, lexicalArgs, (_a = metadata.qwik) === null || _a === void 0 ? void 0 : _a.replace);
     return state;
 }
@@ -246,7 +246,7 @@ var checkIsObjectWithCodeBlock = function (obj) {
 function rewriteCodeExpr(component, methodMap, lexicalArgs, replace) {
     if (replace === void 0) { replace = {}; }
     (0, traverse_1.default)(component).forEach(function (item) {
-        if (!((0, mitosis_component_1.checkIsCodeValue)(item) || checkIsObjectWithCodeBlock(item))) {
+        if (!checkIsObjectWithCodeBlock(item)) {
             return;
         }
         var code = (0, convert_method_to_function_1.convertMethodToFunction)(item.code, methodMap, lexicalArgs);
@@ -273,34 +273,38 @@ function emitImports(file, component) {
 function emitStateMethods(file, componentState, lexicalArgs) {
     var stateValues = {};
     var stateInit = [stateValues];
-    var methodMap = stateToMethodOrGetter(componentState);
-    Object.keys(componentState).forEach(function (key) {
+    var methodMap = getStateMethodsAndGetters(componentState);
+    for (var key in componentState) {
         var stateValue = componentState[key];
-        if ((0, mitosis_component_1.checkIsCodeValue)(stateValue)) {
-            var code = stateValue.code;
-            var prefixIdx = 0;
-            if (stateValue.type === 'getter') {
-                prefixIdx += 'get '.length;
-            }
-            else if (stateValue.type === 'function') {
-                prefixIdx += 'function '.length;
-            }
-            code = code.substring(prefixIdx);
-            code = (0, convert_method_to_function_1.convertMethodToFunction)(code, methodMap, lexicalArgs).replace('(', "(".concat(lexicalArgs.join(','), ","));
-            var functionName = code.split(/\(/)[0];
-            if (stateValue.type === 'getter') {
-                stateInit.push("state.".concat(key, "=").concat(functionName, "(").concat(lexicalArgs.join(','), ")"));
-            }
-            if (!file.options.isTypeScript) {
-                // Erase type information
-                code = convertTypeScriptToJS(code);
-            }
-            file.exportConst(functionName, 'function ' + code, true);
+        switch (stateValue === null || stateValue === void 0 ? void 0 : stateValue.type) {
+            case 'method':
+            case 'getter':
+            case 'function':
+                var code = stateValue.code;
+                var prefixIdx = 0;
+                if (stateValue.type === 'getter') {
+                    prefixIdx += 'get '.length;
+                }
+                else if (stateValue.type === 'function') {
+                    prefixIdx += 'function '.length;
+                }
+                code = code.substring(prefixIdx);
+                code = (0, convert_method_to_function_1.convertMethodToFunction)(code, methodMap, lexicalArgs).replace('(', "(".concat(lexicalArgs.join(','), ","));
+                var functionName = code.split(/\(/)[0];
+                if (stateValue.type === 'getter') {
+                    stateInit.push("state.".concat(key, "=").concat(functionName, "(").concat(lexicalArgs.join(','), ")"));
+                }
+                if (!file.options.isTypeScript) {
+                    // Erase type information
+                    code = convertTypeScriptToJS(code);
+                }
+                file.exportConst(functionName, 'function ' + code, true);
+                continue;
+            case 'property':
+                stateValues[key] = stateValue.code;
+                continue;
         }
-        else {
-            stateValues[key] = stateValue === null || stateValue === void 0 ? void 0 : stateValue.code;
-        }
-    });
+    }
     return stateInit;
 }
 function convertTypeScriptToJS(code) {
@@ -311,7 +315,7 @@ function extractGetterBody(code) {
     var end = code.lastIndexOf('}');
     return code.substring(start + 1, end).trim();
 }
-function stateToMethodOrGetter(state) {
+function getStateMethodsAndGetters(state) {
     var methodMap = {};
     Object.keys(state).forEach(function (key) {
         var stateVal = state[key];

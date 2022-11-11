@@ -208,7 +208,7 @@ var componentFunctionToJson = function (node, context) {
                         // useState(() => true)
                         if (types.isArrowFunctionExpression(value)) {
                             state[varName] = {
-                                code: (0, helpers_1.parseCodeJson)(value.body),
+                                code: (0, helpers_1.parseCode)(value.body),
                                 type: 'function',
                             };
                         }
@@ -216,7 +216,7 @@ var componentFunctionToJson = function (node, context) {
                             // Value as init, like:
                             // useState(true)
                             state[varName] = {
-                                code: (0, helpers_1.parseCodeJson)(value),
+                                code: (0, helpers_1.parseCode)(value),
                                 type: 'property',
                             };
                         }

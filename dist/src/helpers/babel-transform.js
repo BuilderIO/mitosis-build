@@ -32,7 +32,7 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
     return to.concat(ar || Array.prototype.slice.call(from));
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.babelTransformExpression = exports.getType = exports.babelTransformCode = exports.babelTransform = void 0;
+exports.babelTransformExpression = exports.babelTransformCode = exports.babelTransform = void 0;
 var babel = __importStar(require("@babel/core"));
 var jsxPlugin = require('@babel/plugin-syntax-jsx');
 var tsPreset = require('@babel/preset-typescript');
@@ -104,13 +104,12 @@ var getType = function (code, initialType) {
     }
     return initialType;
 };
-exports.getType = getType;
 var babelTransformExpression = function (code, visitor, initialType) {
     if (initialType === void 0) { initialType = 'unknown'; }
     if (!code) {
         return '';
     }
-    var type = (0, exports.getType)(code, initialType);
+    var type = getType(code, initialType);
     var useCode = type === 'functionBody' ? "function(){".concat(code, "}") : code;
     if (type !== 'expression') {
         try {

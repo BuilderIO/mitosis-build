@@ -55,10 +55,6 @@ var uncapitalize = function (str) {
 };
 exports.uncapitalize = uncapitalize;
 var parseCode = function (node) {
-    // if the node is a string literal, make sure to wrap the return value with quotes
-    // if (types.isStringLiteral(node)) {
-    //   return `"${node.value}"`;
-    // }
     return (0, generator_1.default)(node).code;
 };
 exports.parseCode = parseCode;

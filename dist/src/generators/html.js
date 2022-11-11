@@ -99,9 +99,11 @@ var addUpdateAfterSet = function (json, options) {
         if ((0, is_mitosis_node_1.isMitosisNode)(item)) {
             for (var key in item.bindings) {
                 var value = (_a = item.bindings[key]) === null || _a === void 0 ? void 0 : _a.code;
-                var newValue = addUpdateAfterSetInCode(value, options);
-                if (newValue !== value) {
-                    item.bindings[key].code = newValue;
+                if (value) {
+                    var newValue = addUpdateAfterSetInCode(value, options);
+                    if (newValue !== value) {
+                        item.bindings[key].code = newValue;
+                    }
                 }
             }
         }
@@ -351,6 +353,7 @@ var blockToHtml = function (json, options, blockOptions) {
     return str;
 };
 function addUpdateAfterSetInCode(code, options, useString) {
+    if (code === void 0) { code = ''; }
     if (useString === void 0) { useString = options.format === 'class' ? 'this.update' : 'update'; }
     var updates = 0;
     return (0, babel_transform_1.babelTransformExpression)(code, {

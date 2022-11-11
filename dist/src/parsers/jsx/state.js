@@ -144,12 +144,12 @@ var processStateObjectSlice = function (item) {
             // { foo: ('string' as SomeType) }
             if (types.isTSAsExpression(item.value)) {
                 return {
-                    code: (0, helpers_1.parseCodeJson)(item.value.expression),
+                    code: (0, helpers_1.parseCode)(item.value.expression),
                     type: 'property',
                 };
             }
             return {
-                code: (0, helpers_1.parseCodeJson)(item.value),
+                code: (0, helpers_1.parseCode)(item.value),
                 type: 'property',
             };
         }

@@ -5,7 +5,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.updateStateSettersInCode = exports.updateStateSetters = exports.getUseStateCode = exports.processHookCode = void 0;
 var core_1 = require("@babel/core");
-var json5_1 = __importDefault(require("json5"));
 var traverse_1 = __importDefault(require("traverse"));
 var capitalize_1 = require("../../helpers/capitalize");
 var is_mitosis_node_1 = require("../../helpers/is-mitosis-node");
@@ -36,11 +35,14 @@ var processStateValue = function (options) {
     var mapValue = valueMapper(options);
     return function (_a) {
         var key = _a[0], stateVal = _a[1];
+        if (!stateVal) {
+            return '';
+        }
         var getDefaultCase = function () {
-            return (0, function_1.pipe)(value, json5_1.default.stringify, mapValue, function (x) { return "const [".concat(key, ", ").concat(getSetStateFnName(key), "] = useState(() => (").concat(x, "))"); });
+            return (0, function_1.pipe)(value, mapValue, function (x) { return "const [".concat(key, ", ").concat(getSetStateFnName(key), "] = useState(() => (").concat(x, "))"); });
         };
-        var value = stateVal === null || stateVal === void 0 ? void 0 : stateVal.code;
-        var type = stateVal === null || stateVal === void 0 ? void 0 : stateVal.type;
+        var value = stateVal.code || '';
+        var type = stateVal.type;
         if (typeof value === 'string') {
             switch (type) {
                 case 'getter':

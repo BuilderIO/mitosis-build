@@ -61,14 +61,14 @@ exports.METADATA_HOOK_NAME = 'useMetadata';
  * the returned nodes array
  */
 var collectModuleScopeHooks = function (nodes, component, options) {
-    var hookNames = new Set((options.jsonHookNames || []).concat(exports.METADATA_HOOK_NAME));
     return nodes.filter(function (node) {
         var hook = getHook(node);
         if (!hook) {
             return true;
         }
         if (types.isIdentifier(hook.callee)) {
-            if (hookNames.has(hook.callee.name)) {
+            var metadataHooks = new Set((options.jsonHookNames || []).concat(exports.METADATA_HOOK_NAME));
+            if (metadataHooks.has(hook.callee.name)) {
                 try {
                     if (component.meta[hook.callee.name]) {
                         component.meta[hook.callee.name] = __assign(__assign({}, component.meta[hook.callee.name]), (0, helpers_1.parseCodeJson)(hook.arguments[0]));

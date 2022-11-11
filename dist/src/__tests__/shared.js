@@ -81,6 +81,7 @@ var basicOutputsMeta = getRawFile('./data/basic-outputs-meta.raw');
 var basicOutputs = getRawFile('./data/basic-outputs.raw');
 var subComponent = getRawFile('./data/sub-component.raw');
 var componentWithContext = getRawFile('./data/context/component-with-context.raw');
+var expressionState = getRawFile('./data/expression-state.raw');
 var basic = getRawFile('./data/basic.raw');
 var basicAttribute = getRawFile('./data/basic-attribute.raw');
 var basicMitosis = getRawFile('./data/basic-custom-mitosis-package.raw');
@@ -209,6 +210,7 @@ var BASIC_TESTS = {
     spreadProps: spreadProps,
     renderContentExample: renderContentExample,
     arrowFunctionInUseStore: arrowFunctionInUseStore,
+    // expressionState,
 };
 var SLOTS_TESTS = {
     ContentSlotJSX: contentSlotJsx,

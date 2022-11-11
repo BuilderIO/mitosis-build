@@ -704,17 +704,18 @@ var builderContentPartToMitosisComponent = function (builderContent, options) {
     var customCode = convertExportDefaultToReturn(code);
     var parsed = getHooks(builderContent);
     var parsedState = (parsed === null || parsed === void 0 ? void 0 : parsed.state) || {};
+    var mitosisState = Object.keys(parsedState).length > 0
+        ? parsedState
+        : __assign(__assign({}, state), (0, helpers_1.mapBuilderContentStateToMitosisState)(((_c = builderContent.data) === null || _c === void 0 ? void 0 : _c.state) || {}));
     var componentJson = (0, create_mitosis_component_1.createMitosisComponent)({
         meta: __assign({ useMetadata: {
-                httpRequests: (_c = builderContent.data) === null || _c === void 0 ? void 0 : _c.httpRequests,
-            } }, (((_d = builderContent.data) === null || _d === void 0 ? void 0 : _d.cssCode) && { cssCode: builderContent.data.cssCode })),
-        inputs: (_f = (_e = builderContent.data) === null || _e === void 0 ? void 0 : _e.inputs) === null || _f === void 0 ? void 0 : _f.map(function (input) { return ({
+                httpRequests: (_d = builderContent.data) === null || _d === void 0 ? void 0 : _d.httpRequests,
+            } }, (((_e = builderContent.data) === null || _e === void 0 ? void 0 : _e.cssCode) && { cssCode: builderContent.data.cssCode })),
+        inputs: (_g = (_f = builderContent.data) === null || _f === void 0 ? void 0 : _f.inputs) === null || _g === void 0 ? void 0 : _g.map(function (input) { return ({
             name: input.name,
             defaultValue: input.defaultValue,
         }); }),
-        state: Object.keys(parsedState).length > 0
-            ? parsedState
-            : __assign(__assign({}, state), (0, helpers_1.mapBuilderContentStateToMitosisState)(((_g = builderContent.data) === null || _g === void 0 ? void 0 : _g.state) || {})),
+        state: mitosisState,
         hooks: __assign({}, ((((_h = parsed === null || parsed === void 0 ? void 0 : parsed.hooks.onMount) === null || _h === void 0 ? void 0 : _h.code) || (customCode && { code: customCode })) && {
             onMount: (parsed === null || parsed === void 0 ? void 0 : parsed.hooks.onMount) || { code: customCode },
         })),

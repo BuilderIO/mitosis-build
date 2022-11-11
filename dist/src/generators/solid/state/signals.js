@@ -1,10 +1,6 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getSignalsCode = void 0;
-var json5_1 = __importDefault(require("json5"));
 var function_1 = require("fp-ts/lib/function");
 var patterns_1 = require("../../../helpers/patterns");
 var helpers_1 = require("./helpers");
@@ -13,11 +9,14 @@ var processSignalStateValue = function (_a) {
     var mapValue = (0, helpers_1.updateStateCode)({ options: options, component: component });
     return function (_a) {
         var key = _a[0], stateVal = _a[1];
+        if (!stateVal) {
+            return '';
+        }
         var getDefaultCase = function () {
-            return (0, function_1.pipe)(value, json5_1.default.stringify, mapValue, function (x) { return "const [".concat(key, ", ").concat((0, helpers_1.getStateSetterName)(key), "] = createSignal(").concat(x, ")"); });
+            return (0, function_1.pipe)(value, mapValue, function (x) { return "const [".concat(key, ", ").concat((0, helpers_1.getStateSetterName)(key), "] = createSignal(").concat(x, ")"); });
         };
-        var value = stateVal === null || stateVal === void 0 ? void 0 : stateVal.code;
-        var type = stateVal === null || stateVal === void 0 ? void 0 : stateVal.type;
+        var value = stateVal.code;
+        var type = stateVal.type;
         if (typeof value === 'string') {
             switch (type) {
                 case 'getter':

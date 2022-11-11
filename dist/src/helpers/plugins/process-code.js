@@ -55,7 +55,7 @@ var CODE_PROCESSOR_PLUGIN = function (codeProcessor) {
                 }
                 for (var key in json.state) {
                     var state = json.state[key];
-                    if (state && state.type !== 'property') {
+                    if (state) {
                         state.code = codeProcessor('state')(state.code);
                     }
                 }

@@ -10,12 +10,8 @@ var __assign = (this && this.__assign) || function () {
     };
     return __assign.apply(this, arguments);
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getStateObjectStringFromComponent = exports.stringifyContextValue = exports.getMemberObjectString = void 0;
-var json5_1 = __importDefault(require("json5"));
 var DEFAULT_OPTIONS = {
     format: 'object',
     keyPrefix: '',
@@ -56,7 +52,7 @@ var convertStateMemberToString = function (_a) {
                 if (data === false) {
                     return undefined;
                 }
-                return "".concat(keyPrefix, " ").concat(key).concat(keyValueDelimiter, " ").concat(valueMapper(json5_1.default.stringify(code), 'data', typeParameter));
+                return "".concat(keyPrefix, " ").concat(key).concat(keyValueDelimiter, " ").concat(valueMapper(code, 'data', typeParameter));
             }
             default:
                 break;

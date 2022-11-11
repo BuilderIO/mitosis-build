@@ -1,5 +1,5 @@
 import { Dictionary } from '../helpers/typescript';
-import { _JSON, JSONObject } from './json';
+import { JSONObject } from './json';
 import { MitosisNode } from './mitosis-node';
 /**
  * @example
@@ -54,16 +54,9 @@ export interface MitosisExport {
     isFunction?: boolean;
 }
 export declare type StateValueType = 'function' | 'getter' | 'method' | 'property';
-export declare type StateCode = _JSON;
-declare type CodeValue = {
+export declare type StateValue = {
     code: string;
-    type: Exclude<StateValueType, 'property'>;
-    typeParameter?: string;
-};
-export declare const checkIsCodeValue: (value: unknown) => value is CodeValue;
-export declare type StateValue = CodeValue | {
-    code: StateCode;
-    type: Extract<StateValueType, 'property'>;
+    type: StateValueType;
     typeParameter?: string;
 };
 export declare type MitosisState = Dictionary<StateValue | undefined>;
@@ -103,4 +96,3 @@ export declare type MitosisComponent = {
     defaultProps?: JSONObject;
     style?: string;
 };
-export {};
