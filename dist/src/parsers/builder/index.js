@@ -14,9 +14,4 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.METADATA_HOOK_NAME = exports.selfClosingTags = void 0;
-__exportStar(require("./jsx"), exports);
-var helpers_1 = require("./helpers");
-Object.defineProperty(exports, "selfClosingTags", { enumerable: true, get: function () { return helpers_1.selfClosingTags; } });
-var hooks_1 = require("./hooks");
-Object.defineProperty(exports, "METADATA_HOOK_NAME", { enumerable: true, get: function () { return hooks_1.METADATA_HOOK_NAME; } });
+__exportStar(require("./builder"), exports);

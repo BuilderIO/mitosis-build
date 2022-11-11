@@ -63,14 +63,7 @@ var mitosisOptions = {
 describe('Builder', function () {
     test('extractStateHook', function () {
         var code = "useState({ foo: 'bar' }); alert('hi');";
-        expect((0, builder_2.extractStateHook)(code)).toEqual({
-            code: "alert('hi');",
-            state: { foo: 'bar' },
-        });
-        expect((0, builder_2.extractStateHook)(code)).toEqual({
-            code: "alert('hi');",
-            state: { foo: 'bar' },
-        });
+        expect((0, builder_2.extractStateHook)(code)).matchSnapshot();
     });
     test('Stamped', function () {
         var component = (0, jsx_1.parseJsx)(stamped_io_raw_tsx_raw_1.default);
@@ -131,8 +124,10 @@ describe('Builder', function () {
     test('Regenerate Image', function () {
         var code = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n      import { useStore } from \"@builder.io/mitosis\";\n      import { Image } from \"@components\";\n\n      export default function MyComponent(props) {\n        const state = useStore({ people: [\"Steve\", \"Sewell\"] });\n\n        return (\n          <div\n            css={{\n              padding: \"20px\",\n            }}\n          >\n            <Image\n              image=\"https://cdn.builder.io/api/v1/image/foobar\"\n              sizes=\"100vw\"\n              backgroundSize=\"contain\"\n              css={{\n                marignTop: \"50px\",\n                display: \"block\",\n              }}\n            />\n          </div>\n        );\n      }\n    "], ["\n      import { useStore } from \"@builder.io/mitosis\";\n      import { Image } from \"@components\";\n\n      export default function MyComponent(props) {\n        const state = useStore({ people: [\"Steve\", \"Sewell\"] });\n\n        return (\n          <div\n            css={{\n              padding: \"20px\",\n            }}\n          >\n            <Image\n              image=\"https://cdn.builder.io/api/v1/image/foobar\"\n              sizes=\"100vw\"\n              backgroundSize=\"contain\"\n              css={{\n                marignTop: \"50px\",\n                display: \"block\",\n              }}\n            />\n          </div>\n        );\n      }\n    "])));
         var component = (0, jsx_1.parseJsx)(code);
+        expect(component.state).toEqual({ people: { code: ['Steve', 'Sewell'], type: 'property' } });
         var builderJson = (0, builder_1.componentToBuilder)()({ component: component });
         var backToMitosis = (0, builder_2.builderContentToMitosisComponent)(builderJson);
+        expect(backToMitosis.state).toEqual(component.state);
         var mitosis = (0, mitosis_1.componentToMitosis)(mitosisOptions)({
             component: backToMitosis,
         });

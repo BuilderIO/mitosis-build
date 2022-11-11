@@ -26,7 +26,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.isImportOrDefaultExport = exports.parseCodeJson = exports.uncapitalize = exports.selfClosingTags = void 0;
+exports.isImportOrDefaultExport = exports.parseCodeJson = exports.parseCode = exports.uncapitalize = exports.selfClosingTags = void 0;
 var babel = __importStar(require("@babel/core"));
 var generator_1 = __importDefault(require("@babel/generator"));
 var json_1 = require("../../helpers/json");
@@ -54,8 +54,16 @@ var uncapitalize = function (str) {
     return str[0].toLowerCase() + str.slice(1);
 };
 exports.uncapitalize = uncapitalize;
+var parseCode = function (node) {
+    // if the node is a string literal, make sure to wrap the return value with quotes
+    // if (types.isStringLiteral(node)) {
+    //   return `"${node.value}"`;
+    // }
+    return (0, generator_1.default)(node).code;
+};
+exports.parseCode = parseCode;
 var parseCodeJson = function (node) {
-    var code = (0, generator_1.default)(node).code;
+    var code = (0, exports.parseCode)(node);
     return (0, json_1.tryParseJson)(code);
 };
 exports.parseCodeJson = parseCodeJson;

@@ -45,7 +45,7 @@ var replace_new_lines_in_strings_1 = require("../../helpers/replace-new-lines-in
 var json_1 = require("../../helpers/json");
 var ast_1 = require("./ast");
 var state_1 = require("./state");
-var metadata_1 = require("./metadata");
+var hooks_1 = require("./hooks");
 var context_1 = require("./context");
 var helpers_1 = require("./helpers");
 var component_types_1 = require("./component-types");
@@ -119,7 +119,9 @@ function parseJsx(jsx, _options) {
                             return !types.isExportDefaultDeclaration(node) && types.isFunctionDeclaration(node);
                         })
                             .map(function (node) { return "export default ".concat((0, generator_1.default)(node).code); });
-                        var preComponentCode = (0, function_1.pipe)(path.node.body.filter(function (statement) { return !(0, helpers_1.isImportOrDefaultExport)(statement); }), function (statements) { return (0, metadata_1.collectMetadata)(statements, context.builder.component, options); }, types.program, generator_1.default, function (generatorResult) { return generatorResult.code; });
+                        var preComponentCode = (0, function_1.pipe)(path.node.body.filter(function (statement) { return !(0, helpers_1.isImportOrDefaultExport)(statement); }), function (statements) {
+                            return (0, hooks_1.collectModuleScopeHooks)(statements, context.builder.component, options);
+                        }, types.program, generator_1.default, function (generatorResult) { return generatorResult.code; });
                         // TODO: support multiple? e.g. for others to add imports?
                         context.builder.component.hooks.preComponent = { code: preComponentCode };
                         path.replaceWith(types.program(keepStatements));

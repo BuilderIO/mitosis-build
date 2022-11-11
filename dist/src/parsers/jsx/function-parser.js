@@ -57,7 +57,7 @@ var state_1 = require("./state");
 var helpers_1 = require("./helpers");
 var component_types_1 = require("./component-types");
 var element_parser_1 = require("./element-parser");
-var metadata_1 = require("./metadata");
+var hooks_2 = require("./hooks");
 var types = babel.types;
 function generateUseStyleCode(expression) {
     return (0, generator_1.default)(expression.arguments[0]).code.replace(/(^("|'|`)|("|'|`)$)/g, '');
@@ -78,6 +78,15 @@ function parseDefaultPropsHook(component, expression) {
     }
 }
 exports.parseDefaultPropsHook = parseDefaultPropsHook;
+var processHookCode = function (firstArg) {
+    return (0, generator_1.default)(firstArg.body)
+        .code.trim()
+        // Remove arbitrary block wrapping if any
+        // AKA
+        //  { console.log('hi') } -> console.log('hi')
+        .replace(/^{/, '')
+        .replace(/}$/, '');
+};
 /**
  * Parses function declarations within the Mitosis copmonent's body to JSON
  */
@@ -127,18 +136,10 @@ var componentFunctionToJson = function (node, context) {
                             }
                         }
                     }
-                    else if (expression.callee.name === 'onMount' ||
-                        expression.callee.name === 'useEffect') {
+                    else if (expression.callee.name === 'onMount') {
                         var firstArg = expression.arguments[0];
                         if (types.isFunctionExpression(firstArg) || types.isArrowFunctionExpression(firstArg)) {
-                            var code = (0, generator_1.default)(firstArg.body)
-                                .code.trim()
-                                // Remove arbitrary block wrapping if any
-                                // AKA
-                                //  { console.log('hi') } -> console.log('hi')
-                                .replace(/^{/, '')
-                                .replace(/}$/, '');
-                            // TODO: add arguments
+                            var code = processHookCode(firstArg);
                             hooks.onMount = { code: code };
                         }
                     }
@@ -146,13 +147,7 @@ var componentFunctionToJson = function (node, context) {
                         var firstArg = expression.arguments[0];
                         var secondArg = expression.arguments[1];
                         if (types.isFunctionExpression(firstArg) || types.isArrowFunctionExpression(firstArg)) {
-                            var code = (0, generator_1.default)(firstArg.body)
-                                .code.trim()
-                                // Remove arbitrary block wrapping if any
-                                // AKA
-                                //  { console.log('hi') } -> console.log('hi')
-                                .replace(/^{/, '')
-                                .replace(/}$/, '');
+                            var code = processHookCode(firstArg);
                             if (!secondArg ||
                                 (types.isArrayExpression(secondArg) && secondArg.elements.length > 0)) {
                                 var depsCode = secondArg ? (0, generator_1.default)(secondArg).code : '';
@@ -168,26 +163,14 @@ var componentFunctionToJson = function (node, context) {
                     else if (expression.callee.name === 'onUnMount') {
                         var firstArg = expression.arguments[0];
                         if (types.isFunctionExpression(firstArg) || types.isArrowFunctionExpression(firstArg)) {
-                            var code = (0, generator_1.default)(firstArg.body)
-                                .code.trim()
-                                // Remove arbitrary block wrapping if any
-                                // AKA
-                                //  { console.log('hi') } -> console.log('hi')
-                                .replace(/^{/, '')
-                                .replace(/}$/, '');
+                            var code = processHookCode(firstArg);
                             hooks.onUnMount = { code: code };
                         }
                     }
                     else if (expression.callee.name === 'onInit') {
                         var firstArg = expression.arguments[0];
                         if (types.isFunctionExpression(firstArg) || types.isArrowFunctionExpression(firstArg)) {
-                            var code = (0, generator_1.default)(firstArg.body)
-                                .code.trim()
-                                // Remove arbitrary block wrapping if any
-                                // AKA
-                                //  { console.log('hi') } -> console.log('hi')
-                                .replace(/^{/, '')
-                                .replace(/}$/, '');
+                            var code = processHookCode(firstArg);
                             hooks.onInit = { code: code };
                         }
                     }
@@ -197,8 +180,8 @@ var componentFunctionToJson = function (node, context) {
                     else if (expression.callee.name === hooks_1.HOOKS.STYLE) {
                         context.builder.component.style = generateUseStyleCode(expression);
                     }
-                    else if (expression.callee.name === metadata_1.METADATA_HOOK_NAME) {
-                        context.builder.component.meta[metadata_1.METADATA_HOOK_NAME] = __assign(__assign({}, context.builder.component.meta[metadata_1.METADATA_HOOK_NAME]), (0, helpers_1.parseCodeJson)(expression.arguments[0]));
+                    else if (expression.callee.name === hooks_2.METADATA_HOOK_NAME) {
+                        context.builder.component.meta[hooks_2.METADATA_HOOK_NAME] = __assign(__assign({}, context.builder.component.meta[hooks_2.METADATA_HOOK_NAME]), (0, helpers_1.parseCodeJson)(expression.arguments[0]));
                     }
                 }
             }
@@ -214,10 +197,10 @@ var componentFunctionToJson = function (node, context) {
         if (types.isVariableDeclaration(item)) {
             var declaration = item.declarations[0];
             var init = declaration.init;
-            if (types.isCallExpression(init)) {
+            if (types.isCallExpression(init) && types.isIdentifier(init.callee)) {
                 // React format, like:
                 // const [foo, setFoo] = useState(...)
-                if (types.isArrayPattern(declaration.id)) {
+                if (types.isArrayPattern(declaration.id) && init.callee.name === hooks_1.HOOKS.STATE) {
                     var varName = types.isIdentifier(declaration.id.elements[0]) && declaration.id.elements[0].name;
                     if (varName) {
                         var value = init.arguments[0];
@@ -243,48 +226,46 @@ var componentFunctionToJson = function (node, context) {
                         }
                     }
                 }
-                // Legacy format, like:
+                // Solid store format, like:
                 // const state = useStore({...})
-                else if (types.isIdentifier(init.callee)) {
-                    if (init.callee.name === hooks_1.HOOKS.STATE || init.callee.name === hooks_1.HOOKS.STORE) {
-                        var firstArg = init.arguments[0];
-                        if (types.isObjectExpression(firstArg)) {
-                            var useStoreState = (0, state_1.parseStateObjectToMitosisState)(firstArg);
-                            Object.assign(state, useStoreState);
-                        }
+                if (init.callee.name === hooks_1.HOOKS.STORE) {
+                    var firstArg = init.arguments[0];
+                    if (types.isObjectExpression(firstArg)) {
+                        var useStoreState = (0, state_1.parseStateObjectToMitosisState)(firstArg);
+                        Object.assign(state, useStoreState);
                     }
-                    else if (init.callee.name === hooks_1.HOOKS.CONTEXT) {
-                        var firstArg = init.arguments[0];
-                        if (types.isVariableDeclarator(declaration) && types.isIdentifier(declaration.id)) {
-                            if (types.isIdentifier(firstArg)) {
-                                var varName = declaration.id.name;
-                                var name_1 = firstArg.name;
-                                accessedContext[varName] = {
-                                    name: name_1,
-                                    path: (0, trace_reference_to_module_path_1.traceReferenceToModulePath)(context.builder.component.imports, name_1),
-                                };
-                            }
-                            else {
-                                var varName = declaration.id.name;
-                                var name_2 = (0, generator_1.default)(firstArg).code;
-                                accessedContext[varName] = {
-                                    name: name_2,
-                                    path: '',
-                                };
-                            }
-                        }
-                    }
-                    else if (init.callee.name === hooks_1.HOOKS.REF) {
-                        if (types.isIdentifier(declaration.id)) {
-                            var firstArg = init.arguments[0];
+                }
+                else if (init.callee.name === hooks_1.HOOKS.CONTEXT) {
+                    var firstArg = init.arguments[0];
+                    if (types.isVariableDeclarator(declaration) && types.isIdentifier(declaration.id)) {
+                        if (types.isIdentifier(firstArg)) {
                             var varName = declaration.id.name;
-                            refs[varName] = {
-                                argument: (0, generator_1.default)(firstArg).code,
+                            var name_1 = firstArg.name;
+                            accessedContext[varName] = {
+                                name: name_1,
+                                path: (0, trace_reference_to_module_path_1.traceReferenceToModulePath)(context.builder.component.imports, name_1),
                             };
-                            // Typescript Parameter
-                            if (types.isTSTypeParameterInstantiation(init.typeParameters)) {
-                                refs[varName].typeParameter = (0, generator_1.default)(init.typeParameters.params[0]).code;
-                            }
+                        }
+                        else {
+                            var varName = declaration.id.name;
+                            var name_2 = (0, generator_1.default)(firstArg).code;
+                            accessedContext[varName] = {
+                                name: name_2,
+                                path: '',
+                            };
+                        }
+                    }
+                }
+                else if (init.callee.name === hooks_1.HOOKS.REF) {
+                    if (types.isIdentifier(declaration.id)) {
+                        var firstArg = init.arguments[0];
+                        var varName = declaration.id.name;
+                        refs[varName] = {
+                            argument: (0, generator_1.default)(firstArg).code,
+                        };
+                        // Typescript Parameter
+                        if (types.isTSTypeParameterInstantiation(init.typeParameters)) {
+                            refs[varName].typeParameter = (0, generator_1.default)(init.typeParameters.params[0]).code;
                         }
                     }
                 }

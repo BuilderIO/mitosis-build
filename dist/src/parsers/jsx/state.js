@@ -37,18 +37,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.parseStateObjectToMitosisState = exports.parseStateObject = exports.mapStateIdentifiers = void 0;
+exports.parseStateObjectToMitosisState = exports.mapStateIdentifiers = void 0;
 var babel = __importStar(require("@babel/core"));
-var generator_1 = __importDefault(require("@babel/generator"));
-var outdated_prefixes_1 = require("../constants/outdated-prefixes");
 var traverse_1 = __importDefault(require("traverse"));
 var babel_transform_1 = require("../../helpers/babel-transform");
 var capitalize_1 = require("../../helpers/capitalize");
 var is_mitosis_node_1 = require("../../helpers/is-mitosis-node");
 var replace_identifiers_1 = require("../../helpers/replace-identifiers");
 var helpers_1 = require("./helpers");
-var function_1 = require("fp-ts/lib/function");
-var state_1 = require("../helpers/state");
 var types = babel.types;
 function mapStateIdentifiersInExpression(expression, stateProperties) {
     var setExpressions = stateProperties.map(function (propertyName) { return "set".concat((0, capitalize_1.capitalize)(propertyName)); });
@@ -127,36 +123,63 @@ function mapStateIdentifiers(json) {
     });
 }
 exports.mapStateIdentifiers = mapStateIdentifiers;
-var createFunctionStringLiteralObjectProperty = function (key, node) {
-    return types.objectProperty(key, types.stringLiteral("".concat(outdated_prefixes_1.__DO_NOT_USE_FUNCTION_LITERAL_PREFIX).concat((0, generator_1.default)(node).code)));
-};
-var parseStateValue = function (item) {
+var processStateObjectSlice = function (item) {
     if (types.isObjectProperty(item)) {
         if (types.isFunctionExpression(item.value)) {
-            return createFunctionStringLiteralObjectProperty(item.key, item.value);
+            return {
+                code: (0, helpers_1.parseCode)(item.value),
+                type: 'function',
+            };
         }
         else if (types.isArrowFunctionExpression(item.value)) {
-            // convert this to an object method instead
             var n = babel.types.objectMethod('method', item.key, item.value.params, item.value.body);
-            return types.objectProperty(item.key, types.stringLiteral("".concat(outdated_prefixes_1.__DO_NOT_USE_METHOD_LITERAL_PREFIX).concat((0, generator_1.default)(n).code)));
+            var code = (0, helpers_1.parseCode)(n);
+            return {
+                code: code,
+                type: 'method',
+            };
+        }
+        else {
+            // Remove typescript types, e.g. from
+            // { foo: ('string' as SomeType) }
+            if (types.isTSAsExpression(item.value)) {
+                return {
+                    code: (0, helpers_1.parseCodeJson)(item.value.expression),
+                    type: 'property',
+                };
+            }
+            return {
+                code: (0, helpers_1.parseCodeJson)(item.value),
+                type: 'property',
+            };
         }
     }
-    if (types.isObjectMethod(item)) {
-        return types.objectProperty(item.key, types.stringLiteral("".concat(outdated_prefixes_1.__DO_NOT_USE_METHOD_LITERAL_PREFIX).concat((0, generator_1.default)(__assign(__assign({}, item), { returnType: null })).code)));
+    else if (types.isObjectMethod(item)) {
+        var n = (0, helpers_1.parseCode)(__assign(__assign({}, item), { returnType: null }));
+        var isGetter = item.kind === 'get';
+        return {
+            code: n,
+            type: isGetter ? 'getter' : 'method',
+        };
     }
-    // Remove typescript types, e.g. from
-    // { foo: ('string' as SomeType) }
-    if (types.isObjectProperty(item)) {
-        var value = item.value;
-        if (types.isTSAsExpression(value)) {
-            value = value.expression;
+    else {
+        throw new Error('Unexpected state value type', item);
+    }
+};
+var parseStateObjectToMitosisState = function (object) {
+    var state = {};
+    object.properties.forEach(function (x) {
+        if (types.isSpreadElement(x)) {
+            throw new Error('Parse Error: Mitosis cannot consume spread element in state object: ' + x);
         }
-        return types.objectProperty(item.key, value);
-    }
-    return item;
+        if (types.isPrivateName(x.key)) {
+            throw new Error('Parse Error: Mitosis cannot consume private name in state object: ' + x.key);
+        }
+        if (!types.isIdentifier(x.key)) {
+            throw new Error('Parse Error: Mitosis cannot consume non-identifier key in state object: ' + x.key);
+        }
+        state[x.key.name] = processStateObjectSlice(x);
+    });
+    return state;
 };
-var parseStateObject = function (object) {
-    return (0, function_1.pipe)(object.properties, function (p) { return p.map(parseStateValue); }, types.objectExpression, helpers_1.parseCodeJson);
-};
-exports.parseStateObject = parseStateObject;
-exports.parseStateObjectToMitosisState = (0, function_1.flow)(exports.parseStateObject, state_1.mapJsonObjectToStateValue);
+exports.parseStateObjectToMitosisState = parseStateObjectToMitosisState;

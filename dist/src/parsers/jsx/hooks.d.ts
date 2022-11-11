@@ -10,5 +10,5 @@ export declare const METADATA_HOOK_NAME = "useMetadata";
  * This function collects metadata and removes the statement from
  * the returned nodes array
  */
-export declare const collectMetadata: (nodes: babel.types.Statement[], component: MitosisComponent, options: ParseMitosisOptions) => babel.types.Statement[];
+export declare const collectModuleScopeHooks: (nodes: babel.types.Statement[], component: MitosisComponent, options: ParseMitosisOptions) => babel.types.Statement[];
 export {};

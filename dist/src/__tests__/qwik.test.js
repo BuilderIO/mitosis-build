@@ -158,7 +158,7 @@ describe('qwik', function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        component = (0, builder_1.builderContentToMitosisComponent)(require('./qwik.test.hello_world.json'));
+                        component = (0, builder_1.builderContentToMitosisComponent)(require('./qwik/specs/qwik.test.hello_world.json'));
                         fileSet = (0, index_1.createFileSet)({ output: 'mjs' });
                         (0, index_1.addComponent)(fileSet, component);
                         return [4 /*yield*/, debugOutput(fileSet)];
@@ -175,7 +175,7 @@ describe('qwik', function () {
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    component = (0, builder_1.builderContentToMitosisComponent)(require('./qwik.test.page-with-symbol.json'));
+                    component = (0, builder_1.builderContentToMitosisComponent)(require('./qwik/specs/qwik.test.page-with-symbol.json'));
                     fileSet = (0, index_1.createFileSet)({ output: 'mjs', jsx: false });
                     (0, index_1.addComponent)(fileSet, component);
                     return [4 /*yield*/, debugOutput(fileSet)];
@@ -191,7 +191,7 @@ describe('qwik', function () {
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    component = (0, builder_1.builderContentToMitosisComponent)(require('./qwik.test.button.json'));
+                    component = (0, builder_1.builderContentToMitosisComponent)(require('./qwik/specs/qwik.test.button.json'));
                     fileSet = (0, index_1.createFileSet)({ output: 'mjs', jsx: false });
                     (0, index_1.addComponent)(fileSet, component);
                     return [4 /*yield*/, debugOutput(fileSet)];
@@ -207,7 +207,7 @@ describe('qwik', function () {
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    component = (0, builder_1.builderContentToMitosisComponent)(require('./qwik.test.svg.json'), {
+                    component = (0, builder_1.builderContentToMitosisComponent)(require('./qwik/specs/qwik.test.svg.json'), {
                         includeBuilderExtras: true,
                         preserveTextBlocks: true,
                     });
@@ -226,7 +226,7 @@ describe('qwik', function () {
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    component = (0, builder_1.builderContentToMitosisComponent)(require('./qwik.test.image.json'), {
+                    component = (0, builder_1.builderContentToMitosisComponent)(require('./qwik/specs/qwik.test.image.json'), {
                         includeBuilderExtras: true,
                         preserveTextBlocks: true,
                     });
@@ -245,7 +245,7 @@ describe('qwik', function () {
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    component = (0, builder_1.builderContentToMitosisComponent)(require('./qwik.test.image.json'), {
+                    component = (0, builder_1.builderContentToMitosisComponent)(require('./qwik/specs/qwik.test.image.json'), {
                         includeBuilderExtras: true,
                         preserveTextBlocks: true,
                     });
@@ -264,7 +264,7 @@ describe('qwik', function () {
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    component = (0, builder_1.builderContentToMitosisComponent)(require('./qwik.test.accordion.json'), {
+                    component = (0, builder_1.builderContentToMitosisComponent)(require('./qwik/specs/qwik.test.accordion.json'), {
                         includeBuilderExtras: true,
                         preserveTextBlocks: true,
                     });
@@ -284,7 +284,7 @@ describe('qwik', function () {
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    component = (0, builder_1.builderContentToMitosisComponent)(require('./qwik.test.for-loop.json'), {
+                    component = (0, builder_1.builderContentToMitosisComponent)(require('./qwik/specs/qwik.test.for-loop.json'), {
                         includeBuilderExtras: true,
                         preserveTextBlocks: true,
                     });
@@ -305,7 +305,7 @@ describe('qwik', function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        content = require('./qwik.test.component-binding.json');
+                        content = require('./qwik/specs/qwik.test.component-binding.json');
                         state = {};
                         hierarchy = (0, symbol_processor_1.convertBuilderContentToSymbolHierarchy)(content, {
                             collectComponentState: state,
@@ -335,7 +335,7 @@ describe('qwik', function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        content = require('./qwik.test.component-inputs.json');
+                        content = require('./qwik/specs/qwik.test.component-inputs.json');
                         state = {};
                         expect(state).toMatchSnapshot();
                         fileSet = (0, index_1.createFileSet)({ output: 'cjs', jsx: true });
@@ -358,7 +358,7 @@ describe('qwik', function () {
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    content = require('./qwik.test.show-hide.json');
+                    content = require('./qwik/specs/qwik.test.show-hide.json');
                     state = {};
                     expect(state).toMatchSnapshot();
                     fileSet = (0, index_1.createFileSet)({ output: 'mjs', jsx: true });
@@ -380,7 +380,7 @@ describe('qwik', function () {
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    content = require('./qwik.test.bindings.json');
+                    content = require('./qwik/specs/qwik.test.bindings.json');
                     fileSet = (0, index_1.createFileSet)({ output: 'cjs', jsx: false });
                     component = (0, builder_1.builderContentToMitosisComponent)(content, {
                         includeBuilderExtras: true,
@@ -401,7 +401,7 @@ describe('qwik', function () {
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    component = require('./qwik.test.for-loop.binding.json');
+                    component = require('./qwik/specs/qwik.test.for-loop.binding.json');
                     fileSet = (0, index_1.createFileSet)({ output: 'cjs', jsx: false });
                     (0, compile_away_builder_components_1.compileAwayBuilderComponentsFromTree)(component, compile_away_builder_components_1.components);
                     (0, index_1.addComponent)(fileSet, component);
@@ -418,7 +418,7 @@ describe('qwik', function () {
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    content = require('./qwik.test.mount.json');
+                    content = require('./qwik/specs/qwik.test.mount.json');
                     fileSet = (0, index_1.createFileSet)({ output: 'cjs', jsx: false });
                     component = (0, builder_1.builderContentToMitosisComponent)(content, {
                         includeBuilderExtras: true,

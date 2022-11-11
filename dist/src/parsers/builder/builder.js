@@ -42,16 +42,17 @@ var babel = __importStar(require("@babel/core"));
 var generator_1 = __importDefault(require("@babel/generator"));
 var json5_1 = __importDefault(require("json5"));
 var lodash_1 = require("lodash");
-var fast_clone_1 = require("../helpers/fast-clone");
+var fast_clone_1 = require("../../helpers/fast-clone");
 var traverse_1 = __importDefault(require("traverse"));
-var media_sizes_1 = require("../constants/media-sizes");
-var capitalize_1 = require("../helpers/capitalize");
-var create_mitosis_component_1 = require("../helpers/create-mitosis-component");
-var create_mitosis_node_1 = require("../helpers/create-mitosis-node");
-var jsx_1 = require("./jsx");
-var parsers_1 = require("../helpers/parsers");
-var __1 = require("..");
-var state_1 = require("./helpers/state");
+var media_sizes_1 = require("../../constants/media-sizes");
+var capitalize_1 = require("../../helpers/capitalize");
+var create_mitosis_component_1 = require("../../helpers/create-mitosis-component");
+var create_mitosis_node_1 = require("../../helpers/create-mitosis-node");
+var jsx_1 = require("../jsx");
+var parsers_1 = require("../../helpers/parsers");
+var __1 = require("../..");
+var helpers_1 = require("./helpers");
+var state_1 = require("../jsx/state");
 // Omit some superflous styles that can come from Builder's web importer
 var styleOmitList = [
     'backgroundRepeatX',
@@ -573,7 +574,7 @@ function extractStateHook(code) {
                 if (types.isIdentifier(expression.callee) && expression.callee.name === 'useState') {
                     var arg = expression.arguments[0];
                     if (types.isObjectExpression(arg)) {
-                        state = (0, jsx_1.parseStateObject)(arg);
+                        state = (0, state_1.parseStateObjectToMitosisState)(arg);
                         newBody.splice(i, 1);
                     }
                 }
@@ -584,7 +585,7 @@ function extractStateHook(code) {
                             expression.callee.property.name === 'assign') {
                             var arg = expression.arguments[1];
                             if (types.isObjectExpression(arg)) {
-                                state = (0, jsx_1.parseStateObject)(arg);
+                                state = (0, state_1.parseStateObjectToMitosisState)(arg);
                                 newBody.splice(i, 1);
                             }
                         }
@@ -702,6 +703,7 @@ var builderContentPartToMitosisComponent = function (builderContent, options) {
     var _k = extractStateHook(((_a = builderContent === null || builderContent === void 0 ? void 0 : builderContent.data) === null || _a === void 0 ? void 0 : _a.tsCode) || ((_b = builderContent === null || builderContent === void 0 ? void 0 : builderContent.data) === null || _b === void 0 ? void 0 : _b.jsCode) || ''), state = _k.state, code = _k.code;
     var customCode = convertExportDefaultToReturn(code);
     var parsed = getHooks(builderContent);
+    var parsedState = (parsed === null || parsed === void 0 ? void 0 : parsed.state) || {};
     var componentJson = (0, create_mitosis_component_1.createMitosisComponent)({
         meta: __assign({ useMetadata: {
                 httpRequests: (_c = builderContent.data) === null || _c === void 0 ? void 0 : _c.httpRequests,
@@ -710,7 +712,9 @@ var builderContentPartToMitosisComponent = function (builderContent, options) {
             name: input.name,
             defaultValue: input.defaultValue,
         }); }),
-        state: (parsed === null || parsed === void 0 ? void 0 : parsed.state) || __assign(__assign({}, state), (0, state_1.mapJsonObjectToStateValue)((_g = builderContent.data) === null || _g === void 0 ? void 0 : _g.state)),
+        state: Object.keys(parsedState).length > 0
+            ? parsedState
+            : __assign(__assign({}, state), (0, helpers_1.mapBuilderContentStateToMitosisState)(((_g = builderContent.data) === null || _g === void 0 ? void 0 : _g.state) || {})),
         hooks: __assign({}, ((((_h = parsed === null || parsed === void 0 ? void 0 : parsed.hooks.onMount) === null || _h === void 0 ? void 0 : _h.code) || (customCode && { code: customCode })) && {
             onMount: (parsed === null || parsed === void 0 ? void 0 : parsed.hooks.onMount) || { code: customCode },
         })),

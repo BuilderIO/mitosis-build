@@ -34,7 +34,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.collectMetadata = exports.METADATA_HOOK_NAME = void 0;
+exports.collectModuleScopeHooks = exports.METADATA_HOOK_NAME = void 0;
 var babel = __importStar(require("@babel/core"));
 var hooks_1 = require("../../constants/hooks");
 var function_parser_1 = require("./function-parser");
@@ -60,7 +60,7 @@ exports.METADATA_HOOK_NAME = 'useMetadata';
  * This function collects metadata and removes the statement from
  * the returned nodes array
  */
-var collectMetadata = function (nodes, component, options) {
+var collectModuleScopeHooks = function (nodes, component, options) {
     var hookNames = new Set((options.jsonHookNames || []).concat(exports.METADATA_HOOK_NAME));
     return nodes.filter(function (node) {
         var hook = getHook(node);
@@ -94,4 +94,4 @@ var collectMetadata = function (nodes, component, options) {
         return true;
     });
 };
-exports.collectMetadata = collectMetadata;
+exports.collectModuleScopeHooks = collectModuleScopeHooks;
