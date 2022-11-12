@@ -72,82 +72,82 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.runTestsForTarget = exports.runTestsForJsx = void 0;
 var jsx_1 = require("../parsers/jsx");
-var getRawFile = function (path) { return Promise.resolve().then(function () { return __importStar(require("".concat(path, ".tsx?raw"))); }).then(function (x) { return x.default; }); };
-var basicForShow = getRawFile('./data/basic-for-show.raw');
-var basicBooleanAttribute = getRawFile('./data/basic-boolean-attribute.raw');
-var basicOnMountUpdate = getRawFile('./data/basic-onMount-update.raw');
-var basicContext = getRawFile('./data/basic-context.raw');
-var basicOutputsMeta = getRawFile('./data/basic-outputs-meta.raw');
-var basicOutputs = getRawFile('./data/basic-outputs.raw');
-var subComponent = getRawFile('./data/sub-component.raw');
-var componentWithContext = getRawFile('./data/context/component-with-context.raw');
-var expressionState = getRawFile('./data/expression-state.raw');
-var contentState = getRawFile('./data/context-state.raw');
-var basic = getRawFile('./data/basic.raw');
-var basicAttribute = getRawFile('./data/basic-attribute.raw');
-var basicMitosis = getRawFile('./data/basic-custom-mitosis-package.raw');
-var basicChildComponent = getRawFile('./data/basic-child-component.raw');
-var basicFor = getRawFile('./data/basic-for.raw');
-var basicRef = getRawFile('./data/basic-ref.raw');
-var basicForwardRef = getRawFile('./data/basic-forwardRef.raw');
-var basicForwardRefMetadata = getRawFile('./data/basic-forwardRef-metadata.raw');
-var basicRefPrevious = getRawFile('./data/basic-ref-usePrevious.raw');
-var basicRefAssignment = getRawFile('./data/basic-ref-assignment.raw');
-var propsDestructure = getRawFile('./data/basic-props-destructure.raw');
-var nestedStyles = getRawFile('./data/nested-styles.raw');
-var preserveExportOrLocalStatement = getRawFile('./data/basic-preserve-export-or-local-statement.raw');
-var arrowFunctionInUseStore = getRawFile('./data/arrow-function-in-use-store.raw');
-var propsType = getRawFile('./data/types/component-props-type.raw');
-var propsInterface = getRawFile('./data/types/component-props-interface.raw');
-var preserveTyping = getRawFile('./data/types/preserve-typing.raw');
-var typeDependency = getRawFile('./data/types/type-dependency.raw');
-var defaultProps = getRawFile('./data/default-props/default-props.raw');
-var defaultPropsOutsideComponent = getRawFile('./data/default-props/default-props-outside-component.raw');
-var classRaw = getRawFile('./data/styles/class.raw');
-var className = getRawFile('./data/styles/className.raw');
-var classAndClassName = getRawFile('./data/styles/class-and-className.raw');
-var classState = getRawFile('./data/styles/classState.raw');
-var useStyle = getRawFile('./data/styles/use-style.raw');
-var useStyleOutsideComponent = getRawFile('./data/styles/use-style-outside-component.raw');
-var useStyleAndCss = getRawFile('./data/styles/use-style-and-css.raw');
-var button = getRawFile('./data/blocks/button.raw');
-var classNameJsx = getRawFile('./data/blocks/classname-jsx.raw');
-var columns = getRawFile('./data/blocks/columns.raw');
-var contentSlotHtml = getRawFile('./data/blocks/content-slot-html.raw');
-var contentSlotJsx = getRawFile('./data/blocks/content-slot-jsx.raw');
-var customCode = getRawFile('./data/blocks/custom-code.raw');
-var formBlock = getRawFile('./data/blocks/form.raw');
-var image = getRawFile('./data/blocks/image.raw');
-var imageState = getRawFile('./data/blocks/img-state.raw');
-var img = getRawFile('./data/blocks/img.raw');
-var inputBlock = getRawFile('./data/blocks/input.raw');
-var multipleOnUpdate = getRawFile('./data/blocks/multiple-onUpdate.raw');
-var multipleOnUpdateWithDeps = getRawFile('./data/blocks/multiple-onUpdateWithDeps.raw');
-var onInit = getRawFile('./data/blocks/onInit.raw');
-var onInitonMount = getRawFile('./data/blocks/onInit-onMount.raw');
-var onMount = getRawFile('./data/blocks/onMount.raw');
-var onUpdate = getRawFile('./data/blocks/onUpdate.raw');
-var onUpdateWithDeps = getRawFile('./data/blocks/onUpdateWithDeps.raw');
-var rawText = getRawFile('./data/blocks/raw-text.raw');
-var section = getRawFile('./data/blocks/section.raw');
-var sectionState = getRawFile('./data/blocks/section-state.raw');
-var selectBlock = getRawFile('./data/blocks/select.raw');
-var selfRefCompWChildren = getRawFile('./data/blocks/self-referencing-component-with-children.raw');
-var selfRefComp = getRawFile('./data/blocks/self-referencing-component.raw');
-var slotHtml = getRawFile('./data/blocks/slot-html.raw');
-var slotJsx = getRawFile('./data/blocks/slot-jsx.raw');
-var stamped = getRawFile('./data/blocks/stamped-io.raw');
-var submitButtonBlock = getRawFile('./data/blocks/submit-button.raw');
-var text = getRawFile('./data/blocks/text.raw');
-var textarea = getRawFile('./data/blocks/textarea.raw');
-var video = getRawFile('./data/blocks/video.raw');
-var multipleSpreads = getRawFile('./data/spread/multiple-spreads.raw');
-var spreadAttrs = getRawFile('./data/spread/spread-attrs.raw');
-var spreadNestedProps = getRawFile('./data/spread/spread-nested-props.raw');
-var spreadProps = getRawFile('./data/spread/spread-props.raw');
-var builderRenderContent = getRawFile('./data/blocks/builder-render-content.raw');
-var rootFragmentMultiNode = getRawFile('./data/blocks/root-fragment-multi-node.raw');
-var renderContentExample = getRawFile('./data/render-content.raw');
+var getRawFile = function (path) { return Promise.resolve().then(function () { return __importStar(require("".concat(path, "?raw"))); }).then(function (x) { return x.default; }); };
+var basicForShow = getRawFile('./data/basic-for-show.raw.tsx');
+var basicBooleanAttribute = getRawFile('./data/basic-boolean-attribute.raw.tsx');
+var basicOnMountUpdate = getRawFile('./data/basic-onMount-update.raw.tsx');
+var basicContext = getRawFile('./data/basic-context.raw.tsx');
+var basicOutputsMeta = getRawFile('./data/basic-outputs-meta.raw.tsx');
+var basicOutputs = getRawFile('./data/basic-outputs.raw.tsx');
+var subComponent = getRawFile('./data/sub-component.raw.tsx');
+var componentWithContext = getRawFile('./data/context/component-with-context.raw.tsx');
+var expressionState = getRawFile('./data/expression-state.raw.tsx');
+var contentState = getRawFile('./data/context-state.raw.tsx');
+var basic = getRawFile('./data/basic.raw.tsx');
+var basicAttribute = getRawFile('./data/basic-attribute.raw.tsx');
+var basicMitosis = getRawFile('./data/basic-custom-mitosis-package.raw.tsx');
+var basicChildComponent = getRawFile('./data/basic-child-component.raw.tsx');
+var basicFor = getRawFile('./data/basic-for.raw.tsx');
+var basicRef = getRawFile('./data/basic-ref.raw.tsx');
+var basicForwardRef = getRawFile('./data/basic-forwardRef.raw.tsx');
+var basicForwardRefMetadata = getRawFile('./data/basic-forwardRef-metadata.raw.tsx');
+var basicRefPrevious = getRawFile('./data/basic-ref-usePrevious.raw.tsx');
+var basicRefAssignment = getRawFile('./data/basic-ref-assignment.raw.tsx');
+var propsDestructure = getRawFile('./data/basic-props-destructure.raw.tsx');
+var nestedStyles = getRawFile('./data/nested-styles.raw.tsx');
+var preserveExportOrLocalStatement = getRawFile('./data/basic-preserve-export-or-local-statement.raw.tsx');
+var arrowFunctionInUseStore = getRawFile('./data/arrow-function-in-use-store.raw.tsx');
+var propsType = getRawFile('./data/types/component-props-type.raw.tsx');
+var propsInterface = getRawFile('./data/types/component-props-interface.raw.tsx');
+var preserveTyping = getRawFile('./data/types/preserve-typing.raw.tsx');
+var typeDependency = getRawFile('./data/types/type-dependency.raw.tsx');
+var defaultProps = getRawFile('./data/default-props/default-props.raw.tsx');
+var defaultPropsOutsideComponent = getRawFile('./data/default-props/default-props-outside-component.raw.tsx');
+var classRaw = getRawFile('./data/styles/class.raw.tsx');
+var className = getRawFile('./data/styles/className.raw.tsx');
+var classAndClassName = getRawFile('./data/styles/class-and-className.raw.tsx');
+var classState = getRawFile('./data/styles/classState.raw.tsx');
+var useStyle = getRawFile('./data/styles/use-style.raw.tsx');
+var useStyleOutsideComponent = getRawFile('./data/styles/use-style-outside-component.raw.tsx');
+var useStyleAndCss = getRawFile('./data/styles/use-style-and-css.raw.tsx');
+var button = getRawFile('./data/blocks/button.raw.tsx');
+var classNameJsx = getRawFile('./data/blocks/classname-jsx.raw.tsx');
+var columns = getRawFile('./data/blocks/columns.raw.tsx');
+var contentSlotHtml = getRawFile('./data/blocks/content-slot-html.raw.tsx');
+var contentSlotJsx = getRawFile('./data/blocks/content-slot-jsx.raw.tsx');
+var customCode = getRawFile('./data/blocks/custom-code.raw.tsx');
+var formBlock = getRawFile('./data/blocks/form.raw.tsx');
+var image = getRawFile('./data/blocks/image.raw.tsx');
+var imageState = getRawFile('./data/blocks/img-state.raw.tsx');
+var img = getRawFile('./data/blocks/img.raw.tsx');
+var inputBlock = getRawFile('./data/blocks/input.raw.tsx');
+var multipleOnUpdate = getRawFile('./data/blocks/multiple-onUpdate.raw.tsx');
+var multipleOnUpdateWithDeps = getRawFile('./data/blocks/multiple-onUpdateWithDeps.raw.tsx');
+var onInit = getRawFile('./data/blocks/onInit.raw.tsx');
+var onInitonMount = getRawFile('./data/blocks/onInit-onMount.raw.tsx');
+var onMount = getRawFile('./data/blocks/onMount.raw.tsx');
+var onUpdate = getRawFile('./data/blocks/onUpdate.raw.tsx');
+var onUpdateWithDeps = getRawFile('./data/blocks/onUpdateWithDeps.raw.tsx');
+var rawText = getRawFile('./data/blocks/raw-text.raw.tsx');
+var section = getRawFile('./data/blocks/section.raw.tsx');
+var sectionState = getRawFile('./data/blocks/section-state.raw.tsx');
+var selectBlock = getRawFile('./data/blocks/select.raw.tsx');
+var selfRefCompWChildren = getRawFile('./data/blocks/self-referencing-component-with-children.raw.tsx');
+var selfRefComp = getRawFile('./data/blocks/self-referencing-component.raw.tsx');
+var slotHtml = getRawFile('./data/blocks/slot-html.raw.tsx');
+var slotJsx = getRawFile('./data/blocks/slot-jsx.raw.tsx');
+var stamped = getRawFile('./data/blocks/stamped-io.raw.tsx');
+var submitButtonBlock = getRawFile('./data/blocks/submit-button.raw.tsx');
+var text = getRawFile('./data/blocks/text.raw.tsx');
+var textarea = getRawFile('./data/blocks/textarea.raw.tsx');
+var video = getRawFile('./data/blocks/video.raw.tsx');
+var multipleSpreads = getRawFile('./data/spread/multiple-spreads.raw.tsx');
+var spreadAttrs = getRawFile('./data/spread/spread-attrs.raw.tsx');
+var spreadNestedProps = getRawFile('./data/spread/spread-nested-props.raw.tsx');
+var spreadProps = getRawFile('./data/spread/spread-props.raw.tsx');
+var builderRenderContent = getRawFile('./data/blocks/builder-render-content.raw.tsx');
+var rootFragmentMultiNode = getRawFile('./data/blocks/root-fragment-multi-node.raw.tsx');
+var renderContentExample = getRawFile('./data/render-content.raw.tsx');
 var path = 'test-path';
 var BASIC_TESTS = {
     Basic: basic,
@@ -183,7 +183,7 @@ var BASIC_TESTS = {
     defaultPropsOutsideComponent: defaultPropsOutsideComponent,
     preserveTyping: preserveTyping,
     typeDependency: typeDependency,
-    defaultValsWithTypes: getRawFile('./data/types/component-with-default-values-types.raw'),
+    defaultValsWithTypes: getRawFile('./data/types/component-with-default-values-types.raw.tsx'),
     'import types': builderRenderContent,
     subComponent: subComponent,
     nestedStyles: nestedStyles,
@@ -237,18 +237,18 @@ var FORWARD_REF_TESTS = {
     basicForwardRefMetadata: basicForwardRefMetadata,
 };
 var SHOW_TESTS = {
-    rootShow: getRawFile('./data/blocks/rootShow.raw'),
-    nestedShow: getRawFile('./data/show/nested-show.raw'),
-    showWithFor: getRawFile('./data/show/show-with-for.raw'),
+    rootShow: getRawFile('./data/blocks/rootShow.raw.tsx'),
+    nestedShow: getRawFile('./data/show/nested-show.raw.tsx'),
+    showWithFor: getRawFile('./data/show/show-with-for.raw.tsx'),
 };
 var ADVANCED_REF = {
-    AdvancedRef: getRawFile('./data/advanced-ref.raw'),
+    AdvancedRef: getRawFile('./data/advanced-ref.raw.tsx'),
 };
 var ON_UPDATE_RETURN = {
-    basicOnUpdateReturn: getRawFile('./data/basic-onUpdate-return.raw'),
+    basicOnUpdateReturn: getRawFile('./data/basic-onUpdate-return.raw.tsx'),
 };
 var IMPORT_TEST = {
-    importRaw: getRawFile('./data/import.raw'),
+    importRaw: getRawFile('./data/import.raw.tsx'),
 };
 var CONTEXT_TEST = {
     componentWithContext: componentWithContext,
@@ -265,7 +265,7 @@ var JSX_TESTS = [
     FOR_SHOW_TESTS,
     CONTEXT_TEST,
 ];
-var TESTS_FOR_TARGET = {
+var JSX_TESTS_FOR_TARGET = {
     alpine: [
         CONTEXT_TEST,
         BASIC_TESTS,
@@ -482,58 +482,77 @@ var runTestsForJsx = function () {
 exports.runTestsForJsx = runTestsForJsx;
 var runTestsForTarget = function (_a) {
     var target = _a.target, generator = _a.generator, options = _a.options;
-    var testsArray = TESTS_FOR_TARGET[target];
-    test('Remove Internal mitosis package', function () { return __awaiter(void 0, void 0, void 0, function () {
-        var component, _a, output;
-        return __generator(this, function (_b) {
-            switch (_b.label) {
-                case 0:
-                    _a = jsx_1.parseJsx;
-                    return [4 /*yield*/, basicMitosis];
-                case 1:
-                    component = _a.apply(void 0, [_b.sent(), {
-                            compileAwayPackages: ['@dummy/custom-mitosis'],
-                        }]);
-                    output = generator(options)({ component: component, path: path });
-                    expect(output).toMatchSnapshot();
-                    return [2 /*return*/];
-            }
-        });
-    }); });
     var configurations = [
         { options: __assign(__assign({}, options), { typescript: false }), testName: 'Javascript Test' },
         { options: __assign(__assign({}, options), { typescript: true }), testName: 'Typescript Test' },
     ];
-    if (testsArray) {
-        configurations.forEach(function (_a) {
-            var options = _a.options, testName = _a.testName;
-            describe(testName, function () {
-                testsArray.forEach(function (tests) {
-                    Object.keys(tests).forEach(function (key) {
-                        test(key, function () { return __awaiter(void 0, void 0, void 0, function () {
-                            var component, _a, getOutput;
+    var parsers = [
+        {
+            name: 'jsx',
+            parser: function (x) { return __awaiter(void 0, void 0, void 0, function () { return __generator(this, function (_a) {
+                return [2 /*return*/, (0, jsx_1.parseJsx)(x, { typescript: options.typescript })];
+            }); }); },
+            testsArray: JSX_TESTS_FOR_TARGET[target],
+        },
+    ];
+    var _loop_1 = function (name_1, parser, testsArray) {
+        if (testsArray) {
+            describe(name_1, function () {
+                configurations.forEach(function (_a) {
+                    var options = _a.options, testName = _a.testName;
+                    if (name_1 === 'jsx' && options.typescript === false) {
+                        test('Remove Internal mitosis package', function () { return __awaiter(void 0, void 0, void 0, function () {
+                            var component, _a, output;
                             return __generator(this, function (_b) {
                                 switch (_b.label) {
                                     case 0:
                                         _a = jsx_1.parseJsx;
-                                        return [4 /*yield*/, tests[key]];
+                                        return [4 /*yield*/, basicMitosis];
                                     case 1:
-                                        component = _a.apply(void 0, [_b.sent(), { typescript: options.typescript }]);
-                                        getOutput = function () { return generator(options)({ component: component, path: path }); };
-                                        try {
-                                            expect(getOutput()).toMatchSnapshot();
-                                        }
-                                        catch (error) {
-                                            expect(getOutput).toThrowErrorMatchingSnapshot();
-                                        }
+                                        component = _a.apply(void 0, [_b.sent(), {
+                                                compileAwayPackages: ['@dummy/custom-mitosis'],
+                                            }]);
+                                        output = generator(options)({ component: component, path: path });
+                                        expect(output).toMatchSnapshot();
                                         return [2 /*return*/];
                                 }
                             });
                         }); });
+                    }
+                    describe(testName, function () {
+                        testsArray.forEach(function (tests) {
+                            Object.keys(tests).forEach(function (key) {
+                                test(key, function () { return __awaiter(void 0, void 0, void 0, function () {
+                                    var component, _a, getOutput;
+                                    return __generator(this, function (_b) {
+                                        switch (_b.label) {
+                                            case 0:
+                                                _a = parser;
+                                                return [4 /*yield*/, tests[key]];
+                                            case 1: return [4 /*yield*/, _a.apply(void 0, [_b.sent()])];
+                                            case 2:
+                                                component = _b.sent();
+                                                getOutput = function () { return generator(options)({ component: component, path: path }); };
+                                                try {
+                                                    expect(getOutput()).toMatchSnapshot();
+                                                }
+                                                catch (error) {
+                                                    expect(getOutput).toThrowErrorMatchingSnapshot();
+                                                }
+                                                return [2 /*return*/];
+                                        }
+                                    });
+                                }); });
+                            });
+                        });
                     });
                 });
             });
-        });
+        }
+    };
+    for (var _i = 0, parsers_1 = parsers; _i < parsers_1.length; _i++) {
+        var _b = parsers_1[_i], name_1 = _b.name, parser = _b.parser, testsArray = _b.testsArray;
+        _loop_1(name_1, parser, testsArray);
     }
 };
 exports.runTestsForTarget = runTestsForTarget;
