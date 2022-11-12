@@ -72,6 +72,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.runTestsForTarget = exports.runTestsForJsx = void 0;
 var jsx_1 = require("../parsers/jsx");
+var __1 = require("..");
 var getRawFile = function (path) { return Promise.resolve().then(function () { return __importStar(require("".concat(path, "?raw"))); }).then(function (x) { return x.default; }); };
 var basicForShow = getRawFile('./data/basic-for-show.raw.tsx');
 var basicBooleanAttribute = getRawFile('./data/basic-boolean-attribute.raw.tsx');
@@ -149,6 +150,21 @@ var builderRenderContent = getRawFile('./data/blocks/builder-render-content.raw.
 var rootFragmentMultiNode = getRawFile('./data/blocks/root-fragment-multi-node.raw.tsx');
 var renderContentExample = getRawFile('./data/render-content.raw.tsx');
 var path = 'test-path';
+var SVELTE_SYNTAX_TESTS = {
+    basic: getRawFile('./syntax/svelte/basic.raw.svelte'),
+    bindGroup: getRawFile('./syntax/svelte/bind-group.raw.svelte'),
+    bindProperty: getRawFile('./syntax/svelte/bind-property.raw.svelte'),
+    classDirective: getRawFile('./syntax/svelte/class-directive.raw.svelte'),
+    context: getRawFile('./syntax/svelte/context.raw.svelte'),
+    each: getRawFile('./syntax/svelte/each.raw.svelte'),
+    html: getRawFile('./syntax/svelte/html.raw.svelte'),
+    ifElse: getRawFile('./syntax/svelte/if-else.raw.svelte'),
+    imports: getRawFile('./syntax/svelte/imports.raw.svelte'),
+    lifecycleHooks: getRawFile('./syntax/svelte/lifecycle-hooks.raw.svelte'),
+    reactive: getRawFile('./syntax/svelte/reactive.raw.svelte'),
+    style: getRawFile('./syntax/svelte/style.raw.svelte'),
+    textExpressions: getRawFile('./syntax/svelte/text-expressions.raw.svelte'),
+};
 var BASIC_TESTS = {
     Basic: basic,
     BasicAttribute: basicAttribute,
@@ -493,6 +509,13 @@ var runTestsForTarget = function (_a) {
                 return [2 /*return*/, (0, jsx_1.parseJsx)(x, { typescript: options.typescript })];
             }); }); },
             testsArray: JSX_TESTS_FOR_TARGET[target],
+        },
+        {
+            name: 'svelte',
+            parser: function (x) { return __awaiter(void 0, void 0, void 0, function () { return __generator(this, function (_a) {
+                return [2 /*return*/, (0, __1.parseSvelte)(x)];
+            }); }); },
+            testsArray: [SVELTE_SYNTAX_TESTS],
         },
     ];
     var _loop_1 = function (name_1, parser, testsArray) {

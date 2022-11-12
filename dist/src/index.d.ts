@@ -31,6 +31,7 @@ export declare const useDefaultProps: <T = {
 }>(value: T) => T;
 export declare const useStyle: (value: string) => any;
 export * from './parsers/jsx';
+export * from './parsers/svelte';
 export * from './parsers/builder';
 export * from './parsers/angular';
 export * from './parsers/context';

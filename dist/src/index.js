@@ -68,6 +68,7 @@ exports.useDefaultProps = useDefaultProps;
 var useStyle = function (value) { return null; };
 exports.useStyle = useStyle;
 __exportStar(require("./parsers/jsx"), exports);
+__exportStar(require("./parsers/svelte"), exports);
 __exportStar(require("./parsers/builder"), exports);
 __exportStar(require("./parsers/angular"), exports);
 __exportStar(require("./parsers/context"), exports);
