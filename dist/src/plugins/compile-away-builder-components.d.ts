@@ -1,6 +1,7 @@
 import { TraverseContext } from 'traverse';
 import { MitosisComponent } from '../types/mitosis-component';
 import { MitosisNode } from '../types/mitosis-node';
+import { Plugin } from '..';
 declare type CompileAwayComponentsMap = {
     [key: string]: (node: MitosisNode, context: TraverseContext, components: CompileAwayComponentsMap) => MitosisNode | void;
 };
@@ -10,9 +11,5 @@ declare type CompileAwayBuilderComponentsOptions = {
     omit?: string[];
 };
 export declare const compileAwayBuilderComponentsFromTree: (tree: MitosisNode | MitosisComponent, components: CompileAwayComponentsMap) => void;
-export declare const compileAwayBuilderComponents: (pluginOptions?: CompileAwayBuilderComponentsOptions) => (options?: any) => {
-    json: {
-        pre: (json: MitosisComponent) => void;
-    };
-};
+export declare const compileAwayBuilderComponents: (pluginOptions?: CompileAwayBuilderComponentsOptions) => Plugin;
 export {};
