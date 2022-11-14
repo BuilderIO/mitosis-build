@@ -71,7 +71,7 @@ var classStyleMapToCss = function (map) {
     var str = '';
     for (var key in map) {
         var styles = (0, helpers_1.getStylesOnly)(map[key]);
-        str += ".".concat(key, " { ").concat((0, helpers_1.styleMapToCss)(styles), " }");
+        str += ".".concat(key, " {\n").concat((0, helpers_1.styleMapToCss)(styles), "\n}");
         var nestedSelectors = (0, helpers_1.getNestedSelectors)(map[key]);
         for (var nestedSelector in nestedSelectors) {
             var value = nestedSelectors[nestedSelector];
@@ -82,7 +82,7 @@ var classStyleMapToCss = function (map) {
                 var useSelector = nestedSelector.includes('&')
                     ? nestedSelector.replace(/&/g, ".".concat(key))
                     : ".".concat(key, " ").concat(nestedSelector);
-                str += "".concat(useSelector, " { ").concat((0, helpers_1.styleMapToCss)(value), " }");
+                str += "".concat(useSelector, " {\n").concat((0, helpers_1.styleMapToCss)(value), "\n}");
             }
         }
     }

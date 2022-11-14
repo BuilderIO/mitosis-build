@@ -175,7 +175,9 @@ var componentToVue = function (userOptions) {
             (0, lodash_1.size)(Object.keys(component.state).filter(function (key) { var _a; return ((_a = component.state[key]) === null || _a === void 0 ? void 0 : _a.type) === 'property'; })) && vueImports.push('ref');
         }
         var tsLangAttribute = options.typescript ? "lang='ts'" : '';
-        var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    <template>\n      ", "\n    </template>\n\n\n    <script ", " ", ">\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n    </script>\n\n    ", "\n  "], ["\n    <template>\n      ", "\n    </template>\n\n\n    <script ", " ", ">\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n    </script>\n\n    ", "\n  "])), template, options.api === 'composition' ? 'setup' : '', tsLangAttribute, vueImports.length ? "import { ".concat((0, lodash_1.uniq)(vueImports).sort().join(', '), " } from \"vue\"") : '', (options.typescript && ((_h = component.types) === null || _h === void 0 ? void 0 : _h.join('\n'))) || '', (0, render_imports_1.renderPreComponent)({
+        var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    ", "\n\n\n    <script ", " ", ">\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n    </script>\n\n    ", "\n  "], ["\n    ", "\n\n\n    <script ", " ", ">\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n    </script>\n\n    ", "\n  "])), template.trim().length > 0
+            ? "<template>\n      ".concat(template, "\n    </template>")
+            : '', options.api === 'composition' ? 'setup' : '', tsLangAttribute, vueImports.length ? "import { ".concat((0, lodash_1.uniq)(vueImports).sort().join(', '), " } from \"vue\"") : '', (options.typescript && ((_h = component.types) === null || _h === void 0 ? void 0 : _h.join('\n'))) || '', (0, render_imports_1.renderPreComponent)({
             component: component,
             target: 'vue',
             asyncComponentImports: options.asyncComponentImports,
@@ -205,8 +207,9 @@ var componentToVue = function (userOptions) {
         str = (0, plugins_1.runPostCodePlugins)(str, options.plugins);
         for (var _i = 0, removePatterns_1 = removePatterns; _i < removePatterns_1.length; _i++) {
             var pattern = removePatterns_1[_i];
-            str = str.replace(pattern, '');
+            str = str.replace(pattern, '').trim();
         }
+        str = str.replace(/<script(.*)>\n?<\/script>/g, '').trim();
         return str;
     };
 };

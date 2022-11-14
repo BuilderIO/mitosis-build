@@ -203,7 +203,7 @@ function emitUseStyles(file, component) {
 }
 function emitStyles(file, css) {
     if (css) {
-        file.exportConst('STYLES', '`' + css.replace(/`/g, '\\`') + '`');
+        file.exportConst('STYLES', '`\n' + css.replace(/`/g, '\\`') + '`\n');
     }
 }
 /**

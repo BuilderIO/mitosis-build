@@ -106,7 +106,7 @@ var DEFAULT_OPTIONS = {
 };
 var componentToSvelte = function (userProvidedOptions) {
     return function (_a) {
-        var _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m;
+        var _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o;
         var component = _a.component;
         var options = (0, merge_options_1.mergeOptions)(DEFAULT_OPTIONS, userProvidedOptions);
         options.plugins = __spreadArray(__spreadArray([], (options.plugins || []), true), [
@@ -171,14 +171,17 @@ var componentToSvelte = function (userProvidedOptions) {
         if ((_d = (_c = json.hooks.onMount) === null || _c === void 0 ? void 0 : _c.code) === null || _d === void 0 ? void 0 : _d.length) {
             svelteImports.push('onMount');
         }
-        if ((_e = json.hooks.onUpdate) === null || _e === void 0 ? void 0 : _e.length) {
+        if ((_f = (_e = json.hooks.onUpdate) === null || _e === void 0 ? void 0 : _e.filter(function (x) { return !x.deps; })) === null || _f === void 0 ? void 0 : _f.length) {
             svelteImports.push('afterUpdate');
         }
-        if ((_g = (_f = json.hooks.onUnMount) === null || _f === void 0 ? void 0 : _f.code) === null || _g === void 0 ? void 0 : _g.length) {
+        if ((_h = (_g = json.hooks.onUnMount) === null || _g === void 0 ? void 0 : _g.code) === null || _h === void 0 ? void 0 : _h.length) {
             svelteImports.push('onDestroy');
         }
-        if ((0, context_1.hasContext)(component)) {
-            svelteImports.push('getContext', 'setContext');
+        if ((0, context_1.hasGetContext)(component)) {
+            svelteImports.push('getContext');
+        }
+        if ((0, context_1.hasSetContext)(component)) {
+            svelteImports.push('setContext');
         }
         str += (0, dedent_1.default)(templateObject_2 || (templateObject_2 = __makeTemplateObject(["\n      <script ", ">\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n      ", "\n      ", "\n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n      ", "\n      \n      ", "\n\n      ", "\n\n      ", "\n    </script>\n\n    ", "\n\n    ", "\n  "], ["\n      <script ", ">\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n      ", "\n      "
             // https://svelte.dev/repl/bd9b56891f04414982517bbd10c52c82?version=3.31.0
@@ -207,14 +210,14 @@ var componentToSvelte = function (userProvidedOptions) {
             ? dataString.length < 4
                 ? ''
                 : "let state = onChange(".concat(dataString, ", () => state = state)")
-            : dataString, (_j = (_h = json.hooks.onInit) === null || _h === void 0 ? void 0 : _h.code) !== null && _j !== void 0 ? _j : '', !((_k = json.hooks.onMount) === null || _k === void 0 ? void 0 : _k.code) ? '' : "onMount(() => { ".concat(json.hooks.onMount.code, " });"), ((_l = json.hooks.onUpdate) === null || _l === void 0 ? void 0 : _l.map(function (_a, index) {
+            : dataString, (_k = (_j = json.hooks.onInit) === null || _j === void 0 ? void 0 : _j.code) !== null && _k !== void 0 ? _k : '', !((_l = json.hooks.onMount) === null || _l === void 0 ? void 0 : _l.code) ? '' : "onMount(() => { ".concat(json.hooks.onMount.code, " });"), ((_m = json.hooks.onUpdate) === null || _m === void 0 ? void 0 : _m.map(function (_a, index) {
             var code = _a.code, deps = _a.deps;
             if (!deps) {
                 return "afterUpdate(() => { ".concat(code, " });");
             }
             var fnName = "onUpdateFn_".concat(index);
             return "\n              function ".concat(fnName, "() {\n                ").concat(code, "\n              }\n              $: ").concat(fnName, "(...").concat(deps, ")\n            ");
-        }).join(';')) || '', !((_m = json.hooks.onUnMount) === null || _m === void 0 ? void 0 : _m.code) ? '' : "onDestroy(() => { ".concat(json.hooks.onUnMount.code, " });"), json.children
+        }).join(';')) || '', !((_o = json.hooks.onUnMount) === null || _o === void 0 ? void 0 : _o.code) ? '' : "onDestroy(() => { ".concat(json.hooks.onUnMount.code, " });"), json.children
             .map(function (item) {
             return (0, blocks_1.blockToSvelte)({
                 json: item,
@@ -245,6 +248,7 @@ var componentToSvelte = function (userProvidedOptions) {
                 console.warn({ string: str }, err);
             }
         }
+        str = str.replace(/<script>\n<\/script>/g, '').trim();
         str = (0, plugins_1.runPostCodePlugins)(str, options.plugins);
         return str;
     };

@@ -69,16 +69,15 @@ var parseCssObject = function (css) {
 };
 exports.parseCssObject = parseCssObject;
 var styleMapToCss = function (map) {
-    var str = '';
-    for (var key in map) {
-        var value = map[key];
-        if (typeof value === 'string') {
-            str += "\n".concat((0, dash_case_1.dashCase)(key), ": ").concat(value, ";");
-        }
-        else {
-            // TODO: do nothing
-        }
-    }
-    return str;
+    return Object.entries(map)
+        .filter(function (_a) {
+        var key = _a[0], value = _a[1];
+        return typeof value === 'string';
+    })
+        .map(function (_a) {
+        var key = _a[0], value = _a[1];
+        return "  ".concat((0, dash_case_1.dashCase)(key), ": ").concat(value, ";");
+    })
+        .join('\n');
 };
 exports.styleMapToCss = styleMapToCss;

@@ -66,7 +66,6 @@ var traverse_1 = __importDefault(require("traverse"));
 var is_mitosis_node_1 = require("../../helpers/is-mitosis-node");
 var filter_empty_text_nodes_1 = require("../../helpers/filter-empty-text-nodes");
 var create_mitosis_node_1 = require("../../helpers/create-mitosis-node");
-var context_1 = require("../helpers/context");
 var babel_transform_1 = require("../../helpers/babel-transform");
 var core_1 = require("@babel/core");
 var lodash_1 = require("lodash");
@@ -80,12 +79,13 @@ var S = __importStar(require("fp-ts/string"));
 var helpers_2 = require("./state/helpers");
 var merge_options_1 = require("../../helpers/merge-options");
 var process_code_1 = require("../../helpers/plugins/process-code");
+var context_1 = require("../helpers/context");
 // Transform <foo.bar key="value" /> to <component :is="foo.bar" key="value" />
 function processDynamicComponents(json, options) {
     var found = false;
     (0, traverse_1.default)(json).forEach(function (node) {
         if ((0, is_mitosis_node_1.isMitosisNode)(node)) {
-            if (node.name.includes('.')) {
+            if (node.name.includes('.') && !node.name.endsWith('.Provider')) {
                 node.bindings.component = { code: node.name };
                 node.name = 'Dynamic';
                 found = true;
@@ -317,11 +317,10 @@ var componentToSolid = function (passedOptions) {
             });
         var state = (0, state_1.getState)({ json: json, options: options });
         var componentsUsed = (0, get_components_used_1.getComponentsUsed)(json);
-        var componentHasContext = (0, context_1.hasContext)(json);
         var hasShowComponent = componentsUsed.has('Show');
         var hasForComponent = componentsUsed.has('For');
         var solidJSImports = (0, Array_1.uniq)(S.Eq)(__spreadArray(__spreadArray([
-            componentHasContext ? 'useContext' : undefined,
+            (0, context_1.hasGetContext)(json) ? 'useContext' : undefined,
             hasShowComponent ? 'Show' : undefined,
             hasForComponent ? 'For' : undefined,
             ((_b = json.hooks.onMount) === null || _b === void 0 ? void 0 : _b.code) ? 'onMount' : undefined
