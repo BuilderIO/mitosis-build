@@ -244,7 +244,7 @@ var getRefsString = function (json, refs, options) {
         // domRefs must have null argument
         var argument = ((_b = json['refs'][ref]) === null || _b === void 0 ? void 0 : _b.argument) || (domRefs.has(ref) ? 'null' : '');
         hasStateArgument = /state\./.test(argument);
-        code += "\nconst ".concat(ref, " = useRef").concat(typeParameter ? "<".concat(typeParameter, ">") : '', "(").concat((0, state_2.processHookCode)({
+        code += "\nconst ".concat(ref, " = useRef").concat(typeParameter && options.typescript ? "<".concat(typeParameter, ">") : '', "(").concat((0, state_2.processHookCode)({
             str: argument,
             options: options,
         }), ");");
@@ -426,7 +426,8 @@ var _componentToReact = function (json, options, isSubComponent) {
         isRootSpecialNode(json);
     var _o = getRefsString(json, allRefs, options), hasStateArgument = _o[0], refsString = _o[1];
     var nativeStyles = stylesType === 'react-native' && componentHasStyles && (0, react_native_1.collectReactNativeStyles)(json);
-    var propsArgs = "props: ".concat(json.propsTypeRef || 'any');
+    var propType = json.propsTypeRef || 'any';
+    var propsArgs = "props".concat(options.typescript ? ":".concat(propType) : '');
     var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n  ", "\n  ", "\n  ", "\n  ", "\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "", "", "function ", "(", "", ") {\n    ", "\n    ", "\n      ", "\n      ", "\n      ", "\n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      return (\n        ", "\n        ", "\n        ", "\n        ", "\n      );\n    }", "\n\n    ", "\n\n    ", "\n\n    ", "\n    ", "\n\n  "], ["\n  ", "\n  ", "\n  ", "\n  ", "\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "", "", "function ", "(", "", ") {\n    ", "\n    ", "\n      ", "\n      ", "\n      ", "\n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      return (\n        ", "\n        ", "\n        ", "\n        ", "\n      );\n    }", "\n\n    ", "\n\n    ", "\n\n    ", "\n    ", "\n\n  "])), options.preact
         ? "\n    /** @jsx h */\n    import { h, Fragment } from 'preact';\n    "
         : options.type !== 'native'
@@ -437,10 +438,12 @@ var _componentToReact = function (json, options, isSubComponent) {
         ? "/** @jsx jsx */\n    import { jsx } from '@emotion/react'".trim()
         : '', hasState && stateType === 'valtio' ? "import { useLocalProxy } from 'valtio/utils';" : '', hasState && stateType === 'solid' ? "import { useMutable } from 'react-solid-state';" : '', stateType === 'mobx' && hasState
         ? "import { useLocalObservable, observer } from 'mobx-react-lite';"
-        : '', json.types ? json.types.join('\n') : '', (0, render_imports_1.renderPreComponent)({
+        : '', json.types && options.typescript ? json.types.join('\n') : '', (0, render_imports_1.renderPreComponent)({
         component: json,
         target: options.type === 'native' ? 'reactNative' : 'react',
-    }), stateType === 'mobx' && isForwardRef ? "const ".concat(json.name || 'MyComponent', " = ") : "", isSubComponent || stateType === 'mobx' ? '' : 'export default ', isForwardRef ? "forwardRef".concat(forwardRefType ? "<".concat(forwardRefType, ">") : '', "(") : '', json.name || 'MyComponent', propsArgs, isForwardRef ? ", ".concat(options.forwardRef) : '', options.contextType === 'prop-drill'
+    }), stateType === 'mobx' && isForwardRef ? "const ".concat(json.name || 'MyComponent', " = ") : "", isSubComponent || stateType === 'mobx' ? '' : 'export default ', isForwardRef
+        ? "forwardRef".concat(forwardRefType && options.typescript ? "<".concat(forwardRefType, ">") : '', "(")
+        : '', json.name || 'MyComponent', propsArgs, isForwardRef ? ", ".concat(options.forwardRef) : '', options.contextType === 'prop-drill'
         ? "const ".concat(exports.contextPropDrillingKey, " = { ...props['").concat(exports.contextPropDrillingKey, "'] };")
         : '', hasStateArgument ? '' : refsString, hasState
         ? stateType === 'mobx'
