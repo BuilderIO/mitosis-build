@@ -24,7 +24,7 @@ var helpers_1 = require("./helpers");
 function getContextInjectString(component, options) {
     var str = '{';
     for (var key in component.context.get) {
-        str += "\n      ".concat(key, ": \"").concat((0, helpers_1.encodeQuotes)(component.context.get[key].name), "\",\n    ");
+        str += "\n      ".concat(key, ": ").concat((0, helpers_1.encodeQuotes)(component.context.get[key].name), ",\n    ");
     }
     str += '}';
     return str;
@@ -140,7 +140,7 @@ function generateOptionsApiScript(component, options, path, template, props, onU
         : '', "\n        ").concat(onUpdateWithDeps.length
         ? "watch: {\n            ".concat(onUpdateWithDeps
             .map(function (hook, index) {
-            return "".concat((0, helpers_1.getOnUpdateHookName)(index), "() {\n                  ").concat(hook.code, "\n                  }\n                ");
+            return "".concat((0, helpers_1.getOnUpdateHookName)(index), ": { handler() { ").concat(hook.code, " }, immediate: true }");
         })
             .join(','), "\n          },")
         : '', "\n        ").concat(component.hooks.onUnMount
