@@ -10,6 +10,29 @@ var __assign = (this && this.__assign) || function () {
     };
     return __assign.apply(this, arguments);
 };
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
     if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
         if (ar || !(i in from)) {
@@ -19,14 +42,28 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
     }
     return to.concat(ar || Array.prototype.slice.call(from));
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.postProcess = exports.preventNameCollissions = void 0;
+var generator_1 = __importDefault(require("@babel/generator"));
+var parser = __importStar(require("@babel/parser"));
+var types = __importStar(require("@babel/types"));
 var bindings_1 = require("./bindings");
-function preventNameCollissions(json, input, arguments_, prepend, append) {
+function preventNameCollissions(json, item, prepend, append) {
     if (prepend === void 0) { prepend = ''; }
     if (append === void 0) { append = '_'; }
-    var output = input;
-    var argumentsOutput = arguments_;
+    var output = item.code;
+    var argumentsOutput = [];
+    try {
+        var parsed = parser.parse(item.code);
+        var body = parsed.program.body[0];
+        if (types.isFunctionDeclaration(body)) {
+            argumentsOutput = body.params.map(function (p) { return (0, generator_1.default)(p).code; });
+        }
+    }
+    catch (e) { }
     var keys = __spreadArray(__spreadArray(__spreadArray([], Object.keys(json.props), true), Object.keys(json.state), true), Object.keys(json.refs), true);
     var _loop_1 = function (key) {
         var regex = function () { return new RegExp("(?<!=(?:\\s))".concat(key, "\\b"), 'g'); };
@@ -37,9 +74,10 @@ function preventNameCollissions(json, input, arguments_, prepend, append) {
                 argumentsOutput.splice(index, 1, argument.replace(regex(), "".concat(prepend).concat(key).concat(append)));
             }
         });
-        var isInOutput = regex().test(output);
+        var outputRegex = function () { return new RegExp("\\b".concat(key, "\\b"), 'g'); };
+        var isInOutput = outputRegex().test(output);
         if (isInArguments && isInOutput) {
-            output = output.replace(regex(), "".concat(prepend).concat(key).concat(append));
+            output = output.replace(outputRegex(), "".concat(prepend).concat(key).concat(append));
         }
     };
     for (var _i = 0, keys_1 = keys; _i < keys_1.length; _i++) {
@@ -47,11 +85,7 @@ function preventNameCollissions(json, input, arguments_, prepend, append) {
         _loop_1(key);
     }
     return (argumentsOutput === null || argumentsOutput === void 0 ? void 0 : argumentsOutput.length)
-        ? {
-            code: output,
-            arguments: argumentsOutput,
-        }
-        : { code: output };
+        ? __assign(__assign({}, item), { code: output, arguments: argumentsOutput }) : __assign(__assign({}, item), { code: output });
 }
 exports.preventNameCollissions = preventNameCollissions;
 function prependProperties(json, input) {
@@ -71,7 +105,7 @@ function prependState(json, input) {
     var stateKeys = Object.keys(json.state);
     for (var _i = 0, stateKeys_1 = stateKeys; _i < stateKeys_1.length; _i++) {
         var state = stateKeys_1[_i];
-        var regex = new RegExp("(?<!(\\.|'|\"|`|function ))\\b(state\\.)?".concat(state, "\\b(?!(\\s+)?\\()"), 'g');
+        var regex = new RegExp("(?<!(\\.|'|\"|`|function |get ))\\b(state\\.)?".concat(state, "\\b"), 'g');
         if (regex.test(output)) {
             output = output.replace(regex, "state.".concat(state));
         }
@@ -85,13 +119,14 @@ function addPropertiesAndState(json, input) {
     return output;
 }
 function addPropertiesAndStateToNode(json, node) {
-    var _a, _b, _c;
-    for (var _i = 0, _d = Object.keys(node.bindings); _i < _d.length; _i++) {
-        var key = _d[_i];
+    var _a, _b, _c, _d;
+    for (var _i = 0, _e = Object.keys(node.bindings); _i < _e.length; _i++) {
+        var key = _e[_i];
         if (Object.prototype.hasOwnProperty.call(node.bindings, key)) {
             node.bindings[key] = {
                 code: addPropertiesAndState(json, (_b = (_a = node.bindings[key]) === null || _a === void 0 ? void 0 : _a.code) !== null && _b !== void 0 ? _b : '').trim(),
-                type: (_c = node.bindings[key]) === null || _c === void 0 ? void 0 : _c.type,
+                arguments: (_c = node.bindings[key]) === null || _c === void 0 ? void 0 : _c.arguments,
+                type: (_d = node.bindings[key]) === null || _d === void 0 ? void 0 : _d.type,
             };
         }
     }
@@ -101,7 +136,7 @@ function postProcessState(json) {
         var key = _a[_i];
         var item = json.state[key];
         if ((item === null || item === void 0 ? void 0 : item.type) !== 'property') {
-            var output = preventNameCollissions(json, item.code, (item === null || item === void 0 ? void 0 : item.arguments) || []);
+            var output = preventNameCollissions(json, item);
             output.code = addPropertiesAndState(json, output.code);
             json.state[key] = __assign(__assign({}, item), output);
         }

@@ -13,12 +13,21 @@ function parseReactive(json, node) {
             type: 'getter',
         };
     }
-    else if (expression.left) {
+    else if (expression.type === 'AssignmentExpression') {
         var name_2 = expression.left.name;
         json.state[name_2] = {
             code: "get ".concat(name_2, "() {\n return ").concat((0, astring_1.generate)(expression.right), "}"),
             type: 'getter',
         };
+    }
+    else if (expression.type === 'CallExpression') {
+        if (node.body.type === 'ExpressionStatement') {
+            json.hooks.onUpdate = json.hooks.onUpdate || [];
+            json.hooks.onUpdate.push({
+                code: (0, astring_1.generate)(node.body),
+                deps: "[".concat(expression.arguments.map(function (arg) { return (0, astring_1.generate)(arg); }), "]"),
+            });
+        }
     }
 }
 exports.parseReactive = parseReactive;

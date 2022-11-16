@@ -1,9 +1,14 @@
+import type { StateValue } from '../../../types/mitosis-component';
 import type { SveltosisComponent } from '../types';
-export declare function preventNameCollissions(json: SveltosisComponent, input: string, arguments_: string[], prepend?: string, append?: string): {
+declare type SveltosisStateValue = StateValue & {
+    arguments?: string[];
+    type: string;
+};
+export declare function preventNameCollissions(json: SveltosisComponent, item: SveltosisStateValue, prepend?: string, append?: string): {
     code: string;
-    arguments: string[];
-} | {
-    code: string;
-    arguments?: undefined;
+    type: "function" | "getter" | "method" | "property";
+    typeParameter?: string | undefined;
+    arguments?: string[] | undefined;
 };
 export declare function postProcess(json: SveltosisComponent): void;
+export {};

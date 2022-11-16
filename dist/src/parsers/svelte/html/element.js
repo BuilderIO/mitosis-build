@@ -21,7 +21,7 @@ var actions_1 = require("./actions");
 var SPECIAL_ELEMENTS = new Set(['svelte:component', 'svelte:element']);
 function parseElement(json, node) {
     var _a;
-    var _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r;
+    var _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u;
     var mitosisNode = (0, mitosis_node_1.createMitosisNode)();
     mitosisNode.name = node.name;
     var useReference = function () {
@@ -46,8 +46,8 @@ function parseElement(json, node) {
         mitosisNode.name = "".concat(prefix, ".").concat(expression);
     }
     if ((_b = node.attributes) === null || _b === void 0 ? void 0 : _b.length) {
-        for (var _i = 0, _s = node.attributes; _i < _s.length; _i++) {
-            var attribute = _s[_i];
+        for (var _i = 0, _v = node.attributes; _i < _v.length; _i++) {
+            var attribute = _v[_i];
             switch (attribute.type) {
                 case 'Attribute': {
                     switch ((_c = attribute.value[0]) === null || _c === void 0 ? void 0 : _c.type) {
@@ -102,23 +102,41 @@ function parseElement(json, node) {
                     break;
                 }
                 case 'EventHandler': {
-                    var object = { code: '', arguments: [] };
+                    var object = {
+                        code: '',
+                        arguments: [],
+                    };
                     if (((_h = attribute.expression) === null || _h === void 0 ? void 0 : _h.type) === 'ArrowTypeFunction') {
                         var expression = attribute.expression;
+                        var code = (0, astring_1.generate)(expression.body);
                         object = {
-                            code: (0, astring_1.generate)(expression.body),
-                            arguments: (_k = (_j = expression.body) === null || _j === void 0 ? void 0 : _j.arguments) === null || _k === void 0 ? void 0 : _k.map(function (a) { return a.name; }),
+                            code: code,
+                            arguments: (_k = (_j = expression.body) === null || _j === void 0 ? void 0 : _j.arguments) === null || _k === void 0 ? void 0 : _k.map(function (a) { var _a; return (_a = a.name) !== null && _a !== void 0 ? _a : []; }),
                         };
                     }
                     else if (attribute.expression) {
                         var code = (0, astring_1.generate)(attribute.expression);
-                        if (!((_l = attribute.expression.arguments) === null || _l === void 0 ? void 0 : _l.length) &&
-                            !((_o = (_m = attribute.expression.body) === null || _m === void 0 ? void 0 : _m.arguments) === null || _o === void 0 ? void 0 : _o.length)) {
+                        if (((_l = attribute.expression.body) === null || _l === void 0 ? void 0 : _l.type) === 'CallExpression') {
+                            code = (0, astring_1.generate)(attribute.expression.body);
+                        }
+                        if (!code.startsWith(')') && !code.endsWith(')')) {
+                            code += '()';
+                        }
+                        if (!((_m = attribute.expression.arguments) === null || _m === void 0 ? void 0 : _m.length) &&
+                            !((_p = (_o = attribute.expression.body) === null || _o === void 0 ? void 0 : _o.arguments) === null || _p === void 0 ? void 0 : _p.length)) {
                             code = code.replace(/\(\)/g, '(event)');
+                        }
+                        var args = undefined;
+                        if (attribute.expression.type === 'ArrowFunctionExpression') {
+                            args = (_r = (_q = attribute.expression.params) === null || _q === void 0 ? void 0 : _q.map(function (arg) { return (0, astring_1.generate)(arg); })) !== null && _r !== void 0 ? _r : [];
+                        }
+                        else if (attribute.expression.type === 'CallExpression' &&
+                            attribute.expression.arguments.length) {
+                            args = [];
                         }
                         object = {
                             code: code,
-                            arguments: ['event'],
+                            arguments: args,
                         };
                     }
                     else {
@@ -172,7 +190,7 @@ function parseElement(json, node) {
                     // if there are existing class declarations
                     // add them here instead and remove them from properties
                     // to avoid duplicate class declarations in certain frameworks
-                    if ((_q = (_p = mitosisNode.properties) === null || _p === void 0 ? void 0 : _p.class) === null || _q === void 0 ? void 0 : _q.length) {
+                    if ((_t = (_s = mitosisNode.properties) === null || _s === void 0 ? void 0 : _s.class) === null || _t === void 0 ? void 0 : _t.length) {
                         code = "".concat(mitosisNode.properties.class, " ");
                         delete mitosisNode.properties.class;
                     }
@@ -180,7 +198,7 @@ function parseElement(json, node) {
                     // append it to the string instead of assigning it
                     if (mitosisNode.bindings.class &&
                         Object.prototype.hasOwnProperty.call(mitosisNode.bindings.class, 'code') &&
-                        ((_r = mitosisNode.bindings.class) === null || _r === void 0 ? void 0 : _r.code.length)) {
+                        ((_u = mitosisNode.bindings.class) === null || _u === void 0 ? void 0 : _u.code.length)) {
                         code = (0, string_1.insertAt)(mitosisNode.bindings.class.code, ' ${' + binding + '}', mitosisNode.bindings.class.code.length - 1);
                         mitosisNode.bindings.class = {
                             code: code,

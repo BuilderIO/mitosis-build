@@ -140,7 +140,7 @@ function generateOptionsApiScript(component, options, path, template, props, onU
         : '', "\n        ").concat(onUpdateWithDeps.length
         ? "watch: {\n            ".concat(onUpdateWithDeps
             .map(function (hook, index) {
-            return "".concat((0, helpers_1.getOnUpdateHookName)(index), "() {\n                  ").concat(hook.code, "\n                  }\n                ");
+            return "".concat((0, helpers_1.getOnUpdateHookName)(index), ": { handler() { ").concat(hook.code, " }, immediate: true }");
         })
             .join(','), "\n          },")
         : '', "\n        ").concat(component.hooks.onUnMount

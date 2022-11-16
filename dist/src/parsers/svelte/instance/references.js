@@ -22,7 +22,7 @@ function isPropertyOrStateReference(index) {
     return (0, lodash_1.isString)(index) && (index.includes('props.') || index.includes('state.'));
 }
 function parseReferences(json, node) {
-    var _a, _b;
+    var _a, _b, _c;
     var declaration = node.declarations[0];
     var code;
     var type = 'property';
@@ -57,7 +57,7 @@ function parseReferences(json, node) {
             break;
         }
         default: {
-            code = (_b = declaration === null || declaration === void 0 ? void 0 : declaration.init) === null || _b === void 0 ? void 0 : _b.value;
+            code = (_c = (_b = declaration === null || declaration === void 0 ? void 0 : declaration.init) === null || _b === void 0 ? void 0 : _b.value) !== null && _c !== void 0 ? _c : null;
         }
     }
     json.state[declaration.id.name] = {
