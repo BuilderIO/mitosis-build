@@ -6,7 +6,9 @@ var babel_transform_1 = require("./babel-transform");
 var SLOT_PREFIX = 'slot';
 var isSlotProperty = function (key) { return key.startsWith(SLOT_PREFIX); };
 exports.isSlotProperty = isSlotProperty;
-var stripSlotPrefix = function (key) { return key.substring(SLOT_PREFIX.length); };
+var stripSlotPrefix = function (key) {
+    return (0, exports.isSlotProperty)(key) ? key.substring(SLOT_PREFIX.length) : key;
+};
 exports.stripSlotPrefix = stripSlotPrefix;
 function replaceSlotsInString(code, mapper) {
     return (0, babel_transform_1.babelTransformExpression)(code, {

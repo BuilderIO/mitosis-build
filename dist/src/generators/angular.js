@@ -65,11 +65,12 @@ var mappers = {
             .join('\n'), "</ng-container>");
     },
     Slot: function (json, options) {
-        return "<ng-content ".concat(Object.entries(json.bindings)
+        var renderChildren = function () { var _a; return (_a = json.children) === null || _a === void 0 ? void 0 : _a.map(function (item) { return (0, exports.blockToAngular)(item, options); }).join('\n'); };
+        return "<ng-content ".concat(Object.entries(__assign(__assign({}, json.bindings), json.properties))
             .map(function (_a) {
             var binding = _a[0], value = _a[1];
             if (value && binding === 'name') {
-                var selector = (0, function_1.pipe)(value.code, slots_1.stripSlotPrefix, lodash_1.kebabCase);
+                var selector = (0, function_1.pipe)((0, lodash_1.isString)(value) ? value : value.code, slots_1.stripSlotPrefix, lodash_1.kebabCase);
                 return "select=\"[".concat(selector, "]\"");
             }
         })
@@ -80,7 +81,7 @@ var mappers = {
                 return value.code;
             }
         })
-            .join('\n'), "</ng-content>");
+            .join('\n')).concat(renderChildren(), "</ng-content>");
     },
 };
 var generateNgModule = function (content, name, componentsUsed, component, bootstrapMapper) {

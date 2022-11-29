@@ -135,8 +135,10 @@ var sectionState = getRawFile('./data/blocks/section-state.raw.tsx');
 var selectBlock = getRawFile('./data/blocks/select.raw.tsx');
 var selfRefCompWChildren = getRawFile('./data/blocks/self-referencing-component-with-children.raw.tsx');
 var selfRefComp = getRawFile('./data/blocks/self-referencing-component.raw.tsx');
+var slotDefault = getRawFile('./data/blocks/slot-default.raw.tsx');
 var slotHtml = getRawFile('./data/blocks/slot-html.raw.tsx');
 var slotJsx = getRawFile('./data/blocks/slot-jsx.raw.tsx');
+var slotNamed = getRawFile('./data/blocks/slot-named.raw.tsx');
 var stamped = getRawFile('./data/blocks/stamped-io.raw.tsx');
 var submitButtonBlock = getRawFile('./data/blocks/submit-button.raw.tsx');
 var text = getRawFile('./data/blocks/text.raw.tsx');
@@ -164,6 +166,7 @@ var SVELTE_SYNTAX_TESTS = {
     lifecycleHooks: getRawFile('./syntax/svelte/lifecycle-hooks.raw.svelte'),
     reactive: getRawFile('./syntax/svelte/reactive.raw.svelte'),
     reactiveWithFn: getRawFile('./syntax/svelte/reactive-with-fn.raw.svelte'),
+    slots: getRawFile('./syntax/svelte/slots.raw.svelte'),
     style: getRawFile('./syntax/svelte/style.raw.svelte'),
     textExpressions: getRawFile('./syntax/svelte/text-expressions.raw.svelte'),
 };
@@ -235,8 +238,10 @@ var BASIC_TESTS = {
 var SLOTS_TESTS = {
     ContentSlotJSX: contentSlotJsx,
     ContentSlotHtml: contentSlotHtml,
+    SlotDefault: slotDefault,
     SlotJsx: slotJsx,
     SlotHtml: slotHtml,
+    SlotNamed: slotNamed,
     classState: classState,
 };
 var MULTI_ON_UPDATE_TESTS = {

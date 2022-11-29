@@ -53,15 +53,24 @@ var mappers = {
             : '', "\n{/if}");
     },
     Slot: function (_a) {
-        var _b, _c;
+        var _b, _c, _d;
         var json = _a.json, options = _a.options, parentComponent = _a.parentComponent;
-        if (!json.bindings.name) {
+        var slotName = ((_b = json.bindings.name) === null || _b === void 0 ? void 0 : _b.code) || json.properties.name;
+        var renderChildren = function () {
+            var _a;
+            return (_a = json.children) === null || _a === void 0 ? void 0 : _a.map(function (item) { return (0, exports.blockToSvelte)({ json: item, options: options, parentComponent: parentComponent }); }).join('\n');
+        };
+        if (!slotName) {
             var key = Object.keys(json.bindings).find(Boolean);
-            if (!key)
-                return '<slot />';
-            return "\n        <span #".concat(key, ">\n        ").concat((_b = json.bindings[key]) === null || _b === void 0 ? void 0 : _b.code, "\n        </span>\n      ");
+            if (!key) {
+                if (!((_c = json.children) === null || _c === void 0 ? void 0 : _c.length)) {
+                    return '<slot/>';
+                }
+                return "<slot>".concat(renderChildren(), "</slot>");
+            }
+            return "\n        <span #".concat(key, ">\n        ").concat((_d = json.bindings[key]) === null || _d === void 0 ? void 0 : _d.code, "\n        </span>\n      ");
         }
-        return "<slot name=\"".concat((0, slots_1.stripSlotPrefix)(json.bindings.name.code).toLowerCase(), "\">").concat((_c = json.children) === null || _c === void 0 ? void 0 : _c.map(function (item) { return (0, exports.blockToSvelte)({ json: item, options: options, parentComponent: parentComponent }); }).join('\n'), "</slot>");
+        return "<slot name=\"".concat((0, slots_1.stripSlotPrefix)(slotName).toLowerCase(), "\">").concat(renderChildren(), "</slot>");
     },
 };
 var BINDINGS_MAPPER = {

@@ -67,44 +67,57 @@ var isRootSpecialNode = function (json) {
 };
 var wrapInFragment = function (json) { return json.children.length !== 1; };
 var NODE_MAPPERS = {
-    Slot: function (json, options, parentSlots) {
+    Slot: function (json, options, component, parentSlots) {
         var _a;
-        if (!json.bindings.name) {
+        var _b, _c;
+        var slotName = ((_b = json.bindings.name) === null || _b === void 0 ? void 0 : _b.code) || json.properties.name;
+        var hasChildren = json.children.length;
+        var renderChildren = function () { var _a; return (_a = json.children) === null || _a === void 0 ? void 0 : _a.map(function (item) { return (0, exports.blockToReact)(item, options, component); }).join('\n'); };
+        if (!slotName) {
             // TODO: update MitosisNode for simple code
             var key = Object.keys(json.bindings).find(Boolean);
             if (key && parentSlots) {
                 var propKey = (0, lodash_1.camelCase)('Slot' + key[0].toUpperCase() + key.substring(1));
-                parentSlots.push({ key: propKey, value: (_a = json.bindings[key]) === null || _a === void 0 ? void 0 : _a.code });
+                parentSlots.push({ key: propKey, value: (_c = json.bindings[key]) === null || _c === void 0 ? void 0 : _c.code });
                 return '';
+            }
+            if (hasChildren) {
+                component.defaultProps = __assign(__assign({}, (component.defaultProps || {})), { children: renderChildren().trim() });
             }
             return "{".concat((0, helpers_2.processBinding)('props.children', options), "}");
         }
-        var slotProp = (0, helpers_2.processBinding)(json.bindings.name.code, options).replace('name=', '');
+        var slotProp = (0, helpers_2.processBinding)(slotName, options).replace('name=', '');
+        if (!slotProp.startsWith('props.slot')) {
+            slotProp = "props.slot".concat((0, lodash_1.upperFirst)((0, lodash_1.camelCase)(slotProp)));
+        }
+        if (hasChildren) {
+            component.defaultProps = __assign(__assign({}, (component.defaultProps || {})), (_a = {}, _a[slotProp.replace('props.', '')] = renderChildren(), _a));
+        }
         return "{".concat(slotProp, "}");
     },
-    Fragment: function (json, options) {
+    Fragment: function (json, options, component) {
         var wrap = wrapInFragment(json);
         return "".concat(wrap ? getFragment('open', options) : '').concat(json.children
-            .map(function (item) { return (0, exports.blockToReact)(item, options); })
+            .map(function (item) { return (0, exports.blockToReact)(item, options, component); })
             .join('\n')).concat(wrap ? getFragment('close', options) : '');
     },
-    For: function (_json, options) {
+    For: function (_json, options, component) {
         var _a;
         var json = _json;
         var wrap = wrapInFragment(json);
         var forArguments = (0, for_1.getForArguments)(json).join(', ');
         return "{".concat((0, helpers_2.processBinding)((_a = json.bindings.each) === null || _a === void 0 ? void 0 : _a.code, options), "?.map((").concat(forArguments, ") => (\n      ").concat(wrap ? openFrag(options) : '').concat(json.children
             .filter(filter_empty_text_nodes_1.filterEmptyTextNodes)
-            .map(function (item) { return (0, exports.blockToReact)(item, options); })
+            .map(function (item) { return (0, exports.blockToReact)(item, options, component); })
             .join('\n')).concat(wrap ? closeFrag(options) : '', "\n    ))}");
     },
-    Show: function (json, options) {
+    Show: function (json, options, component) {
         var _a;
         var wrap = wrapInFragment(json);
         return "{".concat((0, helpers_2.processBinding)((_a = json.bindings.when) === null || _a === void 0 ? void 0 : _a.code, options), " ? (\n      ").concat(wrap ? openFrag(options) : '').concat(json.children
             .filter(filter_empty_text_nodes_1.filterEmptyTextNodes)
-            .map(function (item) { return (0, exports.blockToReact)(item, options); })
-            .join('\n')).concat(wrap ? closeFrag(options) : '', "\n    ) : ").concat(!json.meta.else ? 'null' : (0, exports.blockToReact)(json.meta.else, options), "}");
+            .map(function (item) { return (0, exports.blockToReact)(item, options, component); })
+            .join('\n')).concat(wrap ? closeFrag(options) : '', "\n    ) : ").concat(!json.meta.else ? 'null' : (0, exports.blockToReact)(json.meta.else, options, component), "}");
     },
 };
 var ATTTRIBUTE_MAPPERS = {
@@ -126,10 +139,10 @@ var BINDING_MAPPERS = __assign({ ref: function (ref, value, options) {
     }, innerHTML: function (_key, value) {
         return ['dangerouslySetInnerHTML', "{__html: ".concat(value.replace(/\s+/g, ' '), "}")];
     } }, ATTTRIBUTE_MAPPERS);
-var blockToReact = function (json, options, parentSlots) {
+var blockToReact = function (json, options, component, parentSlots) {
     var _a, _b, _c;
     if (NODE_MAPPERS[json.name]) {
-        return NODE_MAPPERS[json.name](json, options, parentSlots);
+        return NODE_MAPPERS[json.name](json, options, component, parentSlots);
     }
     if (json.properties._text) {
         var text = json.properties._text;
@@ -150,7 +163,7 @@ var blockToReact = function (json, options, parentSlots) {
     for (var key in json.properties) {
         var value = (json.properties[key] || '').replace(/"/g, '&quot;').replace(/\n/g, '\\n');
         if (key === 'class') {
-            str += " className=\"".concat(value, "\" ");
+            str = "".concat(str.trim(), " className=\"").concat(value, "\" ");
         }
         else if (BINDING_MAPPERS[key]) {
             var mapper = BINDING_MAPPERS[key];
@@ -217,7 +230,7 @@ var blockToReact = function (json, options, parentSlots) {
     var childrenNodes = '';
     if (json.children) {
         childrenNodes = json.children
-            .map(function (item) { return (0, exports.blockToReact)(item, options, needsToRenderSlots); })
+            .map(function (item) { return (0, exports.blockToReact)(item, options, component, needsToRenderSlots); })
             .join('\n');
     }
     if (needsToRenderSlots.length) {
@@ -226,7 +239,7 @@ var blockToReact = function (json, options, parentSlots) {
             str += " ".concat(key, "={").concat(value, "} ");
         });
     }
-    str += '>';
+    str = str.trim() + '>';
     if (json.children) {
         str += childrenNodes;
     }
@@ -472,7 +485,7 @@ var _componentToReact = function (json, options, isSubComponent) {
             str: json.hooks.onUnMount.code,
             options: options,
         }), "\n            }\n          }, [])")
-        : '', wrap ? openFrag(options) : '', json.children.map(function (item) { return (0, exports.blockToReact)(item, options); }).join('\n'), componentHasStyles && stylesType === 'styled-jsx'
+        : '', wrap ? openFrag(options) : '', json.children.map(function (item) { return (0, exports.blockToReact)(item, options, json, []); }).join('\n'), componentHasStyles && stylesType === 'styled-jsx'
         ? "<style jsx>{`".concat(css, "`}</style>")
         : componentHasStyles && stylesType === 'style-tag'
             ? "<style>{`".concat(css, "`}</style>")
