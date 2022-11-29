@@ -28,6 +28,7 @@ var babel_transform_1 = require("../../helpers/babel-transform");
 var core_1 = require("@babel/core");
 var lodash_1 = require("lodash");
 var patterns_1 = require("../../helpers/patterns");
+var replace_identifiers_1 = require("../../helpers/replace-identifiers");
 var addPropertiesToJson = function (properties) {
     return function (json) { return (__assign(__assign({}, json), { properties: __assign(__assign({}, json.properties), properties) })); };
 };
@@ -101,6 +102,25 @@ function processRefs(input, component, options) {
         },
     });
 }
+function prefixMethodsWithThis(input, component, options) {
+    if (options.api === 'options') {
+        var allMethodNames = Object.entries(component.state)
+            .filter(function (_a) {
+            var _key = _a[0], value = _a[1];
+            return (value === null || value === void 0 ? void 0 : value.type) === 'function';
+        })
+            .map(function (_a) {
+            var key = _a[0];
+            return key;
+        });
+        if (!allMethodNames.length)
+            return input;
+        return (0, replace_identifiers_1.replaceIdentifiers)({ code: input, from: allMethodNames, to: function (name) { return "this.".concat(name); } });
+    }
+    else {
+        return input;
+    }
+}
 // TODO: migrate all stripStateAndPropsRefs to use this here
 // to properly replace context refs
 var processBinding = function (_a) {
@@ -125,7 +145,7 @@ var processBinding = function (_a) {
         var wasGetter = x.match(patterns_1.GETTER);
         return (0, function_1.pipe)(x, 
         // workaround so that getter code is valid and parseable by babel.
-        patterns_1.stripGetter, function (code) { return processRefs(code, json, options); }, function (code) { return (preserveGetter && wasGetter ? "get ".concat(code) : code); });
+        patterns_1.stripGetter, function (code) { return processRefs(code, json, options); }, function (code) { return prefixMethodsWithThis(code, json, options); }, function (code) { return (preserveGetter && wasGetter ? "get ".concat(code) : code); });
     });
 };
 exports.processBinding = processBinding;
