@@ -72,7 +72,27 @@ var NODE_MAPPERS = {
         var _b, _c;
         var slotName = ((_b = json.bindings.name) === null || _b === void 0 ? void 0 : _b.code) || json.properties.name;
         var hasChildren = json.children.length;
-        var renderChildren = function () { var _a; return (_a = json.children) === null || _a === void 0 ? void 0 : _a.map(function (item) { return (0, exports.blockToReact)(item, options, component); }).join('\n'); };
+        var renderChildren = function () {
+            var _a;
+            var childrenStr = (_a = json.children) === null || _a === void 0 ? void 0 : _a.map(function (item) { return (0, exports.blockToReact)(item, options, component); }).join('\n').trim();
+            /**
+             * Ad-hoc way of figuring out if the children defaultProp is:
+             * - a JSX element, e.g. `<div>foo</div>`
+             * - a JS expression, e.g. `true`, `false`
+             * - a string, e.g. `'Default text'`
+             *
+             * and correctly wrapping it in quotes when appropriate.
+             */
+            if (childrenStr.startsWith("<") && childrenStr.endsWith(">")) {
+                return childrenStr;
+            }
+            else if (['false', 'true', 'null', 'undefined'].includes(childrenStr)) {
+                return childrenStr;
+            }
+            else {
+                return "\"".concat(childrenStr, "\"");
+            }
+        };
         if (!slotName) {
             // TODO: update MitosisNode for simple code
             var key = Object.keys(json.bindings).find(Boolean);
@@ -82,7 +102,10 @@ var NODE_MAPPERS = {
                 return '';
             }
             if (hasChildren) {
-                component.defaultProps = __assign(__assign({}, (component.defaultProps || {})), { children: renderChildren().trim() });
+                component.defaultProps = __assign(__assign({}, (component.defaultProps || {})), { children: {
+                        code: renderChildren(),
+                        type: 'property',
+                    } });
             }
             return "{".concat((0, helpers_2.processBinding)('props.children', options), "}");
         }
@@ -91,7 +114,10 @@ var NODE_MAPPERS = {
             slotProp = "props.slot".concat((0, lodash_1.upperFirst)((0, lodash_1.camelCase)(slotProp)));
         }
         if (hasChildren) {
-            component.defaultProps = __assign(__assign({}, (component.defaultProps || {})), (_a = {}, _a[slotProp.replace('props.', '')] = renderChildren(), _a));
+            component.defaultProps = __assign(__assign({}, (component.defaultProps || {})), (_a = {}, _a[slotProp.replace('props.', '')] = {
+                code: renderChildren(),
+                type: 'property',
+            }, _a));
         }
         return "{".concat(slotProp, "}");
     },
@@ -441,6 +467,21 @@ var _componentToReact = function (json, options, isSubComponent) {
     var nativeStyles = stylesType === 'react-native' && componentHasStyles && (0, react_native_1.collectReactNativeStyles)(json);
     var propType = json.propsTypeRef || 'any';
     var propsArgs = "props".concat(options.typescript ? ":".concat(propType) : '');
+    var getPropsDefinition = function (_a) {
+        var json = _a.json;
+        if (!json.defaultProps)
+            return '';
+        var defalutPropsString = Object.keys(json.defaultProps)
+            .map(function (prop) {
+            var _a;
+            var value = json.defaultProps.hasOwnProperty(prop)
+                ? (_a = json.defaultProps[prop]) === null || _a === void 0 ? void 0 : _a.code
+                : '{}';
+            return "".concat(prop, ": ").concat(value);
+        })
+            .join(',');
+        return "".concat(json.name || 'MyComponent', ".defaultProps = {").concat(defalutPropsString, "};");
+    };
     var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n  ", "\n  ", "\n  ", "\n  ", "\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "", "", "function ", "(", "", ") {\n    ", "\n    ", "\n      ", "\n      ", "\n      ", "\n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      return (\n        ", "\n        ", "\n        ", "\n        ", "\n      );\n    }", "\n\n    ", "\n\n    ", "\n\n    ", "\n    ", "\n\n  "], ["\n  ", "\n  ", "\n  ", "\n  ", "\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "", "", "function ", "(", "", ") {\n    ", "\n    ", "\n      ", "\n      ", "\n      ", "\n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      return (\n        ", "\n        ", "\n        ", "\n        ", "\n      );\n    }", "\n\n    ", "\n\n    ", "\n\n    ", "\n    ", "\n\n  "])), options.preact
         ? "\n    /** @jsx h */\n    import { h, Fragment } from 'preact';\n    "
         : options.type !== 'native'
@@ -489,9 +530,7 @@ var _componentToReact = function (json, options, isSubComponent) {
         ? "<style jsx>{`".concat(css, "`}</style>")
         : componentHasStyles && stylesType === 'style-tag'
             ? "<style>{`".concat(css, "`}</style>")
-            : '', wrap ? closeFrag(options) : '', isForwardRef ? ')' : '', !json.defaultProps
-        ? ''
-        : "".concat(json.name || 'MyComponent', ".defaultProps = ").concat(json5_1.default.stringify(json.defaultProps), ";"), !nativeStyles
+            : '', wrap ? closeFrag(options) : '', isForwardRef ? ')' : '', getPropsDefinition({ json: json }), !nativeStyles
         ? ''
         : "\n      const styles = StyleSheet.create(".concat(json5_1.default.stringify(nativeStyles), ");\n    "), styledComponentsCode ? styledComponentsCode : '', stateType === 'mobx'
         ? "\n      const observed".concat(json.name || 'MyComponent', " = observer(").concat(json.name || 'MyComponent', ");\n      export default observed").concat(json.name || 'MyComponent', ";\n    ")

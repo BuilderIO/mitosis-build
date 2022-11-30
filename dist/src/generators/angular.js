@@ -29,7 +29,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.componentToAngular = exports.blockToAngular = void 0;
 var dedent_1 = __importDefault(require("dedent"));
-var json5_1 = __importDefault(require("json5"));
 var standalone_1 = require("prettier/standalone");
 var collect_css_1 = require("../helpers/styles/collect-css");
 var fast_clone_1 = require("../helpers/fast-clone");
@@ -53,6 +52,7 @@ var slots_1 = require("../helpers/slots");
 var get_custom_imports_1 = require("../helpers/get-custom-imports");
 var get_components_used_1 = require("../helpers/get-components-used");
 var is_upper_case_1 = require("../helpers/is-upper-case");
+var replace_identifiers_1 = require("../helpers/replace-identifiers");
 var html_tags_1 = require("../constants/html_tags");
 var function_1 = require("fp-ts/lib/function");
 var merge_options_1 = require("../helpers/merge-options");
@@ -225,12 +225,27 @@ var componentToAngular = function (userOptions) {
                 switch (codeType) {
                     case 'hooks':
                         return function (code) {
-                            return (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(code, {
+                            return (0, function_1.pipe)((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(code, {
                                 replaceWith: 'this.',
                                 contextVars: contextVars,
                                 outputVars: outputVars,
                                 domRefs: Array.from(domRefs),
                                 stateVars: stateVars,
+                            }), function (code) {
+                                var allMethodNames = Object.entries(json.state)
+                                    .filter(function (_a) {
+                                    var key = _a[0], value = _a[1];
+                                    return (value === null || value === void 0 ? void 0 : value.type) === 'function' || (value === null || value === void 0 ? void 0 : value.type) === 'method';
+                                })
+                                    .map(function (_a) {
+                                    var key = _a[0];
+                                    return key;
+                                });
+                                return (0, replace_identifiers_1.replaceIdentifiers)({
+                                    code: code,
+                                    from: allMethodNames,
+                                    to: function (name) { return "this.".concat(name); },
+                                });
                             });
                         };
                     case 'bindings':
@@ -349,7 +364,22 @@ var componentToAngular = function (userOptions) {
             var key = _a[0], value = _a[1];
             componentMetadata[key] = value;
         });
-        var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    import { ", " ", " Component ", "", " } from '@angular/core';\n    ", "\n\n    ", "\n    ", "\n    ", "\n\n    @Component({\n      ", "\n    })\n    export class ", " {\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n    }\n  "], ["\n    import { ", " ", " Component ", "", " } from '@angular/core';\n    ", "\n\n    ", "\n    ", "\n    ", "\n\n    @Component({\n      ", "\n    })\n    export class ", " {\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n    }\n  "])), outputs.length ? 'Output, EventEmitter, \n' : '', ((_g = options === null || options === void 0 ? void 0 : options.experimental) === null || _g === void 0 ? void 0 : _g.inject) ? 'Inject, forwardRef,' : '', domRefs.size ? ', ViewChild, ElementRef' : '', props.size ? ', Input' : '', options.standalone ? "import { CommonModule } from '@angular/common';" : '', json.types ? json.types.join('\n') : '', !json.defaultProps ? '' : "const defaultProps = ".concat(json5_1.default.stringify(json.defaultProps), "\n"), (0, render_imports_1.renderPreComponent)({
+        var getPropsDefinition = function (_a) {
+            var json = _a.json;
+            if (!json.defaultProps)
+                return '';
+            var defalutPropsString = Object.keys(json.defaultProps)
+                .map(function (prop) {
+                var _a;
+                var value = json.defaultProps.hasOwnProperty(prop)
+                    ? (_a = json.defaultProps[prop]) === null || _a === void 0 ? void 0 : _a.code
+                    : '{}';
+                return "".concat(prop, ": ").concat(value);
+            })
+                .join(',');
+            return "const defaultProps = {".concat(defalutPropsString, "};\n");
+        };
+        var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    import { ", " ", " Component ", "", " } from '@angular/core';\n    ", "\n\n    ", "\n    ", "\n    ", "\n\n    @Component({\n      ", "\n    })\n    export class ", " {\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n    }\n  "], ["\n    import { ", " ", " Component ", "", " } from '@angular/core';\n    ", "\n\n    ", "\n    ", "\n    ", "\n\n    @Component({\n      ", "\n    })\n    export class ", " {\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n    }\n  "])), outputs.length ? 'Output, EventEmitter, \n' : '', ((_g = options === null || options === void 0 ? void 0 : options.experimental) === null || _g === void 0 ? void 0 : _g.inject) ? 'Inject, forwardRef,' : '', domRefs.size ? ', ViewChild, ElementRef' : '', props.size ? ', Input' : '', options.standalone ? "import { CommonModule } from '@angular/common';" : '', json.types ? json.types.join('\n') : '', getPropsDefinition({ json: json }), (0, render_imports_1.renderPreComponent)({
             component: json,
             target: 'angular',
             excludeMitosisComponents: !options.standalone && !options.preserveImports,

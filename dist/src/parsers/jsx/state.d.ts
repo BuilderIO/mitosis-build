@@ -8,5 +8,5 @@ declare const types: typeof babel.types;
  *   setText(...) -> state.text = ...
  */
 export declare function mapStateIdentifiers(json: MitosisComponent): void;
-export declare const parseStateObjectToMitosisState: (object: babel.types.ObjectExpression) => MitosisState;
+export declare const parseStateObjectToMitosisState: (object: babel.types.ObjectExpression, isState?: boolean) => MitosisState;
 export {};

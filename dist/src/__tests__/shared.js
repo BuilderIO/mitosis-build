@@ -144,6 +144,7 @@ var submitButtonBlock = getRawFile('./data/blocks/submit-button.raw.tsx');
 var text = getRawFile('./data/blocks/text.raw.tsx');
 var textarea = getRawFile('./data/blocks/textarea.raw.tsx');
 var video = getRawFile('./data/blocks/video.raw.tsx');
+var referencingFunInsideHook = getRawFile('./data/blocks/referencing-function-inside-hook.raw.tsx');
 var multipleSpreads = getRawFile('./data/spread/multiple-spreads.raw.tsx');
 var spreadAttrs = getRawFile('./data/spread/spread-attrs.raw.tsx');
 var spreadNestedProps = getRawFile('./data/spread/spread-nested-props.raw.tsx');
@@ -234,6 +235,7 @@ var BASIC_TESTS = {
     arrowFunctionInUseStore: arrowFunctionInUseStore,
     expressionState: expressionState,
     contentState: contentState,
+    referencingFunInsideHook: referencingFunInsideHook,
 };
 var SLOTS_TESTS = {
     ContentSlotJSX: contentSlotJsx,

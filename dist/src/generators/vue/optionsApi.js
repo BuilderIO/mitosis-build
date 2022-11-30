@@ -112,20 +112,30 @@ function generateOptionsApiScript(component, options, path, template, props, onU
     })) === null || _a === void 0 ? void 0 : _a[0]; })
         .filter(nullable_1.checkIsDefined);
     var componentsUsed = (0, lodash_1.uniq)(__spreadArray(__spreadArray([], componentsUsedInTemplate, true), importedComponents, true));
-    var propsDefinition = Array.from(props).filter(function (prop) { return prop !== 'children' && prop !== 'class'; });
-    // add default props (if set)
-    if (component.defaultProps) {
-        propsDefinition = propsDefinition.reduce(function (propsDefinition, curr) {
-            var _a;
-            return ((propsDefinition[curr] = ((_a = component.defaultProps) === null || _a === void 0 ? void 0 : _a.hasOwnProperty(curr))
-                ? { default: component.defaultProps[curr] }
-                : {}),
-                propsDefinition);
-        }, {});
-    }
+    var getPropDefinition = function (_a) {
+        var component = _a.component, props = _a.props;
+        var propsDefinition = Array.from(props).filter(function (prop) { return prop !== 'children' && prop !== 'class'; });
+        var str = 'props: ';
+        if (component.defaultProps) {
+            var defalutPropsString = propsDefinition
+                .map(function (prop) {
+                var _a;
+                var value = component.defaultProps.hasOwnProperty(prop)
+                    ? (_a = component.defaultProps[prop]) === null || _a === void 0 ? void 0 : _a.code
+                    : '{}';
+                return "".concat(prop, ": { default: ").concat(value, " }");
+            })
+                .join(',');
+            str += "{".concat(defalutPropsString, "}");
+        }
+        else {
+            str += "".concat(json5_1.default.stringify(propsDefinition));
+        }
+        return "".concat(str, ",");
+    };
     return "\n        export default {\n        ".concat(!component.name
         ? ''
-        : "name: '".concat(path && ((_a = options.namePrefix) === null || _a === void 0 ? void 0 : _a.call(options, path)) ? ((_b = options.namePrefix) === null || _b === void 0 ? void 0 : _b.call(options, path)) + '-' : '').concat((0, lodash_1.kebabCase)(component.name), "',"), "\n        ").concat(generateComponents(componentsUsed, options), "\n        ").concat(props.length ? "props: ".concat(json5_1.default.stringify(propsDefinition), ",") : '', "\n        ").concat(dataString.length < 4
+        : "name: '".concat(path && ((_a = options.namePrefix) === null || _a === void 0 ? void 0 : _a.call(options, path)) ? ((_b = options.namePrefix) === null || _b === void 0 ? void 0 : _b.call(options, path)) + '-' : '').concat((0, lodash_1.kebabCase)(component.name), "',"), "\n        ").concat(generateComponents(componentsUsed, options), "\n        ").concat(props.length ? getPropDefinition({ component: component, props: props }) : '', "\n        ").concat(dataString.length < 4
         ? ''
         : "\n        data: () => (".concat(dataString, "),\n        "), "\n\n        ").concat((0, lodash_1.size)(component.context.set)
         ? "provide() {\n                return ".concat((0, helpers_1.getContextProvideString)(component, options), "\n              },")
@@ -147,7 +157,7 @@ function generateOptionsApiScript(component, options, path, template, props, onU
         ? "unmounted() {\n                ".concat(component.hooks.onUnMount.code, "\n              },")
         : '', "\n\n        ").concat(getterString.length < 4
         ? ''
-        : " \n          computed: ".concat(getterString, ",\n        "), "\n        ").concat(functionsString.length < 4
+        : "\n          computed: ".concat(getterString, ",\n        "), "\n        ").concat(functionsString.length < 4
         ? ''
         : "\n          methods: ".concat(functionsString, ",\n        "), "\n        ").concat(Object.entries(component.meta.vueConfig || {})
         .map(function (_a) {

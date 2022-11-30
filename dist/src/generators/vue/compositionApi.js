@@ -20,7 +20,16 @@ var getCompositionPropDefinition = function (_a) {
     var str = 'const props = ';
     if (component.defaultProps) {
         var generic = options.typescript ? "<".concat(component.propsTypeRef, ">") : '';
-        str += "withDefaults(defineProps".concat(generic, "(), ").concat(json5_1.default.stringify(component.defaultProps), ")");
+        var defalutPropsString = props
+            .map(function (prop) {
+            var _a;
+            var value = component.defaultProps.hasOwnProperty(prop)
+                ? (_a = component.defaultProps[prop]) === null || _a === void 0 ? void 0 : _a.code
+                : '{}';
+            return "".concat(prop, ": ").concat(value);
+        })
+            .join(',');
+        str += "withDefaults(defineProps".concat(generic, "(), {").concat(defalutPropsString, "})");
     }
     else if (options.typescript && component.propsTypeRef && component.propsTypeRef !== 'any') {
         str += "defineProps<".concat(component.propsTypeRef, ">()");

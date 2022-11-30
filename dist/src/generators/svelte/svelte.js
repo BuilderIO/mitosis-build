@@ -35,7 +35,6 @@ var babel_transform_1 = require("../../helpers/babel-transform");
 var function_1 = require("fp-ts/lib/function");
 var context_1 = require("../helpers/context");
 var slots_1 = require("../../helpers/slots");
-var json5_1 = __importDefault(require("json5"));
 var functions_1 = require("../helpers/functions");
 var merge_options_1 = require("../../helpers/merge-options");
 var process_code_1 = require("../../helpers/plugins/process-code");
@@ -183,12 +182,13 @@ var componentToSvelte = function (userProvidedOptions) {
         if ((0, context_1.hasSetContext)(component)) {
             svelteImports.push('setContext');
         }
-        str += (0, dedent_1.default)(templateObject_2 || (templateObject_2 = __makeTemplateObject(["\n      <script ", ">\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n      ", "\n      ", "\n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n      ", "\n      \n      ", "\n\n      ", "\n\n      ", "\n    </script>\n\n    ", "\n\n    ", "\n  "], ["\n      <script ", ">\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n      ", "\n      "
+        str += (0, dedent_1.default)(templateObject_2 || (templateObject_2 = __makeTemplateObject(["\n      <script ", ">\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n      ", "\n      ", "\n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n    </script>\n\n    ", "\n\n    ", "\n  "], ["\n      <script ", ">\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n      ", "\n      "
             // https://svelte.dev/repl/bd9b56891f04414982517bbd10c52c82?version=3.31.0
-            , "\n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n      ", "\n      \n      ", "\n\n      ", "\n\n      ", "\n    </script>\n\n    ", "\n\n    ", "\n  "])), tsLangAttribute, !svelteImports.length ? '' : "import { ".concat(svelteImports.sort().join(', '), " } from 'svelte'"), !svelteStoreImports.length
+            , "\n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n    </script>\n\n    ", "\n\n    ", "\n  "])), tsLangAttribute, !svelteImports.length ? '' : "import { ".concat(svelteImports.sort().join(', '), " } from 'svelte'"), !svelteStoreImports.length
             ? ''
             : "import { ".concat(svelteStoreImports.sort().join(', '), " } from 'svelte/store'"), (0, render_imports_1.renderPreComponent)({ component: json, target: 'svelte' }), !hasData || options.stateType === 'variables' ? '' : "import onChange from 'on-change'", props
             .map(function (name) {
+            var _a;
             if (name === 'children') {
                 return '';
             }
@@ -197,7 +197,7 @@ var componentToSvelte = function (userProvidedOptions) {
                 propDeclaration += ": ".concat(json.propsTypeRef.split(' |')[0], "['").concat(name, "']");
             }
             if (json.defaultProps && json.defaultProps.hasOwnProperty(name)) {
-                propDeclaration += "=".concat(json5_1.default.stringify(json.defaultProps[name]));
+                propDeclaration += "=".concat((_a = json.defaultProps[name]) === null || _a === void 0 ? void 0 : _a.code);
             }
             propDeclaration += ';';
             return propDeclaration;

@@ -93,6 +93,6 @@ export declare type MitosisComponent = {
     subComponents: MitosisComponent[];
     types?: string[];
     propsTypeRef?: string;
-    defaultProps?: JSONObject;
+    defaultProps?: MitosisState;
     style?: string;
 };

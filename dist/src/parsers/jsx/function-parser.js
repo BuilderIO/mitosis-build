@@ -64,17 +64,9 @@ function generateUseStyleCode(expression) {
 }
 exports.generateUseStyleCode = generateUseStyleCode;
 function parseDefaultPropsHook(component, expression) {
-    var _a;
     var firstArg = expression.arguments[0];
     if (types.isObjectExpression(firstArg)) {
-        var objectProperties = (_a = firstArg.properties) === null || _a === void 0 ? void 0 : _a.filter(function (i) { return types.isObjectProperty(i); });
-        objectProperties === null || objectProperties === void 0 ? void 0 : objectProperties.forEach(function (i) {
-            var _a;
-            var _b, _c, _d;
-            if ((_b = i.key) === null || _b === void 0 ? void 0 : _b.name) {
-                component.defaultProps = __assign(__assign({}, ((_c = component.defaultProps) !== null && _c !== void 0 ? _c : {})), (_a = {}, _a[(_d = i.key) === null || _d === void 0 ? void 0 : _d.name] = i.value.value, _a));
-            }
-        });
+        component.defaultProps = (0, state_1.parseStateObjectToMitosisState)(firstArg, false);
     }
 }
 exports.parseDefaultPropsHook = parseDefaultPropsHook;

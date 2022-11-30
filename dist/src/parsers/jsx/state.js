@@ -166,7 +166,43 @@ var processStateObjectSlice = function (item) {
         throw new Error('Unexpected state value type', item);
     }
 };
-var parseStateObjectToMitosisState = function (object) {
+var processDefaultPropsSlice = function (item) {
+    if (types.isObjectProperty(item)) {
+        if (types.isFunctionExpression(item.value) || types.isArrowFunctionExpression(item.value)) {
+            return {
+                code: (0, helpers_1.parseCode)(item.value),
+                type: 'method',
+            };
+        }
+        else {
+            // Remove typescript types, e.g. from
+            // { foo: ('string' as SomeType) }
+            if (types.isTSAsExpression(item.value)) {
+                return {
+                    code: (0, helpers_1.parseCode)(item.value.expression),
+                    type: 'property',
+                };
+            }
+            return {
+                code: (0, helpers_1.parseCode)(item.value),
+                type: 'property',
+            };
+        }
+    }
+    else if (types.isObjectMethod(item)) {
+        var n = (0, helpers_1.parseCode)(__assign(__assign({}, item), { returnType: null }));
+        var isGetter = item.kind === 'get';
+        return {
+            code: n,
+            type: isGetter ? 'getter' : 'method',
+        };
+    }
+    else {
+        throw new Error('Unexpected state value type', item);
+    }
+};
+var parseStateObjectToMitosisState = function (object, isState) {
+    if (isState === void 0) { isState = true; }
     var state = {};
     object.properties.forEach(function (x) {
         if (types.isSpreadElement(x)) {
@@ -178,7 +214,7 @@ var parseStateObjectToMitosisState = function (object) {
         if (!types.isIdentifier(x.key)) {
             throw new Error('Parse Error: Mitosis cannot consume non-identifier key in state object: ' + x.key);
         }
-        state[x.key.name] = processStateObjectSlice(x);
+        state[x.key.name] = isState ? processStateObjectSlice(x) : processDefaultPropsSlice(x);
     });
     return state;
 };
