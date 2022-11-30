@@ -70,7 +70,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.runTestsForTarget = exports.runTestsForJsx = void 0;
+exports.runTestsForTarget = exports.runTestsForSvelteSyntax = exports.runTestsForJsx = void 0;
 var jsx_1 = require("../parsers/jsx");
 var __1 = require("..");
 var getRawFile = function (path) { return Promise.resolve().then(function () { return __importStar(require("".concat(path, "?raw"))); }).then(function (x) { return x.default; }); };
@@ -505,6 +505,26 @@ var runTestsForJsx = function () {
     });
 };
 exports.runTestsForJsx = runTestsForJsx;
+var runTestsForSvelteSyntax = function () {
+    Object.keys(SVELTE_SYNTAX_TESTS).forEach(function (key) {
+        test(key, function () { return __awaiter(void 0, void 0, void 0, function () {
+            var component, _a;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0:
+                        _a = __1.parseSvelte;
+                        return [4 /*yield*/, SVELTE_SYNTAX_TESTS[key]];
+                    case 1: return [4 /*yield*/, _a.apply(void 0, [_b.sent()])];
+                    case 2:
+                        component = _b.sent();
+                        expect(component).toMatchSnapshot();
+                        return [2 /*return*/];
+                }
+            });
+        }); });
+    });
+};
+exports.runTestsForSvelteSyntax = runTestsForSvelteSyntax;
 var runTestsForTarget = function (_a) {
     var target = _a.target, generator = _a.generator, options = _a.options;
     var configurations = [

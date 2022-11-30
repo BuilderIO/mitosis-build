@@ -144,25 +144,6 @@ var collectClassString = function (json, options) {
     }
     return null;
 };
-var preProcessBlockCode = function (_a) {
-    var json = _a.json, options = _a.options, component = _a.component;
-    for (var key in json.properties) {
-        var value = json.properties[key];
-        if (value) {
-            json.properties[key] = (0, helpers_2.updateStateCode)({ options: options, component: component, updateSetters: false })(value);
-        }
-    }
-    for (var key in json.bindings) {
-        var value = json.bindings[key];
-        if (value === null || value === void 0 ? void 0 : value.code) {
-            json.bindings[key] = {
-                arguments: value.arguments,
-                code: (0, helpers_2.updateStateCode)({ options: options, component: component, updateSetters: true })(value.code),
-                type: value === null || value === void 0 ? void 0 : value.type,
-            };
-        }
-    }
-};
 var blockToSolid = function (_a) {
     var _b, _c;
     var json = _a.json, options = _a.options, component = _a.component;
