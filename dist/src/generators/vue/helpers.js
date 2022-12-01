@@ -125,28 +125,31 @@ function prefixMethodsWithThis(input, component, options) {
 // to properly replace context refs
 var processBinding = function (_a) {
     var code = _a.code, options = _a.options, json = _a.json, _b = _a.preserveGetter, preserveGetter = _b === void 0 ? false : _b;
-    return (0, function_1.pipe)((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(code, {
-        includeState: true,
-        // we don't want to process `props` in the Composition API because it has a `props` ref,
-        // therefore we can keep pointing to `props.${value}`
-        includeProps: options.api === 'options',
-        replaceWith: function (name) {
-            switch (options.api) {
-                case 'composition':
-                    return name;
-                case 'options':
-                    if (name === 'children' || name.startsWith('children.')) {
-                        return 'this.$slots.default';
-                    }
-                    return "this.".concat(name);
-            }
-        },
-    }), function (x) {
-        var wasGetter = x.match(patterns_1.GETTER);
-        return (0, function_1.pipe)(x, 
-        // workaround so that getter code is valid and parseable by babel.
-        patterns_1.stripGetter, function (code) { return processRefs(code, json, options); }, function (code) { return prefixMethodsWithThis(code, json, options); }, function (code) { return (preserveGetter && wasGetter ? "get ".concat(code) : code); });
-    });
+    try {
+        return (0, function_1.pipe)((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(code, {
+            includeState: true,
+            // we don't want to process `props` in the Composition API because it has a `props` ref,
+            // therefore we can keep pointing to `props.${value}`
+            includeProps: options.api === 'options',
+            replaceWith: function (name) {
+                switch (options.api) {
+                    case 'composition':
+                        return name;
+                    case 'options':
+                        if (name === 'children' || name.startsWith('children.')) {
+                            return 'this.$slots.default';
+                        }
+                        return "this.".concat(name);
+                }
+            },
+        }), function (x) {
+            return (0, function_1.pipe)(x, function (code) { return processRefs(code, json, options); }, function (code) { return prefixMethodsWithThis(code, json, options); }, function (code) { return (preserveGetter === false ? (0, patterns_1.stripGetter)(code) : code); });
+        });
+    }
+    catch (e) {
+        console.log('could not process bindings in ', { code: code });
+        throw e;
+    }
 };
 exports.processBinding = processBinding;
 var getContextValue = function (_a) {

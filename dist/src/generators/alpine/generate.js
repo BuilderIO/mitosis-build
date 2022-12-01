@@ -165,18 +165,19 @@ var componentToAlpine = function (options) {
         if (options.plugins) {
             json = (0, plugins_1.runPostJsonPlugins)(json, options.plugins);
         }
+        var componentName = (0, lodash_1.camelCase)(json.name) || 'MyComponent';
         var stateObjectString = getStateObjectString(json);
         // Set x-data on root element
         json.children[0].properties['x-data'] = options.inlineState
             ? stateObjectString
-            : "".concat((0, lodash_1.camelCase)(json.name), "()");
+            : "".concat(componentName, "()");
         if ((0, render_update_hooks_1.hasRootUpdateHook)(json)) {
             json.children[0].properties['x-effect'] = 'onUpdate';
         }
         var str = css.trim().length ? "<style>".concat(css, "</style>") : '';
         str += json.children.map(function (item) { return blockToAlpine(item, options); }).join('\n');
         if (!options.inlineState) {
-            str += "<script>\n          ".concat((0, babel_transform_1.babelTransformCode)("document.addEventListener('alpine:init', () => {\n              Alpine.data('".concat((0, lodash_1.camelCase)(json.name), "', () => (").concat(stateObjectString, "))\n          })")), "\n        </script>");
+            str += "<script>\n          ".concat((0, babel_transform_1.babelTransformCode)("document.addEventListener('alpine:init', () => {\n              Alpine.data('".concat(componentName, "', () => (").concat(stateObjectString, "))\n          })")), "\n        </script>");
         }
         if (options.plugins) {
             str = (0, plugins_1.runPreCodePlugins)(str, options.plugins);

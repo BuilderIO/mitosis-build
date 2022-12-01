@@ -9,12 +9,12 @@ var traverse_nodes_1 = require("../traverse-nodes");
 var preProcessBlockCode = function (_a) {
     var json = _a.json, codeProcessor = _a.codeProcessor;
     var propertiesProcessor = codeProcessor('properties');
-    for (var key in json.properties) {
-        var value = json.properties[key];
-        if (value) {
-            json.properties[key] = propertiesProcessor(value);
-        }
-    }
+    // for (const key in json.properties) {
+    //   const value = json.properties[key];
+    //   if (key !== '_text' && value) {
+    //     json.properties[key] = propertiesProcessor(value);
+    //   }
+    // }
     var bindingsProcessor = codeProcessor('bindings');
     for (var key in json.bindings) {
         var value = json.bindings[key];

@@ -77,7 +77,8 @@ var processHookCode = function (firstArg) {
         // AKA
         //  { console.log('hi') } -> console.log('hi')
         .replace(/^{/, '')
-        .replace(/}$/, '');
+        .replace(/}$/, '')
+        .trim();
 };
 /**
  * Parses function declarations within the Mitosis copmonent's body to JSON

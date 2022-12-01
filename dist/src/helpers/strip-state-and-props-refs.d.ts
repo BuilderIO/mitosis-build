@@ -12,8 +12,7 @@ export declare type StripStateAndPropsRefsOptions = {
  * Remove state. and props. from expressions, e.g.
  * state.foo -> foo
  *
- * This is for support for frameworks like Vue, Svelte, liquid,  etc
+ * This is for support for frameworks like Vue, Svelte, liquid, etc
  *
- * @todo proper ref replacement with babel
  */
 export declare const stripStateAndPropsRefs: (code?: string, _options?: StripStateAndPropsRefsOptions) => string;

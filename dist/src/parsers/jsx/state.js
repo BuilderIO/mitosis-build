@@ -45,24 +45,55 @@ var capitalize_1 = require("../../helpers/capitalize");
 var is_mitosis_node_1 = require("../../helpers/is-mitosis-node");
 var replace_identifiers_1 = require("../../helpers/replace-identifiers");
 var helpers_1 = require("./helpers");
+var function_1 = require("fp-ts/lib/function");
 var types = babel.types;
 function mapStateIdentifiersInExpression(expression, stateProperties) {
     var setExpressions = stateProperties.map(function (propertyName) { return "set".concat((0, capitalize_1.capitalize)(propertyName)); });
-    return (0, babel_transform_1.babelTransformExpression)(
-    // foo -> state.foo
-    (0, replace_identifiers_1.replaceIdentifiers)({ code: expression, from: stateProperties, to: function (name) { return "state.".concat(name); } }), {
-        CallExpression: function (path) {
-            if (types.isIdentifier(path.node.callee)) {
-                if (setExpressions.includes(path.node.callee.name)) {
-                    // setFoo -> foo
-                    var statePropertyName = (0, helpers_1.uncapitalize)(path.node.callee.name.slice(3));
-                    // setFoo(...) -> state.foo = ...
-                    path.replaceWith(types.assignmentExpression('=', types.identifier("state.".concat(statePropertyName)), path.node.arguments[0]));
+    return (0, function_1.pipe)((0, replace_identifiers_1.replaceIdentifiers)({
+        code: expression,
+        from: stateProperties,
+        to: function (name) { return "state.".concat(name); },
+    }), function (code) {
+        return (0, babel_transform_1.babelTransformExpression)(
+        // foo -> state.foo
+        code, {
+            CallExpression: function (path) {
+                if (types.isIdentifier(path.node.callee)) {
+                    if (setExpressions.includes(path.node.callee.name)) {
+                        // setFoo -> foo
+                        var statePropertyName = (0, helpers_1.uncapitalize)(path.node.callee.name.slice(3));
+                        // setFoo(...) -> state.foo = ...
+                        path.replaceWith(types.assignmentExpression('=', types.identifier("state.".concat(statePropertyName)), path.node.arguments[0]));
+                    }
                 }
-            }
-        },
-    });
+            },
+        });
+    }, function (code) { return code.trim(); });
 }
+var consolidateClassBindings = function (item) {
+    if (item.bindings.className) {
+        if (item.bindings.class) {
+            // TO-DO: it's too much work to merge 2 bindings, so just remove the old one for now.
+            item.bindings.class = item.bindings.className;
+        }
+        else {
+            item.bindings.class = item.bindings.className;
+        }
+        delete item.bindings.className;
+    }
+    if (item.properties.className) {
+        if (item.properties.class) {
+            item.properties.class = "".concat(item.properties.class, " ").concat(item.properties.className);
+        }
+        else {
+            item.properties.class = item.properties.className;
+        }
+        delete item.properties.className;
+    }
+    if (item.properties.class && item.bindings.class) {
+        console.warn("[".concat(item.name, "]: Ended up with both a property and binding for 'class'."));
+    }
+};
 /**
  * Convert state identifiers from React hooks format to the state.* format Mitosis needs
  * e.g.
@@ -97,28 +128,7 @@ function mapStateIdentifiers(json) {
                     }
                 }
             }
-            if (item.bindings.className) {
-                if (item.bindings.class) {
-                    // TO-DO: it's too much work to merge 2 bindings, so just remove the old one for now.
-                    item.bindings.class = item.bindings.className;
-                }
-                else {
-                    item.bindings.class = item.bindings.className;
-                }
-                delete item.bindings.className;
-            }
-            if (item.properties.className) {
-                if (item.properties.class) {
-                    item.properties.class = "".concat(item.properties.class, " ").concat(item.properties.className);
-                }
-                else {
-                    item.properties.class = item.properties.className;
-                }
-                delete item.properties.className;
-            }
-            if (item.properties.class && item.bindings.class) {
-                console.warn("[".concat(json.name, "]: Ended up with both a property and binding for 'class'."));
-            }
+            consolidateClassBindings(item);
         }
     });
 }
@@ -127,13 +137,13 @@ var processStateObjectSlice = function (item) {
     if (types.isObjectProperty(item)) {
         if (types.isFunctionExpression(item.value)) {
             return {
-                code: (0, helpers_1.parseCode)(item.value),
+                code: (0, helpers_1.parseCode)(item.value).trim(),
                 type: 'function',
             };
         }
         else if (types.isArrowFunctionExpression(item.value)) {
             var n = babel.types.objectMethod('method', item.key, item.value.params, item.value.body);
-            var code = (0, helpers_1.parseCode)(n);
+            var code = (0, helpers_1.parseCode)(n).trim();
             return {
                 code: code,
                 type: 'method',
@@ -144,18 +154,18 @@ var processStateObjectSlice = function (item) {
             // { foo: ('string' as SomeType) }
             if (types.isTSAsExpression(item.value)) {
                 return {
-                    code: (0, helpers_1.parseCode)(item.value.expression),
+                    code: (0, helpers_1.parseCode)(item.value.expression).trim(),
                     type: 'property',
                 };
             }
             return {
-                code: (0, helpers_1.parseCode)(item.value),
+                code: (0, helpers_1.parseCode)(item.value).trim(),
                 type: 'property',
             };
         }
     }
     else if (types.isObjectMethod(item)) {
-        var n = (0, helpers_1.parseCode)(__assign(__assign({}, item), { returnType: null }));
+        var n = (0, helpers_1.parseCode)(__assign(__assign({}, item), { returnType: null })).trim();
         var isGetter = item.kind === 'get';
         return {
             code: n,

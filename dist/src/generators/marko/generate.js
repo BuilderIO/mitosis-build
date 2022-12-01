@@ -108,21 +108,27 @@ var blockToMarko = function (json, options) {
 };
 function processBinding(json, code, type) {
     if (type === void 0) { type = 'attribute'; }
-    return (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(code, {
-        replaceWith: type === 'state' ? 'input.' : type === 'class' ? 'this.input.' : 'input.',
-        includeProps: true,
-        includeState: false,
-    }), {
-        replaceWith: function (key) {
-            var isProperty = getStatePropertyNames(json).includes(key);
-            if (isProperty) {
-                return (type === 'state' || type === 'class' ? 'this.state.' : 'state.') + key;
-            }
-            return (type === 'class' || type === 'state' ? 'this.' : 'component.') + key;
-        },
-        includeProps: false,
-        includeState: true,
-    });
+    try {
+        return (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(code, {
+            replaceWith: type === 'state' ? 'input.' : type === 'class' ? 'this.input.' : 'input.',
+            includeProps: true,
+            includeState: false,
+        }), {
+            replaceWith: function (key) {
+                var isProperty = getStatePropertyNames(json).includes(key);
+                if (isProperty) {
+                    return (type === 'state' || type === 'class' ? 'this.state.' : 'state.') + key;
+                }
+                return (type === 'class' || type === 'state' ? 'this.' : 'component.') + key;
+            },
+            includeProps: false,
+            includeState: true,
+        });
+    }
+    catch (error) {
+        console.error('Marko: could not process binding', code);
+        return code;
+    }
 }
 var componentToMarko = function (userOptions) {
     if (userOptions === void 0) { userOptions = {}; }

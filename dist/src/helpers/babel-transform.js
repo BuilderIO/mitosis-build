@@ -38,31 +38,33 @@ var jsxPlugin = require('@babel/plugin-syntax-jsx');
 var tsPreset = require('@babel/preset-typescript');
 var decorators = require('@babel/plugin-syntax-decorators');
 var function_1 = require("fp-ts/lib/function");
+var patterns_1 = require("./patterns");
 var handleErrorOrExpression = function (_a) {
     var code = _a.code, useCode = _a.useCode, result = _a.result, visitor = _a.visitor;
     try {
         // If it can't, e.g. this is an expression or code fragment, modify the code below and try again
         // Detect method fragments. These get passed sometimes and otherwise
         // generate compile errors. They are of the form `foo() { ... }`
-        var isMethod = Boolean(!code.startsWith('function') && code.match(/^[a-z0-9_]+\s*\([^\)]*\)\s*[\{:]/i));
-        if (isMethod) {
+        var isMethod = Boolean(!code.trim().startsWith('function') && code.trim().match(/^[a-z0-9_]+\s*\([^\)]*\)\s*[\{:]/i));
+        var isGetter = (0, patterns_1.checkIsGetter)(code);
+        var isMethodOrGetter = isMethod || isGetter;
+        if (isMethodOrGetter) {
             useCode = "function ".concat(useCode);
         }
+        result = (0, function_1.pipe)(
         // Parse the code as an expression (instead of the default, a block) by giving it a fake variable assignment
         // e.g. if the code parsed is { ... } babel will treat that as a block by deafult, unless processed as an expression
         // that is an object
-        useCode = "let _ = ".concat(useCode);
-        result = (0, function_1.pipe)((0, exports.babelTransformCode)(useCode, visitor), trimSemicolons, function (str) {
-            // Remove our fake variable assignment
-            return str.replace(/let _ =\s/, '');
-        });
-        if (isMethod) {
-            return result.replace('function ', '');
+        "let _ = ".concat(useCode), function (code) { return (0, exports.babelTransformCode)(code, visitor); }, trimSemicolons, 
+        // Remove our fake variable assignment
+        function (str) { return str.replace(/let _ =\s/, ''); });
+        if (isMethodOrGetter) {
+            return result.replace('function', '');
         }
         return result;
     }
     catch (err) {
-        console.error('Error parsing code:\n', code, '\n', result);
+        // console.error('Error parsing code:\n', { code, result, useCode });
         throw err;
     }
 };
@@ -109,18 +111,27 @@ var babelTransformExpression = function (code, visitor, initialType) {
     if (!code) {
         return '';
     }
-    var type = getType(code, initialType);
-    var useCode = type === 'functionBody' ? "function(){".concat(code, "}") : code;
-    if (type !== 'expression') {
-        try {
-            return (0, function_1.pipe)((0, exports.babelTransformCode)(useCode, visitor), trimExpression(type));
+    var isGetter = code.trim().startsWith('get ');
+    return (0, function_1.pipe)(code, function (code) {
+        code = isGetter ? code.replace('get', 'function ') : code;
+        var type = getType(code, initialType);
+        var useCode = type === 'functionBody' ? "function(){".concat(code, "}") : code;
+        return { type: type, useCode: useCode };
+    }, function (_a) {
+        var type = _a.type, useCode = _a.useCode;
+        if (type !== 'expression') {
+            try {
+                return (0, function_1.pipe)((0, exports.babelTransformCode)(useCode, visitor), trimExpression(type));
+            }
+            catch (error) {
+                return handleErrorOrExpression({ code: code, useCode: useCode, result: null, visitor: visitor });
+            }
         }
-        catch (error) {
+        else {
             return handleErrorOrExpression({ code: code, useCode: useCode, result: null, visitor: visitor });
         }
-    }
-    else {
-        return handleErrorOrExpression({ code: code, useCode: useCode, result: null, visitor: visitor });
-    }
+    }, function (transformed) {
+        return isGetter ? transformed.replace('function ', 'get ') : transformed;
+    });
 };
 exports.babelTransformExpression = babelTransformExpression;
