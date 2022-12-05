@@ -203,6 +203,17 @@ var blockToAngular = function (json, options, blockOptions) {
     return str;
 };
 exports.blockToAngular = blockToAngular;
+var processAngularCode = function (_a) {
+    var contextVars = _a.contextVars, outputVars = _a.outputVars, domRefs = _a.domRefs, stateVars = _a.stateVars, replaceWith = _a.replaceWith;
+    return function (code) {
+        return (0, function_1.pipe)((0, strip_state_and_props_refs_1.DO_NOT_USE_VARS_TRANSFORMS)(code, {
+            contextVars: contextVars,
+            domRefs: domRefs,
+            outputVars: outputVars,
+            stateVars: stateVars,
+        }), function (newCode) { return (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(newCode, { replaceWith: replaceWith }); });
+    };
+};
 var componentToAngular = function (userOptions) {
     if (userOptions === void 0) { userOptions = {}; }
     return function (_a) {
@@ -221,40 +232,38 @@ var componentToAngular = function (userOptions) {
         var options = (0, merge_options_1.mergeOptions)(__assign(__assign({}, DEFAULT_OPTIONS), userOptions));
         options.plugins = __spreadArray(__spreadArray([], (options.plugins || []), true), [
             (0, process_code_1.CODE_PROCESSOR_PLUGIN)(function (codeType) {
-                var domRefs = (0, get_refs_1.getRefs)(json);
                 switch (codeType) {
                     case 'hooks':
-                        return function (code) {
-                            return (0, function_1.pipe)((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(code, {
-                                replaceWith: 'this.',
-                                contextVars: contextVars,
-                                outputVars: outputVars,
-                                domRefs: Array.from(domRefs),
-                                stateVars: stateVars,
-                            }), function (code) {
-                                var allMethodNames = Object.entries(json.state)
-                                    .filter(function (_a) {
-                                    var key = _a[0], value = _a[1];
-                                    return (value === null || value === void 0 ? void 0 : value.type) === 'function' || (value === null || value === void 0 ? void 0 : value.type) === 'method';
-                                })
-                                    .map(function (_a) {
-                                    var key = _a[0];
-                                    return key;
-                                });
-                                return (0, replace_identifiers_1.replaceIdentifiers)({
-                                    code: code,
-                                    from: allMethodNames,
-                                    to: function (name) { return "this.".concat(name); },
-                                });
+                        return (0, function_1.flow)(processAngularCode({
+                            replaceWith: 'this',
+                            contextVars: contextVars,
+                            outputVars: outputVars,
+                            domRefs: Array.from((0, get_refs_1.getRefs)(json)),
+                            stateVars: stateVars,
+                        }), function (code) {
+                            var allMethodNames = Object.entries(json.state)
+                                .filter(function (_a) {
+                                var _ = _a[0], value = _a[1];
+                                return (value === null || value === void 0 ? void 0 : value.type) === 'function' || (value === null || value === void 0 ? void 0 : value.type) === 'method';
+                            })
+                                .map(function (_a) {
+                                var key = _a[0];
+                                return key;
                             });
-                        };
+                            return (0, replace_identifiers_1.replaceIdentifiers)({
+                                code: code,
+                                from: allMethodNames,
+                                to: function (name) { return "this.".concat(name); },
+                            });
+                        });
                     case 'bindings':
                         return function (code) {
-                            return (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(code, {
+                            var newLocal = processAngularCode({
                                 contextVars: [],
                                 outputVars: outputVars,
                                 domRefs: [], // the template doesn't need the this keyword.
-                            }).replace(/"/g, '&quot;');
+                            })(code);
+                            return newLocal.replace(/"/g, '&quot;');
                         };
                     case 'hooks-deps':
                     case 'state':
@@ -337,15 +346,13 @@ var componentToAngular = function (userOptions) {
         (0, strip_meta_properties_1.stripMetaProperties)(json);
         var dataString = (0, get_state_object_string_1.getStateObjectStringFromComponent)(json, {
             format: 'class',
-            valueMapper: function (code) {
-                return (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(code, {
-                    replaceWith: 'this.',
-                    contextVars: contextVars,
-                    outputVars: outputVars,
-                    domRefs: Array.from(domRefs),
-                    stateVars: stateVars,
-                });
-            },
+            valueMapper: processAngularCode({
+                replaceWith: 'this',
+                contextVars: contextVars,
+                outputVars: outputVars,
+                domRefs: Array.from(domRefs),
+                stateVars: stateVars,
+            }),
         });
         // Preparing built in component metadata parameters
         var componentMetadata = __assign(__assign({ selector: "'".concat((0, lodash_1.kebabCase)(json.name || 'my-component'), ", ").concat(json.name, "'"), template: "`\n        ".concat((0, indent_1.indent)(template, 8).replace(/`/g, '\\`').replace(/\$\{/g, '\\${'), "\n        `") }, (css.length
@@ -408,13 +415,13 @@ var componentToAngular = function (userOptions) {
             var argument = json.refs[ref].argument;
             var typeParameter = json.refs[ref].typeParameter;
             return "private _".concat(ref).concat(typeParameter ? ": ".concat(typeParameter) : '').concat(argument
-                ? " = ".concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(argument, {
+                ? " = ".concat(processAngularCode({
                     replaceWith: 'this.',
                     contextVars: contextVars,
                     outputVars: outputVars,
                     domRefs: Array.from(domRefs),
                     stateVars: stateVars,
-                }))
+                })(argument))
                 : '', ";");
         })
             .join('\n'), !hasConstructor

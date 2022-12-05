@@ -55,6 +55,7 @@ var strip_meta_properties_1 = require("../helpers/strip-meta-properties");
 var remove_surrounding_block_1 = require("../helpers/remove-surrounding-block");
 var render_imports_1 = require("../helpers/render-imports");
 var for_1 = require("../helpers/nodes/for");
+var function_1 = require("fp-ts/lib/function");
 var isAttribute = function (key) {
     return /-/.test(key);
 };
@@ -157,6 +158,22 @@ var createGlobalId = function (name, options) {
     options.namesMap[name] = newNameNum;
     return "".concat(name).concat(options.prefix ? "-".concat(options.prefix) : '', "-").concat(newNameNum);
 };
+var deprecatedStripStateAndPropsRefs = function (code, _a) {
+    var context = _a.context, contextVars = _a.contextVars, domRefs = _a.domRefs, includeProps = _a.includeProps, includeState = _a.includeState, outputVars = _a.outputVars, replaceWith = _a.replaceWith, stateVars = _a.stateVars;
+    return (0, function_1.pipe)((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(code, {
+        includeProps: includeProps,
+        includeState: includeState,
+        replaceWith: replaceWith,
+    }), function (newCode) {
+        return (0, strip_state_and_props_refs_1.DO_NOT_USE_VARS_TRANSFORMS)(newCode, {
+            context: context,
+            contextVars: contextVars,
+            domRefs: domRefs,
+            outputVars: outputVars,
+            stateVars: stateVars,
+        });
+    });
+};
 // TODO: overloaded function
 var updateReferencesInCode = function (code, options, blockOptions) {
     var _a, _b;
@@ -165,23 +182,22 @@ var updateReferencesInCode = function (code, options, blockOptions) {
     var context = (blockOptions === null || blockOptions === void 0 ? void 0 : blockOptions.context) || 'this.';
     if ((_a = options === null || options === void 0 ? void 0 : options.experimental) === null || _a === void 0 ? void 0 : _a.updateReferencesInCode) {
         return (_b = options === null || options === void 0 ? void 0 : options.experimental) === null || _b === void 0 ? void 0 : _b.updateReferencesInCode(code, options, {
-            stripStateAndPropsRefs: strip_state_and_props_refs_1.stripStateAndPropsRefs,
+            stripStateAndPropsRefs: deprecatedStripStateAndPropsRefs,
         });
     }
     if (options.format === 'class') {
-        return (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(code, {
+        return (0, function_1.pipe)((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(code, {
             includeProps: false,
             includeState: true,
             replaceWith: context + 'state.',
-            context: context,
-        }), {
-            // TODO: replace with `this.` and add setters that call this.update()
-            includeProps: true,
-            includeState: false,
-            replaceWith: context + 'props.',
-            contextVars: contextVars,
-            context: context,
-        });
+        }), function (newCode) {
+            return (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(newCode, {
+                // TODO: replace with `this.` and add setters that call this.update()
+                includeProps: true,
+                includeState: false,
+                replaceWith: context + 'props.',
+            });
+        }, function (newCode) { return (0, strip_state_and_props_refs_1.DO_NOT_USE_CONTEXT_VARS_TRANSFORMS)({ code: newCode, context: context, contextVars: contextVars }); });
     }
     return code;
 };
@@ -598,19 +614,25 @@ var componentToCustomElement = function (options) {
             ? "this.context = ".concat(setContext[0].ref)
             : '', "\n\n          ").concat(!((_o = (_m = json.hooks) === null || _m === void 0 ? void 0 : _m.onInit) === null || _o === void 0 ? void 0 : _o.code) ? '' : 'this.onInitOnce = false;', "\n\n          this.state = ").concat((0, get_state_object_string_1.getStateObjectStringFromComponent)(json, {
             valueMapper: function (value) {
-                return (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(addUpdateAfterSetInCode(value, useOptions, 'self.update'), {
+                return (0, function_1.pipe)((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(addUpdateAfterSetInCode(value, useOptions, 'self.update'), {
                     includeProps: false,
                     includeState: true,
                     // TODO: if it's an arrow function it's this.state.
                     replaceWith: 'self.state.',
-                }), {
-                    // TODO: replace with `this.` and add setters that call this.update()
-                    includeProps: true,
-                    includeState: false,
-                    replaceWith: 'self.props.',
-                    contextVars: contextVars,
-                    // correctly ref the class not state object
-                    context: 'self.',
+                }), function (newCode) {
+                    return (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(newCode, {
+                        // TODO: replace with `this.` and add setters that call this.update()
+                        includeProps: true,
+                        includeState: false,
+                        replaceWith: 'self.props.',
+                    });
+                }, function (code) {
+                    return (0, strip_state_and_props_refs_1.DO_NOT_USE_CONTEXT_VARS_TRANSFORMS)({
+                        code: code,
+                        contextVars: contextVars,
+                        // correctly ref the class not state object
+                        context: 'self.',
+                    });
                 });
             },
         }), ";\n          if (!this.props) {\n            this.props = {};\n          }\n          ").concat(!componentHasProps
