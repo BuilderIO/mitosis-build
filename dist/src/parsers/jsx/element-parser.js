@@ -43,6 +43,7 @@ var generator_1 = __importDefault(require("@babel/generator"));
 var nullable_1 = require("../../helpers/nullable");
 var create_mitosis_node_1 = require("../../helpers/create-mitosis-node");
 var function_1 = require("fp-ts/lib/function");
+var helpers_1 = require("./helpers");
 var types = babel.types;
 var getForArguments = function (params) {
     var _a = params
@@ -191,7 +192,7 @@ var jsxElementToJson = function (node) {
         name: nodeName,
         properties: node.openingElement.attributes.reduce(function (memo, item) {
             if (types.isJSXAttribute(item)) {
-                var key = item.name.name;
+                var key = (0, helpers_1.transformAttributeName)(item.name.name);
                 var value = item.value;
                 if (types.isStringLiteral(value)) {
                     memo[key] = value.value;
@@ -206,7 +207,7 @@ var jsxElementToJson = function (node) {
         }, {}),
         bindings: node.openingElement.attributes.reduce(function (memo, item) {
             if (types.isJSXAttribute(item)) {
-                var key = item.name.name;
+                var key = (0, helpers_1.transformAttributeName)(item.name.name);
                 var value = item.value;
                 // boolean attribute
                 if (value === null) {

@@ -150,6 +150,7 @@ var ATTTRIBUTE_MAPPERS = {
     spellcheck: 'spellCheck',
     autocapitalize: 'autoCapitalize',
     autocomplete: 'autoComplete',
+    for: 'htmlFor',
 };
 // TODO: Maybe in the future allow defining `string | function` as values
 var BINDING_MAPPERS = __assign({ ref: function (ref, value, options) {

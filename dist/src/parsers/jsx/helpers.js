@@ -26,10 +26,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.isImportOrDefaultExport = exports.parseCodeJson = exports.parseCode = exports.uncapitalize = exports.selfClosingTags = void 0;
+exports.transformAttributeName = exports.HTML_ATTR_FROM_JSX = exports.isImportOrDefaultExport = exports.parseCodeJson = exports.parseCode = exports.uncapitalize = exports.selfClosingTags = void 0;
 var babel = __importStar(require("@babel/core"));
 var generator_1 = __importDefault(require("@babel/generator"));
 var json_1 = require("../../helpers/json");
+var typescript_1 = require("../../helpers/typescript");
 var types = babel.types;
 exports.selfClosingTags = new Set([
     'area',
@@ -67,3 +68,12 @@ var isImportOrDefaultExport = function (node) {
     return types.isExportDefaultDeclaration(node) || types.isImportDeclaration(node);
 };
 exports.isImportOrDefaultExport = isImportOrDefaultExport;
+exports.HTML_ATTR_FROM_JSX = {
+    htmlFor: 'for',
+};
+var transformAttributeName = function (name) {
+    if ((0, typescript_1.objectHasKey)(exports.HTML_ATTR_FROM_JSX, name))
+        return exports.HTML_ATTR_FROM_JSX[name];
+    return name;
+};
+exports.transformAttributeName = transformAttributeName;

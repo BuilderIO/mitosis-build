@@ -80,6 +80,7 @@ var helpers_2 = require("./state/helpers");
 var merge_options_1 = require("../../helpers/merge-options");
 var process_code_1 = require("../../helpers/plugins/process-code");
 var context_1 = require("../helpers/context");
+var typescript_1 = require("../../helpers/typescript");
 // Transform <foo.bar key="value" /> to <component :is="foo.bar" key="value" />
 function processDynamicComponents(json, options) {
     var found = false;
@@ -144,6 +145,33 @@ var collectClassString = function (json, options) {
     }
     return null;
 };
+var preProcessBlockCode = function (_a) {
+    var json = _a.json, options = _a.options, component = _a.component;
+    for (var key in json.properties) {
+        var value = json.properties[key];
+        if (value) {
+            json.properties[key] = (0, helpers_2.updateStateCode)({ options: options, component: component, updateSetters: false })(value);
+        }
+    }
+    for (var key in json.bindings) {
+        var value = json.bindings[key];
+        if (value === null || value === void 0 ? void 0 : value.code) {
+            json.bindings[key] = {
+                arguments: value.arguments,
+                code: (0, helpers_2.updateStateCode)({ options: options, component: component, updateSetters: true })(value.code),
+                type: value === null || value === void 0 ? void 0 : value.type,
+            };
+        }
+    }
+};
+var ATTTRIBUTE_MAPPERS = {
+    for: 'htmlFor',
+};
+var transformAttributeName = function (name) {
+    if ((0, typescript_1.objectHasKey)(ATTTRIBUTE_MAPPERS, name))
+        return ATTTRIBUTE_MAPPERS[name];
+    return name;
+};
 var blockToSolid = function (_a) {
     var _b, _c;
     var json = _a.json, options = _a.options, component = _a.component;
@@ -177,7 +205,8 @@ var blockToSolid = function (_a) {
     }
     for (var key in json.properties) {
         var value = json.properties[key];
-        str += " ".concat(key, "=\"").concat(value, "\" ");
+        var newKey = transformAttributeName(key);
+        str += " ".concat(newKey, "=\"").concat(value, "\" ");
     }
     for (var key in json.bindings) {
         var _d = json.bindings[key], code = _d.code, _e = _d.arguments, cusArg = _e === void 0 ? ['event'] : _e, type = _d.type;
@@ -215,7 +244,8 @@ var blockToSolid = function (_a) {
                     },
                 });
             }
-            str += " ".concat(key, "={").concat(useValue, "} ");
+            var newKey = transformAttributeName(key);
+            str += " ".concat(newKey, "={").concat(useValue, "} ");
         }
     }
     if (jsx_1.selfClosingTags.has(json.name)) {
@@ -307,7 +337,7 @@ var componentToSolid = function (passedOptions) {
             ((_b = json.hooks.onMount) === null || _b === void 0 ? void 0 : _b.code) ? 'onMount' : undefined
         ], (((_c = json.hooks.onUpdate) === null || _c === void 0 ? void 0 : _c.length) ? ['on', 'createEffect'] : []), true), ((_d = state === null || state === void 0 ? void 0 : state.import.solidjs) !== null && _d !== void 0 ? _d : []), true).filter(nullable_1.checkIsDefined));
         var storeImports = (_e = state === null || state === void 0 ? void 0 : state.import.store) !== null && _e !== void 0 ? _e : [];
-        var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n\n    function ", "(props) {\n      ", "\n      \n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      return (", "\n        ", "\n        ", "\n        ", ")\n    }\n\n    export default ", ";\n  "], ["\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n\n    function ", "(props) {\n      ", "\n      \n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      return (", "\n        ", "\n        ", "\n        ", ")\n    }\n\n    export default ", ";\n  "])), solidJSImports.length > 0 ? "import { ".concat(solidJSImports.join(', '), " } from 'solid-js';") : '', !foundDynamicComponents ? '' : "import { Dynamic } from 'solid-js/web';", storeImports.length > 0 ? "import { ".concat(storeImports.join(', '), " } from 'solid-js/store';") : '', !componentHasStyles && options.stylesType === 'styled-components'
+        var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n\n    function ", "(props) {\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      return (", "\n        ", "\n        ", "\n        ", ")\n    }\n\n    export default ", ";\n  "], ["\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n\n    function ", "(props) {\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      return (", "\n        ", "\n        ", "\n        ", ")\n    }\n\n    export default ", ";\n  "])), solidJSImports.length > 0 ? "import { ".concat(solidJSImports.join(', '), " } from 'solid-js';") : '', !foundDynamicComponents ? '' : "import { Dynamic } from 'solid-js/web';", storeImports.length > 0 ? "import { ".concat(storeImports.join(', '), " } from 'solid-js/store';") : '', !componentHasStyles && options.stylesType === 'styled-components'
             ? ''
             : "import { css } from \"solid-styled-components\";", (0, render_imports_1.renderPreComponent)({ component: json, target: 'solid' }), json.name, (_f = state === null || state === void 0 ? void 0 : state.str) !== null && _f !== void 0 ? _f : '', getRefsString(json), getContextString(json, options), !((_g = json.hooks.onMount) === null || _g === void 0 ? void 0 : _g.code) ? '' : "onMount(() => { ".concat(json.hooks.onMount.code, " })"), json.hooks.onUpdate
             ? json.hooks.onUpdate
