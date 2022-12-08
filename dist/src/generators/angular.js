@@ -156,7 +156,8 @@ var blockToAngular = function (json, options, blockOptions) {
             var _e = json.bindings[key], code = _e.code, _f = _e.arguments, cusArgs = _f === void 0 ? ['event'] : _f;
             // TODO: proper babel transform to replace. Util for this
             if (key.startsWith('on')) {
-                var event_1 = key.replace('on', '').toLowerCase();
+                var event_1 = key.replace('on', '');
+                event_1 = event_1.charAt(0).toLowerCase() + event_1.slice(1);
                 if (event_1 === 'change' && json.name === 'input' /* todo: other tags */) {
                     event_1 = 'input';
                 }

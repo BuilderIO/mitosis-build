@@ -275,6 +275,9 @@ var ON_UPDATE_RETURN = {
 var IMPORT_TEST = {
     importRaw: getRawFile('./data/import.raw.tsx'),
 };
+var OUTPUT_EVENT_BINDINGS_TEST = {
+    outputEventBinding: getRawFile('./data/output-event-bindings.raw.tsx'),
+};
 var CONTEXT_TEST = {
     componentWithContext: componentWithContext,
 };
@@ -339,6 +342,7 @@ var JSX_TESTS_FOR_TARGET = {
         ADVANCED_REF,
         ON_UPDATE_RETURN,
         IMPORT_TEST,
+        OUTPUT_EVENT_BINDINGS_TEST,
     ],
     lit: [
         CONTEXT_TEST,
