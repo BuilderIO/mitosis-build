@@ -57,7 +57,7 @@ var html_tags_1 = require("../constants/html_tags");
 var function_1 = require("fp-ts/lib/function");
 var merge_options_1 = require("../helpers/merge-options");
 var process_code_1 = require("../helpers/plugins/process-code");
-var BUILT_IN_COMPONENTS = new Set(['Show', 'For', 'Fragment']);
+var BUILT_IN_COMPONENTS = new Set(['Show', 'For', 'Fragment', 'Slot']);
 var mappers = {
     Fragment: function (json, options) {
         return "<ng-container>".concat(json.children
@@ -85,7 +85,7 @@ var mappers = {
     },
 };
 var generateNgModule = function (content, name, componentsUsed, component, bootstrapMapper) {
-    return "import { NgModule } from \"@angular/core\";\nimport { BrowserModule } from \"@angular/platform-browser\";\n\n".concat(content, "\n\n@NgModule({\n  declarations: [").concat(name, "],\n  imports: [BrowserModule").concat(componentsUsed.length ? ', ' + componentsUsed.map(function (comp) { return "".concat(comp, "Module"); }).join(', ') : '', "],\n  exports: [").concat(name, "],\n  ").concat(bootstrapMapper ? bootstrapMapper(name, componentsUsed, component) : '', "\n})\nexport class ").concat(name, "Module {}");
+    return "import { NgModule } from \"@angular/core\";\nimport { CommonModule } from \"@angular/common\";\n\n".concat(content, "\n\n@NgModule({\n  declarations: [").concat(name, "],\n  imports: [CommonModule").concat(componentsUsed.length ? ', ' + componentsUsed.map(function (comp) { return "".concat(comp, "Module"); }).join(', ') : '', "],\n  exports: [").concat(name, "],\n  ").concat(bootstrapMapper ? bootstrapMapper(name, componentsUsed, component) : '', "\n})\nexport class ").concat(name, "Module {}");
 };
 // TODO: Maybe in the future allow defining `string | function` as values
 var BINDINGS_MAPPER = {
