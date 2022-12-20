@@ -98,6 +98,7 @@ var propsDestructure = getRawFile('./data/basic-props-destructure.raw.tsx');
 var nestedStyles = getRawFile('./data/nested-styles.raw.tsx');
 var preserveExportOrLocalStatement = getRawFile('./data/basic-preserve-export-or-local-statement.raw.tsx');
 var arrowFunctionInUseStore = getRawFile('./data/arrow-function-in-use-store.raw.tsx');
+var svgComponent = getRawFile('./data/svg.raw.tsx');
 var propsType = getRawFile('./data/types/component-props-type.raw.tsx');
 var propsInterface = getRawFile('./data/types/component-props-interface.raw.tsx');
 var preserveTyping = getRawFile('./data/types/preserve-typing.raw.tsx');
@@ -236,6 +237,7 @@ var BASIC_TESTS = {
     expressionState: expressionState,
     contentState: contentState,
     referencingFunInsideHook: referencingFunInsideHook,
+    svgComponent: svgComponent,
 };
 var SLOTS_TESTS = {
     ContentSlotJSX: contentSlotJsx,

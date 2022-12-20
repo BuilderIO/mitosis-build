@@ -29,6 +29,7 @@ var core_1 = require("@babel/core");
 var lodash_1 = require("lodash");
 var patterns_1 = require("../../helpers/patterns");
 var replace_identifiers_1 = require("../../helpers/replace-identifiers");
+var html_tags_1 = require("../../constants/html_tags");
 var addPropertiesToJson = function (properties) {
     return function (json) { return (__assign(__assign({}, json), { properties: __assign(__assign({}, json.properties), properties) })); };
 };
@@ -48,7 +49,15 @@ function encodeQuotes(string) {
 exports.encodeQuotes = encodeQuotes;
 // Transform <FooBar> to <foo-bar> as Vue2 needs
 var renameMitosisComponentsToKebabCase = function (str) {
-    return str.replace(/<\/?\w+/g, function (match) { return match.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase(); });
+    return str.replace(/<\/?\w+/g, function (match) {
+        var tagName = match.replaceAll('<', '').replaceAll('/', '');
+        if (html_tags_1.VALID_HTML_TAGS.includes(tagName)) {
+            return match;
+        }
+        else {
+            return match.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
+        }
+    });
 };
 exports.renameMitosisComponentsToKebabCase = renameMitosisComponentsToKebabCase;
 function getContextNames(json) {
