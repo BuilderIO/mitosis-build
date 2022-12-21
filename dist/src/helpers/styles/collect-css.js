@@ -12,7 +12,9 @@ var helpers_1 = require("./helpers");
 var trimClassStr = function (classStr) { return classStr.trim().replace(/\s{2,}/g, ' '); };
 var updateClassForNode = function (item, className) {
     if (item.bindings.class) {
-        item.bindings.class.code = trimClassStr("".concat(item.bindings.class.code, " + \"").concat(className, "\""));
+        // combine className with existing binding. We use single quotes because in Vue, bindings are wrapped in double quotes
+        // e.g. <div :class="_classStringToObject(this.className + ' div-21azgz5avex')" />
+        item.bindings.class.code = trimClassStr("".concat(item.bindings.class.code, " + ' ").concat(className, "'"));
     }
     else {
         item.properties.class = trimClassStr("".concat(item.properties.class || '', " ").concat(className));
@@ -26,7 +28,7 @@ var collectStyles = function (json, options) {
     (0, traverse_1.default)(json).forEach(function (item) {
         var _a;
         if ((0, is_mitosis_node_1.isMitosisNode)(item)) {
-            if ((0, helpers_1.nodeHasStyles)(item)) {
+            if ((0, helpers_1.nodeHasCss)(item)) {
                 var value = (0, helpers_1.parseCssObject)((_a = item.bindings.css) === null || _a === void 0 ? void 0 : _a.code);
                 delete item.bindings.css;
                 var componentName = item.properties.$name
@@ -56,17 +58,20 @@ var collectStyles = function (json, options) {
     return styleMap;
 };
 var collectCss = function (json, options) {
+    var _a;
     if (options === void 0) { options = {}; }
     var styles = collectStyles(json, options);
     // TODO create and use a root selector
-    return classStyleMapToCss(styles);
+    var css = classStyleMapToCss(styles);
+    css += ((_a = json.style) === null || _a === void 0 ? void 0 : _a.length) ? "\n".concat(json.style) : '';
+    return css;
 };
 exports.collectCss = collectCss;
 var classStyleMapToCss = function (map) {
     var str = '';
     for (var key in map) {
         var styles = (0, helpers_1.getStylesOnly)(map[key]);
-        str += ".".concat(key, " { ").concat((0, helpers_1.styleMapToCss)(styles), " }");
+        str += ".".concat(key, " {\n").concat((0, helpers_1.styleMapToCss)(styles), "\n}");
         var nestedSelectors = (0, helpers_1.getNestedSelectors)(map[key]);
         for (var nestedSelector in nestedSelectors) {
             var value = nestedSelectors[nestedSelector];
@@ -77,7 +82,7 @@ var classStyleMapToCss = function (map) {
                 var useSelector = nestedSelector.includes('&')
                     ? nestedSelector.replace(/&/g, ".".concat(key))
                     : ".".concat(key, " ").concat(nestedSelector);
-                str += "".concat(useSelector, " { ").concat((0, helpers_1.styleMapToCss)(value), " }");
+                str += "".concat(useSelector, " {\n").concat((0, helpers_1.styleMapToCss)(value), "\n}");
             }
         }
     }

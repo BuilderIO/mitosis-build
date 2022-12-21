@@ -63,8 +63,8 @@ var angularTemplateNodeToMitosisNode = function (node, options) {
                 bindings: {
                     each: { code: transformBinding(expression, options) },
                 },
-                properties: {
-                    _forName: itemName,
+                scope: {
+                    forName: itemName,
                 },
                 children: [angularTemplateNodeToMitosisNode((0, lodash_1.omit)(node, 'templateAttrs'), options)],
             });
@@ -126,9 +126,10 @@ var parseTypescript = function (code, options) {
     for (var _i = 0, _a = ast.statements; _i < _a.length; _i++) {
         var statement = _a[_i];
         if (typescript_1.default.isClassDeclaration(statement)) {
-            if (statement.decorators) {
-                for (var _b = 0, _c = statement.decorators; _b < _c.length; _b++) {
-                    var decorator = _c[_b];
+            var decorators = typescript_1.default.canHaveDecorators(statement) ? typescript_1.default.getDecorators(statement) : undefined;
+            if (decorators) {
+                for (var _b = 0, decorators_1 = decorators; _b < decorators_1.length; _b++) {
+                    var decorator = decorators_1[_b];
                     // TODO: proper reference tracing
                     if (typescript_1.default.isCallExpression(decorator.expression))
                         if (typescript_1.default.isIdentifier(decorator.expression.expression) &&

@@ -8,50 +8,88 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
     }
     return to.concat(ar || Array.prototype.slice.call(from));
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.componentToQwik = void 0;
+var babel_transform_1 = require("../../helpers/babel-transform");
+var fast_clone_1 = require("../../helpers/fast-clone");
 var collect_css_1 = require("../../helpers/styles/collect-css");
-var convertMethodToFunction_1 = require("./convertMethodToFunction");
+var state_1 = require("../../helpers/state");
+var add_prevent_default_1 = require("./add-prevent-default");
+var convert_method_to_function_1 = require("./convert-method-to-function");
 var jsx_1 = require("./jsx");
 var src_generator_1 = require("./src-generator");
-var babel_transform_1 = require("../../helpers/babel-transform");
+var plugins_1 = require("../../modules/plugins");
+var traverse_1 = __importDefault(require("traverse"));
+var stable_inject_1 = require("./stable-inject");
 Error.stackTraceLimit = 9999;
+// TODO(misko): styles are not processed.
+var DEBUG = false;
 var componentToQwik = function (userOptions) {
     if (userOptions === void 0) { userOptions = {}; }
     return function (_a) {
-        var component = _a.component, path = _a.path;
-        var file = new src_generator_1.File(component.name + '.js', {
+        var _b, _c, _d, _e;
+        var _component = _a.component, path = _a.path;
+        // Make a copy we can safely mutate, similar to babel's toolchain
+        var component = (0, fast_clone_1.fastClone)(_component);
+        if (userOptions.plugins) {
+            component = (0, plugins_1.runPreJsonPlugins)(component, userOptions.plugins);
+        }
+        (0, add_prevent_default_1.addPreventDefault)(component);
+        if (userOptions.plugins) {
+            component = (0, plugins_1.runPostJsonPlugins)(component, userOptions.plugins);
+        }
+        var isTypeScript = !!userOptions.typescript;
+        var file = new src_generator_1.File(component.name + (isTypeScript ? '.ts' : '.js'), {
             isPretty: true,
             isJSX: true,
-            isTypeScript: false,
+            isTypeScript: isTypeScript,
             isModule: true,
             isBuilder: false,
         }, '@builder.io/qwik', '');
         try {
-            // file.exportConst('COMPONENT', JSON.stringify(component, null, 2));
             emitImports(file, component);
             emitTypes(file, component);
-            var state_1 = emitStateMethodsAndRewriteBindings(file, component);
-            var hasState_1 = Boolean(Object.keys(component.state).length);
+            emitExports(file, component);
+            var metadata = component.meta.useMetadata || {};
+            var isLightComponent = ((_c = (_b = metadata === null || metadata === void 0 ? void 0 : metadata.qwik) === null || _b === void 0 ? void 0 : _b.component) === null || _c === void 0 ? void 0 : _c.isLight) || false;
+            var mutable_1 = ((_d = metadata === null || metadata === void 0 ? void 0 : metadata.qwik) === null || _d === void 0 ? void 0 : _d.mutable) || [];
+            var imports_1 = (_e = metadata === null || metadata === void 0 ? void 0 : metadata.qwik) === null || _e === void 0 ? void 0 : _e.imports;
+            imports_1 && Object.keys(imports_1).forEach(function (key) { return file.import(imports_1[key], key); });
+            var state_2 = emitStateMethodsAndRewriteBindings(file, component, metadata);
+            var hasState_1 = (0, state_1.checkHasState)(component);
             var css_1 = null;
-            file.src.const(component.name, (0, src_generator_1.invoke)(file.import(file.qwikModule, 'component$'), [
-                (0, src_generator_1.arrowFnBlock)(['props'], [
-                    function () {
-                        css_1 = emitUseStyles(file, component);
-                        hasState_1 && emitUseStore(file, state_1);
-                        emitUseRef(file, component);
-                        emitUseContextProvider(file, component);
-                        emitUseContext(file, component);
-                        emitUseMount(file, component);
-                        emitUseWatch(file, component);
-                        emitUseCleanup(file, component);
-                        emitJSX(file, component);
-                    },
-                ], [component.propsTypeRef || 'any']),
-            ]));
+            var componentFn = (0, src_generator_1.arrowFnBlock)(['props'], [
+                function () {
+                    var _a, _b;
+                    css_1 = emitUseStyles(file, component);
+                    emitUseContext(file, component);
+                    emitUseRef(file, component);
+                    hasState_1 && emitUseStore(file, state_2);
+                    emitUseContextProvider(file, component);
+                    emitUseClientEffect(file, component);
+                    emitUseMount(file, component);
+                    emitUseWatch(file, component);
+                    emitUseCleanup(file, component);
+                    emitTagNameHack(file, component, (_a = component.meta.useMetadata) === null || _a === void 0 ? void 0 : _a.elementTag);
+                    emitTagNameHack(file, component, (_b = component.meta.useMetadata) === null || _b === void 0 ? void 0 : _b.componentElementTag);
+                    emitJSX(file, component, mutable_1);
+                },
+            ], [(component.propsTypeRef || 'any') + (isLightComponent ? '&{key?:any}' : '')]);
+            file.src.const(component.name, isLightComponent
+                ? componentFn
+                : (0, src_generator_1.invoke)(file.import(file.qwikModule, 'component$'), [componentFn]), true, true);
             file.exportDefault(component.name);
             emitStyles(file, css_1);
-            return '// GENERATED BY MITOSIS\n\n' + file.toString();
+            DEBUG && file.exportConst('COMPONENT', JSON.stringify(component));
+            var sourceFile = '// GENERATED BY MITOSIS\n\n' + file.toString();
+            if (userOptions.plugins) {
+                sourceFile = (0, plugins_1.runPreCodePlugins)(sourceFile, userOptions.plugins);
+                sourceFile = (0, plugins_1.runPostCodePlugins)(sourceFile, userOptions.plugins);
+            }
+            return sourceFile;
         }
         catch (e) {
             console.error(e);
@@ -60,7 +98,19 @@ var componentToQwik = function (userOptions) {
     };
 };
 exports.componentToQwik = componentToQwik;
-function emitUseMount(file, component) {
+function emitExports(file, component) {
+    component.exports &&
+        Object.keys(component.exports).forEach(function (key) {
+            var exportObj = component.exports[key];
+            file.src.emit(exportObj.code);
+        });
+}
+function emitTagNameHack(file, component, metadataValue) {
+    if (typeof metadataValue === 'string' && metadataValue) {
+        file.src.emit(metadataValue, '=', (0, convert_method_to_function_1.convertMethodToFunction)(metadataValue, getStateMethodsAndGetters(component.state), getLexicalScopeVars(component)), ';');
+    }
+}
+function emitUseClientEffect(file, component) {
     if (component.hooks.onMount) {
         // This is called useMount, but in practice it is used as
         // useClientEffect. Not sure if this is correct, but for now.
@@ -68,12 +118,19 @@ function emitUseMount(file, component) {
         file.src.emit(file.import(file.qwikModule, 'useClientEffect$').localName, '(()=>{', code, '});');
     }
 }
+function emitUseMount(file, component) {
+    if (component.hooks.onInit) {
+        var code = component.hooks.onInit.code;
+        file.src.emit(file.import(file.qwikModule, 'useMount$').localName, '(()=>{', code, '});');
+    }
+}
 function emitUseWatch(file, component) {
     if (component.hooks.onUpdate) {
         component.hooks.onUpdate.forEach(function (onUpdate) {
-            file.src.emit(file.import(file.qwikModule, 'useWatch$').localName, '((track)=>{');
+            file.src.emit(file.import(file.qwikModule, 'useWatch$').localName, '(({track})=>{');
             emitTrackExpressions(file.src, onUpdate.deps);
-            file.src.emit(convertTypeScriptToJS(onUpdate.code), '});');
+            file.src.emit(convertTypeScriptToJS(onUpdate.code));
+            file.src.emit('});');
         });
     }
 }
@@ -82,9 +139,11 @@ function emitTrackExpressions(src, deps) {
         var dependencies = deps.substring(1, deps.length - 1).split(',');
         dependencies.forEach(function (dep) {
             var lastDotIdx = dep.lastIndexOf('.');
-            var objExp = dep.substring(0, lastDotIdx).replace(/\?$/, '');
-            var objProp = dep.substring(lastDotIdx + 1);
-            src.emit(objExp, '&&track(', objExp, ',"', objProp, '");');
+            if (lastDotIdx > 0) {
+                var objExp = dep.substring(0, lastDotIdx).replace(/\?$/, '');
+                var objProp = dep.substring(lastDotIdx + 1);
+                objExp && src.emit(objExp, '&&track(', objExp, ',"', objProp, '");');
+            }
         });
     }
 }
@@ -94,7 +153,7 @@ function emitUseCleanup(file, component) {
         file.src.emit(file.import(file.qwikModule, 'useCleanup$').localName, '(()=>{', code, '});');
     }
 }
-function emitJSX(file, component) {
+function emitJSX(file, component, mutable) {
     var directives = new Map();
     var handlers = new Map();
     var styles = new Map();
@@ -105,22 +164,22 @@ function emitUseContextProvider(file, component) {
     Object.keys(component.context.set).forEach(function (ctxKey) {
         var context = component.context.set[ctxKey];
         file.src.emit(file.import(file.qwikModule, 'useContextProvider').localName, '(', context.name, ',', file.import(file.qwikModule, 'useStore').localName, '({');
-        context.value &&
-            Object.keys(context.value).forEach(function (prop) {
-                var propValue = context.value[prop];
-                file.src.emit(prop, ':');
-                if (isGetter(propValue)) {
-                    var methodMap = stateToMethodOrGetter(component.state);
-                    var code = (0, convertMethodToFunction_1.convertMethodToFunction)(extractGetterBody(propValue), methodMap, getLexicalScopeVars(component));
-                    file.src.emit('(()=>{', code, '})(),');
-                }
-                else if (typeof propValue == 'function') {
+        for (var _i = 0, _a = Object.keys(context.value || {}); _i < _a.length; _i++) {
+            var prop = _a[_i];
+            var propValue = context.value[prop];
+            file.src.emit(prop, ':');
+            switch (propValue === null || propValue === void 0 ? void 0 : propValue.type) {
+                case 'getter':
+                    file.src.emit('(()=>{', extractGetterBody(propValue.code), '})(),');
+                    continue;
+                case 'function':
+                case 'method':
                     throw new Error('Qwik: Functions are not supported in context');
-                }
-                else {
-                    file.src.emit(JSON.stringify(propValue));
-                }
-            });
+                case 'property':
+                    file.src.emit((0, stable_inject_1.stableInject)(propValue.code), ',');
+                    continue;
+            }
+        }
         file.src.emit('})', ');');
     });
 }
@@ -136,45 +195,67 @@ function emitUseRef(file, component) {
     });
 }
 function emitUseStyles(file, component) {
-    var css = (0, collect_css_1.collectCss)(component);
+    var css = (0, collect_css_1.collectCss)(component, { prefix: component.name });
     if (css) {
-        file.src.emit(file.import(file.qwikModule, 'useScopedStyles$').localName, '(STYLES);');
+        file.src.emit(file.import(file.qwikModule, 'useStylesScoped$').localName, '(STYLES);');
     }
     return css;
 }
 function emitStyles(file, css) {
     if (css) {
-        file.exportConst('STYLES', '`' + css.replace(/`/g, '\\`') + '`');
+        file.exportConst('STYLES', '`\n' + css.replace(/`/g, '\\`') + '`\n');
     }
 }
+/**
+ * @param file
+ * @param stateInit
+ */
 function emitUseStore(file, stateInit) {
     var state = stateInit[0];
-    file.src.emit('const state=', file.import(file.qwikModule, 'useStore').localName, '(');
-    if (stateInit.length == 1) {
-        file.src.emit(JSON.stringify(state));
+    var hasState = state && Object.keys(state).length > 0;
+    if (hasState) {
+        file.src.emit('const state=', file.import(file.qwikModule, 'useStore').localName);
+        if (file.options.isTypeScript) {
+            file.src.emit('<any>');
+        }
+        file.src.emit('(');
+        file.src.emit((0, stable_inject_1.stableInject)(state));
+        file.src.emit(');');
     }
     else {
-        file.src.emit('()=>{const state=', JSON.stringify(state), ';');
-        file.src.emitList(stateInit.slice(1), ';');
-        file.src.emit(';return state;');
-        file.src.emit('}');
+        // TODO hack for now so that `state` variable is defined, even though it is never read.
+        file.src.emit('const state' + (file.options.isTypeScript ? ': any' : '') + ' = {};');
     }
-    file.src.emit(');');
 }
 function emitTypes(file, component) {
-    var _a, _b;
+    var _a;
     if (file.options.isTypeScript) {
         (_a = component.types) === null || _a === void 0 ? void 0 : _a.forEach(function (t) { return file.src.emit(t, '\n'); });
-        (_b = component.interfaces) === null || _b === void 0 ? void 0 : _b.forEach(function (i) { return file.src.emit(i); });
     }
 }
-function emitStateMethodsAndRewriteBindings(file, component) {
+function emitStateMethodsAndRewriteBindings(file, component, metadata) {
     var _a;
     var lexicalArgs = getLexicalScopeVars(component);
     var state = emitStateMethods(file, component.state, lexicalArgs);
-    var methodMap = stateToMethodOrGetter(component.state);
-    (_a = component.children) === null || _a === void 0 ? void 0 : _a.forEach(function (node) { return rewriteBindings(node, methodMap, lexicalArgs); });
+    var methodMap = getStateMethodsAndGetters(component.state);
+    rewriteCodeExpr(component, methodMap, lexicalArgs, (_a = metadata.qwik) === null || _a === void 0 ? void 0 : _a.replace);
     return state;
+}
+var checkIsObjectWithCodeBlock = function (obj) {
+    return typeof obj == 'object' && (obj === null || obj === void 0 ? void 0 : obj.code) && typeof obj.code === 'string';
+};
+function rewriteCodeExpr(component, methodMap, lexicalArgs, replace) {
+    if (replace === void 0) { replace = {}; }
+    (0, traverse_1.default)(component).forEach(function (item) {
+        if (!checkIsObjectWithCodeBlock(item)) {
+            return;
+        }
+        var code = (0, convert_method_to_function_1.convertMethodToFunction)(item.code, methodMap, lexicalArgs);
+        Object.keys(replace).forEach(function (key) {
+            code = code.replace(key, replace[key]);
+        });
+        item.code = code;
+    });
 }
 function getLexicalScopeVars(component) {
     return __spreadArray(__spreadArray(['props', 'state'], Object.keys(component.refs), true), Object.keys(component.context.get), true);
@@ -190,82 +271,58 @@ function emitImports(file, component) {
         });
     });
 }
-var CODE_PREFIX = '@builder.io/mitosis/';
-var FUNCTION = CODE_PREFIX + 'function:';
-var METHOD = CODE_PREFIX + 'method:';
-var GETTER = CODE_PREFIX + 'method:get ';
 function emitStateMethods(file, componentState, lexicalArgs) {
-    var state = {};
-    var stateInit = [state];
-    var methodMap = stateToMethodOrGetter(componentState);
-    Object.keys(componentState).forEach(function (key) {
-        var code = componentState[key];
-        if (isCode(code)) {
-            var prefixIdx = code.indexOf(':') + 1;
-            if (isGetter(code)) {
-                prefixIdx += 'get '.length;
-            }
-            else if (isFunction(code)) {
-                prefixIdx += 'function '.length;
-            }
-            code = code.substring(prefixIdx);
-            code = (0, convertMethodToFunction_1.convertMethodToFunction)(code, methodMap, lexicalArgs).replace('(', "(".concat(lexicalArgs.join(','), ","));
-            var functionName = code.split(/\(/)[0];
-            stateInit.push("state.".concat(key, "=").concat(functionName, "(state, props)"));
-            if (!file.options.isTypeScript) {
-                // Erase type information
-                code = convertTypeScriptToJS(code);
-            }
-            file.src.emit('function ', code);
+    var stateValues = {};
+    var stateInit = [stateValues];
+    var methodMap = getStateMethodsAndGetters(componentState);
+    for (var key in componentState) {
+        var stateValue = componentState[key];
+        switch (stateValue === null || stateValue === void 0 ? void 0 : stateValue.type) {
+            case 'method':
+            case 'getter':
+            case 'function':
+                var code = stateValue.code;
+                var prefixIdx = 0;
+                if (stateValue.type === 'getter') {
+                    prefixIdx += 'get '.length;
+                }
+                else if (stateValue.type === 'function') {
+                    prefixIdx += 'function '.length;
+                }
+                code = code.substring(prefixIdx);
+                code = (0, convert_method_to_function_1.convertMethodToFunction)(code, methodMap, lexicalArgs).replace('(', "(".concat(lexicalArgs.join(','), ","));
+                var functionName = code.split(/\(/)[0];
+                if (stateValue.type === 'getter') {
+                    stateInit.push("state.".concat(key, "=").concat(functionName, "(").concat(lexicalArgs.join(','), ")"));
+                }
+                if (!file.options.isTypeScript) {
+                    // Erase type information
+                    code = convertTypeScriptToJS(code);
+                }
+                file.exportConst(functionName, 'function ' + code, true);
+                continue;
+            case 'property':
+                stateValues[key] = stateValue.code;
+                continue;
         }
-        else {
-            state[key] = code;
-        }
-    });
+    }
     return stateInit;
 }
 function convertTypeScriptToJS(code) {
-    // HACK, proper implementation should use Babel
-    // return code.replace(/(\w+):\s+[\w\[\]"']+/gm, (_, ident) => ident);
     return (0, babel_transform_1.babelTransformExpression)(code, {});
-}
-function isGetter(code) {
-    return typeof code === 'string' && code.startsWith(GETTER);
-}
-function isCode(code) {
-    return typeof code === 'string' && code.startsWith(CODE_PREFIX);
-}
-function isFunction(code) {
-    return typeof code === 'string' && code.startsWith(FUNCTION);
 }
 function extractGetterBody(code) {
     var start = code.indexOf('{');
     var end = code.lastIndexOf('}');
     return code.substring(start + 1, end).trim();
 }
-function stateToMethodOrGetter(state) {
+function getStateMethodsAndGetters(state) {
     var methodMap = {};
     Object.keys(state).forEach(function (key) {
-        var code = state[key];
-        if (typeof code == 'string' && code.startsWith(METHOD)) {
-            methodMap[key] = code.startsWith(GETTER) ? 'getter' : 'method';
+        var stateVal = state[key];
+        if ((stateVal === null || stateVal === void 0 ? void 0 : stateVal.type) === 'getter' || (stateVal === null || stateVal === void 0 ? void 0 : stateVal.type) === 'method') {
+            methodMap[key] = stateVal.type;
         }
     });
     return methodMap;
-}
-function rewriteBindings(node, methodMap, lexicalArgs) {
-    var _a;
-    Object.keys(node.bindings).forEach(function (key) {
-        var binding = node.bindings[key];
-        if (binding === null || binding === void 0 ? void 0 : binding.code) {
-            binding.code = (0, convertMethodToFunction_1.convertMethodToFunction)(binding.code, methodMap, lexicalArgs);
-        }
-        if (key.startsWith('on') && (binding === null || binding === void 0 ? void 0 : binding.code)) {
-            var args = (binding === null || binding === void 0 ? void 0 : binding.arguments) || [];
-            binding.code = "(".concat(args.join(','), ") => ").concat(binding.code);
-            delete node.bindings[key];
-            node.bindings[key + '$'] = binding;
-        }
-    });
-    (_a = node.children) === null || _a === void 0 ? void 0 : _a.forEach(function (child) { return rewriteBindings(child, methodMap, lexicalArgs); });
 }

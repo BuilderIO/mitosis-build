@@ -38,14 +38,16 @@ var get_state_object_string_1 = require("../helpers/get-state-object-string");
 var map_refs_1 = require("../helpers/map-refs");
 var render_imports_1 = require("../helpers/render-imports");
 var jsx_1 = require("../parsers/jsx");
+var mitosis_node_1 = require("../types/mitosis-node");
 var react_1 = require("./react");
+var state_1 = require("../helpers/state");
 exports.DEFAULT_FORMAT = 'legacy';
 // Special isValidAttributeName for Mitosis so we can allow for $ in names
 var isValidAttributeName = function (str) {
     return Boolean(str && /^[$a-z0-9\-_:]+$/i.test(str));
 };
-var blockToMitosis = function (json, toMitosisOptions) {
-    var _a, _b, _c, _d, _e;
+var blockToMitosis = function (json, toMitosisOptions, component) {
+    var _a, _b, _c, _d, _e, _f;
     if (toMitosisOptions === void 0) { toMitosisOptions = {}; }
     var options = __assign({ format: exports.DEFAULT_FORMAT }, toMitosisOptions);
     if (options.format === 'react') {
@@ -54,11 +56,11 @@ var blockToMitosis = function (json, toMitosisOptions) {
             stateType: 'useState',
             stylesType: 'emotion',
             prettier: options.prettier,
-        });
+        }, component);
     }
-    if (json.name === 'For') {
+    if ((0, mitosis_node_1.checkIsForNode)(json)) {
         var needsWrapper = json.children.length !== 1;
-        return "<For each={".concat((_a = json.bindings.each) === null || _a === void 0 ? void 0 : _a.code, "}>\n    {(").concat(json.properties._forName, ", index) =>\n      ").concat(needsWrapper ? '<>' : '', "\n        ").concat(json.children.map(function (child) { return (0, exports.blockToMitosis)(child, options); }), "}\n      ").concat(needsWrapper ? '</>' : '', "\n    </For>");
+        return "<For each={".concat((_a = json.bindings.each) === null || _a === void 0 ? void 0 : _a.code, "}>\n    {(").concat(json.scope.forName, ", index) =>\n      ").concat(needsWrapper ? '<>' : '', "\n        ").concat(json.children.map(function (child) { return (0, exports.blockToMitosis)(child, options, component); }), "}\n      ").concat(needsWrapper ? '</>' : '', "\n    </For>");
     }
     if (json.properties._text) {
         return json.properties._text;
@@ -68,9 +70,6 @@ var blockToMitosis = function (json, toMitosisOptions) {
     }
     var str = '';
     str += "<".concat(json.name, " ");
-    if ((_d = json.bindings._spread) === null || _d === void 0 ? void 0 : _d.code) {
-        str += " {...(".concat(json.bindings._spread.code, ")} ");
-    }
     for (var key in json.properties) {
         var value = (json.properties[key] || '').replace(/"/g, '&quot;').replace(/\n/g, '\\n');
         if (!isValidAttributeName(key)) {
@@ -81,11 +80,11 @@ var blockToMitosis = function (json, toMitosisOptions) {
         }
     }
     for (var key in json.bindings) {
-        var value = (_e = json.bindings[key]) === null || _e === void 0 ? void 0 : _e.code;
-        if (key === '_spread') {
-            continue;
+        var value = (_d = json.bindings[key]) === null || _d === void 0 ? void 0 : _d.code;
+        if (((_e = json.bindings[key]) === null || _e === void 0 ? void 0 : _e.type) === 'spread') {
+            str += " {...(".concat((_f = json.bindings[key]) === null || _f === void 0 ? void 0 : _f.code, ")} ");
         }
-        if (key.startsWith('on')) {
+        else if (key.startsWith('on')) {
             str += " ".concat(key, "={event => ").concat(value.replace(/\s*;$/, ''), "} ");
         }
         else {
@@ -107,7 +106,7 @@ var blockToMitosis = function (json, toMitosisOptions) {
     }
     str += '>';
     if (json.children) {
-        str += json.children.map(function (item) { return (0, exports.blockToMitosis)(item, options); }).join('\n');
+        str += json.children.map(function (item) { return (0, exports.blockToMitosis)(item, options, component); }).join('\n');
     }
     str += "</".concat(json.name, ">");
     return str;
@@ -129,7 +128,7 @@ var mitosisCoreComponents = ['Show', 'For'];
 var componentToMitosis = function (toMitosisOptions) {
     if (toMitosisOptions === void 0) { toMitosisOptions = {}; }
     return function (_a) {
-        var _b, _c, _d;
+        var _b, _c;
         var component = _a.component;
         var options = __assign({ format: exports.DEFAULT_FORMAT }, toMitosisOptions);
         if (options.format === 'react') {
@@ -152,13 +151,15 @@ var componentToMitosis = function (toMitosisOptions) {
         var components = Array.from((0, get_components_1.getComponents)(json));
         var mitosisComponents = components.filter(function (item) { return mitosisCoreComponents.includes(item); });
         var otherComponents = components.filter(function (item) { return !mitosisCoreComponents.includes(item); });
-        var hasState = Boolean(Object.keys(component.state).length);
+        var hasState = (0, state_1.checkHasState)(component);
         var needsMitosisCoreImport = Boolean(hasState || refs.length || mitosisComponents.length);
         var stringifiedUseMetadata = json5_1.default.stringify(component.meta.useMetadata);
         // TODO: smart only pull in imports as needed
-        var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    ", "\n    ", "\n    ", "\n    ", "\n\n    ", "\n\n    ", "\n\n    export default function ", "(props) {\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      return (", "\n        ", "\n        ", ")\n    }\n\n  "], ["\n    ", "\n    ", "\n    ", "\n    ", "\n\n    ", "\n\n    ", "\n\n    export default function ", "(props) {\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      return (", "\n        ", "\n        ", ")\n    }\n\n  "])), !needsMitosisCoreImport
+        var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    ", "\n    ", "\n    ", "\n\n    ", "\n\n    ", "\n\n    export default function ", "(props) {\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      return (", "\n        ", "\n        ", ")\n    }\n\n  "], ["\n    ", "\n    ", "\n    ", "\n\n    ", "\n\n    ", "\n\n    export default function ", "(props) {\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      return (", "\n        ", "\n        ", ")\n    }\n\n  "])), !needsMitosisCoreImport
             ? ''
-            : "import { ".concat(!hasState ? '' : 'useStore, ', " ").concat(!refs.length ? '' : 'useRef, ', " ").concat(mitosisComponents.join(', '), " } from '@builder.io/mitosis';"), !otherComponents.length ? '' : "import { ".concat(otherComponents.join(','), " } from '@components';"), json.types ? json.types.join('\n') : '', json.interfaces ? (_b = json.interfaces) === null || _b === void 0 ? void 0 : _b.join('\n') : '', (0, render_imports_1.renderPreComponent)({ component: json, target: 'mitosis' }), stringifiedUseMetadata !== '{}' ? "".concat(jsx_1.METADATA_HOOK_NAME, "(").concat(stringifiedUseMetadata, ")") : '', component.name, !hasState ? '' : "const state = useStore(".concat((0, get_state_object_string_1.getStateObjectStringFromComponent)(json), ");"), getRefsString(json, refs), !((_c = json.hooks.onMount) === null || _c === void 0 ? void 0 : _c.code) ? '' : "onMount(() => { ".concat(json.hooks.onMount.code, " })"), !((_d = json.hooks.onUnMount) === null || _d === void 0 ? void 0 : _d.code) ? '' : "onUnMount(() => { ".concat(json.hooks.onUnMount.code, " })"), addWrapper ? '<>' : '', json.children.map(function (item) { return (0, exports.blockToMitosis)(item, options); }).join('\n'), addWrapper ? '</>' : '');
+            : "import { ".concat(!hasState ? '' : 'useStore, ', " ").concat(!refs.length ? '' : 'useRef, ', " ").concat(mitosisComponents.join(', '), " } from '@builder.io/mitosis';"), !otherComponents.length ? '' : "import { ".concat(otherComponents.join(','), " } from '@components';"), json.types ? json.types.join('\n') : '', (0, render_imports_1.renderPreComponent)({ component: json, target: 'mitosis' }), stringifiedUseMetadata && stringifiedUseMetadata !== '{}'
+            ? "".concat(jsx_1.METADATA_HOOK_NAME, "(").concat(stringifiedUseMetadata, ")")
+            : '', component.name, !hasState ? '' : "const state = useStore(".concat((0, get_state_object_string_1.getStateObjectStringFromComponent)(json), ");"), getRefsString(json, refs), !((_b = json.hooks.onMount) === null || _b === void 0 ? void 0 : _b.code) ? '' : "onMount(() => { ".concat(json.hooks.onMount.code, " })"), !((_c = json.hooks.onUnMount) === null || _c === void 0 ? void 0 : _c.code) ? '' : "onUnMount(() => { ".concat(json.hooks.onUnMount.code, " })"), addWrapper ? '<>' : '', json.children.map(function (item) { return (0, exports.blockToMitosis)(item, options, component); }).join('\n'), addWrapper ? '</>' : '');
         if (options.prettier !== false) {
             try {
                 str = (0, standalone_1.format)(str, {

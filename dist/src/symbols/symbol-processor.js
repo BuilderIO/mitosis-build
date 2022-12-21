@@ -15,7 +15,7 @@ var __assign = (this && this.__assign) || function () {
     return __assign.apply(this, arguments);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getJsxSymbolComponentName = exports.convertBuilderElementToMitosisComponent = exports.convertBuilderContentToSymbolHierarchy = exports.ensureAllSymbolsHaveIds = void 0;
+exports.hashCode = exports.hashCodeAsString = exports.getJsxSymbolComponentName = exports.convertBuilderElementToMitosisComponent = exports.convertBuilderContentToSymbolHierarchy = exports.ensureAllSymbolsHaveIds = void 0;
 var traverse_1 = require("traverse");
 var builder_1 = require("../parsers/builder");
 var minify_1 = require("../generators/minify");
@@ -87,10 +87,10 @@ function convertBuilderContentToSymbolHierarchy(content, _a) {
             if (((_a = el === null || el === void 0 ? void 0 : el.component) === null || _a === void 0 ? void 0 : _a.name) === 'Symbol') {
                 if (collectComponentState) {
                     var symbol = el.component.options.symbol;
-                    var props = symbol.data;
+                    var props = symbol.data || (symbol.data = {});
                     var state = (_c = (_b = symbol.content) === null || _b === void 0 ? void 0 : _b.data) === null || _c === void 0 ? void 0 : _c.state;
                     if (state) {
-                        var id = toHash(state);
+                        var id = hashCodeAsString(state);
                         props['serverStateId'] = id;
                         collectComponentState[id] = state;
                     }
@@ -130,6 +130,9 @@ function convertBuilderElementToMitosisComponent(element) {
                 name: componentName,
                 options: symbolValue.data,
             },
+            properties: {
+                'builder-content-id': id,
+            },
         }),
     ];
     var mitosisComponent = __assign(__assign({}, (0, builder_1.builderContentToMitosisComponent)(elContent, {
@@ -157,19 +160,54 @@ function addIfMissing(array, value) {
 function isString(value) {
     return typeof value == 'string';
 }
-function toHash(obj) {
-    return hashCode(JSON.stringify(obj));
+function hashCodeAsString(obj) {
+    return Number(Math.abs(hashCode(obj))).toString(36);
 }
-function hashCode(text) {
-    var hash = 0, i, chr;
-    if (text.length === 0)
-        return String(hash);
-    for (i = 0; i < text.length; i++) {
-        chr = text.charCodeAt(i);
-        hash = (hash << 5) - hash + chr;
-        hash |= 0; // Convert to 32bit integer
+exports.hashCodeAsString = hashCodeAsString;
+function hashCode(obj, hash) {
+    if (hash === void 0) { hash = 0; }
+    var value = 0;
+    switch (typeof obj) {
+        case 'number':
+            value = obj;
+            break;
+        case 'undefined':
+            value = Number.MIN_SAFE_INTEGER;
+            break;
+        case 'string':
+            for (var i = 0; i < obj.length; i++) {
+                hash = hashCodeApply(hash, obj.charCodeAt(i));
+            }
+            value = obj.length;
+        case 'boolean':
+            value = obj ? 1 : 0;
+            break;
+        case 'object':
+            if (obj === null) {
+                value = Number.MAX_SAFE_INTEGER;
+            }
+            else if (Array.isArray(obj)) {
+                for (var i = 0; i < obj.length; i++) {
+                    hash = hashCode(obj[i], hash);
+                }
+            }
+            else {
+                for (var _i = 0, _a = Object.keys(obj).sort(); _i < _a.length; _i++) {
+                    var key = _a[_i];
+                    if (obj.hasOwnProperty(key)) {
+                        hash = hashCode(obj[key], hash);
+                    }
+                }
+            }
+            break;
     }
-    return Number(Math.abs(hash)).toString(36);
+    return hashCodeApply(hash, value);
+}
+exports.hashCode = hashCode;
+function hashCodeApply(hash, value) {
+    hash = (hash << 5) - hash + value;
+    hash |= 0; // Convert to 32bit integer
+    return hash;
 }
 function pad(value) {
     var padding = '000000';

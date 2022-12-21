@@ -18,6 +18,8 @@ var get_state_object_string_1 = require("../helpers/get-state-object-string");
 var get_styles_1 = require("../helpers/get-styles");
 var is_children_1 = __importDefault(require("../helpers/is-children"));
 var is_mitosis_node_1 = require("../helpers/is-mitosis-node");
+var mitosis_node_1 = require("../types/mitosis-node");
+var state_1 = require("../helpers/state");
 var scrolls = function (json) {
     var _a;
     return ((_a = (0, get_styles_1.getStyles)(json)) === null || _a === void 0 ? void 0 : _a.overflow) === 'auto';
@@ -57,7 +59,7 @@ var blockToSwift = function (json, options) {
     // TODO: Add support for `{props.children}` bindings
     // Right now we return an empty string because the generated code
     // is very likely wrong.
-    if ((0, is_children_1.default)(json)) {
+    if ((0, is_children_1.default)({ node: json })) {
         return '/* `props.children` is not supported yet for SwiftUI */';
     }
     if (json.properties._text) {
@@ -90,8 +92,8 @@ var blockToSwift = function (json, options) {
         delete json.properties.placeholder;
         json.properties._ = placeholder || '';
     }
-    if (json.name === 'For') {
-        str += "ForEach(".concat(processBinding((_a = json.bindings.each) === null || _a === void 0 ? void 0 : _a.code, options), ", id: \\.self) { ").concat(json.properties._forName, " in ").concat(children
+    if ((0, mitosis_node_1.checkIsForNode)(json)) {
+        str += "ForEach(".concat(processBinding((_a = json.bindings.each) === null || _a === void 0 ? void 0 : _a.code, options), ", id: \\.self) { ").concat(json.scope.forName, " in ").concat(children
             .map(function (item) { return blockToSwift(item, options); })
             .join('\n'), " }");
     }
@@ -193,7 +195,7 @@ var processBinding = function (str, options) {
     return "eval(code: \"".concat(str, "\")");
 };
 function componentHasDynamicData(json) {
-    var hasState = Object.keys(json.state).length > 0;
+    var hasState = (0, state_1.checkHasState)(json);
     if (hasState) {
         return true;
     }

@@ -1,9 +1,10 @@
-/// <reference types="lodash" />
 import * as CSS from 'csstype';
 import { MitosisNode } from '../../types/mitosis-node';
 import { MitosisComponent } from '../../types/mitosis-component';
-export declare const nodeHasStyles: (node: MitosisNode) => boolean;
-export declare const hasStyles: (component: MitosisComponent) => boolean;
+export declare const nodeHasCss: (node: MitosisNode) => boolean;
+export declare const nodeHasStyle: (node: MitosisNode) => boolean;
+export declare const hasCss: (component: MitosisComponent) => boolean;
+export declare const hasStyle: (component: MitosisComponent) => boolean;
 /**
  * e.g.:
  * {

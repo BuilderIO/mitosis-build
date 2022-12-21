@@ -1,3 +1,4 @@
+import { Dictionary } from '../helpers/typescript';
 import { JSONObject } from './json';
 import { MitosisNode } from './mitosis-node';
 /**
@@ -33,15 +34,9 @@ export interface ContextGetInfo {
 }
 export interface ContextSetInfo {
     name: string;
-    value?: JSONObject;
+    value?: MitosisState;
     ref?: string;
 }
-export declare type ContextGet = {
-    [key: string]: ContextGetInfo;
-};
-export declare type ContextSet = {
-    [key: string]: ContextSetInfo;
-};
 export declare type extendedHook = {
     code: string;
     deps?: string;
@@ -50,26 +45,34 @@ export declare type MitosisComponentInput = {
     name: string;
     defaultValue: any;
 };
-export declare type MitosisExport = {
-    [name: string]: {
-        code: string;
-        usedInLocal?: boolean;
-        isFunction?: boolean;
-    };
+export declare type MitosisExports = {
+    [name: string]: MitosisExport;
 };
+export interface MitosisExport {
+    code: string;
+    usedInLocal?: boolean;
+    isFunction?: boolean;
+}
+export declare type StateValueType = 'function' | 'getter' | 'method' | 'property';
+export declare type StateValue = {
+    code: string;
+    type: StateValueType;
+    typeParameter?: string;
+};
+export declare type MitosisState = Dictionary<StateValue | undefined>;
 export declare type MitosisComponent = {
     '@type': '@builder.io/mitosis/component';
     name: string;
     imports: MitosisImport[];
-    exports?: MitosisExport;
+    exports?: MitosisExports;
     meta: JSONObject & {
         useMetadata?: JSONObject;
     };
     inputs: MitosisComponentInput[];
-    state: JSONObject;
+    state: MitosisState;
     context: {
-        get: ContextGet;
-        set: ContextSet;
+        get: Dictionary<ContextGetInfo>;
+        set: Dictionary<ContextSetInfo>;
     };
     refs: {
         [useRef: string]: {
@@ -89,6 +92,7 @@ export declare type MitosisComponent = {
     children: MitosisNode[];
     subComponents: MitosisComponent[];
     types?: string[];
-    interfaces?: string[];
     propsTypeRef?: string;
+    defaultProps?: MitosisState;
+    style?: string;
 };

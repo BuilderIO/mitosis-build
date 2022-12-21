@@ -2,6 +2,8 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.iteratorProperty = exports.lastProperty = exports.isStatement = exports.iif = exports.arrowFnValue = exports.arrowFnBlock = exports.invoke = exports.quote = exports.Block = exports.Imports = exports.Symbol = exports.SrcBuilder = exports.File = void 0;
 var standalone_1 = require("prettier/standalone");
+var builder_1 = require("../../parsers/builder");
+var stable_serialize_1 = require("./stable-serialize");
 var File = /** @class */ (function () {
     function File(filename, options, qwikModule, qrlPrefix) {
         this.imports = new Imports();
@@ -85,10 +87,11 @@ var File = /** @class */ (function () {
                 });
             }
             catch (e) {
-                debugger;
-                source += "\n===============================\n";
-                source += String(e);
-                console.error(source);
+                throw new Error(e +
+                    '\n' +
+                    '========================================================================\n' +
+                    source +
+                    '\n\n========================================================================');
             }
         }
         return source;
@@ -207,6 +210,7 @@ var SrcBuilder = /** @class */ (function () {
             value.startsWith(':') ||
             value.startsWith(']') ||
             value.startsWith('}') ||
+            value.startsWith(',') ||
             value.startsWith('?')) {
             // clear last ',' or ';';
             var index = this.buf.length - 1;
@@ -297,7 +301,7 @@ var SrcBuilder = /** @class */ (function () {
             }
         }
         var _loop_1 = function (rawKey) {
-            if (rawKey === '_spread') {
+            if (bindings[rawKey].type === 'spread') {
                 if (this_1.isJSX) {
                     this_1.emit('{...', bindings[rawKey].code, '}');
                 }
@@ -314,7 +318,11 @@ var SrcBuilder = /** @class */ (function () {
                     binding_1 = quote(props.class + ' ') + '+' + binding_1;
                 }
                 var key = lastProperty(rawKey);
-                if (!binding_1 && rawKey in props) {
+                if (isEvent(key)) {
+                    key = key + '$';
+                    binding_1 = "(event)=>".concat(binding_1);
+                }
+                else if (!binding_1 && rawKey in props) {
                     binding_1 = quote(props[rawKey]);
                 }
                 else if (binding_1 != null && binding_1 === props[key]) {
@@ -348,6 +356,12 @@ var SrcBuilder = /** @class */ (function () {
         }
         function emitJsxProp(key, value) {
             if (value) {
+                if (key === 'innerHTML')
+                    key = 'dangerouslySetInnerHTML';
+                if (key === 'for')
+                    key = 'htmlFor';
+                if (key === 'dataSet')
+                    return; // ignore
                 if (self.isJSX) {
                     self.emit(' ', key, '=');
                     if (typeof value == 'string' && value.startsWith('"') && value.endsWith('"')) {
@@ -404,6 +418,12 @@ var SrcBuilder = /** @class */ (function () {
     return SrcBuilder;
 }());
 exports.SrcBuilder = SrcBuilder;
+function isEvent(name) {
+    return name.startsWith('on') && isUppercase(name.charAt(2)) && !name.endsWith('$');
+}
+function isUppercase(ch) {
+    return ch == ch.toUpperCase();
+}
 var Symbol = /** @class */ (function () {
     function Symbol(importName, localName) {
         this.importName = importName;
@@ -449,7 +469,6 @@ function ignoreKey(key) {
         key.startsWith('_') ||
         key == 'code' ||
         key == '' ||
-        key == 'builder-id' ||
         key.indexOf('.') !== -1);
 }
 var Block = /** @class */ (function () {
@@ -463,7 +482,7 @@ function possiblyQuotePropertyName(key) {
     return /^\w[\w\d]*$/.test(key) ? key : quote(key);
 }
 function quote(text) {
-    var string = JSON.stringify(text);
+    var string = (0, stable_serialize_1.stableJSONserialize)(text);
     // So \u2028 is a line separator character and prettier treats it as such
     // https://www.fileformat.info/info/unicode/char/2028/index.htm
     // That means it can't be inside of a string, so we replace it with `\\u2028`.
@@ -511,6 +530,9 @@ function iif(code) {
     if (code.endsWith(_virtual_index) && !code.endsWith(return_virtual_index)) {
         code = code.substr(0, code.length - _virtual_index.length) + return_virtual_index;
     }
+    if (code.indexOf('export') !== -1) {
+        code = (0, builder_1.convertExportDefaultToReturn)(code);
+    }
     return function () {
         code && this.emit('(()=>{', code, '})()');
     };
@@ -536,7 +558,8 @@ function literalTagName(symbol) {
  */
 function isStatement(code) {
     code = code.trim();
-    if (code.startsWith('(') || code.startsWith('{') || code.endsWith('}')) {
+    if ((code.startsWith('(') && code.endsWith(')')) ||
+        (code.startsWith('{') && code.endsWith('}'))) {
         // Code starting with `(` is most likely and IFF and hence is an expression.
         return false;
     }

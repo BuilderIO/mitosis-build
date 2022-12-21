@@ -10,10 +10,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.componentToStencil = void 0;
 var dedent_1 = __importDefault(require("dedent"));
 var standalone_1 = require("prettier/standalone");
-var get_refs_1 = require("../../helpers/get-refs");
 var get_state_object_string_1 = require("../../helpers/get-state-object-string");
 var render_imports_1 = require("../../helpers/render-imports");
 var jsx_1 = require("../../parsers/jsx");
+var mitosis_node_1 = require("../../types/mitosis-node");
 var plugins_1 = require("../../modules/plugins");
 var fast_clone_1 = require("../../helpers/fast-clone");
 var strip_meta_properties_1 = require("../../helpers/strip-meta-properties");
@@ -25,8 +25,9 @@ var dash_case_1 = require("../../helpers/dash-case");
 var collect_css_1 = require("../../helpers/styles/collect-css");
 var indent_1 = require("../../helpers/indent");
 var map_refs_1 = require("../../helpers/map-refs");
+var for_1 = require("../../helpers/nodes/for");
 var blockToStencil = function (json, options) {
-    var _a, _b, _c, _d, _e;
+    var _a, _b, _c, _d;
     if (options === void 0) { options = {}; }
     if (json.properties._text) {
         return json.properties._text;
@@ -34,9 +35,10 @@ var blockToStencil = function (json, options) {
     if ((_a = json.bindings._text) === null || _a === void 0 ? void 0 : _a.code) {
         return "{".concat(processBinding((_b = json.bindings) === null || _b === void 0 ? void 0 : _b._text.code), "}");
     }
-    if (json.name === 'For') {
+    if ((0, mitosis_node_1.checkIsForNode)(json)) {
         var wrap = json.children.length !== 1;
-        return "{".concat(processBinding((_c = json.bindings.each) === null || _c === void 0 ? void 0 : _c.code), "?.map((").concat(json.properties._forName, ", index) => (\n      ").concat(wrap ? '<>' : '').concat(json.children
+        var forArgs = (0, for_1.getForArguments)(json).join(', ');
+        return "{".concat(processBinding((_c = json.bindings.each) === null || _c === void 0 ? void 0 : _c.code), "?.map((").concat(forArgs, ") => (\n      ").concat(wrap ? '<>' : '').concat(json.children
             .filter(filter_empty_text_nodes_1.filterEmptyTextNodes)
             .map(function (item) { return blockToStencil(item, options); })
             .join('\n')).concat(wrap ? '</>' : '', "\n    ))}");
@@ -54,19 +56,16 @@ var blockToStencil = function (json, options) {
     if (classString) {
         str += " class=".concat(classString, " ");
     }
-    if ((_e = json.bindings._spread) === null || _e === void 0 ? void 0 : _e.code) {
-        str += " {...(".concat(json.bindings._spread.code, ")} ");
-    }
     for (var key in json.properties) {
         var value = json.properties[key];
         str += " ".concat(key, "=\"").concat(value, "\" ");
     }
     for (var key in json.bindings) {
-        var _f = json.bindings[key], code = _f.code, _g = _f.arguments, cusArgs = _g === void 0 ? ['event'] : _g;
-        if (key === '_spread' || key === '_forName') {
-            continue;
+        var _e = json.bindings[key], code = _e.code, _f = _e.arguments, cusArgs = _f === void 0 ? ['event'] : _f, type = _e.type;
+        if (type === 'spread') {
+            str += " {...(".concat(code, ")} ");
         }
-        if (key === 'ref') {
+        else if (key === 'ref') {
             str += " ref={(el) => this.".concat(code, " = el} ");
         }
         else if (key.startsWith('on')) {
@@ -85,15 +84,6 @@ var blockToStencil = function (json, options) {
         str += json.children.map(function (item) { return blockToStencil(item, options); }).join('\n');
     }
     str += "</".concat(json.name, ">");
-    return str;
-};
-var getRefsString = function (json, refs) {
-    if (refs === void 0) { refs = (0, get_refs_1.getRefs)(json); }
-    var str = '';
-    for (var _i = 0, _a = Array.from(refs); _i < _a.length; _i++) {
-        var ref = _a[_i];
-        str += "\nconst ".concat(ref, " = useRef();");
-    }
     return str;
 };
 function processBinding(code) {

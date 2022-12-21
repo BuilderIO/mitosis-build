@@ -1,3 +1,4 @@
+import { JSX } from '../jsx-runtime';
 /**
  * Flow control based on Solid
  *
@@ -19,4 +20,7 @@ export declare function Show<T>(props: {
     when: T | undefined | null | false;
     else?: JSX.Element;
     children?: JSX.Element | null;
+}): any;
+export declare function Fragment(props: {
+    children: JSX.Element | JSX.Element[];
 }): any;

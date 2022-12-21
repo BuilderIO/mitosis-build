@@ -42,8 +42,6 @@ var traverse_1 = __importDefault(require("traverse"));
 var babel = __importStar(require("@babel/core"));
 var get_refs_1 = require("./get-refs");
 var is_mitosis_node_1 = require("./is-mitosis-node");
-var method_literal_prefix_1 = require("../constants/method-literal-prefix");
-var function_literal_prefix_1 = require("../constants/function-literal-prefix");
 var babel_transform_1 = require("./babel-transform");
 var patterns_1 = require("./patterns");
 var tsPreset = require('@babel/preset-typescript');
@@ -65,20 +63,27 @@ var mapRefs = function (component, mapper) {
     var refs = Array.from(refSet);
     for (var _i = 0, _a = Object.keys(component.state); _i < _a.length; _i++) {
         var key = _a[_i];
-        var value = component.state[key];
-        if (typeof value === 'string') {
-            if (value.startsWith(method_literal_prefix_1.methodLiteralPrefix)) {
-                var methodValue = value.replace(method_literal_prefix_1.methodLiteralPrefix, '');
-                var isGet = Boolean(methodValue.match(patterns_1.GETTER));
-                var isSet = Boolean(methodValue.match(patterns_1.SETTER));
-                component.state[key] =
-                    method_literal_prefix_1.methodLiteralPrefix +
-                        replaceRefsInString(methodValue.replace(/^(get |set )?/, 'function '), refs, mapper).replace(/^function /, isGet ? 'get ' : isSet ? 'set ' : '');
-            }
-            else if (value.startsWith(function_literal_prefix_1.functionLiteralPrefix)) {
-                component.state[key] =
-                    function_literal_prefix_1.functionLiteralPrefix +
-                        replaceRefsInString(value.replace(function_literal_prefix_1.functionLiteralPrefix, ''), refs, mapper);
+        var stateVal = component.state[key];
+        if (typeof (stateVal === null || stateVal === void 0 ? void 0 : stateVal.code) === 'string') {
+            var value = stateVal.code;
+            switch (stateVal.type) {
+                case 'method':
+                case 'getter':
+                    var isGet = stateVal.type === 'getter';
+                    var isSet = Boolean(value.match(patterns_1.SETTER));
+                    component.state[key] = {
+                        code: replaceRefsInString(value.replace(/^(get |set )?/, 'function '), refs, mapper).replace(/^function /, isGet ? 'get ' : isSet ? 'set ' : ''),
+                        type: stateVal.type,
+                    };
+                    break;
+                case 'function':
+                    component.state[key] = {
+                        code: replaceRefsInString(value, refs, mapper),
+                        type: 'function',
+                    };
+                    break;
+                default:
+                    break;
             }
         }
     }
@@ -101,12 +106,18 @@ var mapRefs = function (component, mapper) {
                 if (hook.code) {
                     hook.code = replaceRefsInString(hook.code, refs, mapper);
                 }
+                if (hook.deps) {
+                    hook.deps = replaceRefsInString(hook.deps, refs, mapper);
+                }
             });
         }
         else {
             var hookCode = hooks === null || hooks === void 0 ? void 0 : hooks.code;
             if (hookCode) {
                 hooks.code = replaceRefsInString(hookCode, refs, mapper);
+            }
+            if (hooks === null || hooks === void 0 ? void 0 : hooks.deps) {
+                hooks.deps = replaceRefsInString(hooks === null || hooks === void 0 ? void 0 : hooks.deps, refs, mapper);
             }
         }
     }

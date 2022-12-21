@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.renderExportAndLocal = exports.renderPreComponent = exports.renderImports = exports.renderImport = void 0;
+exports.renderExportAndLocal = exports.renderPreComponent = exports.renderImports = exports.renderImport = exports.checkIsComponentImport = void 0;
 var DEFAULT_IMPORT = 'default';
 var STAR_IMPORT = '*';
 var getStarImport = function (_a) {
@@ -33,8 +33,15 @@ var getFileExtensionForTarget = function (target) {
         case 'vue2':
         case 'vue3':
             return '.vue';
+        case 'marko':
+            return '.marko';
+        case 'lit':
+            return '.js';
+        case 'angular':
+            return '';
         // these `.lite` extensions are handled in the `transpile` step of the CLI.
-        // TO-DO: consolidate file-extension renaming to one place.
+        // TO-DO: consolidate file-extension renaming to this file, and remove `.lite` replaces from the CLI `transpile`. (outdated) ?
+        // Bit team wanted to make sure React and Angular behaved the same in regards to imports - ALU 10/05/22
         default:
             return '.lite';
     }
@@ -42,12 +49,13 @@ var getFileExtensionForTarget = function (target) {
 var checkIsComponentImport = function (theImport) {
     return theImport.path.endsWith('.lite') && !theImport.path.endsWith('.context.lite');
 };
-var transformImportPath = function (theImport, target) {
+exports.checkIsComponentImport = checkIsComponentImport;
+var transformImportPath = function (theImport, target, preserveFileExtensions) {
     // We need to drop the `.lite` from context files, because the context generator does so as well.
     if (theImport.path.endsWith('.context.lite')) {
-        return theImport.path.replace('.lite', '');
+        return theImport.path.replace('.lite', '.js');
     }
-    if (checkIsComponentImport(theImport)) {
+    if ((0, exports.checkIsComponentImport)(theImport) && !preserveFileExtensions) {
         return theImport.path.replace('.lite', getFileExtensionForTarget(target));
     }
     return theImport.path;
@@ -87,26 +95,34 @@ var getImportValue = function (_a) {
     }
 };
 var renderImport = function (_a) {
-    var theImport = _a.theImport, target = _a.target, asyncComponentImports = _a.asyncComponentImports;
+    var theImport = _a.theImport, target = _a.target, asyncComponentImports = _a.asyncComponentImports, _b = _a.preserveFileExtensions, preserveFileExtensions = _b === void 0 ? false : _b, _c = _a.component, component = _c === void 0 ? undefined : _c, _d = _a.componentsUsed, componentsUsed = _d === void 0 ? [] : _d, importMapper = _a.importMapper;
     var importedValues = getImportedValues({ theImport: theImport });
-    var path = transformImportPath(theImport, target);
+    var path = transformImportPath(theImport, target, preserveFileExtensions);
     var importValue = getImportValue(importedValues);
-    var isComponentImport = checkIsComponentImport(theImport);
+    var isComponentImport = (0, exports.checkIsComponentImport)(theImport);
     var shouldBeAsyncImport = asyncComponentImports && isComponentImport;
+    // For lit (components) we just want to do a plain import
+    // https://lit.dev/docs/components/rendering/#composing-templates
+    if (isComponentImport && target === 'lit') {
+        return "import '".concat(path, "';");
+    }
     if (shouldBeAsyncImport) {
         var isVueImport = target === 'vue';
         if (isVueImport && importedValues.namedImports) {
             console.warn('Vue: Async Component imports cannot include named imports. Dropping async import. This might break your code.');
         }
         else {
-            return "const ".concat(importValue, " = () => import('").concat(path, "')");
+            return "const ".concat(importValue, " = () => import('").concat(path, "')\n      .then(x => x.default)\n      .catch(err => { \n        console.error('Error while attempting to dynamically import component ").concat(importValue, " at ").concat(path, "', err);\n        throw err;\n      });");
         }
     }
-    return "import ".concat(importValue, " from '").concat(path, "';");
+    if (importMapper) {
+        return importMapper(component, theImport, importedValues, componentsUsed);
+    }
+    return importValue ? "import ".concat(importValue, " from '").concat(path, "';") : "import '".concat(path, "';");
 };
 exports.renderImport = renderImport;
 var renderImports = function (_a) {
-    var imports = _a.imports, target = _a.target, asyncComponentImports = _a.asyncComponentImports;
+    var imports = _a.imports, target = _a.target, asyncComponentImports = _a.asyncComponentImports, excludeMitosisComponents = _a.excludeMitosisComponents, _b = _a.preserveFileExtensions, preserveFileExtensions = _b === void 0 ? false : _b, component = _a.component, componentsUsed = _a.componentsUsed, importMapper = _a.importMapper;
     return imports
         .filter(function (theImport) {
         if (
@@ -116,21 +132,40 @@ var renderImports = function (_a) {
             theImport.path.startsWith('@builder.io/mitosis')) {
             return false;
         }
+        else if (excludeMitosisComponents && theImport.path.includes('.lite')) {
+            return false;
+        }
         else {
             return true;
         }
     })
-        .map(function (theImport) { return (0, exports.renderImport)({ theImport: theImport, target: target, asyncComponentImports: asyncComponentImports }); })
+        .map(function (theImport) {
+        return (0, exports.renderImport)({
+            theImport: theImport,
+            target: target,
+            asyncComponentImports: asyncComponentImports,
+            preserveFileExtensions: preserveFileExtensions,
+            component: component,
+            componentsUsed: componentsUsed,
+            importMapper: importMapper,
+        });
+    })
         .join('\n');
 };
 exports.renderImports = renderImports;
 var renderPreComponent = function (_a) {
-    var component = _a.component, target = _a.target, _b = _a.asyncComponentImports, asyncComponentImports = _b === void 0 ? false : _b;
+    var _b;
+    var component = _a.component, target = _a.target, excludeMitosisComponents = _a.excludeMitosisComponents, _c = _a.asyncComponentImports, asyncComponentImports = _c === void 0 ? false : _c, _d = _a.preserveFileExtensions, preserveFileExtensions = _d === void 0 ? false : _d, _e = _a.componentsUsed, componentsUsed = _e === void 0 ? [] : _e, importMapper = _a.importMapper;
     return "\n    ".concat((0, exports.renderImports)({
         imports: component.imports,
         target: target,
         asyncComponentImports: asyncComponentImports,
-    }), "\n    ").concat((0, exports.renderExportAndLocal)(component), "\n    ").concat(component.hooks.preComponent || '', "\n  ");
+        excludeMitosisComponents: excludeMitosisComponents,
+        preserveFileExtensions: preserveFileExtensions,
+        component: component,
+        componentsUsed: componentsUsed,
+        importMapper: importMapper,
+    }), "\n    ").concat((0, exports.renderExportAndLocal)(component), "\n    ").concat(((_b = component.hooks.preComponent) === null || _b === void 0 ? void 0 : _b.code) || '', "\n  ");
 };
 exports.renderPreComponent = renderPreComponent;
 var renderExportAndLocal = function (component) {

@@ -7,7 +7,7 @@ var contextToReact = function (options) {
     if (options === void 0) { options = {}; }
     return function (_a) {
         var context = _a.context;
-        var str = "\n  import { createContext } from 'react';\n\n  export default createContext(".concat((0, get_state_object_string_1.getMemberObjectString)(context.value), ")\n  ");
+        var str = "\n  import { createContext } from 'react';\n\n  export default createContext(".concat((0, get_state_object_string_1.stringifyContextValue)(context.value), ")\n  ");
         if (options.format !== false) {
             try {
                 str = (0, standalone_1.format)(str, {

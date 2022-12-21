@@ -5,6 +5,7 @@ var __makeTemplateObject = (this && this.__makeTemplateObject) || function (cook
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CoreButton = exports.__passThroughProps__ = exports.Image = exports.DIRECTIVES = void 0;
+var for_1 = require("../../helpers/nodes/for");
 var minify_1 = require("../minify");
 var src_generator_1 = require("./src-generator");
 exports.DIRECTIVES = {
@@ -13,28 +14,39 @@ exports.DIRECTIVES = {
             var _this = this;
             var _a;
             var expr = (_a = node.bindings.when) === null || _a === void 0 ? void 0 : _a.code;
+            var elseBlockFn = blockFn.else;
             this.jsxExpression(function () {
                 _this.emit(expr, '?');
                 blockFn();
-                _this.emit(':null');
+                _this.emit(':');
+                if (elseBlockFn) {
+                    elseBlockFn();
+                }
+                else {
+                    _this.emit('null');
+                }
             });
         };
     },
-    For: function (node, blockFn) {
+    For: function (_node, blockFn) {
         return function () {
             var _this = this;
             var _a;
+            var node = _node;
             var expr = (_a = node.bindings.each) === null || _a === void 0 ? void 0 : _a.code;
             this.jsxExpression(function () {
-                var forName = node.properties._forName || '_';
-                var indexName = node.properties._indexName;
-                _this.emit('(', expr, '||[]).map(', '((', forName, indexName ? ',' : '', indexName ? indexName : '', ') => {');
+                var forArgs = (0, for_1.getForArguments)(node);
+                var forName = forArgs[0];
+                _this.emit('(', expr, '||[]).map(');
+                _this.isBuilder && _this.emit('(('), _this.emit('function(', forArgs, '){');
                 if (_this.isBuilder) {
                     _this.emit('var state=Object.assign({},this,{', (0, src_generator_1.iteratorProperty)(expr), ':', forName, '==null?{}:', forName, '});');
                 }
                 _this.emit('return(');
                 blockFn();
-                _this.emit(');}))');
+                _this.emit(');}');
+                _this.isBuilder && _this.emit(').bind(state))');
+                _this.emit(')');
             });
         };
     },
@@ -47,7 +59,7 @@ function Image(props) {
     var jsx = props.children || [];
     var image = props.image;
     if (image) {
-        var isBuilderIoImage = !!(image || '').match(/\.builder\.io/);
+        var isBuilderIoImage = !!(image || '').match(/\.builder\.io/) && !props.noWebp;
         var isPixel = (_a = props.builderBlock) === null || _a === void 0 ? void 0 : _a.id.startsWith('builder-pixel-');
         var imgProps = {
             src: props.image,
@@ -58,6 +70,10 @@ function Image(props) {
             loading: isPixel ? 'eager' : 'lazy',
             srcset: undefined,
         };
+        var qwikBugWorkaround = function (imgProps) {
+            return Object.keys(imgProps).forEach(function (k) { return imgProps[k] === undefined && delete imgProps[k]; });
+        };
+        qwikBugWorkaround(imgProps);
         if (isBuilderIoImage) {
             var webpImage_1 = updateQueryParam(image, 'format', 'webp');
             var srcset = ['100', '200', '400', '800', '1200', '1600', '2000']
@@ -102,7 +118,7 @@ exports.Image = Image;
 function __passThroughProps__(dstProps, srcProps) {
     for (var key in srcProps) {
         if (Object.prototype.hasOwnProperty.call(srcProps, key) &&
-            ((key.startsWith('on') && key.endsWith('Qrl')) || key == 'style')) {
+            ((key.startsWith('on') && key.endsWith('$')) || key == 'style')) {
             dstProps[key] = srcProps[key];
         }
     }
@@ -112,7 +128,7 @@ exports.__passThroughProps__ = __passThroughProps__;
 function CoreButton(props) {
     var hasLink = !!props.link;
     var hProps = {
-        innerHTML: props.text || '',
+        dangerouslySetInnerHTML: props.text || '',
         href: props.link,
         target: props.openInNewTab ? '_blank' : '_self',
         class: props.class,

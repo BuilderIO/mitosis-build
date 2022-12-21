@@ -6,7 +6,7 @@ var contextToQwik = function (options) {
     if (options === void 0) { options = {}; }
     return function (_a) {
         var context = _a.context;
-        var str = "\n  import { createContext } from '@builder.io/qwik';\n\n  export default createContext(\"".concat(context.name, "\")\n  ");
+        var str = "\n  import { createContext } from '@builder.io/qwik';\n\n  export default createContext<any>(\"".concat(context.name, "\")\n  ");
         if (options.format !== false) {
             try {
                 str = (0, standalone_1.format)(str, {

@@ -24,15 +24,28 @@ exports.renderJSXNodes = void 0;
 var is_mitosis_node_1 = require("../../helpers/is-mitosis-node");
 var directives_1 = require("./directives");
 var src_generator_1 = require("./src-generator");
+/**
+ * Convert a Mitosis nodes to a JSX nodes.
+ *
+ * @param file File into which the output will be written to.
+ * @param directives Store for directives which we came across so that they can be imported.
+ * @param handlers A set of handlers which we came across so that they can be rendered
+ * @param children A list of children to convert to JSX
+ * @param styles Store for styles which we came across so that they can be rendered.
+ * @param parentSymbolBindings A set of bindings from parent to be written into the child.
+ * @param root True if this is the root JSX, and may need a Fragment wrapper.
+ * @returns
+ */
 function renderJSXNodes(file, directives, handlers, children, styles, parentSymbolBindings, root) {
     if (root === void 0) { root = true; }
     return function () {
         var _this = this;
+        var srcBuilder = this;
         if (children.length == 0)
             return;
         if (root)
             this.emit('(');
-        var needsFragment = root && (children.length > 1 || isInlinedDirective(children[0]));
+        var needsFragment = root && (children.length > 1 || (children.length && isInlinedDirective(children[0])));
         file.import(file.qwikModule, 'h');
         var fragmentSymbol = file.import(file.qwikModule, 'Fragment');
         if (needsFragment) {
@@ -43,33 +56,33 @@ function renderJSXNodes(file, directives, handlers, children, styles, parentSymb
             if (isEmptyTextNode(child))
                 return;
             if (isTextNode(child)) {
-                if (((_a = child.bindings._text) === null || _a === void 0 ? void 0 : _a.code) !== undefined) {
-                    if (child.bindings._text.code == 'props.children') {
-                        _this.file.import(_this.file.qwikModule, 'Slot');
-                        _this.jsxBegin('Slot', {}, {});
-                        _this.jsxEnd('Slot');
-                    }
-                    else {
-                        _this.jsxTextBinding(child.bindings._text.code);
-                    }
+                var text = child.properties._text;
+                var textExpr = (_a = child.bindings._text) === null || _a === void 0 ? void 0 : _a.code;
+                if (typeof text == 'string') {
+                    _this.isJSX ? _this.emit(text) : _this.jsxTextBinding((0, src_generator_1.quote)(text));
                 }
-                else {
-                    _this.isJSX
-                        ? _this.emit(child.properties._text)
-                        : _this.jsxTextBinding((0, src_generator_1.quote)(child.properties._text));
+                else if (typeof textExpr == 'string') {
+                    _this.isJSX ? _this.emit('{', textExpr, '}') : _this.jsxTextBinding(textExpr);
                 }
+            }
+            else if (isSlotProjection(child)) {
+                _this.file.import(_this.file.qwikModule, 'Slot');
+                _this.jsxBegin('Slot', {}, {});
+                _this.jsxEnd('Slot');
             }
             else {
                 var childName = child.name;
                 var directive = directives_1.DIRECTIVES[childName];
                 if (typeof directive == 'function') {
-                    _this.emit(directive(child, function () {
-                        var children = child.children.filter(function (c) { return !isEmptyTextNode(c); });
-                        var needsFragment = children.length > 1 || isTextNode(children[0]);
-                        needsFragment && _this.jsxBeginFragment(fragmentSymbol);
-                        renderJSXNodes(file, directives, handlers, children, styles, {}, false).call(_this);
-                        needsFragment && _this.jsxEndFragment();
-                    }));
+                    var blockFn_1 = mitosisNodeToRenderBlock(child.children);
+                    var meta_1 = child.meta;
+                    Object.keys(meta_1).forEach(function (key) {
+                        var value = meta_1[key];
+                        if ((0, is_mitosis_node_1.isMitosisNode)(value)) {
+                            blockFn_1[key] = mitosisNodeToRenderBlock([value]);
+                        }
+                    });
+                    _this.emit(directive(child, blockFn_1));
                     !_this.isJSX && _this.emit(',');
                 }
                 else {
@@ -120,6 +133,15 @@ function renderJSXNodes(file, directives, handlers, children, styles, parentSymb
         }
         if (root)
             this.emit(')');
+        function mitosisNodeToRenderBlock(children) {
+            return function () {
+                children = children.filter(function (c) { return !isEmptyTextNode(c); });
+                var childNeedsFragment = children.length > 1 || (children.length && isTextNode(children[0]));
+                childNeedsFragment && srcBuilder.jsxBeginFragment(fragmentSymbol);
+                renderJSXNodes(file, directives, handlers, children, styles, {}, false).call(srcBuilder);
+                childNeedsFragment && srcBuilder.jsxEndFragment();
+            };
+        }
     };
 }
 exports.renderJSXNodes = renderJSXNodes;
@@ -135,7 +157,18 @@ function isEmptyTextNode(child) {
 }
 function isTextNode(child) {
     var _a;
-    return child.properties._text !== undefined || ((_a = child.bindings._text) === null || _a === void 0 ? void 0 : _a.code) !== undefined;
+    if (child.properties._text !== undefined) {
+        return true;
+    }
+    var code = (_a = child.bindings._text) === null || _a === void 0 ? void 0 : _a.code;
+    if (code !== undefined && code !== 'props.children') {
+        return true;
+    }
+    return false;
+}
+function isSlotProjection(child) {
+    var _a;
+    return ((_a = child.bindings._text) === null || _a === void 0 ? void 0 : _a.code) === 'props.children';
 }
 /**
  * Rewrites bindings:
@@ -150,27 +183,31 @@ function isTextNode(child) {
  * @returns
  */
 function rewriteHandlers(file, handlers, bindings, symbolBindings) {
+    var _a, _b;
     var outBindings = {};
     for (var key in bindings) {
         if (Object.prototype.hasOwnProperty.call(bindings, key)) {
-            var binding = bindings[key].code;
+            var bindingExpr = (_a = bindings === null || bindings === void 0 ? void 0 : bindings[key]) === null || _a === void 0 ? void 0 : _a.code;
             var handlerBlock = void 0;
-            if (binding != null) {
+            if (bindingExpr != null) {
                 if (key == 'css') {
                     continue;
                 }
-                else if ((handlerBlock = handlers.get(binding))) {
-                    key = "".concat(key, "Qrl");
-                    binding = (0, src_generator_1.invoke)(file.import(file.qwikModule, 'qrl'), [
+                else if ((handlerBlock = handlers.get(bindingExpr))) {
+                    key = "".concat(key, "$");
+                    bindingExpr = (0, src_generator_1.invoke)(file.import(file.qwikModule, 'qrl'), [
                         (0, src_generator_1.quote)(file.qrlPrefix + 'high.js'),
                         (0, src_generator_1.quote)(handlerBlock),
                         '[state]',
                     ]);
                 }
                 else if (symbolBindings && key.startsWith('symbol.data.')) {
-                    symbolBindings[(0, src_generator_1.lastProperty)(key)] = binding;
+                    symbolBindings[(0, src_generator_1.lastProperty)(key)] = bindingExpr;
                 }
-                outBindings[key] = { code: binding };
+                else if (key.startsWith('component.options.')) {
+                    key = (0, src_generator_1.lastProperty)(key);
+                }
+                outBindings[key] = { code: bindingExpr, type: (_b = bindings === null || bindings === void 0 ? void 0 : bindings[key]) === null || _b === void 0 ? void 0 : _b.type };
             }
         }
     }

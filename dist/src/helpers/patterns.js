@@ -1,5 +1,13 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.SETTER = exports.GETTER = void 0;
-exports.GETTER = /^get /;
-exports.SETTER = /^set /;
+exports.prefixWithFunction = exports.replaceGetterWithFunction = exports.stripGetter = exports.checkIsGetter = exports.SETTER = exports.GETTER = void 0;
+exports.GETTER = /^\s*get /;
+exports.SETTER = /^\s*set /;
+var checkIsGetter = function (code) { return code.match(exports.GETTER); };
+exports.checkIsGetter = checkIsGetter;
+var stripGetter = function (str) { return str.replace(exports.GETTER, ''); };
+exports.stripGetter = stripGetter;
+var replaceGetterWithFunction = function (str) { return str.replace(/^(get )?/, 'function '); };
+exports.replaceGetterWithFunction = replaceGetterWithFunction;
+var prefixWithFunction = function (str) { return "function ".concat(str); };
+exports.prefixWithFunction = prefixWithFunction;

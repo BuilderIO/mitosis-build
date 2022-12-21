@@ -1,8 +1,14 @@
 import { JSONObject } from './json';
-export declare type MitosisNode = {
+export declare type Binding = {
+    code: string;
+    arguments?: string[];
+    type?: 'spread';
+};
+export declare type BaseNode = {
     '@type': '@builder.io/mitosis/node';
-    name: string;
     meta: JSONObject;
+    name: string;
+    scope: {};
     /**
      * Key-value store of string values for DOM attributes.
      * ```js
@@ -12,9 +18,6 @@ export declare type MitosisNode = {
      * }
      * ```
      */
-    scope: {
-        [key: string]: Array<string>;
-    };
     properties: {
         [key: string]: string | undefined;
     };
@@ -31,10 +34,18 @@ export declare type MitosisNode = {
      * ```
      */
     bindings: {
-        [key: string]: {
-            code: string;
-            arguments?: string[];
-        } | undefined;
+        [key: string]: Binding | undefined;
     };
     children: MitosisNode[];
 };
+export declare type SpecialNodesNames = 'For' | 'Fragment' | 'Show' | 'Slot';
+export declare type ForNode = BaseNode & {
+    name: 'For';
+    scope: {
+        forName: string | undefined;
+        indexName: string | undefined;
+        collectionName: string | undefined;
+    };
+};
+export declare type MitosisNode = BaseNode | ForNode;
+export declare const checkIsForNode: (node: MitosisNode) => node is ForNode;

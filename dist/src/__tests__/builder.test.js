@@ -3,29 +3,6 @@ var __makeTemplateObject = (this && this.__makeTemplateObject) || function (cook
     if (Object.defineProperty) { Object.defineProperty(cooked, "raw", { value: raw }); } else { cooked.raw = raw; }
     return cooked;
 };
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -67,7 +44,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var dedent_1 = __importDefault(require("dedent"));
-var fs = __importStar(require("fs"));
 var builder_1 = require("../generators/builder");
 var mitosis_1 = require("../generators/mitosis");
 var html_1 = require("../generators/html");
@@ -75,36 +51,22 @@ var builder_2 = require("../parsers/builder");
 var jsx_1 = require("../parsers/jsx");
 var compile_away_builder_components_1 = require("../plugins/compile-away-builder-components");
 var __1 = require("..");
-/**
- * Load a file using nodejs resolution as a string.
- */
-function fixture(path) {
-    var localpath = require.resolve(path);
-    return fs.readFileSync(localpath, { encoding: 'utf-8' });
-}
-var stamped = fixture('./data/blocks/stamped-io.raw');
-var customCode = fixture('./data/blocks/custom-code.raw');
-var embed = fixture('./data/blocks/embed.raw');
-var image = fixture('./data/blocks/image.raw');
-var columns = fixture('./data/blocks/columns.raw');
-var lazyLoadSection = JSON.parse(fixture('./data/builder/lazy-load-section.json'));
+var stamped_io_raw_tsx_raw_1 = __importDefault(require("./data/blocks/stamped-io.raw.tsx?raw"));
+var custom_code_raw_tsx_raw_1 = __importDefault(require("./data/blocks/custom-code.raw.tsx?raw"));
+var embed_raw_tsx_raw_1 = __importDefault(require("./data/blocks/embed.raw.tsx?raw"));
+var image_raw_tsx_raw_1 = __importDefault(require("./data/blocks/image.raw.tsx?raw"));
+var columns_raw_tsx_raw_1 = __importDefault(require("./data/blocks/columns.raw.tsx?raw"));
+var lazy_load_section_json_raw_1 = __importDefault(require("./data/builder/lazy-load-section.json?raw"));
 var mitosisOptions = {
     format: 'legacy',
 };
 describe('Builder', function () {
     test('extractStateHook', function () {
         var code = "useState({ foo: 'bar' }); alert('hi');";
-        expect((0, builder_2.extractStateHook)(code)).toEqual({
-            code: "alert('hi');",
-            state: { foo: 'bar' },
-        });
-        expect((0, builder_2.extractStateHook)(code)).toEqual({
-            code: "alert('hi');",
-            state: { foo: 'bar' },
-        });
+        expect((0, builder_2.extractStateHook)(code)).matchSnapshot();
     });
     test('Stamped', function () {
-        var component = (0, jsx_1.parseJsx)(stamped);
+        var component = (0, jsx_1.parseJsx)(stamped_io_raw_tsx_raw_1.default);
         var builderJson = (0, builder_1.componentToBuilder)()({ component: component });
         expect(builderJson).toMatchSnapshot();
         var backToMitosis = (0, builder_2.builderContentToMitosisComponent)(builderJson);
@@ -112,7 +74,7 @@ describe('Builder', function () {
         expect(mitosis).toMatchSnapshot();
     });
     test('CustomCode', function () {
-        var component = (0, jsx_1.parseJsx)(customCode);
+        var component = (0, jsx_1.parseJsx)(custom_code_raw_tsx_raw_1.default);
         var builderJson = (0, builder_1.componentToBuilder)()({ component: component });
         expect(builderJson).toMatchSnapshot();
         var backToMitosis = (0, builder_2.builderContentToMitosisComponent)(builderJson);
@@ -120,7 +82,7 @@ describe('Builder', function () {
         expect(mitosis).toMatchSnapshot();
     });
     test('Embed', function () {
-        var component = (0, jsx_1.parseJsx)(embed);
+        var component = (0, jsx_1.parseJsx)(embed_raw_tsx_raw_1.default);
         var builderJson = (0, builder_1.componentToBuilder)()({ component: component });
         expect(builderJson).toMatchSnapshot();
         var backToMitosis = (0, builder_2.builderContentToMitosisComponent)(builderJson);
@@ -128,7 +90,7 @@ describe('Builder', function () {
         expect(mitosis).toMatchSnapshot();
     });
     test('Image', function () {
-        var component = (0, jsx_1.parseJsx)(image);
+        var component = (0, jsx_1.parseJsx)(image_raw_tsx_raw_1.default);
         var builderJson = (0, builder_1.componentToBuilder)()({ component: component });
         expect(builderJson).toMatchSnapshot();
         var backToMitosis = (0, builder_2.builderContentToMitosisComponent)(builderJson);
@@ -136,7 +98,7 @@ describe('Builder', function () {
         expect(mitosis).toMatchSnapshot();
     });
     test('Columns', function () {
-        var component = (0, jsx_1.parseJsx)(columns);
+        var component = (0, jsx_1.parseJsx)(columns_raw_tsx_raw_1.default);
         var builderJson = (0, builder_1.componentToBuilder)()({ component: component });
         expect(builderJson).toMatchSnapshot();
         var backToMitosis = (0, builder_2.builderContentToMitosisComponent)(builderJson);
@@ -148,7 +110,7 @@ describe('Builder', function () {
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    component = (0, builder_2.builderContentToMitosisComponent)(lazyLoadSection);
+                    component = (0, builder_2.builderContentToMitosisComponent)(JSON.parse(lazy_load_section_json_raw_1.default));
                     return [4 /*yield*/, (0, html_1.componentToHtml)({
                             plugins: [(0, compile_away_builder_components_1.compileAwayBuilderComponents)()],
                         })({ component: component })];
@@ -164,6 +126,7 @@ describe('Builder', function () {
         var component = (0, jsx_1.parseJsx)(code);
         var builderJson = (0, builder_1.componentToBuilder)()({ component: component });
         var backToMitosis = (0, builder_2.builderContentToMitosisComponent)(builderJson);
+        expect(backToMitosis.state).toEqual(component.state);
         var mitosis = (0, mitosis_1.componentToMitosis)(mitosisOptions)({
             component: backToMitosis,
         });

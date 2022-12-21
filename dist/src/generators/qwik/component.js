@@ -25,6 +25,7 @@ var compile_away_builder_components_1 = require("../../plugins/compile-away-buil
 var handlers_1 = require("./handlers");
 var jsx_1 = require("./jsx");
 var src_generator_1 = require("./src-generator");
+var stable_serialize_1 = require("./stable-serialize");
 var styles_1 = require("./styles");
 function createFileSet(options) {
     if (options === void 0) { options = {}; }
@@ -42,7 +43,7 @@ function createFileSet(options) {
         med: new src_generator_1.File('med.' + extension, srcOptions, opts.qwikLib, opts.qrlPrefix),
         low: new src_generator_1.File('low.' + extension, srcOptions, opts.qwikLib, opts.qrlPrefix),
     };
-    Object.defineProperty(fileSet, '_commonStyles', {
+    Object.defineProperty(fileSet, 'CommonStyles', {
         enumerable: false,
         value: { styles: new Map(), symbolName: null },
     });
@@ -50,12 +51,15 @@ function createFileSet(options) {
 }
 exports.createFileSet = createFileSet;
 function getCommonStyles(fileSet) {
-    return fileSet['_commonStyles'];
+    return fileSet['CommonStyles'];
 }
 function addComponent(fileSet, component, opts) {
     if (opts === void 0) { opts = {}; }
     var _opts = __assign({ isRoot: false, shareStyles: false }, opts);
-    (0, compile_away_builder_components_1.compileAwayBuilderComponentsFromTree)(component, __assign(__assign({}, compile_away_builder_components_1.components), { Image: undefined, CoreButton: undefined }));
+    (0, compile_away_builder_components_1.compileAwayBuilderComponentsFromTree)(component, __assign(__assign({}, compile_away_builder_components_1.components), { 
+        // A set of components that should not be compiled away because they are implemented as runtime components.
+        Image: undefined, CoreButton: undefined }));
+    addBuilderBlockClass(component.children);
     var componentName = component.name;
     var handlers = (0, handlers_1.renderHandlers)(fileSet.high, componentName, component.children);
     // If the component has no handlers, than it is probably static
@@ -67,25 +71,36 @@ function addComponent(fileSet, component, opts) {
     var styles = _opts.shareStyles ? getCommonStyles(fileSet).styles : new Map();
     (0, styles_1.collectStyles)(component.children, styles);
     var useStyles = function () { return null; };
-    if (_opts.shareStyles) {
-        if (_opts.isRoot) {
-            var symbolName = componentName + '_styles';
-            getCommonStyles(fileSet).symbolName = symbolName;
-            useStyles = generateStyles(onRenderFile, fileSet.low, symbolName, false);
+    if (styles.size) {
+        if (_opts.shareStyles) {
+            if (_opts.isRoot) {
+                var symbolName = componentName + 'Styles';
+                getCommonStyles(fileSet).symbolName = symbolName;
+                useStyles = generateStyles(onRenderFile, fileSet.low, symbolName, false);
+            }
         }
-    }
-    else {
-        if (styles.size) {
-            var symbolName = componentName + '_styles';
+        else {
+            var symbolName = componentName + 'Styles';
             onRenderFile.exportConst(symbolName, (0, styles_1.renderStyles)(styles));
             useStyles = generateStyles(onRenderFile, onRenderFile, symbolName, true);
         }
     }
+    if (component.meta.cssCode) {
+        var symbolName = componentName + 'UsrStyles';
+        onRenderFile.exportConst(symbolName, (0, stable_serialize_1.stableJSONserialize)(component.meta.cssCode));
+        useStyles = (function (fns) {
+            return function () {
+                var _this = this;
+                fns.forEach(function (fn) { return fn.apply(_this); });
+            };
+        })([useStyles, generateStyles(onRenderFile, onRenderFile, symbolName, false)]);
+    }
     var directives = new Map();
+    var rootChildren = component.children;
     addComponentOnMount(onRenderFile, function () {
-        return this.emit('return ', (0, jsx_1.renderJSXNodes)(onRenderFile, directives, handlers, component.children, styles, {}), ';');
+        return this.emit('return ', (0, jsx_1.renderJSXNodes)(onRenderFile, directives, handlers, rootChildren, styles, {}), ';');
     }, componentName, component, useStyles);
-    componentFile.exportConst(componentName, (0, src_generator_1.invoke)(componentFile.import(componentFile.qwikModule, 'componentQrl'), [generateQrl(componentFile, onRenderFile, componentName + '_onMount')], ['any', 'any']));
+    componentFile.exportConst(componentName, (0, src_generator_1.invoke)(componentFile.import(componentFile.qwikModule, 'componentQrl'), [generateQrl(componentFile, onRenderFile, componentName + 'OnMount')], ['any', 'any']));
     directives.forEach(function (code, name) {
         fileSet.med.import(fileSet.med.qwikModule, 'h');
         fileSet.med.exportConst(name, code, true);
@@ -94,8 +109,18 @@ function addComponent(fileSet, component, opts) {
 exports.addComponent = addComponent;
 function generateStyles(fromFile, dstFile, symbol, scoped) {
     return function () {
-        this.emit((0, src_generator_1.invoke)(fromFile.import(fromFile.qwikModule, scoped ? 'withScopedStylesQrl' : 'useStylesQrl'), [generateQrl(fromFile, dstFile, symbol)]), ';');
+        this.emit((0, src_generator_1.invoke)(fromFile.import(fromFile.qwikModule, scoped ? 'useStylesScopedQrl' : 'useStylesQrl'), [
+            generateQrl(fromFile, dstFile, symbol),
+        ]), ';');
     };
+}
+function addBuilderBlockClass(children) {
+    children.forEach(function (child) {
+        var props = child.properties;
+        if (props['builder-id']) {
+            props.class = (props.class ? props.class + ' ' : '') + 'builder-block';
+        }
+    });
 }
 function renderUseLexicalScope(file) {
     return function () {
@@ -116,23 +141,37 @@ function addComponentOnMount(componentFile, onRenderEmit, componentName, compone
     if (component.inputs) {
         component.inputs.forEach(function (input) {
             input.defaultValue !== undefined &&
-                inputInitializer.push('if(!state.hasOwnProperty("', input.name, '"))state.', input.name, '=', JSON.stringify(input.defaultValue), ';');
+                inputInitializer.push('if(!state.hasOwnProperty("', input.name, '"))state.', input.name, '=', (0, stable_serialize_1.stableJSONserialize)(input.defaultValue), ';');
         });
     }
-    componentFile.exportConst(componentName + '_onMount', function () {
+    componentFile.exportConst(componentName + 'OnMount', function () {
         var _this = this;
-        this.emit((0, src_generator_1.arrowFnValue)(['state'], function () {
+        this.emit((0, src_generator_1.arrowFnValue)(['props'], function () {
             var _a;
             return _this.emit.apply(_this, __spreadArray(__spreadArray(['{',
-                'if(!state.__INIT__){',
-                'state.__INIT__=true;'], inputInitializer, false), ['typeof __STATE__==="object"&&Object.assign(state,__STATE__[state.serverStateId]);',
-                (0, src_generator_1.iif)((_a = component.hooks.onMount) === null || _a === void 0 ? void 0 : _a.code),
-                '}',
+                'const state=',
+                componentFile.import(componentFile.qwikModule, 'useStore').localName,
+                '(()=>{',
+                'const state = Object.assign({},props,typeof __STATE__==="object"?__STATE__[props.serverStateId]:undefined);'], inputInitializer, false), [inlineCode((_a = component.hooks.onMount) === null || _a === void 0 ? void 0 : _a.code),
+                'return state;',
+                '});',
                 useStyles,
                 onRenderEmit,
                 ';}'], false));
         }));
     });
+}
+function inlineCode(code) {
+    return function () {
+        if (code) {
+            // HACK: remove the return value as it is not the state we are creating.
+            code = code
+                .trim()
+                .replace(/return main\(\);?$/, '')
+                .trim();
+            this.emit(code, ';');
+        }
+    };
 }
 function generateQrl(fromFile, dstFile, componentName, capture) {
     if (capture === void 0) { capture = []; }

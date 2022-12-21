@@ -33,6 +33,8 @@ var lodash_1 = require("lodash");
 var builder_1 = require("../parsers/builder");
 var remove_surrounding_block_1 = require("../helpers/remove-surrounding-block");
 var traverse_1 = __importDefault(require("traverse"));
+var symbol_processor_1 = require("../symbols/symbol-processor");
+var state_1 = require("../helpers/state");
 var omitMetaProperties = function (obj) {
     return (0, lodash_1.omitBy)(obj, function (_value, key) { return key.startsWith('$'); });
 };
@@ -79,15 +81,16 @@ var componentMappers = __assign(__assign({}, (!builder_1.symbolBlocksAsChildren
         block.component.options.columns = columns;
         block.children = [];
         return block;
-    }, For: function (node, options) {
+    }, For: function (_node, options) {
         var _a;
+        var node = _node;
         return el({
             component: {
                 name: 'Core:Fragment',
             },
             repeat: {
                 collection: (_a = node.bindings.each) === null || _a === void 0 ? void 0 : _a.code,
-                itemName: node.properties._forName,
+                itemName: node.scope.forName,
             },
             children: node.children
                 .filter(filter_empty_text_nodes_1.filterEmptyTextNodes)
@@ -109,7 +112,7 @@ var componentMappers = __assign(__assign({}, (!builder_1.symbolBlocksAsChildren
         }, options);
     } });
 var el = function (options, toBuilderOptions) { return (__assign(__assign({ '@type': '@builder.io/sdk:Element' }, (toBuilderOptions.includeIds && {
-    id: 'builder-' + Math.random().toString(36).split('.')[1],
+    id: 'builder-' + (0, symbol_processor_1.hashCodeAsString)(options),
 })), options)); };
 function tryFormat(code) {
     var str = code;
@@ -178,7 +181,7 @@ var blockToBuilder = function (json, options, _internalOptions) {
                 componentOptions[key] = parsed;
             }
             else {
-                builderBindings["component.options.".concat(key)] = bindings[key];
+                builderBindings["component.options.".concat(key)] = bindings[key].code;
             }
         };
         for (var key in bindings) {
@@ -209,7 +212,7 @@ var blockToBuilder = function (json, options, _internalOptions) {
     }
     if (thisIsComponent) {
         for (var key in json.bindings) {
-            bindings["component.options.".concat(key)] = json.bindings[key];
+            builderBindings["component.options.".concat(key)] = json.bindings[key].code;
         }
     }
     return el(__assign(__assign(__assign(__assign({ tagName: thisIsComponent ? undefined : json.name }, (hasCss && {
@@ -222,7 +225,9 @@ var blockToBuilder = function (json, options, _internalOptions) {
     })), { code: {
             bindings: builderBindings,
             actions: actions,
-        }, properties: thisIsComponent ? undefined : omitMetaProperties(json.properties), bindings: thisIsComponent ? builderBindings : (0, lodash_1.omit)(bindings, 'css'), actions: actions, children: json.children
+        }, properties: thisIsComponent ? undefined : omitMetaProperties(json.properties), bindings: thisIsComponent
+            ? builderBindings
+            : (0, lodash_1.omit)((0, lodash_1.mapValues)(bindings, function (value) { return value === null || value === void 0 ? void 0 : value.code; }), 'css'), actions: actions, children: json.children
             .filter(filter_empty_text_nodes_1.filterEmptyTextNodes)
             .map(function (child) { return (0, exports.blockToBuilder)(child, options); }) }), options);
 };
@@ -232,7 +237,7 @@ var componentToBuilder = function (options) {
     return function (_a) {
         var _b, _c, _d, _e;
         var component = _a.component;
-        var hasState = Boolean(Object.keys(component.state).length);
+        var hasState = (0, state_1.checkHasState)(component);
         var result = (0, fast_clone_1.fastClone)({
             data: {
                 httpRequests: (_c = (_b = component === null || component === void 0 ? void 0 : component.meta) === null || _b === void 0 ? void 0 : _b.useMetadata) === null || _c === void 0 ? void 0 : _c.httpRequests,

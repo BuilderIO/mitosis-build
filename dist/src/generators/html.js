@@ -47,12 +47,15 @@ var get_props_1 = require("../helpers/get-props");
 var get_props_ref_1 = require("../helpers/get-props-ref");
 var get_prop_functions_1 = require("../helpers/get-prop-functions");
 var jsx_1 = require("../parsers/jsx");
+var mitosis_node_1 = require("../types/mitosis-node");
 var strip_state_and_props_refs_1 = require("../helpers/strip-state-and-props-refs");
 var plugins_1 = require("../modules/plugins");
 var is_children_1 = __importDefault(require("../helpers/is-children"));
 var strip_meta_properties_1 = require("../helpers/strip-meta-properties");
 var remove_surrounding_block_1 = require("../helpers/remove-surrounding-block");
 var render_imports_1 = require("../helpers/render-imports");
+var for_1 = require("../helpers/nodes/for");
+var function_1 = require("fp-ts/lib/function");
 var isAttribute = function (key) {
     return /-/.test(key);
 };
@@ -97,9 +100,11 @@ var addUpdateAfterSet = function (json, options) {
         if ((0, is_mitosis_node_1.isMitosisNode)(item)) {
             for (var key in item.bindings) {
                 var value = (_a = item.bindings[key]) === null || _a === void 0 ? void 0 : _a.code;
-                var newValue = addUpdateAfterSetInCode(value, options);
-                if (newValue !== value) {
-                    item.bindings[key].code = newValue;
+                if (value) {
+                    var newValue = addUpdateAfterSetInCode(value, options);
+                    if (newValue !== value) {
+                        item.bindings[key].code = newValue;
+                    }
                 }
             }
         }
@@ -153,6 +158,22 @@ var createGlobalId = function (name, options) {
     options.namesMap[name] = newNameNum;
     return "".concat(name).concat(options.prefix ? "-".concat(options.prefix) : '', "-").concat(newNameNum);
 };
+var deprecatedStripStateAndPropsRefs = function (code, _a) {
+    var context = _a.context, contextVars = _a.contextVars, domRefs = _a.domRefs, includeProps = _a.includeProps, includeState = _a.includeState, outputVars = _a.outputVars, replaceWith = _a.replaceWith, stateVars = _a.stateVars;
+    return (0, function_1.pipe)((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(code, {
+        includeProps: includeProps,
+        includeState: includeState,
+        replaceWith: replaceWith,
+    }), function (newCode) {
+        return (0, strip_state_and_props_refs_1.DO_NOT_USE_VARS_TRANSFORMS)(newCode, {
+            context: context,
+            contextVars: contextVars,
+            domRefs: domRefs,
+            outputVars: outputVars,
+            stateVars: stateVars,
+        });
+    });
+};
 // TODO: overloaded function
 var updateReferencesInCode = function (code, options, blockOptions) {
     var _a, _b;
@@ -161,23 +182,22 @@ var updateReferencesInCode = function (code, options, blockOptions) {
     var context = (blockOptions === null || blockOptions === void 0 ? void 0 : blockOptions.context) || 'this.';
     if ((_a = options === null || options === void 0 ? void 0 : options.experimental) === null || _a === void 0 ? void 0 : _a.updateReferencesInCode) {
         return (_b = options === null || options === void 0 ? void 0 : options.experimental) === null || _b === void 0 ? void 0 : _b.updateReferencesInCode(code, options, {
-            stripStateAndPropsRefs: strip_state_and_props_refs_1.stripStateAndPropsRefs,
+            stripStateAndPropsRefs: deprecatedStripStateAndPropsRefs,
         });
     }
     if (options.format === 'class') {
-        return (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(code, {
+        return (0, function_1.pipe)((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(code, {
             includeProps: false,
             includeState: true,
             replaceWith: context + 'state.',
-            context: context,
-        }), {
-            // TODO: replace with `this.` and add setters that call this.update()
-            includeProps: true,
-            includeState: false,
-            replaceWith: context + 'props.',
-            contextVars: contextVars,
-            context: context,
-        });
+        }), function (newCode) {
+            return (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(newCode, {
+                // TODO: replace with `this.` and add setters that call this.update()
+                includeProps: true,
+                includeState: false,
+                replaceWith: context + 'props.',
+            });
+        }, function (newCode) { return (0, strip_state_and_props_refs_1.DO_NOT_USE_CONTEXT_VARS_TRANSFORMS)({ code: newCode, context: context, contextVars: contextVars }); });
     }
     return code;
 };
@@ -207,7 +227,7 @@ var blockToHtml = function (json, options, blockOptions) {
     if (mappers[json.name]) {
         return mappers[json.name](json, options, blockOptions);
     }
-    if ((0, is_children_1.default)(json)) {
+    if ((0, is_children_1.default)({ node: json })) {
         return "<slot></slot>";
     }
     if (json.properties._text) {
@@ -221,14 +241,14 @@ var blockToHtml = function (json, options, blockOptions) {
         return "<template data-el=\"".concat(elId, "\"><!-- ").concat((_b = json.bindings._text) === null || _b === void 0 ? void 0 : _b.code, " --></template>");
     }
     var str = '';
-    if (json.name === 'For') {
-        var forArguments = ((_c = json === null || json === void 0 ? void 0 : json.scope) === null || _c === void 0 ? void 0 : _c.For) || [];
+    if ((0, mitosis_node_1.checkIsForNode)(json)) {
+        var forArguments = (0, for_1.getForArguments)(json);
         var localScopeVars_1 = __spreadArray(__spreadArray([], scopeVars, true), forArguments, true);
         var argsStr = forArguments.map(function (arg) { return "\"".concat(arg, "\""); }).join(',');
         addOnChangeJs(elId, options, 
         // TODO: be smarter about rendering, deleting old items and adding new ones by
         // querying dom potentially
-        "\n        let array = ".concat((_d = json.bindings.each) === null || _d === void 0 ? void 0 : _d.code, ";\n        ").concat(options.format === 'class' ? 'this.' : '', "renderLoop(el, array, ").concat(argsStr, ");\n      "));
+        "\n        let array = ".concat((_c = json.bindings.each) === null || _c === void 0 ? void 0 : _c.code, ";\n        ").concat(options.format === 'class' ? 'this.' : '', "renderLoop(el, array, ").concat(argsStr, ");\n      "));
         // TODO: decide on how to handle this...
         str += "\n      <template data-el=\"".concat(elId, "\">");
         if (json.children) {
@@ -241,7 +261,7 @@ var blockToHtml = function (json, options, blockOptions) {
         str += '</template>';
     }
     else if (json.name === 'Show') {
-        var whenCondition = ((_e = json.bindings.when) === null || _e === void 0 ? void 0 : _e.code).replace(/;$/, '');
+        var whenCondition = ((_d = json.bindings.when) === null || _d === void 0 ? void 0 : _d.code).replace(/;$/, '');
         addOnChangeJs(elId, options, "\n        ".concat(addScopeVars(scopeVars, whenCondition, function (scopeVar) {
             return "const ".concat(scopeVar, " = ").concat(options.format === 'class' ? 'this.' : '', "getScope(el, \"").concat(scopeVar, "\");");
         }), "\n        const whenCondition = ").concat(whenCondition, ";\n        if (whenCondition) {\n          ").concat(options.format === 'class' ? 'this.' : '', "showContent(el)\n        }\n      "));
@@ -278,7 +298,7 @@ var blockToHtml = function (json, options, blockOptions) {
         var injectOnce = false;
         var startInjectVar = '%%START_VARS%%';
         for (var key in json.bindings) {
-            if (key === '_spread' || key === 'css') {
+            if (((_e = json.bindings[key]) === null || _e === void 0 ? void 0 : _e.type) === 'spread' || key === 'css') {
                 continue;
             }
             var value = (_f = json.bindings[key]) === null || _f === void 0 ? void 0 : _f.code;
@@ -349,6 +369,7 @@ var blockToHtml = function (json, options, blockOptions) {
     return str;
 };
 function addUpdateAfterSetInCode(code, options, useString) {
+    if (code === void 0) { code = ''; }
     if (useString === void 0) { useString = options.format === 'class' ? 'this.update' : 'update'; }
     var updates = 0;
     return (0, babel_transform_1.babelTransformExpression)(code, {
@@ -485,7 +506,7 @@ exports.componentToHtml = componentToHtml;
 var componentToCustomElement = function (options) {
     if (options === void 0) { options = {}; }
     return function (_a) {
-        var _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15;
+        var _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14;
         var component = _a.component;
         var ComponentName = component.name;
         var kebabName = (0, lodash_2.kebabCase)(ComponentName);
@@ -494,7 +515,7 @@ var componentToCustomElement = function (options) {
         if (options.plugins) {
             json = (0, plugins_1.runPreJsonPlugins)(json, options.plugins);
         }
-        var _16 = (0, get_props_ref_1.getPropsRef)(json, true), forwardProp = _16[0], hasPropRef = _16[1];
+        var _15 = (0, get_props_ref_1.getPropsRef)(json, true), forwardProp = _15[0], hasPropRef = _15[1];
         var contextVars = Object.keys(((_b = json === null || json === void 0 ? void 0 : json.context) === null || _b === void 0 ? void 0 : _b.get) || {});
         var childComponents = getChildComponents(json, useOptions);
         var componentHasProps = (0, has_props_1.hasProps)(json);
@@ -518,7 +539,7 @@ var componentToCustomElement = function (options) {
         });
         var setContext = [];
         for (var key in json.context.set) {
-            var _17 = json.context.set[key], name_1 = _17.name, value = _17.value, ref = _17.ref;
+            var _16 = json.context.set[key], name_1 = _16.name, value = _16.value, ref = _16.ref;
             setContext.push({ name: name_1, value: value, ref: ref });
         }
         addUpdateAfterSet(json, useOptions);
@@ -581,41 +602,47 @@ var componentToCustomElement = function (options) {
                 console.warn('Could not prettify', { string: html }, err);
             }
         }
-        var str = "\n      ".concat(json.types ? json.types.join('\n') : '', "\n      ").concat(json.interfaces ? (_j = json.interfaces) === null || _j === void 0 ? void 0 : _j.join('\n') : '', "\n      ").concat((0, render_imports_1.renderPreComponent)({ component: json, target: 'customElement' }), "\n      /**\n       * Usage:\n       * \n       *  <").concat(kebabName, "></").concat(kebabName, ">\n       * \n       */\n      class ").concat(ComponentName, " extends ").concat(((_k = useOptions === null || useOptions === void 0 ? void 0 : useOptions.experimental) === null || _k === void 0 ? void 0 : _k.classExtends)
-            ? (_l = useOptions === null || useOptions === void 0 ? void 0 : useOptions.experimental) === null || _l === void 0 ? void 0 : _l.classExtends(json, useOptions)
+        var str = "\n      ".concat(json.types ? json.types.join('\n') : '', "\n      ").concat((0, render_imports_1.renderPreComponent)({ component: json, target: 'customElement' }), "\n      /**\n       * Usage:\n       * \n       *  <").concat(kebabName, "></").concat(kebabName, ">\n       * \n       */\n      class ").concat(ComponentName, " extends ").concat(((_j = useOptions === null || useOptions === void 0 ? void 0 : useOptions.experimental) === null || _j === void 0 ? void 0 : _j.classExtends)
+            ? (_k = useOptions === null || useOptions === void 0 ? void 0 : useOptions.experimental) === null || _k === void 0 ? void 0 : _k.classExtends(json, useOptions)
             : 'HTMLElement', " {\n        ").concat(Array.from(domRefs)
             .map(function (ref) {
             return "\n        get _".concat(ref, "() {\n          return this._root.querySelector(\"[data-ref='").concat(ComponentName, "-").concat(ref, "']\")\n        }\n            ");
         })
             .join('\n'), "\n\n        get _root() {\n          return this.shadowRoot || this;\n        }\n\n        constructor() {\n          super();\n          const self = this;\n          ").concat(
         // TODO: more than one context not injector
-        setContext.length === 1 && ((_m = setContext === null || setContext === void 0 ? void 0 : setContext[0]) === null || _m === void 0 ? void 0 : _m.ref)
+        setContext.length === 1 && ((_l = setContext === null || setContext === void 0 ? void 0 : setContext[0]) === null || _l === void 0 ? void 0 : _l.ref)
             ? "this.context = ".concat(setContext[0].ref)
-            : '', "\n\n          ").concat(!((_p = (_o = json.hooks) === null || _o === void 0 ? void 0 : _o.onInit) === null || _p === void 0 ? void 0 : _p.code) ? '' : 'this.onInitOnce = false;', "\n\n          this.state = ").concat((0, get_state_object_string_1.getStateObjectStringFromComponent)(json, {
+            : '', "\n\n          ").concat(!((_o = (_m = json.hooks) === null || _m === void 0 ? void 0 : _m.onInit) === null || _o === void 0 ? void 0 : _o.code) ? '' : 'this.onInitOnce = false;', "\n\n          this.state = ").concat((0, get_state_object_string_1.getStateObjectStringFromComponent)(json, {
             valueMapper: function (value) {
-                return (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(addUpdateAfterSetInCode(value, useOptions, 'self.update'), {
+                return (0, function_1.pipe)((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(addUpdateAfterSetInCode(value, useOptions, 'self.update'), {
                     includeProps: false,
                     includeState: true,
                     // TODO: if it's an arrow function it's this.state.
                     replaceWith: 'self.state.',
-                }), {
-                    // TODO: replace with `this.` and add setters that call this.update()
-                    includeProps: true,
-                    includeState: false,
-                    replaceWith: 'self.props.',
-                    contextVars: contextVars,
-                    // correctly ref the class not state object
-                    context: 'self.',
+                }), function (newCode) {
+                    return (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(newCode, {
+                        // TODO: replace with `this.` and add setters that call this.update()
+                        includeProps: true,
+                        includeState: false,
+                        replaceWith: 'self.props.',
+                    });
+                }, function (code) {
+                    return (0, strip_state_and_props_refs_1.DO_NOT_USE_CONTEXT_VARS_TRANSFORMS)({
+                        code: code,
+                        contextVars: contextVars,
+                        // correctly ref the class not state object
+                        context: 'self.',
+                    });
                 });
             },
         }), ";\n          if (!this.props) {\n            this.props = {};\n          }\n          ").concat(!componentHasProps
             ? ''
             : "\n          this.componentProps = [".concat(Array.from(props)
                 .map(function (prop) { return "\"".concat(prop, "\""); })
-                .join(','), "];\n          "), "\n\n          ").concat(!((_q = json.hooks.onUpdate) === null || _q === void 0 ? void 0 : _q.length)
+                .join(','), "];\n          "), "\n\n          ").concat(!((_p = json.hooks.onUpdate) === null || _p === void 0 ? void 0 : _p.length)
             ? ''
-            : "\n            this.updateDeps = [".concat((_r = json.hooks.onUpdate) === null || _r === void 0 ? void 0 : _r.map(function (hook) { return updateReferencesInCode((hook === null || hook === void 0 ? void 0 : hook.deps) || '[]', useOptions); }).join(','), "];\n            "), "\n\n          // used to keep track of all nodes created by show/for\n          this.nodesToDestroy = [];\n          // batch updates\n          this.pendingUpdate = false;\n          ").concat(((_s = useOptions === null || useOptions === void 0 ? void 0 : useOptions.experimental) === null || _s === void 0 ? void 0 : _s.componentConstructor)
-            ? (_t = useOptions === null || useOptions === void 0 ? void 0 : useOptions.experimental) === null || _t === void 0 ? void 0 : _t.componentConstructor(json, useOptions)
+            : "\n            this.updateDeps = [".concat((_q = json.hooks.onUpdate) === null || _q === void 0 ? void 0 : _q.map(function (hook) { return updateReferencesInCode((hook === null || hook === void 0 ? void 0 : hook.deps) || '[]', useOptions); }).join(','), "];\n            "), "\n\n          // used to keep track of all nodes created by show/for\n          this.nodesToDestroy = [];\n          // batch updates\n          this.pendingUpdate = false;\n          ").concat(((_r = useOptions === null || useOptions === void 0 ? void 0 : useOptions.experimental) === null || _r === void 0 ? void 0 : _r.componentConstructor)
+            ? (_s = useOptions === null || useOptions === void 0 ? void 0 : useOptions.experimental) === null || _s === void 0 ? void 0 : _s.componentConstructor(json, useOptions)
             : '', "\n\n          ").concat(useOptions.js, "\n\n          ").concat(jsRefs
             .map(function (ref) {
             var _a;
@@ -623,32 +650,32 @@ var componentToCustomElement = function (options) {
             var argument = ((_a = json['refs'][ref]) === null || _a === void 0 ? void 0 : _a.argument) || 'null';
             return "this._".concat(ref, " = ").concat(argument);
         })
-            .join('\n'), "\n\n          if (").concat((_u = json.meta.useMetadata) === null || _u === void 0 ? void 0 : _u.isAttachedToShadowDom, ") {\n            this.attachShadow({ mode: 'open' })\n          }\n        }\n\n\n        ").concat(!((_v = json.hooks.onUnMount) === null || _v === void 0 ? void 0 : _v.code)
+            .join('\n'), "\n\n          if (").concat((_t = json.meta.useMetadata) === null || _t === void 0 ? void 0 : _t.isAttachedToShadowDom, ") {\n            this.attachShadow({ mode: 'open' })\n          }\n        }\n\n\n        ").concat(!((_u = json.hooks.onUnMount) === null || _u === void 0 ? void 0 : _u.code)
             ? ''
-            : "\n          disconnectedCallback() {\n            ".concat(((_w = useOptions === null || useOptions === void 0 ? void 0 : useOptions.experimental) === null || _w === void 0 ? void 0 : _w.disconnectedCallback)
-                ? (_x = useOptions === null || useOptions === void 0 ? void 0 : useOptions.experimental) === null || _x === void 0 ? void 0 : _x.disconnectedCallback(json, useOptions)
+            : "\n          disconnectedCallback() {\n            ".concat(((_v = useOptions === null || useOptions === void 0 ? void 0 : useOptions.experimental) === null || _v === void 0 ? void 0 : _v.disconnectedCallback)
+                ? (_w = useOptions === null || useOptions === void 0 ? void 0 : useOptions.experimental) === null || _w === void 0 ? void 0 : _w.disconnectedCallback(json, useOptions)
                 : "\n            // onUnMount\n            ".concat(updateReferencesInCode(addUpdateAfterSetInCode(json.hooks.onUnMount.code, useOptions), useOptions, {
                     contextVars: contextVars,
-                }), "\n            this.destroyAnyNodes(); // clean up nodes when component is destroyed\n            ").concat(!((_z = (_y = json.hooks) === null || _y === void 0 ? void 0 : _y.onInit) === null || _z === void 0 ? void 0 : _z.code) ? '' : 'this.onInitOnce = false;', "\n            "), "\n          }\n          "), "\n\n        destroyAnyNodes() {\n          // destroy current view template refs before rendering again\n          this.nodesToDestroy.forEach(el => el.remove());\n          this.nodesToDestroy = [];\n        }\n\n        connectedCallback() {\n          ").concat(context.join('\n'), "\n          ").concat(!componentHasProps
+                }), "\n            this.destroyAnyNodes(); // clean up nodes when component is destroyed\n            ").concat(!((_y = (_x = json.hooks) === null || _x === void 0 ? void 0 : _x.onInit) === null || _y === void 0 ? void 0 : _y.code) ? '' : 'this.onInitOnce = false;', "\n            "), "\n          }\n          "), "\n\n        destroyAnyNodes() {\n          // destroy current view template refs before rendering again\n          this.nodesToDestroy.forEach(el => el.remove());\n          this.nodesToDestroy = [];\n        }\n\n        connectedCallback() {\n          ").concat(context.join('\n'), "\n          ").concat(!componentHasProps
             ? ''
-            : "\n          this.getAttributeNames().forEach((attr) => {\n            const jsVar = attr.replace(/-/g, '');\n            const regexp = new RegExp(jsVar, 'i');\n            this.componentProps.forEach(prop => {\n              if (regexp.test(prop)) {\n                const attrValue = this.getAttribute(attr);\n                if (this.props[prop] !== attrValue) {\n                  this.props[prop] = attrValue;\n                }\n              }\n            });\n          });\n          ", "\n          ").concat(((_0 = useOptions === null || useOptions === void 0 ? void 0 : useOptions.experimental) === null || _0 === void 0 ? void 0 : _0.connectedCallbackUpdate)
-            ? (_1 = useOptions === null || useOptions === void 0 ? void 0 : useOptions.experimental) === null || _1 === void 0 ? void 0 : _1.connectedCallbackUpdate(json, html, useOptions)
-            : "\n              this._root.innerHTML = `\n      ".concat(html, "`;\n              this.pendingUpdate = true;\n              ").concat(!((_3 = (_2 = json.hooks) === null || _2 === void 0 ? void 0 : _2.onInit) === null || _3 === void 0 ? void 0 : _3.code) ? '' : 'this.onInit();', "\n              this.render();\n              this.onMount();\n              this.pendingUpdate = false;\n              this.update();\n              "), "\n        }\n        ").concat(!((_5 = (_4 = json.hooks) === null || _4 === void 0 ? void 0 : _4.onInit) === null || _5 === void 0 ? void 0 : _5.code)
+            : "\n          this.getAttributeNames().forEach((attr) => {\n            const jsVar = attr.replace(/-/g, '');\n            const regexp = new RegExp(jsVar, 'i');\n            this.componentProps.forEach(prop => {\n              if (regexp.test(prop)) {\n                const attrValue = this.getAttribute(attr);\n                if (this.props[prop] !== attrValue) {\n                  this.props[prop] = attrValue;\n                }\n              }\n            });\n          });\n          ", "\n          ").concat(((_z = useOptions === null || useOptions === void 0 ? void 0 : useOptions.experimental) === null || _z === void 0 ? void 0 : _z.connectedCallbackUpdate)
+            ? (_0 = useOptions === null || useOptions === void 0 ? void 0 : useOptions.experimental) === null || _0 === void 0 ? void 0 : _0.connectedCallbackUpdate(json, html, useOptions)
+            : "\n              this._root.innerHTML = `\n      ".concat(html, "`;\n              this.pendingUpdate = true;\n              ").concat(!((_2 = (_1 = json.hooks) === null || _1 === void 0 ? void 0 : _1.onInit) === null || _2 === void 0 ? void 0 : _2.code) ? '' : 'this.onInit();', "\n              this.render();\n              this.onMount();\n              this.pendingUpdate = false;\n              this.update();\n              "), "\n        }\n        ").concat(!((_4 = (_3 = json.hooks) === null || _3 === void 0 ? void 0 : _3.onInit) === null || _4 === void 0 ? void 0 : _4.code)
             ? ''
-            : "\n            onInit() {\n              ".concat(!((_7 = (_6 = json.hooks) === null || _6 === void 0 ? void 0 : _6.onInit) === null || _7 === void 0 ? void 0 : _7.code)
+            : "\n            onInit() {\n              ".concat(!((_6 = (_5 = json.hooks) === null || _5 === void 0 ? void 0 : _5.onInit) === null || _6 === void 0 ? void 0 : _6.code)
                 ? ''
-                : "\n                  if (!this.onInitOnce) {\n                    ".concat(updateReferencesInCode(addUpdateAfterSetInCode((_9 = (_8 = json.hooks) === null || _8 === void 0 ? void 0 : _8.onInit) === null || _9 === void 0 ? void 0 : _9.code, useOptions), useOptions, {
+                : "\n                  if (!this.onInitOnce) {\n                    ".concat(updateReferencesInCode(addUpdateAfterSetInCode((_8 = (_7 = json.hooks) === null || _7 === void 0 ? void 0 : _7.onInit) === null || _8 === void 0 ? void 0 : _8.code, useOptions), useOptions, {
                     contextVars: contextVars,
                 }), "\n                    this.onInitOnce = true;\n                  }"), "\n            }\n            "), "\n\n        ").concat(!hasShow
             ? ''
-            : "\n          showContent(el) {\n            // https://developer.mozilla.org/en-US/docs/Web/API/HTMLTemplateElement/content\n            // grabs the content of a node that is between <template> tags\n            // iterates through child nodes to register all content including text elements\n            // attaches the content after the template\n  \n  \n            const elementFragment = el.content.cloneNode(true);\n            const children = Array.from(elementFragment.childNodes)\n            children.forEach(child => {\n              if (el?.scope) {\n                child.scope = el.scope;\n              }\n              if (el?.context) {\n                child.context = el.context;\n              }\n              this.nodesToDestroy.push(child);\n            });\n            el.after(elementFragment);\n          }", "\n        ").concat(!((_10 = useOptions === null || useOptions === void 0 ? void 0 : useOptions.experimental) === null || _10 === void 0 ? void 0 : _10.attributeChangedCallback)
+            : "\n          showContent(el) {\n            // https://developer.mozilla.org/en-US/docs/Web/API/HTMLTemplateElement/content\n            // grabs the content of a node that is between <template> tags\n            // iterates through child nodes to register all content including text elements\n            // attaches the content after the template\n  \n  \n            const elementFragment = el.content.cloneNode(true);\n            const children = Array.from(elementFragment.childNodes)\n            children.forEach(child => {\n              if (el?.scope) {\n                child.scope = el.scope;\n              }\n              if (el?.context) {\n                child.context = el.context;\n              }\n              this.nodesToDestroy.push(child);\n            });\n            el.after(elementFragment);\n          }", "\n        ").concat(!((_9 = useOptions === null || useOptions === void 0 ? void 0 : useOptions.experimental) === null || _9 === void 0 ? void 0 : _9.attributeChangedCallback)
             ? ''
-            : "\n          attributeChangedCallback(name, oldValue, newValue) {\n            ".concat((_11 = useOptions === null || useOptions === void 0 ? void 0 : useOptions.experimental) === null || _11 === void 0 ? void 0 : _11.attributeChangedCallback(['name', 'oldValue', 'newValue'], json, useOptions), "\n          }\n          "), "\n\n        onMount() {\n          ").concat(!((_12 = json.hooks.onMount) === null || _12 === void 0 ? void 0 : _12.code)
+            : "\n          attributeChangedCallback(name, oldValue, newValue) {\n            ".concat((_10 = useOptions === null || useOptions === void 0 ? void 0 : useOptions.experimental) === null || _10 === void 0 ? void 0 : _10.attributeChangedCallback(['name', 'oldValue', 'newValue'], json, useOptions), "\n          }\n          "), "\n\n        onMount() {\n          ").concat(!((_11 = json.hooks.onMount) === null || _11 === void 0 ? void 0 : _11.code)
             ? ''
             : // TODO: make prettier by grabbing only the function body
                 "\n                // onMount\n                ".concat(updateReferencesInCode(addUpdateAfterSetInCode(json.hooks.onMount.code, useOptions), useOptions, {
                     contextVars: contextVars,
-                }), "\n                "), "\n        }\n\n        onUpdate() {\n          ").concat(!((_13 = json.hooks.onUpdate) === null || _13 === void 0 ? void 0 : _13.length)
+                }), "\n                "), "\n        }\n\n        onUpdate() {\n          ").concat(!((_12 = json.hooks.onUpdate) === null || _12 === void 0 ? void 0 : _12.length)
             ? ''
             : "\n              const self = this;\n            ".concat(json.hooks.onUpdate.reduce(function (code, hook, index) {
                 // create check update
@@ -701,8 +728,8 @@ var componentToCustomElement = function (options) {
             ? ''
             : "\n            // scope helper\n            getScope(el, name) {\n              do {\n                let value = el?.scope?.[name]\n                if (value !== undefined) {\n                  return value\n                }\n              } while ((el = el.parentNode));\n            }\n            ", "\n\n        ").concat(!hasLoop
             ? ''
-            : "\n\n          // Helper to render loops\n          renderLoop(template, array, itemName, itemIndex, collectionName) {\n            const collection = [];\n            for (let [index, value] of array.entries()) {\n              const elementFragment = template.content.cloneNode(true);\n              const children = Array.from(elementFragment.childNodes)\n              const localScope = {};\n              let scope = localScope;\n              if (template?.scope) {\n                const getParent = {\n                  get(target, prop, receiver) {\n                    if (prop in target) {\n                      return target[prop];\n                    }\n                    if (prop in template.scope) {\n                      return template.scope[prop];\n                    }\n                    return target[prop];\n                  }\n                };\n                scope = new Proxy(localScope, getParent);\n              }\n              children.forEach((child) => {\n                if (itemName !== undefined) {\n                  scope[itemName] = value;\n                }\n                if (itemIndex !== undefined) {\n                  scope[itemIndex] = index;\n                }\n                if (collectionName !== undefined) {\n                  scope[collectionName] = array;\n                }\n                child.scope = scope;\n                if (template.context) {\n                  child.context = context;\n                }\n                this.nodesToDestroy.push(child);\n                collection.unshift(child)\n              });\n            }\n            collection.forEach(child => template.after(child));\n          }\n        ", "\n      }\n\n      ").concat(((_14 = useOptions === null || useOptions === void 0 ? void 0 : useOptions.experimental) === null || _14 === void 0 ? void 0 : _14.customElementsDefine)
-            ? (_15 = useOptions === null || useOptions === void 0 ? void 0 : useOptions.experimental) === null || _15 === void 0 ? void 0 : _15.customElementsDefine(kebabName, component, useOptions)
+            : "\n\n          // Helper to render loops\n          renderLoop(template, array, itemName, itemIndex, collectionName) {\n            const collection = [];\n            for (let [index, value] of array.entries()) {\n              const elementFragment = template.content.cloneNode(true);\n              const children = Array.from(elementFragment.childNodes)\n              const localScope = {};\n              let scope = localScope;\n              if (template?.scope) {\n                const getParent = {\n                  get(target, prop, receiver) {\n                    if (prop in target) {\n                      return target[prop];\n                    }\n                    if (prop in template.scope) {\n                      return template.scope[prop];\n                    }\n                    return target[prop];\n                  }\n                };\n                scope = new Proxy(localScope, getParent);\n              }\n              children.forEach((child) => {\n                if (itemName !== undefined) {\n                  scope[itemName] = value;\n                }\n                if (itemIndex !== undefined) {\n                  scope[itemIndex] = index;\n                }\n                if (collectionName !== undefined) {\n                  scope[collectionName] = array;\n                }\n                child.scope = scope;\n                if (template.context) {\n                  child.context = context;\n                }\n                this.nodesToDestroy.push(child);\n                collection.unshift(child)\n              });\n            }\n            collection.forEach(child => template.after(child));\n          }\n        ", "\n      }\n\n      ").concat(((_13 = useOptions === null || useOptions === void 0 ? void 0 : useOptions.experimental) === null || _13 === void 0 ? void 0 : _13.customElementsDefine)
+            ? (_14 = useOptions === null || useOptions === void 0 ? void 0 : useOptions.experimental) === null || _14 === void 0 ? void 0 : _14.customElementsDefine(kebabName, component, useOptions)
             : "customElements.define('".concat(kebabName, "', ").concat(ComponentName, ");"), "\n    ");
         if (options.plugins) {
             str = (0, plugins_1.runPreCodePlugins)(str, options.plugins);
