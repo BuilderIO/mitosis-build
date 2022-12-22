@@ -20,7 +20,7 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
     return to.concat(ar || Array.prototype.slice.call(from));
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getContextProvideString = exports.getContextValue = exports.processBinding = exports.getContextNames = exports.renameMitosisComponentsToKebabCase = exports.encodeQuotes = exports.invertBooleanExpression = exports.getOnUpdateHookName = exports.addBindingsToJson = exports.addPropertiesToJson = void 0;
+exports.getContextKey = exports.checkIfContextHasStrName = exports.getContextValue = exports.processBinding = exports.getContextNames = exports.renameMitosisComponentsToKebabCase = exports.encodeQuotes = exports.invertBooleanExpression = exports.getOnUpdateHookName = exports.addBindingsToJson = exports.addPropertiesToJson = void 0;
 var get_state_object_string_1 = require("../../helpers/get-state-object-string");
 var strip_state_and_props_refs_1 = require("../../helpers/strip-state-and-props-refs");
 var function_1 = require("fp-ts/lib/function");
@@ -99,13 +99,14 @@ var getAllRefs = function (component) {
     var allKeys = __spreadArray(__spreadArray([], refKeys, true), stateKeys, true);
     return allKeys;
 };
-function processRefs(input, component, options) {
+function processRefs(_a) {
+    var input = _a.input, component = _a.component, options = _a.options, thisPrefix = _a.thisPrefix;
     var refs = options.api === 'options' ? getContextNames(component) : getAllRefs(component);
     return (0, babel_transform_1.babelTransformExpression)(input, {
         Identifier: function (path) {
             var name = path.node.name;
             if (refs.includes(name) && shouldAppendValueToRef(path)) {
-                var newValue = options.api === 'options' ? "this.".concat(name) : "".concat(name, ".value");
+                var newValue = options.api === 'options' ? "".concat(thisPrefix, ".").concat(name) : "".concat(name, ".value");
                 path.replaceWith(core_1.types.identifier(newValue));
             }
         },
@@ -133,7 +134,7 @@ function prefixMethodsWithThis(input, component, options) {
 // TODO: migrate all stripStateAndPropsRefs to use this here
 // to properly replace context refs
 var processBinding = function (_a) {
-    var code = _a.code, options = _a.options, json = _a.json, _b = _a.preserveGetter, preserveGetter = _b === void 0 ? false : _b;
+    var code = _a.code, options = _a.options, json = _a.json, _b = _a.preserveGetter, preserveGetter = _b === void 0 ? false : _b, _c = _a.thisPrefix, thisPrefix = _c === void 0 ? 'this' : _c;
     try {
         return (0, function_1.pipe)((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(code, {
             includeState: true,
@@ -146,12 +147,14 @@ var processBinding = function (_a) {
                         return name;
                     case 'options':
                         if (name === 'children' || name.startsWith('children.')) {
-                            return 'this.$slots.default';
+                            return '${thisPrefix}.$slots.default';
                         }
-                        return "this.".concat(name);
+                        return "".concat(thisPrefix, ".").concat(name);
                 }
             },
-        }), function (code) { return processRefs(code, json, options); }, function (code) { return prefixMethodsWithThis(code, json, options); }, function (code) { return (preserveGetter === false ? (0, patterns_1.stripGetter)(code) : code); });
+        }), function (x) {
+            return (0, function_1.pipe)(x, function (code) { return processRefs({ input: code, component: json, options: options, thisPrefix: thisPrefix }); }, function (code) { return prefixMethodsWithThis(code, json, options); }, function (code) { return (preserveGetter === false ? (0, patterns_1.stripGetter)(code) : code); });
+        });
     }
     catch (e) {
         console.log('could not process bindings in ', { code: code });
@@ -159,24 +162,29 @@ var processBinding = function (_a) {
     }
 };
 exports.processBinding = processBinding;
-var getContextValue = function (_a) {
-    var options = _a.options, json = _a.json;
+var getContextValue = function (args) {
     return function (_a) {
         var name = _a.name, ref = _a.ref, value = _a.value;
         var valueStr = value
             ? (0, get_state_object_string_1.stringifyContextValue)(value, {
-                valueMapper: function (code) { return (0, exports.processBinding)({ code: code, options: options, json: json, preserveGetter: true }); },
+                valueMapper: function (code) { return (0, exports.processBinding)(__assign(__assign({ code: code }, args), { preserveGetter: true })); },
             })
             : ref
-                ? (0, exports.processBinding)({ code: ref, options: options, json: json, preserveGetter: true })
+                ? (0, exports.processBinding)(__assign(__assign({ code: ref }, args), { preserveGetter: true }))
                 : null;
         return valueStr;
     };
 };
 exports.getContextValue = getContextValue;
-var getContextProvideString = function (json, options) {
-    return "{\n    ".concat(Object.values(json.context.set)
-        .map(function (setVal) { return "".concat(setVal.name, ": ").concat((0, exports.getContextValue)({ options: options, json: json })(setVal)); })
-        .join(','), "\n  }");
+var checkIfContextHasStrName = function (context) {
+    // check if the name is wrapped in single or double quotes
+    var isStrName = context.name.startsWith("'") || context.name.startsWith('"');
+    return isStrName;
 };
-exports.getContextProvideString = getContextProvideString;
+exports.checkIfContextHasStrName = checkIfContextHasStrName;
+var getContextKey = function (context) {
+    var isStrName = (0, exports.checkIfContextHasStrName)(context);
+    var key = isStrName ? context.name : "".concat(context.name, ".key");
+    return key;
+};
+exports.getContextKey = getContextKey;

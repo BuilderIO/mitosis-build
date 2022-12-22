@@ -61,11 +61,13 @@ function generateCompositionApiScript(component, options, template, props, onUpd
         methods += " function _classStringToObject(str) {\n      const obj = {};\n      if (typeof str !== 'string') { return obj }\n      const classNames = str.trim().split(/\\s+/);\n      for (const name of classNames) {\n        obj[name] = true;\n      }\n      return obj;\n    } ";
     }
     var getterKeys = Object.keys((0, lodash_1.pickBy)(component.state, function (i) { return (i === null || i === void 0 ? void 0 : i.type) === 'getter'; }));
-    var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    ", "\n    ", "\n\n    ", "\n\n    ", "\n\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n\n    ", "\n\n    ", "\n    ", "\n  "], ["\n    ", "\n    ", "\n\n    ", "\n\n    ", "\n\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n\n    ", "\n\n    ", "\n    ", "\n  "])), props.length ? getCompositionPropDefinition({ component: component, props: props, options: options }) : '', refs, (_a = Object.keys(component.context.get)) === null || _a === void 0 ? void 0 : _a.map(function (key) { return "const ".concat(key, " = inject(").concat(component.context.get[key].name, ")"); }).join('\n'), (_b = Object.values(component.context.set)) === null || _b === void 0 ? void 0 : _b.map(function (contextSet) {
-        return "provide(".concat(contextSet.name, ", ").concat((0, helpers_1.getContextValue)({
-            json: component,
-            options: options,
-        })(contextSet), ")");
+    var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    ", "\n    ", "\n\n    ", "\n\n    ", "\n\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n\n    ", "\n\n    ", "\n    ", "\n  "], ["\n    ", "\n    ", "\n\n    ", "\n\n    ", "\n\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n\n    ", "\n\n    ", "\n    ", "\n  "])), props.length ? getCompositionPropDefinition({ component: component, props: props, options: options }) : '', refs, (_a = Object.entries(component.context.get)) === null || _a === void 0 ? void 0 : _a.map(function (_a) {
+        var key = _a[0], context = _a[1];
+        return "const ".concat(key, " = inject(").concat((0, helpers_1.getContextKey)(context), ")");
+    }).join('\n'), (_b = Object.values(component.context.set)) === null || _b === void 0 ? void 0 : _b.map(function (contextSet) {
+        var contextValue = (0, helpers_1.getContextValue)({ json: component, options: options })(contextSet);
+        var key = (0, helpers_1.getContextKey)(contextSet);
+        return "provide(".concat(key, ", ").concat(contextValue, ")");
     }).join('\n'), (_c = Object.keys(component.refs)) === null || _c === void 0 ? void 0 : _c.map(function (key) {
         if (options.typescript) {
             return "const ".concat(key, " = ref<").concat(component.refs[key].typeParameter, ">()");

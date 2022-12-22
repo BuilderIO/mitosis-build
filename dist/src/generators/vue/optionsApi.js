@@ -21,10 +21,20 @@ var get_state_object_string_1 = require("../../helpers/get-state-object-string")
 var nullable_1 = require("../../helpers/nullable");
 var render_imports_1 = require("../../helpers/render-imports");
 var helpers_1 = require("./helpers");
+var getContextProvideString = function (json, options) {
+    return "{\n    ".concat(Object.values(json.context.set)
+        .map(function (setVal) {
+        var key = (0, helpers_1.getContextKey)(setVal);
+        return "[".concat(key, "]: ").concat((0, helpers_1.getContextValue)({ options: options, json: json, thisPrefix: '_this' })(setVal));
+    })
+        .join(','), "\n  }");
+};
 function getContextInjectString(component, options) {
     var str = '{';
-    for (var key in component.context.get) {
-        str += "\n      ".concat(key, ": ").concat((0, helpers_1.encodeQuotes)(component.context.get[key].name), ",\n    ");
+    var contextGetters = component.context.get;
+    for (var key in contextGetters) {
+        var context = contextGetters[key];
+        str += "\n      ".concat(key, ": ").concat((0, helpers_1.encodeQuotes)((0, helpers_1.getContextKey)(context)), ",\n    ");
     }
     str += '}';
     return str;
@@ -138,7 +148,7 @@ function generateOptionsApiScript(component, options, path, template, props, onU
         : "name: '".concat(path && ((_a = options.namePrefix) === null || _a === void 0 ? void 0 : _a.call(options, path)) ? ((_b = options.namePrefix) === null || _b === void 0 ? void 0 : _b.call(options, path)) + '-' : '').concat((0, lodash_1.kebabCase)(component.name), "',"), "\n        ").concat(generateComponents(componentsUsed, options), "\n        ").concat(props.length ? getPropDefinition({ component: component, props: props }) : '', "\n        ").concat(dataString.length < 4
         ? ''
         : "\n        data: () => (".concat(dataString, "),\n        "), "\n\n        ").concat((0, lodash_1.size)(component.context.set)
-        ? "provide() {\n                return ".concat((0, helpers_1.getContextProvideString)(component, options), "\n              },")
+        ? "provide() {\n                const _this = this;\n                return ".concat(getContextProvideString(component, options), "\n              },")
         : '', "\n        ").concat((0, lodash_1.size)(component.context.get)
         ? "inject: ".concat(getContextInjectString(component, options), ",")
         : '', "\n        ").concat(((_c = component.hooks.onInit) === null || _c === void 0 ? void 0 : _c.code)
