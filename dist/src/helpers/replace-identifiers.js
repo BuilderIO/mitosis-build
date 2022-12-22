@@ -14,10 +14,10 @@ var babel_transform_1 = require("./babel-transform");
  */
 var getToParam = function (path) {
     if (core_1.types.isMemberExpression(path.node) || core_1.types.isOptionalMemberExpression(path.node)) {
-        // if simple member expression e.g. `props.foo`, returns `foo`
         if (core_1.types.isIdentifier(path.node.property)) {
-            var newLocal = path.node.property.name;
-            return newLocal;
+            // if simple member expression e.g. `props.foo`, returns `foo`
+            var propertyName = path.node.property.name;
+            return propertyName;
         }
         else {
             // if nested member expression e.g. `props.foo.bar.baz`, returns `foo.bar.baz`
@@ -27,14 +27,17 @@ var getToParam = function (path) {
     }
     else {
         // if naked identifier e.g. `foo`, returns `foo`
-        return path.node.name;
+        var nodeName = path.node.name;
+        return nodeName;
     }
 };
 var _replaceIdentifiers = function (path, _a) {
+    var _b, _c;
     var from = _a.from, to = _a.to;
     var memberExpressionObject = core_1.types.isIdentifier(path.node) ? path.node : path.node.object;
     var normalizedFrom = Array.isArray(from) ? from : [from];
-    if (!core_1.types.isIdentifier(memberExpressionObject)) {
+    if (!core_1.types.isIdentifier(memberExpressionObject) ||
+        ((_c = (_b = path.node) === null || _b === void 0 ? void 0 : _b._builder_meta) === null || _c === void 0 ? void 0 : _c.newlyGenerated)) {
         return;
     }
     var matchesFrom = normalizedFrom.includes(memberExpressionObject.name);
@@ -78,17 +81,18 @@ var _replaceIdentifiers = function (path, _a) {
                     if ((0, generator_1.default)(path.node).code === (0, generator_1.default)(newMemberExpression).code) {
                         return;
                     }
+                    newMemberExpression._builder_meta = { newlyGenerated: true };
                     path.replaceWith(newMemberExpression);
                 }
                 catch (err) {
-                    console.error('Could not replace', path.node, 'with', to);
+                    console.debug('Could not replace', path.node, 'with', to.toString());
                     // throw err;
                 }
             }
         }
         else {
             if (core_1.types.isIdentifier(path.node)) {
-                console.error("Could not replace Identifier '".concat(from.toString(), "' with nothing."));
+                console.debug("Could not replace Identifier '".concat(from.toString(), "' with nothing."));
             }
             else {
                 // if we're looking at a member expression, e.g. `props.foo` and no `to` was provided, then we want to strip out
@@ -115,13 +119,16 @@ var replaceIdentifiers = function (_a) {
                 !core_1.types.isMemberExpression(path.parent) &&
                     !core_1.types.isOptionalMemberExpression(path.parent) &&
                     // function declaration identifiers shouldn't be transformed
-                    !core_1.types.isFunctionDeclaration(path.parent)) {
+                    !core_1.types.isFunctionDeclaration(path.parent)
+                // variable declaration identifiers shouldn't be transformed
+                // !(types.isVariableDeclarator(path.parent) && path.parent.id === path.node)
+                ) {
                     _replaceIdentifiers(path, { from: from, to: to });
                 }
             },
         }), 
         // merely running `babel.transform` will add spaces around the code, even if we don't end up replacing anything.
-        // This is why we need to trim the output.
+        // we have some other code downstream that cannot have untrimmed spaces, so we need to trim the output.
         function (code) { return code.trim(); });
     }
     catch (err) {

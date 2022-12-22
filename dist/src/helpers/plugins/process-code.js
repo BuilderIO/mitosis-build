@@ -7,14 +7,14 @@ var traverse_nodes_1 = require("../traverse-nodes");
  * Process code in bindings and properties of a node
  */
 var preProcessBlockCode = function (_a) {
-    var json = _a.json, codeProcessor = _a.codeProcessor;
-    var propertiesProcessor = codeProcessor('properties');
+    // const propertiesProcessor = codeProcessor('properties');
     // for (const key in json.properties) {
     //   const value = json.properties[key];
     //   if (key !== '_text' && value) {
     //     json.properties[key] = propertiesProcessor(value);
     //   }
     // }
+    var json = _a.json, codeProcessor = _a.codeProcessor;
     var bindingsProcessor = codeProcessor('bindings');
     for (var key in json.bindings) {
         var value = json.bindings[key];
@@ -30,26 +30,27 @@ var CODE_PROCESSOR_PLUGIN = function (codeProcessor) {
     return function () { return ({
         json: {
             post: function (json) {
-                var processHookCode = codeProcessor('hooks');
+                function processHook(key, hook) {
+                    hook.code = codeProcessor('hooks')(hook.code, key);
+                    if (hook.deps) {
+                        hook.deps = codeProcessor('hooks-deps')(hook.deps);
+                    }
+                }
                 /**
                  * process code in hooks
                  */
                 for (var key in json.hooks) {
                     var typedKey = key;
                     var hooks = json.hooks[typedKey];
-                    if ((0, nullable_1.checkIsDefined)(hooks) && Array.isArray(hooks)) {
-                        for (var _i = 0, hooks_1 = hooks; _i < hooks_1.length; _i++) {
-                            var hook = hooks_1[_i];
-                            hook.code = processHookCode(hook.code);
-                            if (hook.deps) {
-                                hook.deps = codeProcessor('hooks-deps')(hook.deps);
+                    if ((0, nullable_1.checkIsDefined)(hooks)) {
+                        if (Array.isArray(hooks)) {
+                            for (var _i = 0, hooks_1 = hooks; _i < hooks_1.length; _i++) {
+                                var hook = hooks_1[_i];
+                                processHook(typedKey, hook);
                             }
                         }
-                    }
-                    else if ((0, nullable_1.checkIsDefined)(hooks)) {
-                        hooks.code = processHookCode(hooks.code);
-                        if (hooks.deps) {
-                            hooks.deps = codeProcessor('hooks-deps')(hooks.deps);
+                        else {
+                            processHook(typedKey, hooks);
                         }
                     }
                 }

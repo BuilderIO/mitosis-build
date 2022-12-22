@@ -151,9 +151,7 @@ var processBinding = function (_a) {
                         return "this.".concat(name);
                 }
             },
-        }), function (x) {
-            return (0, function_1.pipe)(x, function (code) { return processRefs(code, json, options); }, function (code) { return prefixMethodsWithThis(code, json, options); }, function (code) { return (preserveGetter === false ? (0, patterns_1.stripGetter)(code) : code); });
-        });
+        }), function (code) { return processRefs(code, json, options); }, function (code) { return prefixMethodsWithThis(code, json, options); }, function (code) { return (preserveGetter === false ? (0, patterns_1.stripGetter)(code) : code); });
     }
     catch (e) {
         console.log('could not process bindings in ', { code: code });
