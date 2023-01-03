@@ -125,10 +125,12 @@ var componentToSvelte = function (userProvidedOptions) {
         // Make a copy we can safely mutate, similar to babel's toolchain
         var json = (0, fast_clone_1.fastClone)(component);
         json = (0, plugins_1.runPreJsonPlugins)(json, options.plugins);
-        var refs = Array.from((0, get_refs_1.getRefs)(json));
         useBindValue(json, options);
         (0, getters_to_functions_1.gettersToFunctions)(json);
         var props = Array.from((0, get_props_1.getProps)(json)).filter(function (prop) { return !(0, slots_1.isSlotProperty)(prop); });
+        var refs = Array.from((0, get_refs_1.getRefs)(json))
+            .map((0, helpers_2.stripStateAndProps)({ json: json, options: options }))
+            .filter(function (x) { return !props.includes(x); });
         json = (0, plugins_1.runPostJsonPlugins)(json, options.plugins);
         var css = (0, collect_css_1.collectCss)(json);
         (0, strip_meta_properties_1.stripMetaProperties)(json);
@@ -206,7 +208,7 @@ var componentToSvelte = function (userProvidedOptions) {
         // https://svelte.dev/repl/bd9b56891f04414982517bbd10c52c82?version=3.31.0
         (0, helpers_1.hasStyle)(json)
             ? "\n        function mitosis_styling (node, vars) {\n          Object.entries(vars || {}).forEach(([ p, v ]) => {\n            if (p.startsWith('--')) {\n              node.style.setProperty(p, v);\n            } else {\n              node.style[p] = v;\n            }\n          })\n        }\n      "
-            : '', getContextCode(json), setContextCode({ json: json, options: options }), functionsString.length < 4 ? '' : functionsString, getterString.length < 4 ? '' : getterString, refs.map(function (ref) { return "let ".concat((0, helpers_2.stripStateAndProps)({ json: json, options: options })(ref)); }).join('\n'), options.stateType === 'proxies'
+            : '', getContextCode(json), setContextCode({ json: json, options: options }), functionsString.length < 4 ? '' : functionsString, getterString.length < 4 ? '' : getterString, refs.map(function (ref) { return "let ".concat(ref); }).join('\n'), options.stateType === 'proxies'
             ? dataString.length < 4
                 ? ''
                 : "let state = onChange(".concat(dataString, ", () => state = state)")
