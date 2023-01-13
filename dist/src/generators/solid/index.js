@@ -56,8 +56,6 @@ var standalone_1 = require("prettier/standalone");
 var helpers_1 = require("../../helpers/styles/helpers");
 var get_refs_1 = require("../../helpers/get-refs");
 var render_imports_1 = require("../../helpers/render-imports");
-var jsx_1 = require("../../parsers/jsx");
-var mitosis_node_1 = require("../../types/mitosis-node");
 var plugins_1 = require("../../modules/plugins");
 var fast_clone_1 = require("../../helpers/fast-clone");
 var strip_meta_properties_1 = require("../../helpers/strip-meta-properties");
@@ -66,9 +64,6 @@ var traverse_1 = __importDefault(require("traverse"));
 var is_mitosis_node_1 = require("../../helpers/is-mitosis-node");
 var filter_empty_text_nodes_1 = require("../../helpers/filter-empty-text-nodes");
 var create_mitosis_node_1 = require("../../helpers/create-mitosis-node");
-var babel_transform_1 = require("../../helpers/babel-transform");
-var core_1 = require("@babel/core");
-var lodash_1 = require("lodash");
 var state_1 = require("./state");
 var nullable_1 = require("../../helpers/nullable");
 var get_state_object_string_1 = require("../../helpers/get-state-object-string");
@@ -80,7 +75,7 @@ var helpers_2 = require("./state/helpers");
 var merge_options_1 = require("../../helpers/merge-options");
 var process_code_1 = require("../../helpers/plugins/process-code");
 var context_1 = require("../helpers/context");
-var typescript_1 = require("../../helpers/typescript");
+var blocks_1 = require("./blocks");
 // Transform <foo.bar key="value" /> to <component :is="foo.bar" key="value" />
 function processDynamicComponents(json, options) {
     var found = false;
@@ -102,170 +97,6 @@ function getContextString(component, options) {
     }
     return str;
 }
-// This should really be a preprocessor mapping the `class` attribute binding based on what other values have
-// to make this more pluggable
-var collectClassString = function (json, options) {
-    var _a, _b, _c;
-    var staticClasses = [];
-    if (json.properties.class) {
-        staticClasses.push(json.properties.class);
-        delete json.properties.class;
-    }
-    if (json.properties.className) {
-        staticClasses.push(json.properties.className);
-        delete json.properties.className;
-    }
-    var dynamicClasses = [];
-    if (typeof ((_a = json.bindings.class) === null || _a === void 0 ? void 0 : _a.code) === 'string') {
-        dynamicClasses.push(json.bindings.class.code);
-        delete json.bindings.class;
-    }
-    if (typeof ((_b = json.bindings.className) === null || _b === void 0 ? void 0 : _b.code) === 'string') {
-        dynamicClasses.push(json.bindings.className.code);
-        delete json.bindings.className;
-    }
-    if (typeof ((_c = json.bindings.css) === null || _c === void 0 ? void 0 : _c.code) === 'string' &&
-        json.bindings.css.code.trim().length > 4 &&
-        options.stylesType === 'styled-components') {
-        dynamicClasses.push("css(".concat(json.bindings.css.code, ")"));
-    }
-    delete json.bindings.css;
-    var staticClassesString = staticClasses.join(' ');
-    var dynamicClassesString = dynamicClasses.join(" + ' ' + ");
-    var hasStaticClasses = Boolean(staticClasses.length);
-    var hasDynamicClasses = Boolean(dynamicClasses.length);
-    if (hasStaticClasses && !hasDynamicClasses) {
-        return "\"".concat(staticClassesString, "\"");
-    }
-    if (hasDynamicClasses && !hasStaticClasses) {
-        return "{".concat(dynamicClassesString, "}");
-    }
-    if (hasDynamicClasses && hasStaticClasses) {
-        return "{\"".concat(staticClassesString, " \" + ").concat(dynamicClassesString, "}");
-    }
-    return null;
-};
-var preProcessBlockCode = function (_a) {
-    var json = _a.json, options = _a.options, component = _a.component;
-    for (var key in json.properties) {
-        var value = json.properties[key];
-        if (value) {
-            json.properties[key] = (0, helpers_2.updateStateCode)({ options: options, component: component, updateSetters: false })(value);
-        }
-    }
-    for (var key in json.bindings) {
-        var value = json.bindings[key];
-        if (value === null || value === void 0 ? void 0 : value.code) {
-            json.bindings[key] = {
-                arguments: value.arguments,
-                code: (0, helpers_2.updateStateCode)({ options: options, component: component, updateSetters: true })(value.code),
-                type: value === null || value === void 0 ? void 0 : value.type,
-            };
-        }
-    }
-};
-var ATTTRIBUTE_MAPPERS = {
-    for: 'htmlFor',
-};
-var transformAttributeName = function (name) {
-    if ((0, typescript_1.objectHasKey)(ATTTRIBUTE_MAPPERS, name))
-        return ATTTRIBUTE_MAPPERS[name];
-    return name;
-};
-var blockToSolid = function (_a) {
-    var _b, _c;
-    var json = _a.json, options = _a.options, component = _a.component;
-    if (json.properties._text) {
-        return json.properties._text;
-    }
-    if ((_b = json.bindings._text) === null || _b === void 0 ? void 0 : _b.code) {
-        return "{".concat(json.bindings._text.code, "}");
-    }
-    if ((0, mitosis_node_1.checkIsForNode)(json)) {
-        var needsWrapper = json.children.length !== 1;
-        // The SolidJS `<For>` component has a special index() signal function.
-        // https://www.solidjs.com/docs/latest#%3Cfor%3E
-        return "<For each={".concat((_c = json.bindings.each) === null || _c === void 0 ? void 0 : _c.code, "}>\n    {(").concat(json.scope.forName, ", _index) => {\n      const ").concat(json.scope.indexName || 'index', " = _index();\n      return ").concat(needsWrapper ? '<>' : '').concat(json.children
-            .filter(filter_empty_text_nodes_1.filterEmptyTextNodes)
-            .map(function (child) { return blockToSolid({ component: component, json: child, options: options }); }), "}}\n      ").concat(needsWrapper ? '</>' : '', "\n    </For>");
-    }
-    var str = '';
-    if (json.name === 'Fragment') {
-        str += '<';
-    }
-    else {
-        str += "<".concat(json.name, " ");
-    }
-    if (json.name === 'Show' && json.meta.else) {
-        str += "fallback={".concat(blockToSolid({ component: component, json: json.meta.else, options: options }), "}");
-    }
-    var classString = collectClassString(json, options);
-    if (classString) {
-        str += " class=".concat(classString, " ");
-    }
-    for (var key in json.properties) {
-        var value = json.properties[key];
-        var newKey = transformAttributeName(key);
-        str += " ".concat(newKey, "=\"").concat(value, "\" ");
-    }
-    for (var key in json.bindings) {
-        var _d = json.bindings[key], code = _d.code, _e = _d.arguments, cusArg = _e === void 0 ? ['event'] : _e, type = _d.type;
-        if (!code)
-            continue;
-        if (type === 'spread') {
-            str += " {...(".concat(code, ")} ");
-        }
-        else if (key.startsWith('on')) {
-            var useKey = key === 'onChange' && json.name === 'input' ? 'onInput' : key;
-            str += " ".concat(useKey, "={(").concat(cusArg.join(','), ") => ").concat(code, "} ");
-        }
-        else {
-            var useValue = code;
-            if (key === 'style') {
-                // Convert camelCase keys to kebab-case
-                // TODO: support more than top level objects, may need
-                // a runtime helper for expressions that are not a direct
-                // object literal, such as ternaries and other expression
-                // types
-                useValue = (0, babel_transform_1.babelTransformExpression)(code, {
-                    ObjectExpression: function (path) {
-                        // TODO: limit to top level objects only
-                        for (var _i = 0, _a = path.node.properties; _i < _a.length; _i++) {
-                            var property = _a[_i];
-                            if (core_1.types.isObjectProperty(property)) {
-                                if (core_1.types.isIdentifier(property.key) || core_1.types.isStringLiteral(property.key)) {
-                                    var key_1 = core_1.types.isIdentifier(property.key)
-                                        ? property.key.name
-                                        : property.key.value;
-                                    property.key = core_1.types.stringLiteral((0, lodash_1.kebabCase)(key_1));
-                                }
-                            }
-                        }
-                    },
-                });
-            }
-            var newKey = transformAttributeName(key);
-            str += " ".concat(newKey, "={").concat(useValue, "} ");
-        }
-    }
-    if (jsx_1.selfClosingTags.has(json.name)) {
-        return str + ' />';
-    }
-    str += '>';
-    if (json.children) {
-        str += json.children
-            .filter(filter_empty_text_nodes_1.filterEmptyTextNodes)
-            .map(function (item) { return blockToSolid({ component: component, json: item, options: options }); })
-            .join('\n');
-    }
-    if (json.name === 'Fragment') {
-        str += '</>';
-    }
-    else {
-        str += "</".concat(json.name, ">");
-    }
-    return str;
-};
 var getRefsString = function (json) {
     return Array.from((0, get_refs_1.getRefs)(json))
         .map(function (ref) { return "let ".concat(ref, ";"); })
@@ -354,7 +185,7 @@ var componentToSolid = function (passedOptions) {
                 .join('\n')
             : '', addWrapper ? '<>' : '', json.children
             .filter(filter_empty_text_nodes_1.filterEmptyTextNodes)
-            .map(function (item) { return blockToSolid({ component: component, json: item, options: options }); })
+            .map(function (item) { return (0, blocks_1.blockToSolid)({ component: component, json: item, options: options }); })
             .join('\n'), options.stylesType === 'style-tag' && css && css.trim().length > 4
             ? // We add the jsx attribute so prettier formats this nicely
                 "<style jsx>{`".concat(css, "`}</style>")
