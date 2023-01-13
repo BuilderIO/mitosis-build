@@ -76,7 +76,7 @@ var merge_options_1 = require("../../helpers/merge-options");
 var process_code_1 = require("../../helpers/plugins/process-code");
 var context_1 = require("../helpers/context");
 var blocks_1 = require("./blocks");
-// Transform <foo.bar key="value" /> to <component :is="foo.bar" key="value" />
+// Transform <foo.bar key={value} /> to <Dynamic compnent={foo.bar} key={value} />
 function processDynamicComponents(json, options) {
     var found = false;
     (0, traverse_1.default)(json).forEach(function (node) {
@@ -148,15 +148,13 @@ var componentToSolid = function (passedOptions) {
         addProviderComponents(json, options);
         var componentHasStyles = (0, helpers_1.hasCss)(json);
         var addWrapper = json.children.filter(filter_empty_text_nodes_1.filterEmptyTextNodes).length !== 1 || options.stylesType === 'style-tag';
+        // we need to run this before we run the code processor plugin, so the dynamic component variables are transformed
+        var foundDynamicComponents = processDynamicComponents(json, options);
         if (options.plugins) {
             json = (0, plugins_1.runPostJsonPlugins)(json, options.plugins);
         }
         (0, strip_meta_properties_1.stripMetaProperties)(json);
-        var foundDynamicComponents = processDynamicComponents(json, options);
-        var css = options.stylesType === 'style-tag' &&
-            (0, collect_css_1.collectCss)(json, {
-                prefix: (0, hash_sum_1.default)(json),
-            });
+        var css = options.stylesType === 'style-tag' && (0, collect_css_1.collectCss)(json, { prefix: (0, hash_sum_1.default)(json) });
         var state = (0, state_1.getState)({ json: json, options: options });
         var componentsUsed = (0, get_components_used_1.getComponentsUsed)(json);
         var hasShowComponent = componentsUsed.has('Show');
