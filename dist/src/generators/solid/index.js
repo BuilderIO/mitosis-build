@@ -97,9 +97,13 @@ function getContextString(component, options) {
     }
     return str;
 }
-var getRefsString = function (json) {
+var getRefsString = function (json, options) {
     return Array.from((0, get_refs_1.getRefs)(json))
-        .map(function (ref) { return "let ".concat(ref, ";"); })
+        .map(function (ref) {
+        var _a;
+        var typeParameter = (options.typescript && ((_a = json['refs'][ref]) === null || _a === void 0 ? void 0 : _a.typeParameter)) || '';
+        return "let ".concat(ref).concat(typeParameter ? ': ' + typeParameter : '', ";");
+    })
         .join('\n');
 };
 function addProviderComponents(json, options) {
@@ -166,9 +170,11 @@ var componentToSolid = function (passedOptions) {
             ((_b = json.hooks.onMount) === null || _b === void 0 ? void 0 : _b.code) ? 'onMount' : undefined
         ], (((_c = json.hooks.onUpdate) === null || _c === void 0 ? void 0 : _c.length) ? ['on', 'createEffect'] : []), true), ((_d = state === null || state === void 0 ? void 0 : state.import.solidjs) !== null && _d !== void 0 ? _d : []), true).filter(nullable_1.checkIsDefined));
         var storeImports = (_e = state === null || state === void 0 ? void 0 : state.import.store) !== null && _e !== void 0 ? _e : [];
-        var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n\n    function ", "(props) {\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      return (", "\n        ", "\n        ", "\n        ", ")\n    }\n\n    export default ", ";\n  "], ["\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n\n    function ", "(props) {\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      return (", "\n        ", "\n        ", "\n        ", ")\n    }\n\n    export default ", ";\n  "])), solidJSImports.length > 0 ? "import { ".concat(solidJSImports.join(', '), " } from 'solid-js';") : '', !foundDynamicComponents ? '' : "import { Dynamic } from 'solid-js/web';", storeImports.length > 0 ? "import { ".concat(storeImports.join(', '), " } from 'solid-js/store';") : '', !componentHasStyles && options.stylesType === 'styled-components'
+        var propType = json.propsTypeRef || 'any';
+        var propsArgs = "props".concat(options.typescript ? ":".concat(propType) : '');
+        var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n\n    function ", "(", ") {\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      return (", "\n        ", "\n        ", "\n        ", ")\n    }\n\n    export default ", ";\n  "], ["\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n\n    function ", "(", ") {\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      return (", "\n        ", "\n        ", "\n        ", ")\n    }\n\n    export default ", ";\n  "])), solidJSImports.length > 0 ? "import { ".concat(solidJSImports.join(', '), " } from 'solid-js';") : '', !foundDynamicComponents ? '' : "import { Dynamic } from 'solid-js/web';", storeImports.length > 0 ? "import { ".concat(storeImports.join(', '), " } from 'solid-js/store';") : '', !componentHasStyles && options.stylesType === 'styled-components'
             ? ''
-            : "import { css } from \"solid-styled-components\";", (0, render_imports_1.renderPreComponent)({ component: json, target: 'solid' }), json.name, (_f = state === null || state === void 0 ? void 0 : state.str) !== null && _f !== void 0 ? _f : '', getRefsString(json), getContextString(json, options), !((_g = json.hooks.onMount) === null || _g === void 0 ? void 0 : _g.code) ? '' : "onMount(() => { ".concat(json.hooks.onMount.code, " })"), json.hooks.onUpdate
+            : "import { css } from \"solid-styled-components\";", json.types && options.typescript ? json.types.join('\n') : '', (0, render_imports_1.renderPreComponent)({ component: json, target: 'solid' }), json.name, propsArgs, (_f = state === null || state === void 0 ? void 0 : state.str) !== null && _f !== void 0 ? _f : '', getRefsString(json, options), getContextString(json, options), !((_g = json.hooks.onMount) === null || _g === void 0 ? void 0 : _g.code) ? '' : "onMount(() => { ".concat(json.hooks.onMount.code, " })"), json.hooks.onUpdate
             ? json.hooks.onUpdate
                 .map(function (hook, index) {
                 if (hook.deps) {

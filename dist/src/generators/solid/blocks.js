@@ -64,6 +64,9 @@ var blockToSolid = function (_a) {
             var useKey = key === 'onChange' && json.name === 'input' ? 'onInput' : key;
             str += " ".concat(useKey, "={(").concat(cusArg.join(','), ") => ").concat(code, "} ");
         }
+        else if (key === 'ref' && options.typescript) {
+            str += " ".concat(key, "={").concat(code, "!} ");
+        }
         else {
             var useValue = code;
             if (key === 'style') {
