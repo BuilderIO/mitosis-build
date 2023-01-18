@@ -147,7 +147,7 @@ function generateOptionsApiScript(component, options, path, template, props, onU
         ? ''
         : "name: '".concat(path && ((_a = options.namePrefix) === null || _a === void 0 ? void 0 : _a.call(options, path)) ? ((_b = options.namePrefix) === null || _b === void 0 ? void 0 : _b.call(options, path)) + '-' : '').concat((0, lodash_1.kebabCase)(component.name), "',"), "\n        ").concat(generateComponents(componentsUsed, options), "\n        ").concat(props.length ? getPropDefinition({ component: component, props: props }) : '', "\n        ").concat(dataString.length < 4
         ? ''
-        : "\n        data: () => (".concat(dataString, "),\n        "), "\n\n        ").concat((0, lodash_1.size)(component.context.set)
+        : "\n        data() {\n          return ".concat(dataString, "\n        },\n        "), "\n\n        ").concat((0, lodash_1.size)(component.context.set)
         ? "provide() {\n                const _this = this;\n                return ".concat(getContextProvideString(component, options), "\n              },")
         : '', "\n        ").concat((0, lodash_1.size)(component.context.get)
         ? "inject: ".concat(getContextInjectString(component, options), ",")
