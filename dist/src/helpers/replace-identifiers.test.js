@@ -36,10 +36,7 @@ var TEST_SPECS = [
     {
         code: "\n    const x = {\n      foo: bar,\n      test: 123,\n    }\n\n    const foo = x.foo;\n\n    const y = {\n      l: x.foo,\n      m: foo\n    }\n\n    const bar = foo;\n    ",
         from: ['foo', 'test'],
-        to: function (name) {
-            console.log({ name: name });
-            return "".concat(name, ".value");
-        },
+        to: function (name) { return "".concat(name, ".value"); },
     },
 ];
 describe('replaceIdentifiers', function () {
