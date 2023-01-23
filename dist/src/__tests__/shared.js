@@ -82,6 +82,7 @@ var basicOutputsMeta = getRawFile('./data/basic-outputs-meta.raw.tsx');
 var basicOutputs = getRawFile('./data/basic-outputs.raw.tsx');
 var subComponent = getRawFile('./data/sub-component.raw.tsx');
 var componentWithContext = getRawFile('./data/context/component-with-context.raw.tsx');
+var componentWithContextMultiRoot = getRawFile('./data/context/component-with-context-multi-root.raw.tsx');
 var expressionState = getRawFile('./data/expression-state.raw.tsx');
 var contentState = getRawFile('./data/context-state.raw.tsx');
 var basic = getRawFile('./data/basic.raw.tsx');
@@ -284,6 +285,7 @@ var OUTPUT_EVENT_BINDINGS_TEST = {
 };
 var CONTEXT_TEST = {
     componentWithContext: componentWithContext,
+    componentWithContextMultiRoot: componentWithContextMultiRoot,
 };
 var JSX_TESTS = [
     BASIC_TESTS,

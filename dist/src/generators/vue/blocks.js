@@ -37,10 +37,11 @@ var BINDING_MAPPERS = {
 };
 var NODE_MAPPERS = {
     Fragment: function (json, options, scope) {
-        if (options.vueVersion === 2 && (scope === null || scope === void 0 ? void 0 : scope.isRootNode)) {
+        var children = json.children.filter(filter_empty_text_nodes_1.filterEmptyTextNodes);
+        if (options.vueVersion === 2 && (scope === null || scope === void 0 ? void 0 : scope.isRootNode) && children.length > 1) {
             throw new Error('Vue 2 template should have a single root element');
         }
-        return json.children.map(function (item) { return (0, exports.blockToVue)(item, options); }).join('\n');
+        return children.map(function (item) { return (0, exports.blockToVue)(item, options); }).join('\n');
     },
     For: function (_json, options) {
         var _a, _b;
