@@ -477,7 +477,7 @@ var _componentToReact = function (json, options, isSubComponent) {
             var _a;
             var value = json.defaultProps.hasOwnProperty(prop)
                 ? (_a = json.defaultProps[prop]) === null || _a === void 0 ? void 0 : _a.code
-                : '{}';
+                : 'undefined';
             return "".concat(prop, ": ").concat(value);
         })
             .join(',');
