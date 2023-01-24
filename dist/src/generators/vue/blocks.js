@@ -30,6 +30,9 @@ var SPECIAL_PROPERTIES = {
     V_FOR: 'v-for',
     V_ELSE: 'v-else',
     V_ELSE_IF: 'v-else-if',
+    V_ON: 'v-on',
+    V_ON_AT: '@',
+    V_BIND: 'v-bind',
 };
 // TODO: Maybe in the future allow defining `string | function` as values
 var BINDING_MAPPERS = {
@@ -192,13 +195,12 @@ var NODE_MAPPERS = {
 };
 var stringifyBinding = function (node) {
     return function (_a) {
-        var _b;
         var key = _a[0], value = _a[1];
-        if (((_b = node.bindings[key]) === null || _b === void 0 ? void 0 : _b.type) === 'spread') {
+        if (value.type === 'spread') {
             return ''; // we handle this after
         }
         else if (key === 'class') {
-            return " :class=\"_classStringToObject(".concat(value === null || value === void 0 ? void 0 : value.code, ")\" ");
+            return ":class=\"_classStringToObject(".concat(value === null || value === void 0 ? void 0 : value.code, ")\"");
             // TODO: support dynamic classes as objects somehow like Vue requires
             // https://vuejs.org/v2/guide/class-and-style.html
         }
@@ -206,36 +208,61 @@ var stringifyBinding = function (node) {
             // TODO: proper babel transform to replace. Util for this
             var useValue = (value === null || value === void 0 ? void 0 : value.code) || '';
             if (key.startsWith('on')) {
-                var _c = value.arguments, cusArgs = _c === void 0 ? ['event'] : _c;
+                var _b = value.arguments, cusArgs = _b === void 0 ? ['event'] : _b;
                 var event_1 = key.replace('on', '').toLowerCase();
                 if (event_1 === 'change' && node.name === 'input') {
                     event_1 = 'input';
                 }
                 var isAssignmentExpression = useValue.includes('=');
-                var valueWRenamedEvent = (0, replace_identifiers_1.replaceIdentifiers)({
+                var eventHandlerValue = (0, function_1.pipe)((0, replace_identifiers_1.replaceIdentifiers)({
                     code: useValue,
                     from: cusArgs[0],
                     to: '$event',
-                });
-                // TODO: proper babel transform to replace. Util for this
-                if (isAssignmentExpression) {
-                    return " @".concat(event_1, "=\"").concat((0, helpers_1.encodeQuotes)((0, remove_surrounding_block_1.removeSurroundingBlock)(valueWRenamedEvent)), "\" ");
-                }
-                else {
-                    return " @".concat(event_1, "=\"").concat((0, helpers_1.encodeQuotes)((0, remove_surrounding_block_1.removeSurroundingBlock)((0, remove_surrounding_block_1.removeSurroundingBlock)(valueWRenamedEvent))), "\" ");
-                }
+                }), isAssignmentExpression ? function_1.identity : remove_surrounding_block_1.removeSurroundingBlock, remove_surrounding_block_1.removeSurroundingBlock, helpers_1.encodeQuotes);
+                var eventHandlerKey = "".concat(SPECIAL_PROPERTIES.V_ON_AT).concat(event_1);
+                return "".concat(eventHandlerKey, "=\"").concat(eventHandlerValue, "\"");
             }
             else if (key === 'ref') {
-                return " ref=\"".concat((0, helpers_1.encodeQuotes)(useValue), "\" ");
+                return "ref=\"".concat((0, helpers_1.encodeQuotes)(useValue), "\"");
             }
             else if (BINDING_MAPPERS[key]) {
-                return " ".concat(BINDING_MAPPERS[key], "=\"").concat((0, helpers_1.encodeQuotes)(useValue.replace(/"/g, "\\'")), "\" ");
+                return "".concat(BINDING_MAPPERS[key], "=\"").concat((0, helpers_1.encodeQuotes)(useValue.replace(/"/g, "\\'")), "\"");
             }
             else {
-                return " :".concat(key, "=\"").concat((0, helpers_1.encodeQuotes)(useValue), "\" ");
+                return ":".concat(key, "=\"").concat((0, helpers_1.encodeQuotes)(useValue), "\"");
             }
         }
     };
+};
+var stringifySpreads = function (node) {
+    var spreads = (0, lodash_1.filter)(node.bindings, function (binding) { return (binding === null || binding === void 0 ? void 0 : binding.type) === 'spread'; }).map(function (value) {
+        return value.code === 'props' ? '$props' : value.code;
+    });
+    if (spreads.length === 0) {
+        return '';
+    }
+    var stringifiedValue = spreads.length > 1 ? "{".concat(spreads.map(function (spread) { return "...".concat(spread); }).join(', '), "}") : spreads[0];
+    return " ".concat(SPECIAL_PROPERTIES.V_BIND, "=\"").concat((0, helpers_1.encodeQuotes)(stringifiedValue), "\" ");
+};
+var getBlockBindings = function (node) {
+    var stringifiedProperties = Object.entries(node.properties)
+        .map(function (_a) {
+        var key = _a[0], value = _a[1];
+        if (key === 'className') {
+            return '';
+        }
+        else if (key === SPECIAL_PROPERTIES.V_ELSE) {
+            return "".concat(key);
+        }
+        else if (typeof value === 'string') {
+            return "".concat(key, "=\"").concat((0, helpers_1.encodeQuotes)(value), "\"");
+        }
+    })
+        .join(' ');
+    var stringifiedBindings = Object.entries(node.bindings)
+        .map(stringifyBinding(node))
+        .join(' ');
+    return [stringifiedProperties, stringifiedBindings, stringifySpreads(node)].join(' ');
 };
 var blockToVue = function (node, options, scope) {
     var _a;
@@ -262,35 +289,8 @@ var blockToVue = function (node, options, scope) {
         }
         return "{{".concat(textCode, "}}");
     }
-    var str = '';
-    str += "<".concat(node.name, " ");
-    for (var key in node.properties) {
-        var value = node.properties[key];
-        if (key === 'className') {
-            continue;
-        }
-        else if (key === SPECIAL_PROPERTIES.V_ELSE) {
-            str += " ".concat(key, " ");
-        }
-        else if (typeof value === 'string') {
-            str += " ".concat(key, "=\"").concat((0, helpers_1.encodeQuotes)(value), "\" ");
-        }
-    }
-    var stringifiedBindings = Object.entries(node.bindings).map(stringifyBinding(node)).join('');
-    str += stringifiedBindings;
-    // spreads
-    var spreads = (0, lodash_1.filter)(node.bindings, function (binding) { return (binding === null || binding === void 0 ? void 0 : binding.type) === 'spread'; }).map(function (value) {
-        return (value === null || value === void 0 ? void 0 : value.code) === 'props' ? '$props' : value === null || value === void 0 ? void 0 : value.code;
-    });
-    if (spreads === null || spreads === void 0 ? void 0 : spreads.length) {
-        if (spreads.length > 1) {
-            var spreadsString = "{...".concat(spreads.join(', ...'), "}");
-            str += " v-bind=\"".concat((0, helpers_1.encodeQuotes)(spreadsString), "\"");
-        }
-        else {
-            str += " v-bind=\"".concat((0, helpers_1.encodeQuotes)(spreads.join('')), "\"");
-        }
-    }
+    var str = "<".concat(node.name, " ");
+    str += getBlockBindings(node);
     if (jsx_1.selfClosingTags.has(node.name)) {
         return str + ' />';
     }
