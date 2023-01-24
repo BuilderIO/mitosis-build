@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.processBindings = void 0;
+var bindings_1 = require("../../../helpers/bindings");
 function replaceGroupWithChecked(node, isArray) {
     var _a, _b, _c;
     if (isArray === void 0) { isArray = false; }
@@ -19,9 +20,9 @@ function replaceGroupWithChecked(node, isArray) {
                 ? "".concat(groupBinding, " === ").concat(bindingValue)
                 : "".concat(groupBinding, " === '").concat(propertyValue, "'");
         }
-        node.bindings['checked'] = {
+        node.bindings['checked'] = (0, bindings_1.createSingleBinding)({
             code: code,
-        };
+        });
         delete node.bindings.group;
     }
 }
@@ -66,10 +67,10 @@ function processBindings(json, node) {
         onChangeCode = "event.target.checked ? ".concat(binding, ".push(").concat(target, ") : ").concat(binding, ".splice(").concat(binding, ".indexOf(").concat(node.properties.value ? "'".concat(node.properties.value, "'") : (_g = node.bindings.value) === null || _g === void 0 ? void 0 : _g.code, "), 1)");
     }
     if (name !== 'ref' && binding) {
-        node.bindings['onChange'] = {
+        node.bindings['onChange'] = (0, bindings_1.createSingleBinding)({
             code: onChangeCode,
             arguments: ['event'],
-        };
+        });
     }
 }
 exports.processBindings = processBindings;

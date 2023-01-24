@@ -76,13 +76,14 @@ var merge_options_1 = require("../../helpers/merge-options");
 var process_code_1 = require("../../helpers/plugins/process-code");
 var context_1 = require("../helpers/context");
 var blocks_1 = require("./blocks");
+var bindings_1 = require("../../helpers/bindings");
 // Transform <foo.bar key={value} /> to <Dynamic compnent={foo.bar} key={value} />
 function processDynamicComponents(json, options) {
     var found = false;
     (0, traverse_1.default)(json).forEach(function (node) {
         if ((0, is_mitosis_node_1.isMitosisNode)(node)) {
             if (node.name.includes('.') && !node.name.endsWith('.Provider')) {
-                node.bindings.component = { code: node.name };
+                node.bindings.component = (0, bindings_1.createSingleBinding)({ code: node.name });
                 node.name = 'Dynamic';
                 found = true;
             }
@@ -112,7 +113,7 @@ function addProviderComponents(json, options) {
         json.children = [
             (0, create_mitosis_node_1.createMitosisNode)(__assign({ name: "".concat(name_1, ".Provider"), children: json.children }, (value && {
                 bindings: {
-                    value: { code: (0, get_state_object_string_1.stringifyContextValue)(value) },
+                    value: (0, bindings_1.createSingleBinding)({ code: (0, get_state_object_string_1.stringifyContextValue)(value) }),
                 },
             }))),
         ];

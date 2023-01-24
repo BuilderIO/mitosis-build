@@ -12,6 +12,7 @@ var lodash_1 = require("lodash");
 var babel_transform_1 = require("../helpers/babel-transform");
 var core_1 = require("@babel/core");
 var capitalize_1 = require("../helpers/capitalize");
+var bindings_1 = require("../helpers/bindings");
 var getTsAST = function (code) {
     return typescript_1.default.createSourceFile('code.ts', code, typescript_1.default.ScriptTarget.Latest, true);
 };
@@ -46,9 +47,9 @@ var angularTemplateNodeToMitosisNode = function (node, options) {
             return (0, create_mitosis_node_1.createMitosisNode)({
                 name: 'Show',
                 bindings: {
-                    when: {
+                    when: (0, bindings_1.createSingleBinding)({
                         code: transformBinding(ngIf.value.source, options),
-                    },
+                    }),
                 },
                 children: [angularTemplateNodeToMitosisNode((0, lodash_1.omit)(node, 'templateAttrs'), options)],
             });
@@ -61,7 +62,7 @@ var angularTemplateNodeToMitosisNode = function (node, options) {
             return (0, create_mitosis_node_1.createMitosisNode)({
                 name: 'For',
                 bindings: {
-                    each: { code: transformBinding(expression, options) },
+                    each: (0, bindings_1.createSingleBinding)({ code: transformBinding(expression, options) }),
                 },
                 scope: {
                     forName: itemName,
@@ -75,17 +76,17 @@ var angularTemplateNodeToMitosisNode = function (node, options) {
         var bindings = {};
         for (var _i = 0, _a = node.inputs; _i < _a.length; _i++) {
             var input = _a[_i];
-            bindings[input.name] = {
+            bindings[input.name] = (0, bindings_1.createSingleBinding)({
                 code: transformBinding(input.value.source, options),
-            };
+            });
         }
         for (var _b = 0, _c = node.outputs; _b < _c.length; _b++) {
             var output = _c[_b];
-            bindings['on' + (0, capitalize_1.capitalize)(output.name)] = {
+            bindings['on' + (0, capitalize_1.capitalize)(output.name)] = (0, bindings_1.createSingleBinding)({
                 code: transformBinding(output.handler
                     .source // TODO: proper reference replace
                     .replace(/\$event/g, 'event'), options),
-            };
+            });
         }
         for (var _d = 0, _e = node.attributes; _d < _e.length; _d++) {
             var attribute = _e[_d];

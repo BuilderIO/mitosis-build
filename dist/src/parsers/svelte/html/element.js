@@ -18,6 +18,7 @@ var mitosis_node_1 = require("../helpers/mitosis-node");
 var children_1 = require("../helpers/children");
 var string_1 = require("../helpers/string");
 var actions_1 = require("./actions");
+var bindings_1 = require("../../../helpers/bindings");
 var SPECIAL_ELEMENTS = new Set(['svelte:component', 'svelte:element']);
 function parseElement(json, node) {
     var _a;
@@ -28,9 +29,7 @@ function parseElement(json, node) {
         var nodeReference = (0, string_1.uniqueName)(Object.keys(json.refs), node.name);
         if (!Object.keys(json.refs).includes(nodeReference)) {
             json.refs[nodeReference] = { argument: '', typeParameter: '' };
-            mitosisNode.bindings.ref = {
-                code: nodeReference,
-            };
+            mitosisNode.bindings.ref = (0, bindings_1.createSingleBinding)({ code: nodeReference });
         }
         return nodeReference;
     };
@@ -72,23 +71,21 @@ function parseElement(json, node) {
                                     ? (0, string_1.insertAt)(mitosisNode.bindings.class.code, ' ${' + code + '}', mitosisNode.bindings.class.code.length - 1)
                                     : '`${' + code + '}`';
                             }
-                            mitosisNode.bindings[attribute.name] = {
-                                code: code,
-                            };
+                            mitosisNode.bindings[attribute.name] = (0, bindings_1.createSingleBinding)({ code: code });
                             break;
                         }
                         case 'AttributeShorthand': {
                             // e.g. <input {value}/>
                             var value = attribute.value[0];
                             var code = value.expression.name;
-                            mitosisNode.bindings[code] = {
-                                code: code,
-                            };
+                            mitosisNode.bindings[code] = (0, bindings_1.createSingleBinding)({ code: code });
                             break;
                         }
                         default: {
                             var name_1 = attribute.name;
-                            mitosisNode.bindings[name_1] = { code: attribute.value.toString() };
+                            mitosisNode.bindings[name_1] = (0, bindings_1.createSingleBinding)({
+                                code: attribute.value.toString(),
+                            });
                         }
                     }
                     break;
@@ -98,6 +95,7 @@ function parseElement(json, node) {
                     mitosisNode.bindings[expression.name] = {
                         code: expression.name,
                         type: 'spread',
+                        spreadType: 'normal',
                     };
                     break;
                 }
@@ -145,7 +143,7 @@ function parseElement(json, node) {
                             arguments: ['event'],
                         };
                     }
-                    mitosisNode.bindings["on".concat((0, lodash_1.upperFirst)(attribute.name))] = object;
+                    mitosisNode.bindings["on".concat((0, lodash_1.upperFirst)(attribute.name))] = (0, bindings_1.createSingleBinding)(object);
                     // add event handlers as props (e.g. props.onClick)
                     json.props = __assign(__assign({}, json.props), (_a = {}, _a["on".concat((0, lodash_1.upperFirst)(attribute.name))] = { default: function () { return ({}); } }, _a));
                     break;
@@ -172,14 +170,14 @@ function parseElement(json, node) {
                     }
                     if (name_2 !== 'ref' && name_2 !== 'group' && name_2 !== 'this') {
                         var onChangeCode = "".concat(binding, " = event.target.value");
-                        mitosisNode.bindings['onChange'] = {
+                        mitosisNode.bindings['onChange'] = (0, bindings_1.createSingleBinding)({
                             code: onChangeCode,
                             arguments: ['event'],
-                        };
+                        });
                     }
-                    mitosisNode.bindings[name_2] = {
+                    mitosisNode.bindings[name_2] = (0, bindings_1.createSingleBinding)({
                         code: binding,
-                    };
+                    });
                     break;
                 }
                 case 'Class': {
@@ -200,16 +198,12 @@ function parseElement(json, node) {
                         Object.prototype.hasOwnProperty.call(mitosisNode.bindings.class, 'code') &&
                         ((_u = mitosisNode.bindings.class) === null || _u === void 0 ? void 0 : _u.code.length)) {
                         code = (0, string_1.insertAt)(mitosisNode.bindings.class.code, ' ${' + binding + '}', mitosisNode.bindings.class.code.length - 1);
-                        mitosisNode.bindings.class = {
-                            code: code,
-                        };
+                        mitosisNode.bindings.class = (0, bindings_1.createSingleBinding)({ code: code });
                     }
                     else {
                         // otherwise just assign
                         code = '`' + code + '${' + binding + '}`';
-                        mitosisNode.bindings.class = {
-                            code: code,
-                        };
+                        mitosisNode.bindings.class = (0, bindings_1.createSingleBinding)({ code: code });
                     }
                     break;
                 }
@@ -228,9 +222,9 @@ function parseElement(json, node) {
     if (filteredChildren.length === 1 && filteredChildren[0].type === 'RawMustacheTag') {
         var child = filteredChildren[0];
         mitosisNode.children = [];
-        mitosisNode.bindings.innerHTML = {
+        mitosisNode.bindings.innerHTML = (0, bindings_1.createSingleBinding)({
             code: (0, astring_1.generate)(child.expression),
-        };
+        });
     }
     else {
         mitosisNode.children = (0, children_1.parseChildren)(json, node);

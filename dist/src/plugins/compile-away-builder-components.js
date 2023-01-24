@@ -55,6 +55,7 @@ var filter_empty_text_nodes_1 = require("../helpers/filter-empty-text-nodes");
 var is_mitosis_node_1 = require("../helpers/is-mitosis-node");
 var JSON5 = __importStar(require("json5"));
 var builder_1 = require("../parsers/builder");
+var bindings_1 = require("../helpers/bindings");
 function getComponentInputNames(componentName) {
     var _a;
     var componentInfo = react_1.Builder.components.find(function (item) { return item.name === componentName; });
@@ -185,7 +186,7 @@ exports.components = {
                 lazyLoad: 'true',
             })),
             bindings: {
-                css: {
+                css: (0, bindings_1.createSingleBinding)({
                     code: JSON.stringify({
                         width: '100%',
                         alignSelf: 'stretch',
@@ -198,7 +199,7 @@ exports.components = {
                         marginLeft: 'auto',
                         marginRight: 'auto',
                     }),
-                },
+                }),
             },
             children: node.children,
         }), components);
@@ -227,7 +228,7 @@ exports.components = {
                 class: 'builder-columns',
             },
             bindings: {
-                css: {
+                css: (0, bindings_1.createSingleBinding)({
                     code: JSON.stringify(__assign({ display: 'flex' }, (properties.stackColumnsAt === 'never'
                         ? {}
                         : (_a = {},
@@ -238,7 +239,7 @@ exports.components = {
                                 alignItems: 'stretch',
                             },
                             _a)))),
-                },
+                }),
             },
             children: columns.map(function (col, index) {
                 var _a;
@@ -249,7 +250,7 @@ exports.components = {
                         class: 'builder-column',
                     },
                     bindings: {
-                        css: {
+                        css: (0, bindings_1.createSingleBinding)({
                             code: JSON.stringify(__assign({ display: 'flex', flexDirection: 'column', alignItems: 'stretch', lineHeight: 'normal', width: "".concat(getColumnWidth(index)), marginLeft: "".concat(index === 0 ? 0 : gutterSize, "px") }, (properties.stackColumnsAt === 'never'
                                 ? {}
                                 : (_a = {},
@@ -258,7 +259,7 @@ exports.components = {
                                         marginLeft: 0,
                                     },
                                     _a)))),
-                        },
+                        }),
                     },
                     children: col.children,
                 });
@@ -297,7 +298,7 @@ exports.components = {
             bindings: noUndefined({
                 src: ((_c = node.bindings.image) === null || _c === void 0 ? void 0 : _c.code) && { code: (_d = node.bindings.image) === null || _d === void 0 ? void 0 : _d.code },
                 sizes: ((_e = node.bindings.sizes) === null || _e === void 0 ? void 0 : _e.code) && { code: (_f = node.bindings.sizes) === null || _f === void 0 ? void 0 : _f.code },
-                css: {
+                css: (0, bindings_1.createSingleBinding)({
                     code: JSON.stringify(__assign({ objectFit: backgroundSize || 'cover', objectPosition: backgroundPosition || 'cover' }, (aspectRatio
                         ? {
                             position: 'absolute',
@@ -307,7 +308,7 @@ exports.components = {
                             left: '0',
                         }
                         : {}))),
-                },
+                }),
             }),
         });
         var picture = (0, create_mitosis_node_1.createMitosisNode)({
@@ -322,14 +323,14 @@ exports.components = {
                     class: 'builder-image-sizer',
                 },
                 bindings: {
-                    css: {
+                    css: (0, bindings_1.createSingleBinding)({
                         code: JSON.stringify({
                             width: '100%',
                             paddingTop: aspectRatio * 100 + '%',
                             pointerEvents: 'none',
                             fontSize: '0',
                         }),
-                    },
+                    }),
                 },
             });
         var children = node.children &&
@@ -340,7 +341,7 @@ exports.components = {
                     $name: 'image-contents',
                 },
                 bindings: {
-                    css: {
+                    css: (0, bindings_1.createSingleBinding)({
                         code: JSON.stringify({
                             display: 'flex',
                             flexDirection: 'column',
@@ -351,7 +352,7 @@ exports.components = {
                             width: '100%',
                             height: '100%',
                         }),
-                    },
+                    }),
                 },
                 children: node.children,
             });
@@ -368,7 +369,7 @@ exports.components = {
                 },
                 bindings: hrefBinding
                     ? {
-                        href: { code: hrefBinding },
+                        href: (0, bindings_1.createSingleBinding)({ code: hrefBinding }),
                     }
                     : undefined,
                 children: imageNodes,
@@ -417,7 +418,7 @@ exports.components = {
                     code: (_l = node.bindings.playsInline) === null || _l === void 0 ? void 0 : _l.code,
                 },
                 loop: ((_m = node.bindings.loop) === null || _m === void 0 ? void 0 : _m.code) && { code: (_o = node.bindings.loop) === null || _o === void 0 ? void 0 : _o.code },
-                css: {
+                css: (0, bindings_1.createSingleBinding)({
                     code: JSON.stringify({
                         width: '100%',
                         height: '100%',
@@ -426,7 +427,7 @@ exports.components = {
                         borderRadius: '1',
                         position: aspectRatio ? 'absolute' : '',
                     }),
-                },
+                }),
             }),
             children: [
                 (0, create_mitosis_node_1.createMitosisNode)({
@@ -450,14 +451,14 @@ exports.components = {
                     $name: 'builder-video-sizer',
                 },
                 bindings: {
-                    css: {
+                    css: (0, bindings_1.createSingleBinding)({
                         code: JSON.stringify({
                             width: '100%',
                             paddingTop: aspectRatio * 100 + '%',
                             pointerEvents: 'none',
                             fontSize: '0',
                         }),
-                    },
+                    }),
                 },
             }));
         node.children &&
@@ -468,7 +469,7 @@ exports.components = {
                     $name: 'image-contents',
                 },
                 bindings: {
-                    css: {
+                    css: (0, bindings_1.createSingleBinding)({
                         code: JSON.stringify({
                             display: 'flex',
                             flexDirection: 'column',
@@ -479,7 +480,7 @@ exports.components = {
                             width: '100%',
                             height: '100%',
                         }),
-                    },
+                    }),
                 },
                 children: node.children,
             }));
@@ -489,7 +490,7 @@ exports.components = {
                 $name: 'video-container',
             },
             bindings: {
-                css: { code: JSON.stringify({ position: 'relative' }) },
+                css: (0, bindings_1.createSingleBinding)({ code: JSON.stringify({ position: 'relative' }) }),
             },
             children: videoContainerNodes,
         });

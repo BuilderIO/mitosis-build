@@ -16,7 +16,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.blockToVue = void 0;
 var function_1 = require("fp-ts/lib/function");
-var lodash_1 = require("lodash");
 var filter_empty_text_nodes_1 = require("../../helpers/filter-empty-text-nodes");
 var is_children_1 = __importDefault(require("../../helpers/is-children"));
 var is_mitosis_node_1 = require("../../helpers/is-mitosis-node");
@@ -25,6 +24,7 @@ var replace_identifiers_1 = require("../../helpers/replace-identifiers");
 var slots_1 = require("../../helpers/slots");
 var jsx_1 = require("../../parsers/jsx");
 var helpers_1 = require("./helpers");
+var nullable_1 = require("../../helpers/nullable");
 var SPECIAL_PROPERTIES = {
     V_IF: 'v-if',
     V_FOR: 'v-for',
@@ -50,7 +50,7 @@ var NODE_MAPPERS = {
         var _a, _b;
         var _c;
         var json = _json;
-        var keyValue = json.bindings.key || { code: 'index' };
+        var keyValue = json.bindings.key || { code: 'index', type: 'single' };
         var forValue = "(".concat(json.scope.forName, ", index) in ").concat((_c = json.bindings.each) === null || _c === void 0 ? void 0 : _c.code);
         if (options.vueVersion >= 3) {
             // TODO: tmk key goes on different element (parent vs child) based on Vue 2 vs Vue 3
@@ -234,15 +234,18 @@ var stringifyBinding = function (node) {
         }
     };
 };
-var stringifySpreads = function (node) {
-    var spreads = (0, lodash_1.filter)(node.bindings, function (binding) { return (binding === null || binding === void 0 ? void 0 : binding.type) === 'spread'; }).map(function (value) {
-        return value.code === 'props' ? '$props' : value.code;
-    });
+var stringifySpreads = function (_a) {
+    var node = _a.node, spreadType = _a.spreadType;
+    var spreads = Object.values(node.bindings)
+        .filter(nullable_1.checkIsDefined)
+        .filter(function (binding) { return binding.type === 'spread' && binding.spreadType === spreadType; })
+        .map(function (value) { return (value.code === 'props' ? '$props' : value.code); });
     if (spreads.length === 0) {
         return '';
     }
     var stringifiedValue = spreads.length > 1 ? "{".concat(spreads.map(function (spread) { return "...".concat(spread); }).join(', '), "}") : spreads[0];
-    return " ".concat(SPECIAL_PROPERTIES.V_BIND, "=\"").concat((0, helpers_1.encodeQuotes)(stringifiedValue), "\" ");
+    var key = spreadType === 'normal' ? SPECIAL_PROPERTIES.V_BIND : SPECIAL_PROPERTIES.V_ON;
+    return " ".concat(key, "=\"").concat((0, helpers_1.encodeQuotes)(stringifiedValue), "\" ");
 };
 var getBlockBindings = function (node) {
     var stringifiedProperties = Object.entries(node.properties)
@@ -262,7 +265,12 @@ var getBlockBindings = function (node) {
     var stringifiedBindings = Object.entries(node.bindings)
         .map(stringifyBinding(node))
         .join(' ');
-    return [stringifiedProperties, stringifiedBindings, stringifySpreads(node)].join(' ');
+    return [
+        stringifiedProperties,
+        stringifiedBindings,
+        stringifySpreads({ node: node, spreadType: 'normal' }),
+        stringifySpreads({ node: node, spreadType: 'event-handlers' }),
+    ].join(' ');
 };
 var blockToVue = function (node, options, scope) {
     var _a;
@@ -277,7 +285,7 @@ var blockToVue = function (node, options, scope) {
         // Vue doesn't allow <style>...</style> in templates, but does support the synonymous
         // <component is="'style'">...</component>
         node.name = 'component';
-        node.bindings.is = { code: "'style'" };
+        node.bindings.is = { code: "'style'", type: 'single' };
     }
     if (node.properties._text) {
         return "".concat(node.properties._text);

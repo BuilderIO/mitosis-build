@@ -44,6 +44,7 @@ var nullable_1 = require("../../helpers/nullable");
 var create_mitosis_node_1 = require("../../helpers/create-mitosis-node");
 var function_1 = require("fp-ts/lib/function");
 var helpers_1 = require("./helpers");
+var bindings_1 = require("../../helpers/bindings");
 var types = babel.types;
 var getForArguments = function (params) {
     var _a = params
@@ -81,11 +82,11 @@ var jsxElementToJson = function (node) {
                     return (0, create_mitosis_node_1.createMitosisNode)({
                         name: 'For',
                         bindings: {
-                            each: {
+                            each: (0, bindings_1.createSingleBinding)({
                                 code: (0, generator_1.default)(node.expression.callee)
                                     .code // Remove .map or potentially ?.map
                                     .replace(/\??\.map$/, ''),
-                            },
+                            }),
                         },
                         scope: forArguments,
                         children: [(0, exports.jsxElementToJson)(callback.body)],
@@ -99,7 +100,7 @@ var jsxElementToJson = function (node) {
                 return (0, create_mitosis_node_1.createMitosisNode)({
                     name: 'Show',
                     bindings: {
-                        when: { code: (0, generator_1.default)(node.expression.left).code },
+                        when: (0, bindings_1.createSingleBinding)({ code: (0, generator_1.default)(node.expression.left).code }),
                     },
                     children: [(0, exports.jsxElementToJson)(node.expression.right)],
                 });
@@ -116,7 +117,7 @@ var jsxElementToJson = function (node) {
                     else: (0, exports.jsxElementToJson)(node.expression.alternate),
                 },
                 bindings: {
-                    when: { code: (0, generator_1.default)(node.expression.test).code },
+                    when: (0, bindings_1.createSingleBinding)({ code: (0, generator_1.default)(node.expression.test).code }),
                 },
                 children: [(0, exports.jsxElementToJson)(node.expression.consequent)],
             });
@@ -124,7 +125,7 @@ var jsxElementToJson = function (node) {
         // TODO: support {foo ? bar : baz}
         return (0, create_mitosis_node_1.createMitosisNode)({
             bindings: {
-                _text: { code: (0, generator_1.default)(node.expression).code },
+                _text: (0, bindings_1.createSingleBinding)({ code: (0, generator_1.default)(node.expression).code }),
             },
         });
     }
@@ -153,7 +154,7 @@ var jsxElementToJson = function (node) {
             meta: {
                 else: elseValue || undefined,
             },
-            bindings: __assign({}, (whenValue ? { when: { code: whenValue } } : {})),
+            bindings: __assign({}, (whenValue ? { when: (0, bindings_1.createSingleBinding)({ code: whenValue }) } : {})),
             children: node.children.map(exports.jsxElementToJson).filter(nullable_1.checkIsDefined),
         });
     }
@@ -178,9 +179,9 @@ var jsxElementToJson = function (node) {
                 return (0, create_mitosis_node_1.createMitosisNode)({
                     name: 'For',
                     bindings: {
-                        each: {
+                        each: (0, bindings_1.createSingleBinding)({
                             code: forCode,
-                        },
+                        }),
                     },
                     scope: forArguments,
                     children: [(0, exports.jsxElementToJson)(childExpression.body)],
@@ -211,26 +212,27 @@ var jsxElementToJson = function (node) {
                 var value = item.value;
                 // boolean attribute
                 if (value === null) {
-                    memo[key] = {
+                    memo[key] = (0, bindings_1.createSingleBinding)({
                         code: 'true',
-                    };
+                    });
                     return memo;
                 }
                 if (types.isJSXExpressionContainer(value) && !types.isStringLiteral(value.expression)) {
                     var expression = value.expression;
                     if (types.isArrowFunctionExpression(expression)) {
                         if (key.startsWith('on')) {
-                            memo[key] = {
+                            var args = expression.params.map(function (node) { return node === null || node === void 0 ? void 0 : node.name; });
+                            memo[key] = (0, bindings_1.createSingleBinding)({
                                 code: (0, generator_1.default)(expression.body).code,
-                                arguments: expression.params.map(function (node) { return node === null || node === void 0 ? void 0 : node.name; }),
-                            };
+                                arguments: args.length ? args : undefined,
+                            });
                         }
                         else {
-                            memo[key] = { code: (0, generator_1.default)(expression.body).code };
+                            memo[key] = (0, bindings_1.createSingleBinding)({ code: (0, generator_1.default)(expression.body).code });
                         }
                     }
                     else {
-                        memo[key] = { code: (0, generator_1.default)(expression).code };
+                        memo[key] = (0, bindings_1.createSingleBinding)({ code: (0, generator_1.default)(expression).code });
                     }
                     return memo;
                 }
@@ -243,6 +245,7 @@ var jsxElementToJson = function (node) {
                 memo[key] = {
                     code: types.stringLiteral((0, generator_1.default)(item.argument).code).value,
                     type: 'spread',
+                    spreadType: 'normal',
                 };
             }
             return memo;

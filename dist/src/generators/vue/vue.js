@@ -42,12 +42,13 @@ var blocks_1 = require("./blocks");
 var merge_options_1 = require("../../helpers/merge-options");
 var process_code_1 = require("../../helpers/plugins/process-code");
 var strip_state_and_props_refs_1 = require("../../helpers/strip-state-and-props-refs");
+var bindings_1 = require("../../helpers/bindings");
 // Transform <foo.bar key="value" /> to <component :is="foo.bar" key="value" />
 function processDynamicComponents(json, _options) {
     (0, traverse_1.default)(json).forEach(function (node) {
         if ((0, is_mitosis_node_1.isMitosisNode)(node)) {
             if (node.name.includes('.')) {
-                node.bindings.is = { code: node.name };
+                node.bindings.is = (0, bindings_1.createSingleBinding)({ code: node.name });
                 node.name = 'component';
             }
         }

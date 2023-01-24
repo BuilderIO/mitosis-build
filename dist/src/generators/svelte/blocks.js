@@ -12,6 +12,7 @@ var html_tags_1 = require("../../constants/html_tags");
 var is_upper_case_1 = require("../../helpers/is-upper-case");
 var for_1 = require("../../helpers/nodes/for");
 var helpers_1 = require("./helpers");
+var bindings_1 = require("../../helpers/bindings");
 var mappers = {
     Fragment: function (_a) {
         var _b;
@@ -96,9 +97,9 @@ var getTagName = function (_a) {
     // TO-DO: no way to decide between <svelte:component> and <svelte:element>...need to do that through metadata
     // overrides for now
     if (!isValidHtmlTag && !isSpecialSvelteTag && !hasMatchingImport) {
-        json.bindings.this = {
+        json.bindings.this = (0, bindings_1.createSingleBinding)({
             code: (0, helpers_1.stripStateAndProps)({ json: parentComponent, options: options })(json.name),
-        };
+        });
         return SVELTE_SPECIAL_TAGS.COMPONENT;
     }
     return json.name;

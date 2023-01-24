@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.setStyles = exports.getStyles = void 0;
 var json5_1 = __importDefault(require("json5"));
 var lodash_1 = require("lodash");
+var bindings_1 = require("./bindings");
 var getStyles = function (json) {
     var _a;
     if (!json.bindings.css) {
@@ -27,7 +28,7 @@ var setStyles = function (json, styles) {
         delete json.bindings.css;
     }
     else {
-        json.bindings.css = { code: json5_1.default.stringify(styles) };
+        json.bindings.css = (0, bindings_1.createSingleBinding)({ code: json5_1.default.stringify(styles) });
     }
 };
 exports.setStyles = setStyles;

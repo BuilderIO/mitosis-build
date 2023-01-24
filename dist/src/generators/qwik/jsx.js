@@ -183,32 +183,30 @@ function isSlotProjection(child) {
  * @returns
  */
 function rewriteHandlers(file, handlers, bindings, symbolBindings) {
-    var _a, _b;
     var outBindings = {};
     for (var key in bindings) {
         if (Object.prototype.hasOwnProperty.call(bindings, key)) {
-            var bindingExpr = (_a = bindings === null || bindings === void 0 ? void 0 : bindings[key]) === null || _a === void 0 ? void 0 : _a.code;
+            var bindingValue = bindings[key];
+            var bindingExpr = bindingValue.code;
             var handlerBlock = void 0;
-            if (bindingExpr != null) {
-                if (key == 'css') {
-                    continue;
-                }
-                else if ((handlerBlock = handlers.get(bindingExpr))) {
-                    key = "".concat(key, "$");
-                    bindingExpr = (0, src_generator_1.invoke)(file.import(file.qwikModule, 'qrl'), [
-                        (0, src_generator_1.quote)(file.qrlPrefix + 'high.js'),
-                        (0, src_generator_1.quote)(handlerBlock),
-                        '[state]',
-                    ]);
-                }
-                else if (symbolBindings && key.startsWith('symbol.data.')) {
-                    symbolBindings[(0, src_generator_1.lastProperty)(key)] = bindingExpr;
-                }
-                else if (key.startsWith('component.options.')) {
-                    key = (0, src_generator_1.lastProperty)(key);
-                }
-                outBindings[key] = { code: bindingExpr, type: (_b = bindings === null || bindings === void 0 ? void 0 : bindings[key]) === null || _b === void 0 ? void 0 : _b.type };
+            if (key == 'css') {
+                continue;
             }
+            else if ((handlerBlock = handlers.get(bindingExpr))) {
+                key = "".concat(key, "$");
+                bindingExpr = (0, src_generator_1.invoke)(file.import(file.qwikModule, 'qrl'), [
+                    (0, src_generator_1.quote)(file.qrlPrefix + 'high.js'),
+                    (0, src_generator_1.quote)(handlerBlock),
+                    '[state]',
+                ]);
+            }
+            else if (symbolBindings && key.startsWith('symbol.data.')) {
+                symbolBindings[(0, src_generator_1.lastProperty)(key)] = bindingExpr;
+            }
+            else if (key.startsWith('component.options.')) {
+                key = (0, src_generator_1.lastProperty)(key);
+            }
+            outBindings[key] = __assign(__assign({}, bindingValue), { code: bindingExpr });
         }
     }
     return outBindings;

@@ -53,6 +53,7 @@ var parsers_1 = require("../../helpers/parsers");
 var __1 = require("../..");
 var helpers_1 = require("./helpers");
 var state_1 = require("../jsx/state");
+var bindings_1 = require("../../helpers/bindings");
 // Omit some superflous styles that can come from Builder's web importer
 var styleOmitList = [
     'backgroundRepeatX',
@@ -108,7 +109,7 @@ var getActionBindingsFromBlock = function (block, options) {
                 continue;
             }
             var useKey = "on".concat((0, lodash_1.upperFirst)(key));
-            bindings[useKey] = { code: "".concat(wrapBindingIfNeeded(value, options)) };
+            bindings[useKey] = (0, bindings_1.createSingleBinding)({ code: "".concat(wrapBindingIfNeeded(value, options)) });
         }
     }
     return bindings;
@@ -225,18 +226,19 @@ var componentMappers = __assign(__assign({ Symbol: function (block, options) {
         var css = getCssFromBlock(block);
         var styleString = getStyleStringFromBlock(block, options);
         var actionBindings = getActionBindingsFromBlock(block, options);
+        var bindings = __assign(__assign(__assign({ symbol: (0, bindings_1.createSingleBinding)({
+                code: JSON.stringify({
+                    data: (_a = block.component) === null || _a === void 0 ? void 0 : _a.options.symbol.data,
+                    content: (_b = block.component) === null || _b === void 0 ? void 0 : _b.options.symbol.content,
+                }),
+            }) }, actionBindings), (styleString && {
+            style: (0, bindings_1.createSingleBinding)({ code: styleString }),
+        })), (Object.keys(css).length && {
+            css: (0, bindings_1.createSingleBinding)({ code: JSON.stringify(css) }),
+        }));
         return (0, create_mitosis_node_1.createMitosisNode)({
             name: 'Symbol',
-            bindings: __assign(__assign(__assign({ symbol: {
-                    code: JSON.stringify({
-                        data: (_a = block.component) === null || _a === void 0 ? void 0 : _a.options.symbol.data,
-                        content: (_b = block.component) === null || _b === void 0 ? void 0 : _b.options.symbol.content,
-                    }),
-                } }, actionBindings), (styleString && {
-                style: { code: styleString },
-            })), (Object.keys(css).length && {
-                css: { code: JSON.stringify(css) },
-            })),
+            bindings: bindings,
         });
     } }, (!exports.symbolBlocksAsChildren
     ? {}
@@ -255,15 +257,15 @@ var componentMappers = __assign(__assign({ Symbol: function (block, options) {
                 name: 'Symbol',
                 bindings: __assign(__assign(__assign({ 
                     // TODO: this doesn't use all attrs
-                    symbol: {
+                    symbol: (0, bindings_1.createSingleBinding)({
                         code: JSON.stringify({
                             data: (_c = block.component) === null || _c === void 0 ? void 0 : _c.options.symbol.content.data,
                             content: content, // TODO: convert to <SymbolInternal>...</SymbolInternal> so can be parsed
                         }),
-                    } }, actionBindings), (styleString && {
-                    style: { code: styleString },
+                    }) }, actionBindings), (styleString && {
+                    style: (0, bindings_1.createSingleBinding)({ code: styleString }),
                 })), (Object.keys(css).length && {
-                    css: { code: JSON.stringify(css) },
+                    css: (0, bindings_1.createSingleBinding)({ code: JSON.stringify(css) }),
                 })),
                 children: !blocks
                     ? []
@@ -298,7 +300,9 @@ var componentMappers = __assign(__assign({ Symbol: function (block, options) {
         return (0, create_mitosis_node_1.createMitosisNode)({
             name: 'For',
             bindings: {
-                each: { code: "state.".concat(block.component.options.repeat.collection) },
+                each: (0, bindings_1.createSingleBinding)({
+                    code: "state.".concat(block.component.options.repeat.collection),
+                }),
             },
             scope: {
                 forName: block.component.options.repeat.itemName,
@@ -332,9 +336,9 @@ var componentMappers = __assign(__assign({ Symbol: function (block, options) {
         var innerBindings = {};
         var componentOptionsText = blockBindings['component.options.text'];
         if (componentOptionsText) {
-            innerBindings[options.preserveTextBlocks ? 'innerHTML' : '_text'] = {
+            innerBindings[options.preserveTextBlocks ? 'innerHTML' : '_text'] = (0, bindings_1.createSingleBinding)({
                 code: wrapBindingIfNeeded(componentOptionsText.code, options),
-            };
+            });
         }
         var innerProperties = (_a = {},
             _a[options.preserveTextBlocks ? 'innerHTML' : '_text'] = block.component.options.text,
@@ -394,14 +398,14 @@ var builderElementToMitosisNode = function (block, options, _internalOptions) {
         if (isFragment) {
             return (0, create_mitosis_node_1.createMitosisNode)({
                 name: 'Show',
-                bindings: { when: { code: code } },
+                bindings: { when: (0, bindings_1.createSingleBinding)({ code: code }) },
                 children: ((_d = block.children) === null || _d === void 0 ? void 0 : _d.map(function (child) { return (0, exports.builderElementToMitosisNode)(child, options); })) || [],
             });
         }
         else {
             return (0, create_mitosis_node_1.createMitosisNode)({
                 name: 'Show',
-                bindings: { when: { code: code } },
+                bindings: { when: (0, bindings_1.createSingleBinding)({ code: code }) },
                 children: [
                     (0, exports.builderElementToMitosisNode)(__assign(__assign({}, block), { code: __assign(__assign({}, block.code), { bindings: (0, lodash_1.omit)(blockBindings, 'show', 'hide') }), bindings: (0, lodash_1.omit)(blockBindings, 'show', 'hide') }), options),
                 ],
@@ -416,9 +420,9 @@ var builderElementToMitosisNode = function (block, options, _internalOptions) {
             return (0, create_mitosis_node_1.createMitosisNode)({
                 name: 'For',
                 bindings: {
-                    each: {
+                    each: (0, bindings_1.createSingleBinding)({
                         code: wrapBindingIfNeeded((_g = block.repeat) === null || _g === void 0 ? void 0 : _g.collection, options),
-                    },
+                    }),
                 },
                 scope: {
                     forName: ((_h = block.repeat) === null || _h === void 0 ? void 0 : _h.itemName) || 'item',
@@ -433,9 +437,9 @@ var builderElementToMitosisNode = function (block, options, _internalOptions) {
             return (0, create_mitosis_node_1.createMitosisNode)({
                 name: 'For',
                 bindings: {
-                    each: {
+                    each: (0, bindings_1.createSingleBinding)({
                         code: wrapBindingIfNeeded((_m = block.repeat) === null || _m === void 0 ? void 0 : _m.collection, options),
-                    },
+                    }),
                 },
                 scope: {
                     forName: ((_o = block.repeat) === null || _o === void 0 ? void 0 : _o.itemName) || 'item',
@@ -745,10 +749,10 @@ function mapBuilderBindingsToMitosisBindingWithCode(bindings) {
         Object.keys(bindings).forEach(function (key) {
             var value = bindings[key];
             if (typeof value === 'string') {
-                result[key] = { code: value };
+                result[key] = (0, bindings_1.createSingleBinding)({ code: value });
             }
             else if (value && typeof value === 'object' && value.code) {
-                result[key] = { code: value.code };
+                result[key] = (0, bindings_1.createSingleBinding)({ code: value.code });
             }
             else {
                 throw new Error('Unexpected binding value: ' + JSON.stringify(value));

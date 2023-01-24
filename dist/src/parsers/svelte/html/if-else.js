@@ -16,14 +16,15 @@ var astring_1 = require("astring");
 var _1 = require(".");
 var mitosis_node_1 = require("../helpers/mitosis-node");
 var children_1 = require("../helpers/children");
+var bindings_1 = require("../../../helpers/bindings");
 function parseIfElse(json, node) {
     var _a, _b, _c;
     var mitosisNode = (0, mitosis_node_1.createMitosisNode)();
     mitosisNode.name = 'Show';
     mitosisNode.bindings = {
-        when: {
+        when: (0, bindings_1.createSingleBinding)({
             code: (0, astring_1.generate)(node.expression),
-        },
+        }),
     };
     mitosisNode.children = (0, children_1.parseChildren)(json, node);
     if (node.else) {

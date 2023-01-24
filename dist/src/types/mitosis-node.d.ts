@@ -1,9 +1,15 @@
 import { JSONObject } from './json';
+export declare type SpreadType = 'normal' | 'event-handlers';
+declare type BindingProperties = {
+    type: 'spread';
+    spreadType: SpreadType;
+} | {
+    type: 'single';
+};
 export declare type Binding = {
     code: string;
     arguments?: string[];
-    type?: 'spread';
-};
+} & BindingProperties;
 export declare type BaseNode = {
     '@type': '@builder.io/mitosis/node';
     meta: JSONObject;
@@ -49,3 +55,4 @@ export declare type ForNode = BaseNode & {
 };
 export declare type MitosisNode = BaseNode | ForNode;
 export declare const checkIsForNode: (node: MitosisNode) => node is ForNode;
+export {};

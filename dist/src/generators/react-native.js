@@ -30,6 +30,7 @@ var fast_clone_1 = require("../helpers/fast-clone");
 var traverse_1 = __importDefault(require("traverse"));
 var is_mitosis_node_1 = require("../helpers/is-mitosis-node");
 var react_1 = require("./react");
+var bindings_1 = require("../helpers/bindings");
 var stylePropertiesThatMustBeNumber = new Set(['lineHeight']);
 var MEDIA_QUERY_KEY_REGEX = /^@media.*/;
 var collectReactNativeStyles = function (json) {
@@ -69,7 +70,7 @@ var collectReactNativeStyles = function (json) {
         var componentName = (0, lodash_1.camelCase)(item.name || 'view');
         var index = (componentIndexes[componentName] = (componentIndexes[componentName] || 0) + 1);
         var className = "".concat(componentName).concat(index);
-        item.bindings.style = { code: "styles.".concat(className) };
+        item.bindings.style = (0, bindings_1.createSingleBinding)({ code: "styles.".concat(className) });
         styleMap[className] = value;
     });
     return styleMap;

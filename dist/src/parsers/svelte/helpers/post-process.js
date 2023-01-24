@@ -119,15 +119,12 @@ function addPropertiesAndState(json, input) {
     return output;
 }
 function addPropertiesAndStateToNode(json, node) {
-    var _a, _b, _c, _d;
-    for (var _i = 0, _e = Object.keys(node.bindings); _i < _e.length; _i++) {
-        var key = _e[_i];
+    var _a;
+    for (var _i = 0, _b = Object.keys(node.bindings); _i < _b.length; _i++) {
+        var key = _b[_i];
         if (Object.prototype.hasOwnProperty.call(node.bindings, key)) {
-            node.bindings[key] = {
-                code: addPropertiesAndState(json, (_b = (_a = node.bindings[key]) === null || _a === void 0 ? void 0 : _a.code) !== null && _b !== void 0 ? _b : '').trim(),
-                arguments: (_c = node.bindings[key]) === null || _c === void 0 ? void 0 : _c.arguments,
-                type: (_d = node.bindings[key]) === null || _d === void 0 ? void 0 : _d.type,
-            };
+            var value = node.bindings[key];
+            node.bindings[key].code = addPropertiesAndState(json, (_a = value === null || value === void 0 ? void 0 : value.code) !== null && _a !== void 0 ? _a : '').trim();
         }
     }
 }

@@ -24,6 +24,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.componentToRsc = void 0;
+var bindings_1 = require("../helpers/bindings");
 var traverse_1 = __importDefault(require("traverse"));
 var fast_clone_1 = require("../helpers/fast-clone");
 var is_mitosis_node_1 = require("../helpers/is-mitosis-node");
@@ -57,9 +58,9 @@ var RSC_TRANSFORM_PLUGIN = function () { return ({
                         // Drill context down, aka
                         // function (props) { return <Component _context{props._context} /> }
                         if (!node.bindings[react_1.contextPropDrillingKey]) {
-                            node.bindings[react_1.contextPropDrillingKey] = {
+                            node.bindings[react_1.contextPropDrillingKey] = (0, bindings_1.createSingleBinding)({
                                 code: react_1.contextPropDrillingKey,
-                            };
+                            });
                         }
                     }
                     if (node.bindings.ref) {

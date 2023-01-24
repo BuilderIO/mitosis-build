@@ -50,6 +50,7 @@ var state_2 = require("./state");
 var helpers_2 = require("./helpers");
 var hash_sum_1 = __importDefault(require("hash-sum"));
 var for_1 = require("../../helpers/nodes/for");
+var bindings_1 = require("../../helpers/bindings");
 exports.contextPropDrillingKey = '_context';
 var openFrag = function (options) { return getFragment('open', options); };
 var closeFrag = function (options) { return getFragment('close', options); };
@@ -310,9 +311,9 @@ function provideContext(json, options) {
                 json.children = [
                     (0, create_mitosis_node_1.createMitosisNode)(__assign({ name: "".concat(name_2, ".Provider"), children: json.children }, (value && {
                         bindings: {
-                            value: {
+                            value: (0, bindings_1.createSingleBinding)({
                                 code: (0, get_state_object_string_1.stringifyContextValue)(value),
-                            },
+                            }),
                         },
                     }))),
                 ];
@@ -321,9 +322,7 @@ function provideContext(json, options) {
                 json.children = [
                     (0, create_mitosis_node_1.createMitosisNode)(__assign({ name: 'Context.Provider', children: json.children }, (ref && {
                         bindings: {
-                            value: {
-                                code: ref,
-                            },
+                            value: (0, bindings_1.createSingleBinding)({ code: ref }),
                         },
                     }))),
                 ];
