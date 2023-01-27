@@ -184,9 +184,11 @@ var componentToSvelte = function (userProvidedOptions) {
         if ((0, context_1.hasSetContext)(component)) {
             svelteImports.push('setContext');
         }
-        str += (0, dedent_1.default)(templateObject_2 || (templateObject_2 = __makeTemplateObject(["\n      <script ", ">\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n      ", "\n      ", "\n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n    </script>\n\n    ", "\n\n    ", "\n  "], ["\n      <script ", ">\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n      ", "\n      "
+        str += (0, dedent_1.default)(templateObject_2 || (templateObject_2 = __makeTemplateObject(["\n      <script ", ">\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n      ", "\n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n    </script>\n\n    ", "\n\n    ", "\n  "], ["\n      <script ", ">\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n      ", "\n      "
             // https://svelte.dev/repl/bd9b56891f04414982517bbd10c52c82?version=3.31.0
-            , "\n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n    </script>\n\n    ", "\n\n    ", "\n  "])), tsLangAttribute, !svelteImports.length ? '' : "import { ".concat(svelteImports.sort().join(', '), " } from 'svelte'"), !svelteStoreImports.length
+            , "\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      "
+            // make sure this is after all other state/code is initialized
+            , "\n\n      ", "\n    </script>\n\n    ", "\n\n    ", "\n  "])), tsLangAttribute, !svelteImports.length ? '' : "import { ".concat(svelteImports.sort().join(', '), " } from 'svelte'"), !svelteStoreImports.length
             ? ''
             : "import { ".concat(svelteStoreImports.sort().join(', '), " } from 'svelte/store'"), (0, render_imports_1.renderPreComponent)({ component: json, target: 'svelte' }), !hasData || options.stateType === 'variables' ? '' : "import onChange from 'on-change'", props
             .map(function (name) {
@@ -208,7 +210,7 @@ var componentToSvelte = function (userProvidedOptions) {
         // https://svelte.dev/repl/bd9b56891f04414982517bbd10c52c82?version=3.31.0
         (0, helpers_1.hasStyle)(json)
             ? "\n        function mitosis_styling (node, vars) {\n          Object.entries(vars || {}).forEach(([ p, v ]) => {\n            if (p.startsWith('--')) {\n              node.style.setProperty(p, v);\n            } else {\n              node.style[p] = v;\n            }\n          })\n        }\n      "
-            : '', getContextCode(json), setContextCode({ json: json, options: options }), functionsString.length < 4 ? '' : functionsString, getterString.length < 4 ? '' : getterString, refs.map(function (ref) { return "let ".concat(ref); }).join('\n'), options.stateType === 'proxies'
+            : '', getContextCode(json), functionsString.length < 4 ? '' : functionsString, getterString.length < 4 ? '' : getterString, refs.map(function (ref) { return "let ".concat(ref); }).join('\n'), options.stateType === 'proxies'
             ? dataString.length < 4
                 ? ''
                 : "let state = onChange(".concat(dataString, ", () => state = state)")
@@ -219,7 +221,9 @@ var componentToSvelte = function (userProvidedOptions) {
             }
             var fnName = "onUpdateFn_".concat(index);
             return "\n              function ".concat(fnName, "() {\n                ").concat(code, "\n              }\n              $: ").concat(fnName, "(...").concat(deps, ")\n            ");
-        }).join(';')) || '', !((_o = json.hooks.onUnMount) === null || _o === void 0 ? void 0 : _o.code) ? '' : "onDestroy(() => { ".concat(json.hooks.onUnMount.code, " });"), json.children
+        }).join(';')) || '', 
+        // make sure this is after all other state/code is initialized
+        setContextCode({ json: json, options: options }), !((_o = json.hooks.onUnMount) === null || _o === void 0 ? void 0 : _o.code) ? '' : "onDestroy(() => { ".concat(json.hooks.onUnMount.code, " });"), json.children
             .map(function (item) {
             return (0, blocks_1.blockToSvelte)({
                 json: item,
