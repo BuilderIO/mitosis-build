@@ -71,7 +71,7 @@ var componentToQwik = function (userOptions) {
                     emitUseContextProvider(file, component);
                     emitUseClientEffect(file, component);
                     emitUseMount(file, component);
-                    emitUseWatch(file, component);
+                    emitUseTask(file, component);
                     emitUseCleanup(file, component);
                     emitTagNameHack(file, component, (_a = component.meta.useMetadata) === null || _a === void 0 ? void 0 : _a.elementTag);
                     emitTagNameHack(file, component, (_b = component.meta.useMetadata) === null || _b === void 0 ? void 0 : _b.componentElementTag);
@@ -124,10 +124,10 @@ function emitUseMount(file, component) {
         file.src.emit(file.import(file.qwikModule, 'useMount$').localName, '(()=>{', code, '});');
     }
 }
-function emitUseWatch(file, component) {
+function emitUseTask(file, component) {
     if (component.hooks.onUpdate) {
         component.hooks.onUpdate.forEach(function (onUpdate) {
-            file.src.emit(file.import(file.qwikModule, 'useWatch$').localName, '(({track})=>{');
+            file.src.emit(file.import(file.qwikModule, 'useTask$').localName, '(({track})=>{');
             emitTrackExpressions(file.src, onUpdate.deps);
             file.src.emit(convertTypeScriptToJS(onUpdate.code));
             file.src.emit('});');
@@ -135,17 +135,13 @@ function emitUseWatch(file, component) {
     }
 }
 function emitTrackExpressions(src, deps) {
-    if (deps && deps.startsWith('[') && deps.endsWith(']')) {
-        var dependencies = deps.substring(1, deps.length - 1).split(',');
-        dependencies.forEach(function (dep) {
-            var lastDotIdx = dep.lastIndexOf('.');
-            if (lastDotIdx > 0) {
-                var objExp = dep.substring(0, lastDotIdx).replace(/\?$/, '');
-                var objProp = dep.substring(lastDotIdx + 1);
-                objExp && src.emit(objExp, '&&track(', objExp, ',"', objProp, '");');
-            }
-        });
+    if (!deps) {
+        return;
     }
+    var dependencies = deps.substring(1, deps.length - 1).split(',');
+    dependencies.forEach(function (dep) {
+        src.emit("track(() => ".concat(dep, ");"));
+    });
 }
 function emitUseCleanup(file, component) {
     if (component.hooks.onUnMount) {
@@ -161,26 +157,26 @@ function emitJSX(file, component, mutable) {
     file.src.emit('return ', (0, jsx_1.renderJSXNodes)(file, directives, handlers, component.children, styles, parentSymbolBindings));
 }
 function emitUseContextProvider(file, component) {
-    Object.keys(component.context.set).forEach(function (ctxKey) {
-        var context = component.context.set[ctxKey];
-        file.src.emit(file.import(file.qwikModule, 'useContextProvider').localName, '(', context.name, ',', file.import(file.qwikModule, 'useStore').localName, '({');
-        for (var _i = 0, _a = Object.keys(context.value || {}); _i < _a.length; _i++) {
-            var prop = _a[_i];
-            var propValue = context.value[prop];
-            file.src.emit(prop, ':');
+    Object.entries(component.context.set).forEach(function (_a) {
+        var _ctxKey = _a[0], context = _a[1];
+        file.src.emit("\n      ".concat(file.import(file.qwikModule, 'useContextProvider').localName, "(\n        ").concat(context.name, ", ").concat(file.import(file.qwikModule, 'useStore').localName, "({\n      "));
+        for (var _i = 0, _b = Object.entries(context.value || {}); _i < _b.length; _i++) {
+            var _c = _b[_i], prop = _c[0], propValue = _c[1];
+            file.src.emit("".concat(prop, ": "));
             switch (propValue === null || propValue === void 0 ? void 0 : propValue.type) {
                 case 'getter':
-                    file.src.emit('(()=>{', extractGetterBody(propValue.code), '})(),');
-                    continue;
+                    file.src.emit("(()=>{\n            ".concat(extractGetterBody(propValue.code), "\n          })()"));
+                    break;
                 case 'function':
                 case 'method':
                     throw new Error('Qwik: Functions are not supported in context');
                 case 'property':
-                    file.src.emit((0, stable_inject_1.stableInject)(propValue.code), ',');
-                    continue;
+                    file.src.emit((0, stable_inject_1.stableInject)(propValue.code));
+                    break;
             }
+            file.src.emit(',');
         }
-        file.src.emit('})', ');');
+        file.src.emit('}));');
     });
 }
 function emitUseContext(file, component) {
