@@ -28,6 +28,7 @@ var get_refs_1 = require("../../helpers/get-refs");
 var render_update_hooks_1 = require("./render-update-hooks");
 var render_mount_hook_1 = require("./render-mount-hook");
 var babel_transform_1 = require("../../helpers/babel-transform");
+var replace_identifiers_1 = require("../../helpers/replace-identifiers");
 var checkIsComponentNode = function (node) {
     return node.name === '@builder.io/mitosis/component';
 };
@@ -57,7 +58,6 @@ var isValidAlpineBinding = function (str) {
 };
 exports.isValidAlpineBinding = isValidAlpineBinding;
 var removeOnFromEventName = function (str) { return str.replace(/^on/, ''); };
-var prefixEvent = function (str) { return str.replace(/(?<=[\s]|^)event/gm, '$event'); };
 var removeTrailingSemicolon = function (str) { return str.replace(/;$/, ''); };
 var trim = function (str) { return str.trim(); };
 var replaceInputRefs = (0, lodash_1.curry)(function (json, str) {
@@ -71,7 +71,13 @@ var getStateObjectString = function (json) {
     return (0, lodash_1.flow)(get_state_object_string_1.getStateObjectStringFromComponent, trim, replaceInputRefs(json), (0, render_mount_hook_1.renderMountHook)(json), (0, render_update_hooks_1.renderUpdateHooks)(json), replaceStateWithThis)(json);
 };
 var bindEventHandlerKey = (0, lodash_1.flowRight)(dash_case_1.dashCase, removeOnFromEventName);
-var bindEventHandlerValue = (0, lodash_1.flowRight)(prefixEvent, removeTrailingSemicolon, trim, remove_surrounding_block_1.removeSurroundingBlock, strip_state_and_props_refs_1.stripStateAndPropsRefs);
+var bindEventHandlerValue = (0, lodash_1.flowRight)(function (x) {
+    return (0, replace_identifiers_1.replaceIdentifiers)({
+        code: x,
+        from: 'event',
+        to: '$event',
+    });
+}, removeTrailingSemicolon, trim, remove_surrounding_block_1.removeSurroundingBlock, strip_state_and_props_refs_1.stripStateAndPropsRefs);
 var bindEventHandler = function (_a) {
     var useShorthandSyntax = _a.useShorthandSyntax;
     return function (eventName, code) {
