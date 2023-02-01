@@ -25,6 +25,10 @@ export declare type MitosisConfig = {
      */
     files?: string | string[];
     /**
+     * Optional list of globs to exclude from transpilation.
+     */
+    exclude?: string[];
+    /**
      * The directory where overrides are stored. The structure of the override directory must match that of the source code,
      * with each target having its own sub-directory: `${overridesDir}/${target}/*`
      * Defaults to `overrides`.
