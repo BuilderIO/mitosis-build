@@ -8,7 +8,6 @@ function collectClassString(json, bindingOpenChar, bindingCloseChar) {
     if (bindingOpenChar === void 0) { bindingOpenChar = '{'; }
     if (bindingCloseChar === void 0) { bindingCloseChar = '}'; }
     var staticClasses = [];
-    var hasStaticClasses = Boolean(staticClasses.length);
     if (json.properties.class) {
         staticClasses.push(json.properties.class);
         delete json.properties.class;
@@ -28,6 +27,7 @@ function collectClassString(json, bindingOpenChar, bindingCloseChar) {
     }
     var staticClassesString = staticClasses.join(' ');
     var dynamicClassesString = dynamicClasses.join(" + ' ' + ");
+    var hasStaticClasses = Boolean(staticClasses.length);
     var hasDynamicClasses = Boolean(dynamicClasses.length);
     if (hasStaticClasses && !hasDynamicClasses) {
         return "\"".concat(staticClassesString, "\"");
