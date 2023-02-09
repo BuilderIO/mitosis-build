@@ -515,7 +515,7 @@ var _componentToReact = function (json, options, isSubComponent) {
         ? "\n          useEffect(() => {\n            ".concat((0, state_2.processHookCode)({
             str: json.hooks.onInit.code,
             options: options,
-        }), "\n          })\n          ")
+        }), "\n          }, [])\n          ")
         : '', ((_h = json.hooks.onMount) === null || _h === void 0 ? void 0 : _h.code)
         ? "useEffect(() => {\n            ".concat((0, state_2.processHookCode)({
             str: json.hooks.onMount.code,
