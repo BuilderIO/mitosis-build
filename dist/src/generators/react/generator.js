@@ -268,7 +268,7 @@ var _componentToReact = function (json, options, isSubComponent) {
         ? "\n    /** @jsx h */\n    import { h, Fragment } from 'preact';\n    "
         : options.type !== 'native'
             ? "import * as React from 'react';"
-            : "\n  import * as React from 'react';\n  import { View, StyleSheet, Image, Text } from 'react-native';\n  ", styledComponentsCode ? "import styled from 'styled-components';\n" : '', reactLibImports.size
+            : "\n  import * as React from 'react';\n  import { FlatList, ScrollView, View, StyleSheet, Image, Text } from 'react-native';\n  ", styledComponentsCode ? "import styled from 'styled-components';\n" : '', reactLibImports.size
         ? "import { ".concat(Array.from(reactLibImports).join(', '), " } from '").concat(options.preact ? 'preact/hooks' : 'react', "'")
         : '', componentHasStyles && stylesType === 'emotion' && options.format !== 'lite'
         ? "/** @jsx jsx */\n    import { jsx } from '@emotion/react'".trim()
