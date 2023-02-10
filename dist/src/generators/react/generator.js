@@ -18,21 +18,18 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.componentToReact = exports.componentToPreact = exports.blockToReact = exports.contextPropDrillingKey = void 0;
+exports.componentToReact = exports.componentToPreact = exports.contextPropDrillingKey = void 0;
 var dedent_1 = __importDefault(require("dedent"));
 var json5_1 = __importDefault(require("json5"));
-var lodash_1 = require("lodash");
 var standalone_1 = require("prettier/standalone");
 var collect_css_1 = require("../../helpers/styles/collect-css");
 var create_mitosis_node_1 = require("../../helpers/create-mitosis-node");
 var fast_clone_1 = require("../../helpers/fast-clone");
-var filter_empty_text_nodes_1 = require("../../helpers/filter-empty-text-nodes");
 var get_refs_1 = require("../../helpers/get-refs");
 var get_props_ref_1 = require("../../helpers/get-props-ref");
 var get_state_object_string_1 = require("../../helpers/get-state-object-string");
 var getters_to_functions_1 = require("../../helpers/getters-to-functions");
 var handle_missing_state_1 = require("../../helpers/handle-missing-state");
-var is_valid_attribute_name_1 = require("../../helpers/is-valid-attribute-name");
 var map_refs_1 = require("../../helpers/map-refs");
 var process_http_requests_1 = require("../../helpers/process-http-requests");
 var process_tag_references_1 = require("../../helpers/process-tag-references");
@@ -40,7 +37,6 @@ var render_imports_1 = require("../../helpers/render-imports");
 var replace_new_lines_in_strings_1 = require("../../helpers/replace-new-lines-in-strings");
 var strip_meta_properties_1 = require("../../helpers/strip-meta-properties");
 var plugins_1 = require("../../modules/plugins");
-var jsx_1 = require("../../parsers/jsx");
 var context_1 = require("../helpers/context");
 var react_native_1 = require("../react-native");
 var collect_styled_components_1 = require("../../helpers/styles/collect-styled-components");
@@ -49,15 +45,9 @@ var state_1 = require("../../helpers/state");
 var state_2 = require("./state");
 var helpers_2 = require("./helpers");
 var hash_sum_1 = __importDefault(require("hash-sum"));
-var for_1 = require("../../helpers/nodes/for");
 var bindings_1 = require("../../helpers/bindings");
+var blocks_1 = require("./blocks");
 exports.contextPropDrillingKey = '_context';
-var openFrag = function (options) { return getFragment('open', options); };
-var closeFrag = function (options) { return getFragment('close', options); };
-function getFragment(type, options) {
-    var tagName = options.preact ? 'Fragment' : '';
-    return type === 'open' ? "<".concat(tagName, ">") : "</".concat(tagName, ">");
-}
 /**
  * If the root Mitosis component only has 1 child, and it is a `Show`/`For` node, then we need to wrap it in a fragment.
  * Otherwise, we end up with invalid React render code.
@@ -66,214 +56,6 @@ function getFragment(type, options) {
 var isRootSpecialNode = function (json) {
     return json.children.length === 1 && ['Show', 'For'].includes(json.children[0].name);
 };
-var wrapInFragment = function (json) { return json.children.length !== 1; };
-var NODE_MAPPERS = {
-    Slot: function (json, options, component, parentSlots) {
-        var _a;
-        var _b, _c;
-        var slotName = ((_b = json.bindings.name) === null || _b === void 0 ? void 0 : _b.code) || json.properties.name;
-        var hasChildren = json.children.length;
-        var renderChildren = function () {
-            var _a;
-            var childrenStr = (_a = json.children) === null || _a === void 0 ? void 0 : _a.map(function (item) { return (0, exports.blockToReact)(item, options, component); }).join('\n').trim();
-            /**
-             * Ad-hoc way of figuring out if the children defaultProp is:
-             * - a JSX element, e.g. `<div>foo</div>`
-             * - a JS expression, e.g. `true`, `false`
-             * - a string, e.g. `'Default text'`
-             *
-             * and correctly wrapping it in quotes when appropriate.
-             */
-            if (childrenStr.startsWith("<") && childrenStr.endsWith(">")) {
-                return childrenStr;
-            }
-            else if (['false', 'true', 'null', 'undefined'].includes(childrenStr)) {
-                return childrenStr;
-            }
-            else {
-                return "\"".concat(childrenStr, "\"");
-            }
-        };
-        if (!slotName) {
-            // TODO: update MitosisNode for simple code
-            var key = Object.keys(json.bindings).find(Boolean);
-            if (key && parentSlots) {
-                var propKey = (0, lodash_1.camelCase)('Slot' + key[0].toUpperCase() + key.substring(1));
-                parentSlots.push({ key: propKey, value: (_c = json.bindings[key]) === null || _c === void 0 ? void 0 : _c.code });
-                return '';
-            }
-            if (hasChildren) {
-                component.defaultProps = __assign(__assign({}, (component.defaultProps || {})), { children: {
-                        code: renderChildren(),
-                        type: 'property',
-                    } });
-            }
-            return "{".concat((0, helpers_2.processBinding)('props.children', options), "}");
-        }
-        var slotProp = (0, helpers_2.processBinding)(slotName, options).replace('name=', '');
-        if (!slotProp.startsWith('props.slot')) {
-            slotProp = "props.slot".concat((0, lodash_1.upperFirst)((0, lodash_1.camelCase)(slotProp)));
-        }
-        if (hasChildren) {
-            component.defaultProps = __assign(__assign({}, (component.defaultProps || {})), (_a = {}, _a[slotProp.replace('props.', '')] = {
-                code: renderChildren(),
-                type: 'property',
-            }, _a));
-        }
-        return "{".concat(slotProp, "}");
-    },
-    Fragment: function (json, options, component) {
-        var wrap = wrapInFragment(json);
-        return "".concat(wrap ? getFragment('open', options) : '').concat(json.children
-            .map(function (item) { return (0, exports.blockToReact)(item, options, component); })
-            .join('\n')).concat(wrap ? getFragment('close', options) : '');
-    },
-    For: function (_json, options, component) {
-        var _a;
-        var json = _json;
-        var wrap = wrapInFragment(json);
-        var forArguments = (0, for_1.getForArguments)(json).join(', ');
-        return "{".concat((0, helpers_2.processBinding)((_a = json.bindings.each) === null || _a === void 0 ? void 0 : _a.code, options), "?.map((").concat(forArguments, ") => (\n      ").concat(wrap ? openFrag(options) : '').concat(json.children
-            .filter(filter_empty_text_nodes_1.filterEmptyTextNodes)
-            .map(function (item) { return (0, exports.blockToReact)(item, options, component); })
-            .join('\n')).concat(wrap ? closeFrag(options) : '', "\n    ))}");
-    },
-    Show: function (json, options, component) {
-        var _a;
-        var wrap = wrapInFragment(json);
-        return "{".concat((0, helpers_2.processBinding)((_a = json.bindings.when) === null || _a === void 0 ? void 0 : _a.code, options), " ? (\n      ").concat(wrap ? openFrag(options) : '').concat(json.children
-            .filter(filter_empty_text_nodes_1.filterEmptyTextNodes)
-            .map(function (item) { return (0, exports.blockToReact)(item, options, component); })
-            .join('\n')).concat(wrap ? closeFrag(options) : '', "\n    ) : ").concat(!json.meta.else ? 'null' : (0, exports.blockToReact)(json.meta.else, options, component), "}");
-    },
-};
-var ATTTRIBUTE_MAPPERS = {
-    spellcheck: 'spellCheck',
-    autocapitalize: 'autoCapitalize',
-    autocomplete: 'autoComplete',
-    for: 'htmlFor',
-};
-// TODO: Maybe in the future allow defining `string | function` as values
-var BINDING_MAPPERS = __assign({ ref: function (ref, value, options) {
-        var regexp = /(.+)?props\.(.+)( |\)|;|\()?$/m;
-        if (regexp.test(value)) {
-            var match = regexp.exec(value);
-            var prop = match === null || match === void 0 ? void 0 : match[2];
-            if (prop) {
-                return [ref, prop];
-            }
-        }
-        return [ref, value];
-    }, innerHTML: function (_key, value) {
-        return ['dangerouslySetInnerHTML', "{__html: ".concat(value.replace(/\s+/g, ' '), "}")];
-    } }, ATTTRIBUTE_MAPPERS);
-var blockToReact = function (json, options, component, parentSlots) {
-    var _a, _b, _c;
-    if (NODE_MAPPERS[json.name]) {
-        return NODE_MAPPERS[json.name](json, options, component, parentSlots);
-    }
-    if (json.properties._text) {
-        var text = json.properties._text;
-        if (options.type === 'native' && text.trim().length) {
-            return "<Text>".concat(text, "</Text>");
-        }
-        return text;
-    }
-    if ((_a = json.bindings._text) === null || _a === void 0 ? void 0 : _a.code) {
-        var processed = (0, helpers_2.processBinding)(json.bindings._text.code, options);
-        if (options.type === 'native') {
-            return "<Text>{".concat(processed, "}</Text>");
-        }
-        return "{".concat(processed, "}");
-    }
-    var str = '';
-    str += "<".concat(json.name, " ");
-    for (var key in json.properties) {
-        var value = (json.properties[key] || '').replace(/"/g, '&quot;').replace(/\n/g, '\\n');
-        if (key === 'class') {
-            str = "".concat(str.trim(), " className=\"").concat(value, "\" ");
-        }
-        else if (BINDING_MAPPERS[key]) {
-            var mapper = BINDING_MAPPERS[key];
-            if (typeof mapper === 'function') {
-                var _d = mapper(key, value, options), newKey = _d[0], newValue = _d[1];
-                str += " ".concat(newKey, "={").concat(newValue, "} ");
-            }
-            else {
-                str += " ".concat(BINDING_MAPPERS[key], "=\"").concat(value, "\" ");
-            }
-        }
-        else {
-            if ((0, is_valid_attribute_name_1.isValidAttributeName)(key)) {
-                str += " ".concat(key, "=\"").concat(value.replace(/"/g, '&quot;'), "\" ");
-            }
-        }
-    }
-    for (var key in json.bindings) {
-        var value = String((_b = json.bindings[key]) === null || _b === void 0 ? void 0 : _b.code);
-        if (key === 'css' && value.trim() === '{}') {
-            continue;
-        }
-        var useBindingValue = (0, helpers_2.processBinding)(value, options);
-        if (((_c = json.bindings[key]) === null || _c === void 0 ? void 0 : _c.type) === 'spread') {
-            str += " {...(".concat(value, ")} ");
-        }
-        else if (key.startsWith('on')) {
-            var _e = json.bindings[key].arguments, cusArgs = _e === void 0 ? ['event'] : _e;
-            str += " ".concat(key, "={(").concat(cusArgs.join(','), ") => ").concat((0, state_2.updateStateSettersInCode)(useBindingValue, options), " } ");
-        }
-        else if (key.startsWith('slot')) {
-            // <Component slotProjected={<AnotherComponent />} />
-            str += " ".concat(key, "={").concat(value, "} ");
-        }
-        else if (key === 'class') {
-            str += " className={".concat(useBindingValue, "} ");
-        }
-        else if (BINDING_MAPPERS[key]) {
-            var mapper = BINDING_MAPPERS[key];
-            if (typeof mapper === 'function') {
-                var _f = mapper(key, useBindingValue, options), newKey = _f[0], newValue = _f[1];
-                str += " ".concat(newKey, "={").concat(newValue, "} ");
-            }
-            else {
-                str += " ".concat(BINDING_MAPPERS[key], "={").concat(useBindingValue, "} ");
-            }
-        }
-        else {
-            if ((0, is_valid_attribute_name_1.isValidAttributeName)(key)) {
-                str += " ".concat(key, "={").concat(useBindingValue, "} ");
-            }
-        }
-    }
-    if (jsx_1.selfClosingTags.has(json.name)) {
-        return str + ' />';
-    }
-    // Self close by default if no children
-    if (!json.children.length) {
-        str += ' />';
-        return str;
-    }
-    // TODO: update MitosisNode for simple code
-    var needsToRenderSlots = [];
-    var childrenNodes = '';
-    if (json.children) {
-        childrenNodes = json.children
-            .map(function (item) { return (0, exports.blockToReact)(item, options, component, needsToRenderSlots); })
-            .join('\n');
-    }
-    if (needsToRenderSlots.length) {
-        needsToRenderSlots.forEach(function (_a) {
-            var key = _a.key, value = _a.value;
-            str += " ".concat(key, "={").concat(value, "} ");
-        });
-    }
-    str = str.trim() + '>';
-    if (json.children) {
-        str += childrenNodes;
-    }
-    return str + "</".concat(json.name, ">");
-};
-exports.blockToReact = blockToReact;
 var getRefsString = function (json, refs, options) {
     var _a, _b;
     var hasStateArgument = false;
@@ -460,7 +242,7 @@ var _componentToReact = function (json, options, isSubComponent) {
         ((_f = json.hooks.onInit) === null || _f === void 0 ? void 0 : _f.code)) {
         reactLibImports.add('useEffect');
     }
-    var wrap = wrapInFragment(json) ||
+    var wrap = (0, helpers_2.wrapInFragment)(json) ||
         (componentHasStyles && (stylesType === 'styled-jsx' || stylesType === 'style-tag')) ||
         isRootSpecialNode(json);
     var _o = getRefsString(json, allRefs, options), hasStateArgument = _o[0], refsString = _o[1];
@@ -526,11 +308,11 @@ var _componentToReact = function (json, options, isSubComponent) {
             str: json.hooks.onUnMount.code,
             options: options,
         }), "\n            }\n          }, [])")
-        : '', wrap ? openFrag(options) : '', json.children.map(function (item) { return (0, exports.blockToReact)(item, options, json, []); }).join('\n'), componentHasStyles && stylesType === 'styled-jsx'
+        : '', wrap ? (0, helpers_2.openFrag)(options) : '', json.children.map(function (item) { return (0, blocks_1.blockToReact)(item, options, json, []); }).join('\n'), componentHasStyles && stylesType === 'styled-jsx'
         ? "<style jsx>{`".concat(css, "`}</style>")
         : componentHasStyles && stylesType === 'style-tag'
             ? "<style>{`".concat(css, "`}</style>")
-            : '', wrap ? closeFrag(options) : '', isForwardRef ? ')' : '', getPropsDefinition({ json: json }), !nativeStyles
+            : '', wrap ? (0, helpers_2.closeFrag)(options) : '', isForwardRef ? ')' : '', getPropsDefinition({ json: json }), !nativeStyles
         ? ''
         : "\n      const styles = StyleSheet.create(".concat(json5_1.default.stringify(nativeStyles), ");\n    "), styledComponentsCode ? styledComponentsCode : '', stateType === 'mobx'
         ? "\n      const observed".concat(json.name || 'MyComponent', " = observer(").concat(json.name || 'MyComponent', ");\n      export default observed").concat(json.name || 'MyComponent', ";\n    ")

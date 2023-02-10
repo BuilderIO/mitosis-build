@@ -14,5 +14,8 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.blockToReact = void 0;
 __exportStar(require("./generator"), exports);
 __exportStar(require("./types"), exports);
+var blocks_1 = require("./blocks");
+Object.defineProperty(exports, "blockToReact", { enumerable: true, get: function () { return blocks_1.blockToReact; } });
