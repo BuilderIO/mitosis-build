@@ -20,6 +20,7 @@ var qwik_1 = require("./generators/qwik");
 var marko_1 = require("./generators/marko");
 var lit_1 = require("./generators/lit");
 var rsc_1 = require("./generators/rsc");
+var taro_1 = require("./generators/taro");
 exports.builder = builder_1.componentToBuilder;
 exports.targets = {
     alpine: alpine_1.componentToAlpine,
@@ -44,4 +45,5 @@ exports.targets = {
     preact: react_2.componentToPreact,
     lit: lit_1.componentToLit,
     rsc: rsc_1.componentToRsc,
+    taro: taro_1.componentToTaro,
 };

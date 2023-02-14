@@ -97,6 +97,7 @@ __exportStar(require("./generators/template"), exports);
 __exportStar(require("./generators/swift-ui"), exports);
 __exportStar(require("./generators/lit"), exports);
 __exportStar(require("./generators/react-native"), exports);
+__exportStar(require("./generators/taro"), exports);
 __exportStar(require("./helpers/is-mitosis-node"), exports);
 __exportStar(require("./types/mitosis-node"), exports);
 __exportStar(require("./types/mitosis-component"), exports);

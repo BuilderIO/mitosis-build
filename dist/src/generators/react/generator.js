@@ -177,6 +177,20 @@ var componentToReact = function (reactOptions) {
     };
 };
 exports.componentToReact = componentToReact;
+// TODO: import target components when they are required
+var getDefaultImport = function (json, options) {
+    var preact = options.preact, type = options.type, plugins = options.plugins;
+    if (preact) {
+        return "\n    /** @jsx h */\n    import { h, Fragment } from 'preact';\n    ";
+    }
+    if (type === 'native') {
+        return "\n    import * as React from 'react';\n    import { FlatList, ScrollView, View, StyleSheet, Image, Text } from 'react-native';\n    ";
+    }
+    if (type === 'taro') {
+        return "\n    import * as React from 'react';\n    ";
+    }
+    return "import * as React from 'react';";
+};
 var _componentToReact = function (json, options, isSubComponent) {
     var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l;
     if (isSubComponent === void 0) { isSubComponent = false; }
@@ -264,11 +278,7 @@ var _componentToReact = function (json, options, isSubComponent) {
             .join(',');
         return "".concat(json.name || 'MyComponent', ".defaultProps = {").concat(defalutPropsString, "};");
     };
-    var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n  ", "\n  ", "\n  ", "\n  ", "\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "", "", "function ", "(", "", ") {\n    ", "\n    ", "\n      ", "\n      ", "\n      ", "\n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      return (\n        ", "\n        ", "\n        ", "\n        ", "\n      );\n    }", "\n\n    ", "\n\n    ", "\n\n    ", "\n    ", "\n\n  "], ["\n  ", "\n  ", "\n  ", "\n  ", "\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "", "", "function ", "(", "", ") {\n    ", "\n    ", "\n      ", "\n      ", "\n      ", "\n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      return (\n        ", "\n        ", "\n        ", "\n        ", "\n      );\n    }", "\n\n    ", "\n\n    ", "\n\n    ", "\n    ", "\n\n  "])), options.preact
-        ? "\n    /** @jsx h */\n    import { h, Fragment } from 'preact';\n    "
-        : options.type !== 'native'
-            ? "import * as React from 'react';"
-            : "\n  import * as React from 'react';\n  import { FlatList, ScrollView, View, StyleSheet, Image, Text } from 'react-native';\n  ", styledComponentsCode ? "import styled from 'styled-components';\n" : '', reactLibImports.size
+    var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n  ", "\n  ", "\n  ", "\n  ", "\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "", "", "function ", "(", "", ") {\n    ", "\n    ", "\n      ", "\n      ", "\n      ", "\n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      return (\n        ", "\n        ", "\n        ", "\n        ", "\n      );\n    }", "\n\n    ", "\n\n    ", "\n\n    ", "\n    ", "\n\n  "], ["\n  ", "\n  ", "\n  ", "\n  ", "\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "", "", "function ", "(", "", ") {\n    ", "\n    ", "\n      ", "\n      ", "\n      ", "\n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      return (\n        ", "\n        ", "\n        ", "\n        ", "\n      );\n    }", "\n\n    ", "\n\n    ", "\n\n    ", "\n    ", "\n\n  "])), getDefaultImport(json, options), styledComponentsCode ? "import styled from 'styled-components';\n" : '', reactLibImports.size
         ? "import { ".concat(Array.from(reactLibImports).join(', '), " } from '").concat(options.preact ? 'preact/hooks' : 'react', "'")
         : '', componentHasStyles && stylesType === 'emotion' && options.format !== 'lite'
         ? "/** @jsx jsx */\n    import { jsx } from '@emotion/react'".trim()
