@@ -24,8 +24,8 @@ exports.mergeOptions = void 0;
 /**
  * Merges options while combining the `plugins` array.
  */
-var mergeOptions = function (a, b) {
+var mergeOptions = function (a, b, c) {
     if (b === void 0) { b = {}; }
-    return __assign(__assign(__assign({}, a), b), { plugins: __spreadArray(__spreadArray([], (a.plugins || []), true), (b.plugins || []), true) });
+    return __assign(__assign(__assign(__assign({}, a), b), c), { plugins: __spreadArray(__spreadArray(__spreadArray([], (a.plugins || []), true), (b.plugins || []), true), ((c === null || c === void 0 ? void 0 : c.plugins) || []), true) });
 };
 exports.mergeOptions = mergeOptions;

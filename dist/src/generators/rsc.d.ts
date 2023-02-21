@@ -1,4 +1,4 @@
-import { BaseTranspilerOptions, TranspilerGenerator } from '../types/transpiler';
-export interface ToRscOptions extends BaseTranspilerOptions {
-}
-export declare const componentToRsc: TranspilerGenerator<ToRscOptions>;
+import { TranspilerGenerator } from '../types/transpiler';
+import { ToReactOptions } from './react';
+export declare type ToRscOptions = ToReactOptions;
+export declare const componentToRsc: TranspilerGenerator<Partial<ToRscOptions>>;

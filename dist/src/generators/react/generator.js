@@ -34,7 +34,6 @@ var map_refs_1 = require("../../helpers/map-refs");
 var process_http_requests_1 = require("../../helpers/process-http-requests");
 var process_tag_references_1 = require("../../helpers/process-tag-references");
 var render_imports_1 = require("../../helpers/render-imports");
-var replace_new_lines_in_strings_1 = require("../../helpers/replace-new-lines-in-strings");
 var strip_meta_properties_1 = require("../../helpers/strip-meta-properties");
 var plugins_1 = require("../../modules/plugins");
 var context_1 = require("../helpers/context");
@@ -47,6 +46,8 @@ var helpers_2 = require("./helpers");
 var hash_sum_1 = __importDefault(require("hash-sum"));
 var bindings_1 = require("../../helpers/bindings");
 var blocks_1 = require("./blocks");
+var merge_options_1 = require("../../helpers/merge-options");
+var replace_new_lines_in_strings_1 = require("../../helpers/replace-new-lines-in-strings");
 exports.contextPropDrillingKey = '_context';
 /**
  * If the root Mitosis component only has 1 child, and it is a `Show`/`For` node, then we need to wrap it in a fragment.
@@ -131,6 +132,7 @@ var getInitCode = function (json, options) {
 var DEFAULT_OPTIONS = {
     stateType: 'useState',
     stylesType: 'styled-jsx',
+    type: 'dom',
 };
 var componentToPreact = function (reactOptions) {
     if (reactOptions === void 0) { reactOptions = {}; }
@@ -142,7 +144,7 @@ var componentToReact = function (reactOptions) {
     return function (_a) {
         var component = _a.component;
         var json = (0, fast_clone_1.fastClone)(component);
-        var options = __assign(__assign({}, DEFAULT_OPTIONS), reactOptions);
+        var options = (0, merge_options_1.mergeOptions)(DEFAULT_OPTIONS, reactOptions);
         if (options.plugins) {
             json = (0, plugins_1.runPreJsonPlugins)(json, options.plugins);
         }
@@ -179,7 +181,7 @@ var componentToReact = function (reactOptions) {
 exports.componentToReact = componentToReact;
 // TODO: import target components when they are required
 var getDefaultImport = function (json, options) {
-    var preact = options.preact, type = options.type, plugins = options.plugins;
+    var preact = options.preact, type = options.type;
     if (preact) {
         return "\n    /** @jsx h */\n    import { h, Fragment } from 'preact';\n    ";
     }
@@ -191,6 +193,21 @@ var getDefaultImport = function (json, options) {
     }
     return "import * as React from 'react';";
 };
+var getPropsDefinition = function (_a) {
+    var json = _a.json;
+    if (!json.defaultProps)
+        return '';
+    var defaultPropsString = Object.keys(json.defaultProps)
+        .map(function (prop) {
+        var _a;
+        var value = json.defaultProps.hasOwnProperty(prop)
+            ? (_a = json.defaultProps[prop]) === null || _a === void 0 ? void 0 : _a.code
+            : 'undefined';
+        return "".concat(prop, ": ").concat(value);
+    })
+        .join(',');
+    return "".concat(json.name, ".defaultProps = {").concat(defaultPropsString, "};");
+};
 var _componentToReact = function (json, options, isSubComponent) {
     var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l;
     if (isSubComponent === void 0) { isSubComponent = false; }
@@ -199,9 +216,15 @@ var _componentToReact = function (json, options, isSubComponent) {
     (0, process_tag_references_1.processTagReferences)(json);
     var contextStr = provideContext(json, options);
     var componentHasStyles = (0, helpers_1.hasCss)(json);
+    if (json.name === 'Column' && options.type === 'native') {
+        console.log('componentHasStyles', componentHasStyles);
+    }
     if (options.stateType === 'useState') {
         (0, getters_to_functions_1.gettersToFunctions)(json);
         (0, state_2.updateStateSetters)(json, options);
+    }
+    if (!json.name) {
+        json.name = 'MyComponent';
     }
     // const domRefs = getRefs(json);
     var allRefs = Object.keys(json.refs);
@@ -213,32 +236,33 @@ var _componentToReact = function (json, options, isSubComponent) {
         var meta = (_b = json.meta.useMetadata) === null || _b === void 0 ? void 0 : _b.forwardRef;
         options.forwardRef = meta || forwardRef;
     }
-    var forwardRefType = json.propsTypeRef && forwardRef && json.propsTypeRef !== 'any'
-        ? "".concat(json.propsTypeRef, "[\"").concat(forwardRef, "\"]")
-        : undefined;
-    var stylesType = options.stylesType || 'emotion';
-    var stateType = options.stateType || 'mobx';
-    if (stateType === 'builder') {
+    var forwardRefType = options.typescript && json.propsTypeRef && forwardRef && json.propsTypeRef !== 'any'
+        ? "<".concat(json.propsTypeRef, "[\"").concat(forwardRef, "\"]>")
+        : '';
+    if (options.stateType === 'builder') {
         // Always use state if we are generate Builder react code
         hasState = true;
     }
-    var useStateCode = stateType === 'useState' && (0, state_2.getUseStateCode)(json, options);
+    var useStateCode = options.stateType === 'useState' ? (0, state_2.getUseStateCode)(json, options) : '';
     if (options.plugins) {
         json = (0, plugins_1.runPostJsonPlugins)(json, options.plugins);
     }
-    var css = stylesType === 'styled-jsx'
+    var css = options.stylesType === 'styled-jsx'
         ? (0, collect_css_1.collectCss)(json)
-        : stylesType === 'style-tag'
+        : options.stylesType === 'style-tag'
             ? (0, collect_css_1.collectCss)(json, {
                 prefix: (0, hash_sum_1.default)(json),
             })
             : null;
-    var styledComponentsCode = stylesType === 'styled-components' && componentHasStyles && (0, collect_styled_components_1.collectStyledComponents)(json);
+    var styledComponentsCode = (options.stylesType === 'styled-components' &&
+        componentHasStyles &&
+        (0, collect_styled_components_1.collectStyledComponents)(json)) ||
+        '';
     if (options.format !== 'lite') {
         (0, strip_meta_properties_1.stripMetaProperties)(json);
     }
     var reactLibImports = new Set();
-    if (useStateCode && useStateCode.includes('useState')) {
+    if (useStateCode.includes('useState')) {
         reactLibImports.add('useState');
     }
     if ((0, context_1.hasContext)(json) && options.contextType !== 'prop-drill') {
@@ -257,77 +281,75 @@ var _componentToReact = function (json, options, isSubComponent) {
         reactLibImports.add('useEffect');
     }
     var wrap = (0, helpers_2.wrapInFragment)(json) ||
-        (componentHasStyles && (stylesType === 'styled-jsx' || stylesType === 'style-tag')) ||
+        (componentHasStyles &&
+            (options.stylesType === 'styled-jsx' || options.stylesType === 'style-tag')) ||
         isRootSpecialNode(json);
     var _o = getRefsString(json, allRefs, options), hasStateArgument = _o[0], refsString = _o[1];
-    var nativeStyles = stylesType === 'react-native' && componentHasStyles && (0, react_native_1.collectReactNativeStyles)(json);
+    // NOTE: `collectReactNativeStyles` must run before style generation in the component generation body, as it has
+    // side effects that delete styles bindings from the JSON.
+    var reactNativeStyles = options.stylesType === 'react-native' && componentHasStyles
+        ? (0, react_native_1.collectReactNativeStyles)(json)
+        : undefined;
     var propType = json.propsTypeRef || 'any';
-    var propsArgs = "props".concat(options.typescript ? ":".concat(propType) : '');
-    var getPropsDefinition = function (_a) {
-        var json = _a.json;
-        if (!json.defaultProps)
-            return '';
-        var defalutPropsString = Object.keys(json.defaultProps)
-            .map(function (prop) {
-            var _a;
-            var value = json.defaultProps.hasOwnProperty(prop)
-                ? (_a = json.defaultProps[prop]) === null || _a === void 0 ? void 0 : _a.code
-                : 'undefined';
-            return "".concat(prop, ": ").concat(value);
-        })
-            .join(',');
-        return "".concat(json.name || 'MyComponent', ".defaultProps = {").concat(defalutPropsString, "};");
-    };
-    var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n  ", "\n  ", "\n  ", "\n  ", "\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "", "", "function ", "(", "", ") {\n    ", "\n    ", "\n      ", "\n      ", "\n      ", "\n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      return (\n        ", "\n        ", "\n        ", "\n        ", "\n      );\n    }", "\n\n    ", "\n\n    ", "\n\n    ", "\n    ", "\n\n  "], ["\n  ", "\n  ", "\n  ", "\n  ", "\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "", "", "function ", "(", "", ") {\n    ", "\n    ", "\n      ", "\n      ", "\n      ", "\n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      return (\n        ", "\n        ", "\n        ", "\n        ", "\n      );\n    }", "\n\n    ", "\n\n    ", "\n\n    ", "\n    ", "\n\n  "])), getDefaultImport(json, options), styledComponentsCode ? "import styled from 'styled-components';\n" : '', reactLibImports.size
-        ? "import { ".concat(Array.from(reactLibImports).join(', '), " } from '").concat(options.preact ? 'preact/hooks' : 'react', "'")
-        : '', componentHasStyles && stylesType === 'emotion' && options.format !== 'lite'
-        ? "/** @jsx jsx */\n    import { jsx } from '@emotion/react'".trim()
-        : '', hasState && stateType === 'valtio' ? "import { useLocalProxy } from 'valtio/utils';" : '', hasState && stateType === 'solid' ? "import { useMutable } from 'react-solid-state';" : '', stateType === 'mobx' && hasState
-        ? "import { useLocalObservable, observer } from 'mobx-react-lite';"
-        : '', json.types && options.typescript ? json.types.join('\n') : '', (0, render_imports_1.renderPreComponent)({
-        component: json,
-        target: options.type === 'native' ? 'reactNative' : 'react',
-    }), stateType === 'mobx' && isForwardRef ? "const ".concat(json.name || 'MyComponent', " = ") : "", isSubComponent || stateType === 'mobx' ? '' : 'export default ', isForwardRef
-        ? "forwardRef".concat(forwardRefType && options.typescript ? "<".concat(forwardRefType, ">") : '', "(")
-        : '', json.name || 'MyComponent', propsArgs, isForwardRef ? ", ".concat(options.forwardRef) : '', options.contextType === 'prop-drill'
+    var componentArgs = ["props".concat(options.typescript ? ":".concat(propType) : ''), options.forwardRef]
+        .filter(Boolean)
+        .join(',');
+    var componentBody = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n\n    ", "\n    ", "\n\n    ", "\n\n    ", "\n\n    return (\n      ", "\n      ", "\n      ", "\n      ", "\n    );\n  "], ["\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n\n    ", "\n    ", "\n\n    ", "\n\n    ", "\n\n    return (\n      ", "\n      ", "\n      ", "\n      ", "\n    );\n  "])), options.contextType === 'prop-drill'
         ? "const ".concat(exports.contextPropDrillingKey, " = { ...props['").concat(exports.contextPropDrillingKey, "'] };")
         : '', hasStateArgument ? '' : refsString, hasState
-        ? stateType === 'mobx'
+        ? options.stateType === 'mobx'
             ? "const state = useLocalObservable(() => (".concat((0, get_state_object_string_1.getStateObjectStringFromComponent)(json), "));")
-            : stateType === 'useState'
+            : options.stateType === 'useState'
                 ? useStateCode
-                : stateType === 'solid'
+                : options.stateType === 'solid'
                     ? "const state = useMutable(".concat((0, get_state_object_string_1.getStateObjectStringFromComponent)(json), ");")
-                    : stateType === 'builder'
+                    : options.stateType === 'builder'
                         ? "const state = useBuilderState(".concat((0, get_state_object_string_1.getStateObjectStringFromComponent)(json), ");")
-                        : stateType === 'variables'
+                        : options.stateType === 'variables'
                             ? "const state = ".concat((0, get_state_object_string_1.getStateObjectStringFromComponent)(json), ";")
                             : "const state = useLocalProxy(".concat((0, get_state_object_string_1.getStateObjectStringFromComponent)(json), ");")
         : '', hasStateArgument ? refsString : '', getContextString(json, options), getInitCode(json, options), contextStr || '', ((_g = json.hooks.onInit) === null || _g === void 0 ? void 0 : _g.code)
-        ? "\n          useEffect(() => {\n            ".concat((0, state_2.processHookCode)({
+        ? "\n        useEffect(() => {\n          ".concat((0, state_2.processHookCode)({
             str: json.hooks.onInit.code,
             options: options,
-        }), "\n          }, [])\n          ")
+        }), "\n        }, [])\n        ")
         : '', ((_h = json.hooks.onMount) === null || _h === void 0 ? void 0 : _h.code)
-        ? "useEffect(() => {\n            ".concat((0, state_2.processHookCode)({
+        ? "useEffect(() => {\n          ".concat((0, state_2.processHookCode)({
             str: json.hooks.onMount.code,
             options: options,
-        }), "\n          }, [])")
-        : '', (_k = (_j = json.hooks.onUpdate) === null || _j === void 0 ? void 0 : _j.map(function (hook) { return "useEffect(() => {\n            ".concat((0, state_2.processHookCode)({ str: hook.code, options: options }), "\n          },\n          ").concat(hook.deps ? (0, state_2.processHookCode)({ str: hook.deps, options: options }) : '', ")"); }).join(';')) !== null && _k !== void 0 ? _k : '', ((_l = json.hooks.onUnMount) === null || _l === void 0 ? void 0 : _l.code)
-        ? "useEffect(() => {\n            return () => {\n              ".concat((0, state_2.processHookCode)({
+        }), "\n        }, [])")
+        : '', (_k = (_j = json.hooks.onUpdate) === null || _j === void 0 ? void 0 : _j.map(function (hook) { return "useEffect(() => {\n          ".concat((0, state_2.processHookCode)({ str: hook.code, options: options }), "\n        },\n        ").concat(hook.deps ? (0, state_2.processHookCode)({ str: hook.deps, options: options }) : '', ")"); }).join(';')) !== null && _k !== void 0 ? _k : '', ((_l = json.hooks.onUnMount) === null || _l === void 0 ? void 0 : _l.code)
+        ? "useEffect(() => {\n          return () => {\n            ".concat((0, state_2.processHookCode)({
             str: json.hooks.onUnMount.code,
             options: options,
-        }), "\n            }\n          }, [])")
-        : '', wrap ? (0, helpers_2.openFrag)(options) : '', json.children.map(function (item) { return (0, blocks_1.blockToReact)(item, options, json, []); }).join('\n'), componentHasStyles && stylesType === 'styled-jsx'
+        }), "\n          }\n        }, [])")
+        : '', wrap ? (0, helpers_2.openFrag)(options) : '', json.children.map(function (item) { return (0, blocks_1.blockToReact)(item, options, json, []); }).join('\n'), componentHasStyles && options.stylesType === 'styled-jsx'
         ? "<style jsx>{`".concat(css, "`}</style>")
-        : componentHasStyles && stylesType === 'style-tag'
+        : componentHasStyles && options.stylesType === 'style-tag'
             ? "<style>{`".concat(css, "`}</style>")
-            : '', wrap ? (0, helpers_2.closeFrag)(options) : '', isForwardRef ? ')' : '', getPropsDefinition({ json: json }), !nativeStyles
+            : '', wrap ? (0, helpers_2.closeFrag)(options) : '');
+    var str = (0, dedent_1.default)(templateObject_2 || (templateObject_2 = __makeTemplateObject(["\n  ", "\n  ", "\n  ", "\n  ", "\n    ", "\n    ", "\n    ", "\n    ", "function ", "(", ") {\n    ", "\n  }", "\n\n    ", "\n\n    ", "\n\n    ", "\n    ", "\n\n  "], ["\n  ", "\n  ", "\n  ", "\n  ", "\n    ", "\n    ", "\n    ", "\n    ", "function ", "(", ") {\n    ", "\n  }", "\n\n    ", "\n\n    ", "\n\n    ", "\n    ", "\n\n  "])), getDefaultImport(json, options), styledComponentsCode ? "import styled from 'styled-components';\n" : '', reactLibImports.size
+        ? "import { ".concat(Array.from(reactLibImports).join(', '), " } from '").concat(options.preact ? 'preact/hooks' : 'react', "'")
+        : '', componentHasStyles && options.stylesType === 'emotion' && options.format !== 'lite'
+        ? "/** @jsx jsx */\n    import { jsx } from '@emotion/react'".trim()
+        : '', !hasState
         ? ''
-        : "\n      const styles = StyleSheet.create(".concat(json5_1.default.stringify(nativeStyles), ");\n    "), styledComponentsCode ? styledComponentsCode : '', stateType === 'mobx'
-        ? "\n      const observed".concat(json.name || 'MyComponent', " = observer(").concat(json.name || 'MyComponent', ");\n      export default observed").concat(json.name || 'MyComponent', ";\n    ")
-        : '');
-    str = (0, replace_new_lines_in_strings_1.stripNewlinesInStrings)(str);
-    return str;
+        : options.stateType === 'valtio'
+            ? "import { useLocalProxy } from 'valtio/utils';"
+            : options.stateType === 'solid'
+                ? "import { useMutable } from 'react-solid-state';"
+                : options.stateType === 'mobx'
+                    ? "import { useLocalObservable, observer } from 'mobx-react-lite';"
+                    : '', json.types && options.typescript ? json.types.join('\n') : '', (0, render_imports_1.renderPreComponent)({
+        component: json,
+        target: options.type === 'native' ? 'reactNative' : 'react',
+    }), isForwardRef ? "const ".concat(json.name, " = forwardRef").concat(forwardRefType, "(") : '', json.name, componentArgs, componentBody, isForwardRef ? ')' : '', getPropsDefinition({ json: json }), reactNativeStyles
+        ? "const styles = StyleSheet.create(".concat(json5_1.default.stringify(reactNativeStyles), ");")
+        : '', styledComponentsCode !== null && styledComponentsCode !== void 0 ? styledComponentsCode : '', isSubComponent
+        ? ''
+        : options.stateType === 'mobx'
+            ? "\n      const observed".concat(json.name, " = observer(").concat(json.name, ");\n      export default observed").concat(json.name, ";\n    ")
+            : "export default ".concat(json.name, ";"));
+    return (0, replace_new_lines_in_strings_1.stripNewlinesInStrings)(str);
 };
-var templateObject_1;
+var templateObject_1, templateObject_2;

@@ -10,15 +10,6 @@ var __assign = (this && this.__assign) || function () {
     };
     return __assign.apply(this, arguments);
 };
-var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
-    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
-        if (ar || !(i in from)) {
-            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
-            ar[i] = from[i];
-        }
-    }
-    return to.concat(ar || Array.prototype.slice.call(from));
-};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -31,6 +22,7 @@ var traverse_1 = __importDefault(require("traverse"));
 var is_mitosis_node_1 = require("../helpers/is-mitosis-node");
 var react_1 = require("./react");
 var bindings_1 = require("../helpers/bindings");
+var merge_options_1 = require("../helpers/merge-options");
 var stylePropertiesThatMustBeNumber = new Set(['lineHeight']);
 var MEDIA_QUERY_KEY_REGEX = /^@media.*/;
 var collectReactNativeStyles = function (json) {
@@ -121,8 +113,8 @@ var componentToReactNative = function (_options) {
     return function (_a) {
         var component = _a.component, path = _a.path;
         var json = (0, fast_clone_1.fastClone)(component);
-        var options = __assign(__assign(__assign({}, DEFAULT_OPTIONS), _options), { plugins: __spreadArray(__spreadArray([], (DEFAULT_OPTIONS.plugins || []), true), (_options.plugins || []), true), type: 'native' });
-        return (0, react_1.componentToReact)(options)({ component: json, path: path });
+        var options = (0, merge_options_1.mergeOptions)(DEFAULT_OPTIONS, _options);
+        return (0, react_1.componentToReact)(__assign(__assign({}, options), { type: 'native' }))({ component: json, path: path });
     };
 };
 exports.componentToReactNative = componentToReactNative;

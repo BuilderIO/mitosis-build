@@ -55,6 +55,7 @@ var blockToMitosis = function (json, toMitosisOptions, component) {
             format: 'lite',
             stateType: 'useState',
             stylesType: 'emotion',
+            type: 'dom',
             prettier: options.prettier,
         }, component);
     }

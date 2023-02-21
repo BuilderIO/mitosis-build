@@ -6,8 +6,8 @@ export declare const targets: {
     readonly html: import(".").TranspilerGenerator<import("./generators/html").ToHtmlOptions, string>;
     readonly mitosis: import(".").TranspilerGenerator<Partial<import("./generators/mitosis").ToMitosisOptions>, string>;
     readonly liquid: import(".").TranspilerGenerator<import("./generators/liquid").ToLiquidOptions, string>;
-    readonly react: import(".").TranspilerGenerator<import("./generators/react").ToReactOptions, string>;
-    readonly reactNative: import(".").TranspilerGenerator<import("./generators/react-native").ToReactNativeOptions, string>;
+    readonly react: import(".").TranspilerGenerator<Partial<import("./generators/react").ToReactOptions>, string>;
+    readonly reactNative: import(".").TranspilerGenerator<Partial<import("./generators/react-native").ToReactNativeOptions>, string>;
     readonly solid: import(".").TranspilerGenerator<Partial<import("./generators/solid/types").ToSolidOptions>, string>;
     readonly svelte: import(".").TranspilerGenerator<import("./generators/svelte/types").ToSvelteOptions, string>;
     readonly swift: import(".").TranspilerGenerator<import(".").BaseTranspilerOptions, string>;
@@ -19,8 +19,8 @@ export declare const targets: {
     readonly stencil: import(".").TranspilerGenerator<import("./generators/stencil").ToStencilOptions, string>;
     readonly qwik: import(".").TranspilerGenerator<import("./generators/qwik/component-generator").ToQwikOptions, string>;
     readonly marko: import(".").TranspilerGenerator<import("./generators/marko").ToMarkoOptions, string>;
-    readonly preact: import(".").TranspilerGenerator<import("./generators/react").ToReactOptions, string>;
+    readonly preact: import(".").TranspilerGenerator<Partial<import("./generators/react").ToReactOptions>, string>;
     readonly lit: import(".").TranspilerGenerator<import("./generators/lit").ToLitOptions, string>;
-    readonly rsc: import(".").TranspilerGenerator<import("./generators/rsc").ToRscOptions, string>;
-    readonly taro: import(".").TranspilerGenerator<import("./generators/taro").ToTaroOptions, string>;
+    readonly rsc: import(".").TranspilerGenerator<Partial<import("./generators/react").ToReactOptions>, string>;
+    readonly taro: import(".").TranspilerGenerator<Partial<import("./generators/react").ToReactOptions>, string>;
 };

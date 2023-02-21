@@ -1,24 +1,4 @@
 "use strict";
-var __assign = (this && this.__assign) || function () {
-    __assign = Object.assign || function(t) {
-        for (var s, i = 1, n = arguments.length; i < n; i++) {
-            s = arguments[i];
-            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-                t[p] = s[p];
-        }
-        return t;
-    };
-    return __assign.apply(this, arguments);
-};
-var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
-    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
-        if (ar || !(i in from)) {
-            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
-            ar[i] = from[i];
-        }
-    }
-    return to.concat(ar || Array.prototype.slice.call(from));
-};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -31,6 +11,7 @@ var fast_clone_1 = require("../helpers/fast-clone");
 var is_mitosis_node_1 = require("../helpers/is-mitosis-node");
 var react_1 = require("./react");
 var bindings_1 = require("../helpers/bindings");
+var merge_options_1 = require("../helpers/merge-options");
 // @tarojs/components
 exports.DEFAULT_Component_SET = new Set([
     'View',
@@ -182,7 +163,9 @@ var componentToTaro = function (_options) {
     return function (_a) {
         var component = _a.component, path = _a.path;
         var json = (0, fast_clone_1.fastClone)(component);
-        var options = __assign(__assign(__assign({}, DEFAULT_OPTIONS), _options), { plugins: __spreadArray(__spreadArray([], (DEFAULT_OPTIONS.plugins || []), true), (_options.plugins || []), true), type: 'taro' });
+        var options = (0, merge_options_1.mergeOptions)(DEFAULT_OPTIONS, _options, {
+            type: 'taro',
+        });
         return (0, react_1.componentToReact)(options)({ component: json, path: path });
     };
 };
