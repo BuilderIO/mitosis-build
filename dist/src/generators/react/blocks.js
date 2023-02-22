@@ -191,6 +191,10 @@ var blockToReact = function (json, options, component, parentSlots) {
                 str += " ".concat(BINDING_MAPPERS[key], "={").concat(useBindingValue, "} ");
             }
         }
+        else if (key === 'style' && options.type === 'native' && json.name === 'ScrollView') {
+            // React Native's ScrollView has a different prop for styles: `contentContainerStyle`
+            str += " contentContainerStyle={".concat(useBindingValue, "} ");
+        }
         else {
             if ((0, is_valid_attribute_name_1.isValidAttributeName)(key)) {
                 str += " ".concat(key, "={").concat(useBindingValue, "} ");

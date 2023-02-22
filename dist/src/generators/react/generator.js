@@ -216,9 +216,6 @@ var _componentToReact = function (json, options, isSubComponent) {
     (0, process_tag_references_1.processTagReferences)(json);
     var contextStr = provideContext(json, options);
     var componentHasStyles = (0, helpers_1.hasCss)(json);
-    if (json.name === 'Column' && options.type === 'native') {
-        console.log('componentHasStyles', componentHasStyles);
-    }
     if (options.stateType === 'useState') {
         (0, getters_to_functions_1.gettersToFunctions)(json);
         (0, state_2.updateStateSetters)(json, options);
