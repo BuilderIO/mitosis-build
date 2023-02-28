@@ -10,9 +10,14 @@ var __assign = (this && this.__assign) || function () {
     };
     return __assign.apply(this, arguments);
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.blockToReact = void 0;
 var lodash_1 = require("lodash");
+var is_children_1 = __importDefault(require("../../helpers/is-children"));
+var slots_1 = require("../../helpers/slots");
 var filter_empty_text_nodes_1 = require("../../helpers/filter-empty-text-nodes");
 var is_valid_attribute_name_1 = require("../../helpers/is-valid-attribute-name");
 var for_1 = require("../../helpers/nodes/for");
@@ -133,7 +138,9 @@ var blockToReact = function (json, options, component, parentSlots) {
     }
     if ((_a = json.bindings._text) === null || _a === void 0 ? void 0 : _a.code) {
         var processed = (0, helpers_1.processBinding)(json.bindings._text.code, options);
-        if (options.type === 'native') {
+        if (options.type === 'native' &&
+            !(0, is_children_1.default)({ node: json }) &&
+            !(0, slots_1.isSlotProperty)(json.bindings._text.code.split('.')[1] || '')) {
             return "<Text>{".concat(processed, "}</Text>");
         }
         return "{".concat(processed, "}");

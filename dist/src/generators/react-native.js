@@ -23,6 +23,7 @@ var is_mitosis_node_1 = require("../helpers/is-mitosis-node");
 var react_1 = require("./react");
 var bindings_1 = require("../helpers/bindings");
 var merge_options_1 = require("../helpers/merge-options");
+var is_children_1 = __importDefault(require("../helpers/is-children"));
 var stylePropertiesThatMustBeNumber = new Set(['lineHeight']);
 var MEDIA_QUERY_KEY_REGEX = /^@media.*/;
 var collectReactNativeStyles = function (json) {
@@ -80,10 +81,14 @@ var PROCESS_REACT_NATIVE_PLUGIN = function () { return ({
                 var _a, _b, _c, _d;
                 if ((0, is_mitosis_node_1.isMitosisNode)(node)) {
                     // TODO: handle TextInput, Image, etc
-                    if (node.name.toLowerCase() === node.name) {
+                    if ((0, is_children_1.default)({ node: node })) {
+                        node.name = '';
+                    }
+                    else if (node.name.toLowerCase() === node.name) {
                         node.name = 'View';
                     }
-                    if (((_a = node.properties._text) === null || _a === void 0 ? void 0 : _a.trim().length) || ((_d = (_c = (_b = node.bindings._text) === null || _b === void 0 ? void 0 : _b.code) === null || _c === void 0 ? void 0 : _c.trim()) === null || _d === void 0 ? void 0 : _d.length)) {
+                    else if (((_a = node.properties._text) === null || _a === void 0 ? void 0 : _a.trim().length) ||
+                        ((_d = (_c = (_b = node.bindings._text) === null || _b === void 0 ? void 0 : _b.code) === null || _c === void 0 ? void 0 : _c.trim()) === null || _d === void 0 ? void 0 : _d.length)) {
                         node.name = 'Text';
                     }
                     if (node.properties.class) {
