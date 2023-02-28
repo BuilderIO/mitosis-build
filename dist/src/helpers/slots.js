@@ -4,10 +4,14 @@ exports.replaceSlotsInString = exports.stripSlotPrefix = exports.isSlotProperty 
 var core_1 = require("@babel/core");
 var babel_transform_1 = require("./babel-transform");
 var SLOT_PREFIX = 'slot';
-var isSlotProperty = function (key) { return key.startsWith(SLOT_PREFIX); };
+var isSlotProperty = function (key, slotPrefix) {
+    if (slotPrefix === void 0) { slotPrefix = SLOT_PREFIX; }
+    return key.startsWith(slotPrefix);
+};
 exports.isSlotProperty = isSlotProperty;
-var stripSlotPrefix = function (key) {
-    return (0, exports.isSlotProperty)(key) ? key.substring(SLOT_PREFIX.length) : key;
+var stripSlotPrefix = function (key, slotPrefix) {
+    if (slotPrefix === void 0) { slotPrefix = SLOT_PREFIX; }
+    return (0, exports.isSlotProperty)(key, slotPrefix) ? key.substring(slotPrefix.length) : key;
 };
 exports.stripSlotPrefix = stripSlotPrefix;
 function replaceSlotsInString(code, mapper) {

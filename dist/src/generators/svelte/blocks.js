@@ -13,6 +13,12 @@ var is_upper_case_1 = require("../../helpers/is-upper-case");
 var for_1 = require("../../helpers/nodes/for");
 var helpers_1 = require("./helpers");
 var bindings_1 = require("../../helpers/bindings");
+/**
+ * blockToSvelte executed after stripStateAndProps,
+ * when stripStateAndProps is executed,
+ * SLOT_PREFIX from `slot` change to `$$slots.`
+ */
+var SLOT_PREFIX = '$$slots.';
 var mappers = {
     Fragment: function (_a) {
         var _b;
@@ -71,7 +77,7 @@ var mappers = {
             }
             return "\n        <span #".concat(key, ">\n        ").concat((_d = json.bindings[key]) === null || _d === void 0 ? void 0 : _d.code, "\n        </span>\n      ");
         }
-        return "<slot name=\"".concat((0, slots_1.stripSlotPrefix)(slotName).toLowerCase(), "\">").concat(renderChildren(), "</slot>");
+        return "<slot name=\"".concat((0, slots_1.stripSlotPrefix)(slotName, SLOT_PREFIX).toLowerCase(), "\">").concat(renderChildren(), "</slot>");
     },
 };
 var BINDINGS_MAPPER = {
@@ -153,8 +159,8 @@ var blockToSvelte = function (_a) {
     }
     var textCode = (_b = json.bindings._text) === null || _b === void 0 ? void 0 : _b.code;
     if (textCode) {
-        if ((0, slots_1.isSlotProperty)(textCode)) {
-            return "<slot name=\"".concat((0, slots_1.stripSlotPrefix)(textCode).toLowerCase(), "\"/>");
+        if ((0, slots_1.isSlotProperty)(textCode, SLOT_PREFIX)) {
+            return "<slot name=\"".concat((0, slots_1.stripSlotPrefix)(textCode, SLOT_PREFIX).toLowerCase(), "\"/>");
         }
         return "{".concat(textCode, "}");
     }

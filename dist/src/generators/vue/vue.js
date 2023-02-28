@@ -112,7 +112,7 @@ var componentToVue = function (userOptions) {
                     case 'state':
                         return function (code) { return (0, helpers_1.processBinding)({ code: code, options: options, json: component }); };
                     case 'bindings':
-                        return function (c) { return (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(c); };
+                        return function (code) { return (0, helpers_1.processBinding)({ code: code, options: options, json: component, codeType: codeType }); };
                     case 'hooks-deps':
                         return function (c) { return (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(c, { includeProps: false }); };
                     case 'properties':
@@ -124,7 +124,7 @@ var componentToVue = function (userOptions) {
                     case 'hooks':
                         return function (code) { return (0, helpers_1.processBinding)({ code: code, options: options, json: component }); };
                     case 'bindings':
-                        return function (c) { return (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(c); };
+                        return function (code) { return (0, helpers_1.processBinding)({ code: code, options: options, json: component, codeType: codeType }); };
                     case 'properties':
                     case 'hooks-deps':
                         return function (c) { return c; };
@@ -150,7 +150,9 @@ var componentToVue = function (userOptions) {
             (0, map_refs_1.mapRefs)(component, function (refName) { return "this.$refs.".concat(refName); });
         }
         // need to run this before we process the component's code
-        var elementProps = Array.from((0, get_props_1.getProps)(component)).filter(function (prop) { return !(0, slots_1.isSlotProperty)(prop); });
+        var props = Array.from((0, get_props_1.getProps)(component));
+        var elementProps = props.filter(function (prop) { return !(0, slots_1.isSlotProperty)(prop); });
+        var slotsProps = props.filter(function (prop) { return (0, slots_1.isSlotProperty)(prop); });
         component = (0, plugins_1.runPostJsonPlugins)(component, options.plugins);
         var css = (0, collect_css_1.collectCss)(component, {
             prefix: (_c = (_b = options.cssNamespace) === null || _b === void 0 ? void 0 : _b.call(options)) !== null && _c !== void 0 ? _c : undefined,
@@ -174,6 +176,7 @@ var componentToVue = function (userOptions) {
             (0, lodash_1.size)(component.context.set) && vueImports.push('provide');
             (0, lodash_1.size)(component.context.get) && vueImports.push('inject');
             (0, lodash_1.size)(Object.keys(component.state).filter(function (key) { var _a; return ((_a = component.state[key]) === null || _a === void 0 ? void 0 : _a.type) === 'property'; })) && vueImports.push('ref');
+            (0, lodash_1.size)(slotsProps) && vueImports.push('useSlots');
         }
         var tsLangAttribute = options.typescript ? "lang='ts'" : '';
         var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    ", "\n\n\n    <script ", " ", ">\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n    </script>\n\n    ", "\n  "], ["\n    ", "\n\n\n    <script ", " ", ">\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n    </script>\n\n    ", "\n  "])), template.trim().length > 0

@@ -34,6 +34,12 @@ var SPECIAL_PROPERTIES = {
     V_ON_AT: '@',
     V_BIND: 'v-bind',
 };
+/**
+ * blockToVue executed after processBinding,
+ * when processBinding is executed,
+ * SLOT_PREFIX from `slot` change to `$slots.`
+ */
+var SLOT_PREFIX = '$slots.';
 // TODO: Maybe in the future allow defining `string | function` as values
 var BINDING_MAPPERS = {
     innerHTML: 'v-html',
@@ -67,7 +73,7 @@ var NODE_MAPPERS = {
     Show: function (json, options, scope) {
         var _a, _b, _c, _d, _e, _f;
         var _g, _h;
-        var ifValue = (0, slots_1.replaceSlotsInString)(((_g = json.bindings.when) === null || _g === void 0 ? void 0 : _g.code) || '', function (slotName) { return "$slots.".concat(slotName); });
+        var ifValue = ((_g = json.bindings.when) === null || _g === void 0 ? void 0 : _g.code) || '';
         var defaultShowTemplate = "\n    <template ".concat(SPECIAL_PROPERTIES.V_IF, "=\"").concat((0, helpers_1.encodeQuotes)(ifValue), "\">\n      ").concat(json.children.map(function (item) { return (0, exports.blockToVue)(item, options); }).join('\n'), "\n    </template>\n    ").concat((0, is_mitosis_node_1.isMitosisNode)(json.meta.else)
             ? "\n        <template ".concat(SPECIAL_PROPERTIES.V_ELSE, ">\n          ").concat((0, exports.blockToVue)(json.meta.else, options), "\n        </template>")
             : '', "\n    ");
@@ -190,7 +196,7 @@ var NODE_MAPPERS = {
             }
             return "\n        <template #".concat(key, ">\n          ").concat((_c = json.bindings[key]) === null || _c === void 0 ? void 0 : _c.code, "\n        </template>\n      ");
         }
-        return "<slot name=\"".concat((0, slots_1.stripSlotPrefix)(slotName).toLowerCase(), "\">").concat(renderChildren(), "</slot>");
+        return "<slot name=\"".concat((0, slots_1.stripSlotPrefix)(slotName, SLOT_PREFIX).toLowerCase(), "\">").concat(renderChildren(), "</slot>");
     },
 };
 var stringifyBinding = function (node) {
@@ -292,8 +298,8 @@ var blockToVue = function (node, options, scope) {
     }
     var textCode = (_a = node.bindings._text) === null || _a === void 0 ? void 0 : _a.code;
     if (textCode) {
-        if ((0, slots_1.isSlotProperty)(textCode)) {
-            return "<slot name=\"".concat((0, slots_1.stripSlotPrefix)(textCode).toLowerCase(), "\"/>");
+        if ((0, slots_1.isSlotProperty)(textCode, SLOT_PREFIX)) {
+            return "<slot name=\"".concat((0, slots_1.stripSlotPrefix)(textCode, SLOT_PREFIX).toLowerCase(), "\"/>");
         }
         return "{{".concat(textCode, "}}");
     }

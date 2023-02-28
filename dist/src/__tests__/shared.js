@@ -401,6 +401,7 @@ var JSX_TESTS_FOR_TARGET = {
     svelte: [
         CONTEXT_TEST,
         BASIC_TESTS,
+        SLOTS_TESTS,
         SHOW_TESTS,
         FORWARD_REF_TESTS,
         MULTI_ON_UPDATE_TESTS,
