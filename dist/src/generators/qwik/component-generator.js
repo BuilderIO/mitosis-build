@@ -99,11 +99,11 @@ var componentToQwik = function (userOptions) {
 };
 exports.componentToQwik = componentToQwik;
 function emitExports(file, component) {
-    component.exports &&
-        Object.keys(component.exports).forEach(function (key) {
-            var exportObj = component.exports[key];
-            file.src.emit(exportObj.code);
-        });
+    Object.keys(component.exports || {}).forEach(function (key) {
+        var exportObj = component.exports[key];
+        var code = exportObj.code.startsWith('export ') ? exportObj.code : "export ".concat(exportObj.code);
+        file.src.emit(code);
+    });
 }
 function emitTagNameHack(file, component, metadataValue) {
     if (typeof metadataValue === 'string' && metadataValue) {

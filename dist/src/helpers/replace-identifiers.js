@@ -85,14 +85,14 @@ var _replaceIdentifiers = function (path, _a) {
                     path.replaceWith(newMemberExpression);
                 }
                 catch (err) {
-                    console.debug('Could not replace', path.node, 'with', to.toString());
+                    console.debug('Could not replace node.');
                     // throw err;
                 }
             }
         }
         else {
             if (core_1.types.isIdentifier(path.node)) {
-                console.debug("Could not replace Identifier '".concat(from.toString(), "' with nothing."));
+                console.debug("Could not replace Identifier with nothing.");
             }
             else {
                 // if we're looking at a member expression, e.g. `props.foo` and no `to` was provided, then we want to strip out

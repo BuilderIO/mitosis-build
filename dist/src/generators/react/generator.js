@@ -142,7 +142,7 @@ exports.componentToPreact = componentToPreact;
 var componentToReact = function (reactOptions) {
     if (reactOptions === void 0) { reactOptions = {}; }
     return function (_a) {
-        var component = _a.component;
+        var component = _a.component, path = _a.path;
         var json = (0, fast_clone_1.fastClone)(component);
         var options = (0, merge_options_1.mergeOptions)(DEFAULT_OPTIONS, reactOptions);
         if (options.plugins) {
@@ -168,7 +168,7 @@ var componentToReact = function (reactOptions) {
                     .replace(/;\n\nimport\s/g, ';\nimport ');
             }
             catch (err) {
-                console.error('Format error for file:', str, JSON.stringify(json, null, 2));
+                console.error('Format error for file:');
                 throw err;
             }
         }
