@@ -53,7 +53,7 @@ var traverse_1 = __importDefault(require("traverse"));
 var create_mitosis_node_1 = require("../helpers/create-mitosis-node");
 var filter_empty_text_nodes_1 = require("../helpers/filter-empty-text-nodes");
 var is_mitosis_node_1 = require("../helpers/is-mitosis-node");
-var JSON5 = __importStar(require("json5"));
+var json5_1 = __importStar(require("json5")), JSON5 = json5_1;
 var builder_1 = require("../parsers/builder");
 var bindings_1 = require("../helpers/bindings");
 function getComponentInputNames(componentName) {
@@ -72,6 +72,12 @@ exports.components = {
     CoreButton: function (node, context, components) {
         var properties = {};
         var bindings = {};
+        if (!node.properties.href && node.bindings.css) {
+            var css = json5_1.default.parse(node.bindings.css.code);
+            // When using button tag ensure we have all: unset and
+            // be sure that is the first style in the list
+            node.bindings.css.code = json5_1.default.stringify(__assign({ all: 'unset' }, css));
+        }
         if ('link' in node.properties) {
             properties.href = node.properties.link;
         }
@@ -79,10 +85,22 @@ exports.components = {
             bindings.href = node.properties.link;
         }
         if ('text' in node.properties) {
-            properties.innerHTML = node.properties.text;
+            node.children = [
+                (0, create_mitosis_node_1.createMitosisNode)({
+                    properties: {
+                        _text: node.properties.text,
+                    },
+                }),
+            ];
         }
         if ('text' in node.bindings) {
-            bindings.innerHTML = node.properties.text;
+            node.children = [
+                (0, create_mitosis_node_1.createMitosisNode)({
+                    bindings: {
+                        _text: node.bindings.text,
+                    },
+                }),
+            ];
         }
         if ('openInNewTab' in node.bindings) {
             bindings.target = "".concat(node.bindings.openInNewTab, " ? '_blank' : '_self'");
@@ -91,7 +109,7 @@ exports.components = {
         var hasLink = node.properties.link || node.bindings.link;
         return (0, create_mitosis_node_1.createMitosisNode)(__assign(__assign({}, node), { 
             // TODO: use 'button' tag for no link, and add `all: unset` to CSS string only then
-            name: hasLink ? 'a' : node.properties.$tagName || 'span', properties: __assign(__assign({}, (0, lodash_1.omit)(node.properties, omitFields)), properties), bindings: __assign(__assign({}, (0, lodash_1.omit)(node.bindings, omitFields)), bindings) }));
+            name: hasLink ? 'a' : 'button', properties: __assign(__assign({}, (0, lodash_1.omit)(node.properties, omitFields)), properties), bindings: __assign(__assign({}, (0, lodash_1.omit)(node.bindings, omitFields)), bindings) }));
     },
     Embed: function (node, context, components) {
         return wrapOutput(node, (0, create_mitosis_node_1.createMitosisNode)({
