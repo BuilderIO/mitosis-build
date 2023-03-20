@@ -47,6 +47,7 @@ export declare class SrcBuilder {
     typeParameters(typeParameters: string[] | undefined): void;
     jsxExpression(expression: EmitFn): void;
     jsxBegin(symbol: Symbol | string, props: Record<string, any>, bindings: Record<string, any>): void;
+    isSelfClosingTag(symbol: Symbol | string): boolean;
     jsxEnd(symbol: Symbol | string): void;
     jsxBeginFragment(symbol: Symbol): void;
     jsxEndFragment(): void;

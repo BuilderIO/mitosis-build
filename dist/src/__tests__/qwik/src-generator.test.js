@@ -30,7 +30,7 @@ describe('src-generator', function () {
             beforeEach(function () {
                 options = {
                     isJSX: true,
-                    isPretty: false,
+                    isPretty: true,
                     isTypeScript: false,
                     isModule: true,
                     isBuilder: false,
@@ -39,18 +39,18 @@ describe('src-generator', function () {
             });
             test('import to string', function () {
                 src.import('module', [new src_generator_1.Symbol('importName', 'asLocalName')]);
-                expect(src.toString()).toEqual('import{importName as asLocalName}from"module";');
+                expect(src.toString().trim()).toEqual('import{importName as asLocalName}from"module";');
             });
             test('import from default', function () {
                 src.import('module', [new src_generator_1.Symbol('default', 'asLocalName')]);
-                expect(src.toString()).toEqual('import asLocalName from"module";');
+                expect(src.toString().trim()).toEqual('import asLocalName from"module";');
             });
         });
         describe('require', function () {
             beforeEach(function () {
                 options = {
                     isJSX: true,
-                    isPretty: false,
+                    isPretty: true,
                     isTypeScript: false,
                     isModule: false,
                     isBuilder: false,
@@ -59,11 +59,11 @@ describe('src-generator', function () {
             });
             test('import to string', function () {
                 src.import('module', [new src_generator_1.Symbol('importName', 'asLocalName')]);
-                expect(src.toString()).toEqual('const asLocalName=require("module").importName;');
+                expect(src.toString().trim()).toEqual('const asLocalName=require("module").importName;');
             });
             test('import from default', function () {
                 src.import('module', [new src_generator_1.Symbol('default', 'asLocalName')]);
-                expect(src.toString()).toEqual('const asLocalName=require("module");');
+                expect(src.toString().trim()).toEqual('const asLocalName=require("module");');
             });
         });
     });

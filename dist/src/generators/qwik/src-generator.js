@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.iteratorProperty = exports.lastProperty = exports.isStatement = exports.iif = exports.arrowFnValue = exports.arrowFnBlock = exports.invoke = exports.quote = exports.Block = exports.Imports = exports.Symbol = exports.SrcBuilder = exports.File = void 0;
 var standalone_1 = require("prettier/standalone");
+var jsx_1 = require("../../parsers/jsx");
 var builder_1 = require("../../parsers/builder");
 var stable_serialize_1 = require("./stable-serialize");
 var File = /** @class */ (function () {
@@ -49,6 +50,9 @@ var File = /** @class */ (function () {
         this.src.const(name, value, true, locallyVisible);
     };
     File.prototype.exportDefault = function (symbolName) {
+        if (this.options.isPretty) {
+            this.src.emit('\n\n');
+        }
         if (this.options.isModule) {
             this.src.emit('export default ', symbolName, ';');
         }
@@ -82,6 +86,7 @@ var File = /** @class */ (function () {
                         require('prettier/parser-postcss'),
                         require('prettier/parser-html'),
                         require('prettier/parser-babel'),
+                        require('prettier-plugin-organize-imports'),
                     ],
                     htmlWhitespaceSensitivity: 'ignore',
                 });
@@ -154,6 +159,9 @@ var SrcBuilder = /** @class */ (function () {
                     }
                 });
             });
+        }
+        if (this.file.options.isPretty) {
+            this.emit('\n\n');
         }
         return this;
     };
@@ -320,7 +328,12 @@ var SrcBuilder = /** @class */ (function () {
                 var key = lastProperty(rawKey);
                 if (isEvent(key)) {
                     key = key + '$';
-                    binding_1 = "".concat(this_1.file.import(this_1.file.qwikModule, '$').localName, "((event)=>").concat(binding_1, ")");
+                    if (this_1.file.options.isJSX) {
+                        binding_1 = "(event)=>".concat(binding_1);
+                    }
+                    else {
+                        binding_1 = "".concat(this_1.file.import(this_1.file.qwikModule, '$').localName, "((event)=>").concat(binding_1, ")");
+                    }
                 }
                 else if (!binding_1 && rawKey in props) {
                     binding_1 = quote(props[rawKey]);
@@ -349,7 +362,9 @@ var SrcBuilder = /** @class */ (function () {
             _loop_1(rawKey);
         }
         if (this.isJSX) {
-            this.emit('>');
+            if (!this.isSelfClosingTag(symbol)) {
+                this.emit('>');
+            }
         }
         else {
             this.emit('},');
@@ -377,9 +392,17 @@ var SrcBuilder = /** @class */ (function () {
             }
         }
     };
+    SrcBuilder.prototype.isSelfClosingTag = function (symbol) {
+        return jsx_1.selfClosingTags.has(String(symbol));
+    };
     SrcBuilder.prototype.jsxEnd = function (symbol) {
         if (this.isJSX) {
-            this.emit('</', symbol, '>');
+            if (this.isSelfClosingTag(symbol)) {
+                this.emit(' />');
+            }
+            else {
+                this.emit('</', symbol, '>');
+            }
         }
         else {
             this.emit('),');

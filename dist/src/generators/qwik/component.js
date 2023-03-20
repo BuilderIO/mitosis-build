@@ -109,9 +109,15 @@ function addComponent(fileSet, component, opts) {
 exports.addComponent = addComponent;
 function generateStyles(fromFile, dstFile, symbol, scoped) {
     return function () {
+        if (this.file.options.isPretty) {
+            this.emit('\n\n');
+        }
         this.emit((0, src_generator_1.invoke)(fromFile.import(fromFile.qwikModule, scoped ? 'useStylesScopedQrl' : 'useStylesQrl'), [
             generateQrl(fromFile, dstFile, symbol),
         ]), ';');
+        if (this.file.options.isPretty) {
+            this.emit('\n\n');
+        }
     };
 }
 function addBuilderBlockClass(children) {
