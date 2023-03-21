@@ -113,6 +113,7 @@ var classState = getRawFile('./data/styles/classState.raw.tsx');
 var useStyle = getRawFile('./data/styles/use-style.raw.tsx');
 var useStyleOutsideComponent = getRawFile('./data/styles/use-style-outside-component.raw.tsx');
 var useStyleAndCss = getRawFile('./data/styles/use-style-and-css.raw.tsx');
+var styleClassAndCss = getRawFile('./data/styles/style-class-and-css.raw.tsx');
 var button = getRawFile('./data/blocks/button.raw.tsx');
 var classNameJsx = getRawFile('./data/blocks/classname-jsx.raw.tsx');
 var columns = getRawFile('./data/blocks/columns.raw.tsx');
@@ -226,6 +227,7 @@ var BASIC_TESTS = {
     'class + ClassName + css': classAndClassName,
     'use-style': useStyle,
     'use-style-and-css': useStyleAndCss,
+    styleClassAndCss: styleClassAndCss,
     'use-style-outside-component': useStyleOutsideComponent,
     'self-referencing component with children': selfRefCompWChildren,
     'self-referencing component': selfRefComp,

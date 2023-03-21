@@ -30,7 +30,7 @@ var collectReactNativeStyles = function (json) {
     var styleMap = {};
     var componentIndexes = {};
     (0, traverse_1.default)(json).forEach(function (item) {
-        var _a;
+        var _a, _b;
         if (!(0, is_mitosis_node_1.isMitosisNode)(item) || typeof ((_a = item.bindings.css) === null || _a === void 0 ? void 0 : _a.code) !== 'string') {
             return;
         }
@@ -63,7 +63,10 @@ var collectReactNativeStyles = function (json) {
         var componentName = (0, lodash_1.camelCase)(item.name || 'view');
         var index = (componentIndexes[componentName] = (componentIndexes[componentName] || 0) + 1);
         var className = "".concat(componentName).concat(index);
-        item.bindings.style = (0, bindings_1.createSingleBinding)({ code: "styles.".concat(className) });
+        var styleSheetName = "styles.".concat(className);
+        item.bindings.style = (0, bindings_1.createSingleBinding)({
+            code: ((_b = item.bindings.style) === null || _b === void 0 ? void 0 : _b.code.replace(/}$/, ", ...".concat(styleSheetName, " }"))) || styleSheetName,
+        });
         styleMap[className] = value;
     });
     return styleMap;
