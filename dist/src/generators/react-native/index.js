@@ -17,57 +17,68 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.componentToReactNative = exports.collectReactNativeStyles = void 0;
 var json5_1 = __importDefault(require("json5"));
 var lodash_1 = require("lodash");
-var fast_clone_1 = require("../helpers/fast-clone");
+var fast_clone_1 = require("../../helpers/fast-clone");
 var traverse_1 = __importDefault(require("traverse"));
-var is_mitosis_node_1 = require("../helpers/is-mitosis-node");
-var react_1 = require("./react");
-var bindings_1 = require("../helpers/bindings");
-var merge_options_1 = require("../helpers/merge-options");
-var is_children_1 = __importDefault(require("../helpers/is-children"));
+var is_mitosis_node_1 = require("../../helpers/is-mitosis-node");
+var react_1 = require("../react");
+var bindings_1 = require("../../helpers/bindings");
+var merge_options_1 = require("../../helpers/merge-options");
+var is_children_1 = __importDefault(require("../../helpers/is-children"));
+var sanitize_react_native_block_styles_1 = require("./sanitize-react-native-block-styles");
 var stylePropertiesThatMustBeNumber = new Set(['lineHeight']);
 var MEDIA_QUERY_KEY_REGEX = /^@media.*/;
+var sanitizeStyle = function (obj) { return function (key, value) {
+    var propertyValue = obj[key];
+    if (key.match(MEDIA_QUERY_KEY_REGEX)) {
+        console.warn('Unsupported: skipping media queries for react-native: ', key, propertyValue);
+        delete obj[key];
+        return;
+    }
+}; };
 var collectReactNativeStyles = function (json) {
     var styleMap = {};
     var componentIndexes = {};
-    (0, traverse_1.default)(json).forEach(function (item) {
-        var _a, _b;
-        if (!(0, is_mitosis_node_1.isMitosisNode)(item) || typeof ((_a = item.bindings.css) === null || _a === void 0 ? void 0 : _a.code) !== 'string') {
-            return;
-        }
-        var value = json5_1.default.parse(item.bindings.css.code);
-        delete item.bindings.css;
-        if (!(0, lodash_1.size)(value)) {
-            return;
-        }
-        // Style properties like `"20px"` need to be numbers like `20` for react native
-        for (var key in value) {
-            var propertyValue = value[key];
-            if (key.match(MEDIA_QUERY_KEY_REGEX)) {
-                console.warn('Unsupported: skipping media queries for react-native: ', key, propertyValue);
-                delete value[key];
-                continue;
-            }
-            if (stylePropertiesThatMustBeNumber.has(key) && typeof propertyValue !== 'number') {
-                console.warn("Style key ".concat(key, " must be a number, but had value `").concat(propertyValue, "`"));
-                delete value[key];
-                continue;
-            }
-            // convert strings to number if applicable
-            if (typeof propertyValue === 'string' && propertyValue.match(/^\d/)) {
-                var newValue = parseFloat(propertyValue);
-                if (!isNaN(newValue)) {
-                    value[key] = newValue;
-                }
-            }
-        }
+    var getStyleSheetName = function (item) {
         var componentName = (0, lodash_1.camelCase)(item.name || 'view');
+        // If we have already seen this component name, we will increment the index. Otherwise, we will set the index to 1.
         var index = (componentIndexes[componentName] = (componentIndexes[componentName] || 0) + 1);
-        var className = "".concat(componentName).concat(index);
-        var styleSheetName = "styles.".concat(className);
+        return "".concat(componentName).concat(index);
+    };
+    (0, traverse_1.default)(json).forEach(function (item) {
+        var _a, _b, _c;
+        if (!(0, is_mitosis_node_1.isMitosisNode)(item)) {
+            return;
+        }
+        var cssValue = json5_1.default.parse(((_a = item.bindings.css) === null || _a === void 0 ? void 0 : _a.code) || '{}');
+        delete item.bindings.css;
+        if ((0, lodash_1.size)(cssValue)) {
+            // Style properties like `"20px"` need to be numbers like `20` for react native
+            for (var key in cssValue) {
+                sanitizeStyle(cssValue)(key, cssValue[key]);
+                cssValue = (0, sanitize_react_native_block_styles_1.sanitizeReactNativeBlockStyles)(cssValue);
+            }
+        }
+        try {
+            var styleValue = json5_1.default.parse(((_b = item.bindings.style) === null || _b === void 0 ? void 0 : _b.code) || '{}');
+            if ((0, lodash_1.size)(styleValue)) {
+                // Style properties like `"20px"` need to be numbers like `20` for react native
+                for (var key in styleValue) {
+                    sanitizeStyle(styleValue)(key, styleValue[key]);
+                    styleValue = (0, sanitize_react_native_block_styles_1.sanitizeReactNativeBlockStyles)(styleValue);
+                }
+                item.bindings.style.code = json5_1.default.stringify(styleValue);
+            }
+        }
+        catch (e) { }
+        if (!(0, lodash_1.size)(cssValue)) {
+            return;
+        }
+        var styleSheetName = getStyleSheetName(item);
+        var styleSheetAccess = "styles.".concat(styleSheetName);
         item.bindings.style = (0, bindings_1.createSingleBinding)({
-            code: ((_b = item.bindings.style) === null || _b === void 0 ? void 0 : _b.code.replace(/}$/, ", ...".concat(styleSheetName, " }"))) || styleSheetName,
+            code: ((_c = item.bindings.style) === null || _c === void 0 ? void 0 : _c.code.replace(/}$/, ", ...".concat(styleSheetAccess, " }"))) || styleSheetAccess,
         });
-        styleMap[className] = value;
+        styleMap[styleSheetName] = cssValue;
     });
     return styleMap;
 };
