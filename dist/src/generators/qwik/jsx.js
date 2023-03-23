@@ -45,7 +45,9 @@ function renderJSXNodes(file, directives, handlers, children, styles, parentSymb
             return;
         if (root)
             this.emit('(');
-        var needsFragment = root && (children.length > 1 || (children.length && isInlinedDirective(children[0])));
+        var needsFragment = root &&
+            (children.length > 1 ||
+                (children.length && (isInlinedDirective(children[0]) || isTextNode(children[0]))));
         file.import(file.qwikModule, 'h');
         var fragmentSymbol = file.import(file.qwikModule, 'Fragment');
         if (needsFragment) {

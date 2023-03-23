@@ -77,6 +77,7 @@ var process_code_1 = require("../../helpers/plugins/process-code");
 var context_1 = require("../helpers/context");
 var blocks_1 = require("./blocks");
 var bindings_1 = require("../../helpers/bindings");
+var is_root_text_node_1 = require("../../helpers/is-root-text-node");
 // Transform <foo.bar key={value} /> to <Dynamic compnent={foo.bar} key={value} />
 function processDynamicComponents(json, options) {
     var found = false;
@@ -152,7 +153,9 @@ var componentToSolid = function (passedOptions) {
         }
         addProviderComponents(json, options);
         var componentHasStyles = (0, helpers_1.hasCss)(json);
-        var addWrapper = json.children.filter(filter_empty_text_nodes_1.filterEmptyTextNodes).length !== 1 || options.stylesType === 'style-tag';
+        var addWrapper = json.children.filter(filter_empty_text_nodes_1.filterEmptyTextNodes).length !== 1 ||
+            options.stylesType === 'style-tag' ||
+            (0, is_root_text_node_1.isRootTextNode)(json);
         // we need to run this before we run the code processor plugin, so the dynamic component variables are transformed
         var foundDynamicComponents = processDynamicComponents(json, options);
         if (options.plugins) {

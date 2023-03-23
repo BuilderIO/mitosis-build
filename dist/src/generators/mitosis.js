@@ -41,6 +41,7 @@ var jsx_1 = require("../parsers/jsx");
 var mitosis_node_1 = require("../types/mitosis-node");
 var react_1 = require("./react");
 var state_1 = require("../helpers/state");
+var is_root_text_node_1 = require("../helpers/is-root-text-node");
 exports.DEFAULT_FORMAT = 'legacy';
 // Special isValidAttributeName for Mitosis so we can allow for $ in names
 var isValidAttributeName = function (str) {
@@ -148,7 +149,7 @@ var componentToMitosis = function (toMitosisOptions) {
         (0, map_refs_1.mapRefs)(json, function (refName) {
             return "".concat(refName).concat(domRefs.has(refName) ? ".current" : '');
         });
-        var addWrapper = json.children.length !== 1;
+        var addWrapper = json.children.length !== 1 || (0, is_root_text_node_1.isRootTextNode)(json);
         var components = Array.from((0, get_components_1.getComponents)(json));
         var mitosisComponents = components.filter(function (item) { return mitosisCoreComponents.includes(item); });
         var otherComponents = components.filter(function (item) { return !mitosisCoreComponents.includes(item); });

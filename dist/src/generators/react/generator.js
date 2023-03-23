@@ -48,11 +48,11 @@ var bindings_1 = require("../../helpers/bindings");
 var blocks_1 = require("./blocks");
 var merge_options_1 = require("../../helpers/merge-options");
 var replace_new_lines_in_strings_1 = require("../../helpers/replace-new-lines-in-strings");
+var is_root_text_node_1 = require("../../helpers/is-root-text-node");
 exports.contextPropDrillingKey = '_context';
 /**
  * If the root Mitosis component only has 1 child, and it is a `Show`/`For` node, then we need to wrap it in a fragment.
  * Otherwise, we end up with invalid React render code.
- *
  */
 var isRootSpecialNode = function (json) {
     return json.children.length === 1 && ['Show', 'For'].includes(json.children[0].name);
@@ -278,6 +278,7 @@ var _componentToReact = function (json, options, isSubComponent) {
         reactLibImports.add('useEffect');
     }
     var wrap = (0, helpers_2.wrapInFragment)(json) ||
+        (0, is_root_text_node_1.isRootTextNode)(json) ||
         (componentHasStyles &&
             (options.stylesType === 'styled-jsx' || options.stylesType === 'style-tag')) ||
         isRootSpecialNode(json);
