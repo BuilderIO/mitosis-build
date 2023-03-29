@@ -1,5 +1,5 @@
-import { MitosisNode } from '../..';
-import { SrcBuilder } from './src-generator';
+import { MitosisNode } from '../../..';
+import { SrcBuilder } from '../src-generator';
 export declare type CssStyles = {
     CLASS_NAME: string;
 } & Record<string, string>;

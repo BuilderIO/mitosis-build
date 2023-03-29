@@ -22,11 +22,11 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.addCommonStyles = exports.renderUseLexicalScope = exports.addComponent = exports.createFileSet = void 0;
 var compile_away_builder_components_1 = require("../../plugins/compile-away-builder-components");
-var handlers_1 = require("./handlers");
+var handlers_1 = require("./helpers/handlers");
 var jsx_1 = require("./jsx");
 var src_generator_1 = require("./src-generator");
-var stable_serialize_1 = require("./stable-serialize");
-var styles_1 = require("./styles");
+var stable_serialize_1 = require("./helpers/stable-serialize");
+var styles_1 = require("./helpers/styles");
 function createFileSet(options) {
     if (options === void 0) { options = {}; }
     var opts = __assign({ qwikLib: '@builder.io/qwik', qrlPrefix: './', output: 'ts', minify: false, jsx: true }, options);

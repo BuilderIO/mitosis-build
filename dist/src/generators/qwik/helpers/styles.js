@@ -25,7 +25,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.renderStyles = exports.collectStyles = void 0;
 var json5_1 = __importDefault(require("json5"));
-var dash_case_1 = require("../../helpers/dash-case");
+var dash_case_1 = require("../../../helpers/dash-case");
 function collectStyles(children, styleMap) {
     var _a;
     var nodes = __spreadArray([], children, true);

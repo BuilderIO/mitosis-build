@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var convert_method_to_function_1 = require("../../generators/qwik/convert-method-to-function");
+var convert_method_to_function_1 = require("../../generators/qwik/helpers/convert-method-to-function");
 describe('convertMethodToFunction', function () {
     var methodMap = {
         methodA: 'method',

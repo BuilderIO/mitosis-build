@@ -9,9 +9,9 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
     return to.concat(ar || Array.prototype.slice.call(from));
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.renderHandlers = exports.extractJSBlock = void 0;
-var component_1 = require("./component");
-var src_generator_1 = require("./src-generator");
+exports.renderHandlers = void 0;
+var component_1 = require("../component");
+var src_generator_1 = require("../src-generator");
 var IIF_START = '(() => {';
 var IIF_END = '})()';
 function extractJSBlock(binding) {
@@ -28,7 +28,6 @@ function extractJSBlock(binding) {
     }
     return null;
 }
-exports.extractJSBlock = extractJSBlock;
 function renderHandlers(file, componentName, children) {
     var id = 0;
     var map = new Map();

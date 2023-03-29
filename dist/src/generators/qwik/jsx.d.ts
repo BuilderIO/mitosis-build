@@ -1,6 +1,6 @@
 import { MitosisNode } from '../../types/mitosis-node';
 import { File } from './src-generator';
-import { CssStyles } from './styles';
+import { CssStyles } from './helpers/styles';
 /**
  * Convert a Mitosis nodes to a JSX nodes.
  *

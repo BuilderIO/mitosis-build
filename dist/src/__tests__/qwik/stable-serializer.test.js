@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var stable_serialize_1 = require("../../generators/qwik/stable-serialize");
+var stable_serialize_1 = require("../../generators/qwik/helpers/stable-serialize");
 describe('stable-serializer', function () {
     test('is an expression', function () {
         expect((0, stable_serialize_1.stableJSONserialize)({})).toBe('{}');

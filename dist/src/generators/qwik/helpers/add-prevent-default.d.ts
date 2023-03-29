@@ -1,4 +1,4 @@
-import { MitosisComponent } from '../../types/mitosis-component';
+import { MitosisComponent } from '../../../types/mitosis-component';
 /**
  * Find event handlers that explicitly call .preventDefault() and
  * add preventdefault:event

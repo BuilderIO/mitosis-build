@@ -1,10 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.iteratorProperty = exports.lastProperty = exports.isStatement = exports.iif = exports.arrowFnValue = exports.arrowFnBlock = exports.invoke = exports.quote = exports.Block = exports.Imports = exports.Symbol = exports.SrcBuilder = exports.File = void 0;
+exports.iteratorProperty = exports.lastProperty = exports.isStatement = exports.iif = exports.arrowFnValue = exports.arrowFnBlock = exports.invoke = exports.quote = exports.Imports = exports.Symbol = exports.SrcBuilder = exports.File = void 0;
 var standalone_1 = require("prettier/standalone");
 var jsx_1 = require("../../parsers/jsx");
 var builder_1 = require("../../parsers/builder");
-var stable_serialize_1 = require("./stable-serialize");
+var stable_serialize_1 = require("./helpers/stable-serialize");
 var File = /** @class */ (function () {
     function File(filename, options, qwikModule, qrlPrefix) {
         this.imports = new Imports();
@@ -111,7 +111,6 @@ function removeExt(filename) {
     var indx = filename.lastIndexOf('.');
     return indx == -1 ? filename : filename.substr(0, indx);
 }
-var spaces = [''];
 var SrcBuilder = /** @class */ (function () {
     function SrcBuilder(file, options) {
         this.buf = [];
@@ -494,13 +493,6 @@ function ignoreKey(key) {
         key == '' ||
         key.indexOf('.') !== -1);
 }
-var Block = /** @class */ (function () {
-    function Block(imports) {
-        this.imports = imports;
-    }
-    return Block;
-}());
-exports.Block = Block;
 function possiblyQuotePropertyName(key) {
     return /^\w[\w\d]*$/.test(key) ? key : quote(key);
 }

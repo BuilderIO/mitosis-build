@@ -64,10 +64,6 @@ export declare class Imports {
     get(moduleName: string, symbolName: string, as?: string): Symbol;
     hasImport(localName: string): boolean;
 }
-export declare class Block {
-    imports: Imports;
-    constructor(imports: Imports);
-}
 export declare function quote(text: string): string;
 export declare function invoke(symbol: Symbol | string, args: any[], typeParameters?: string[]): (this: SrcBuilder) => void;
 export declare function arrowFnBlock(args: string[], statements: any[], argTypes?: string[]): (this: SrcBuilder) => void;

@@ -5,7 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.addPreventDefault = void 0;
 var traverse_1 = __importDefault(require("traverse"));
-var is_mitosis_node_1 = require("../../helpers/is-mitosis-node");
+var is_mitosis_node_1 = require("../../../helpers/is-mitosis-node");
 /**
  * Find event handlers that explicitly call .preventDefault() and
  * add preventdefault:event
