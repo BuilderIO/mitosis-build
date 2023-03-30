@@ -372,8 +372,6 @@ var SrcBuilder = /** @class */ (function () {
             if (value) {
                 if (key === 'innerHTML')
                     key = 'dangerouslySetInnerHTML';
-                if (key === 'for')
-                    key = 'htmlFor';
                 if (key === 'dataSet')
                     return; // ignore
                 if (self.isJSX) {

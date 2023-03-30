@@ -509,22 +509,30 @@ var runTestsForJsx = function () {
             }
         });
     }); });
-    JSX_TESTS.forEach(function (tests) {
-        Object.keys(tests).forEach(function (key) {
-            test(key, function () { return __awaiter(void 0, void 0, void 0, function () {
-                var component, _a;
-                return __generator(this, function (_b) {
-                    switch (_b.label) {
-                        case 0:
-                            _a = jsx_1.parseJsx;
-                            return [4 /*yield*/, tests[key]];
-                        case 1:
-                            component = _a.apply(void 0, [_b.sent()]);
-                            expect(component).toMatchSnapshot();
-                            return [2 /*return*/];
-                    }
+    var configurations = [
+        { typescript: true, testName: 'Typescript' },
+        { typescript: false, testName: 'Javascript' },
+    ];
+    configurations.forEach(function (config) {
+        describe(config.testName, function () {
+            JSX_TESTS.forEach(function (tests) {
+                Object.keys(tests).forEach(function (key) {
+                    test(key, function () { return __awaiter(void 0, void 0, void 0, function () {
+                        var component, _a;
+                        return __generator(this, function (_b) {
+                            switch (_b.label) {
+                                case 0:
+                                    _a = jsx_1.parseJsx;
+                                    return [4 /*yield*/, tests[key]];
+                                case 1:
+                                    component = _a.apply(void 0, [_b.sent()]);
+                                    expect(component).toMatchSnapshot();
+                                    return [2 /*return*/];
+                            }
+                        });
+                    }); });
                 });
-            }); });
+            });
         });
     });
 };
