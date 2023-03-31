@@ -35,7 +35,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.handleTypeImports = exports.collectTypes = exports.isTypeOrInterface = exports.getPropsTypeRef = void 0;
+exports.collectTypes = exports.isTypeOrInterface = exports.getPropsTypeRef = void 0;
 var babel = __importStar(require("@babel/core"));
 var generator_1 = __importDefault(require("@babel/generator"));
 var types = babel.types;
@@ -78,24 +78,15 @@ var isTypeOrInterface = function (node) {
         (types.isExportNamedDeclaration(node) && types.isTSInterfaceDeclaration(node.declaration));
 };
 exports.isTypeOrInterface = isTypeOrInterface;
-var collectTypes = function (node, context) {
+var getTypesFromNode = function (node, context) {
     var typeStr = (0, generator_1.default)(node).code;
     var _a = context.builder.component.types, types = _a === void 0 ? [] : _a;
     types.push(typeStr);
     context.builder.component.types = types.filter(Boolean);
 };
+var collectTypes = function (path, context) {
+    var node = path.node;
+    getTypesFromNode(node, context);
+    path.remove();
+};
 exports.collectTypes = collectTypes;
-function handleTypeImports(path, context) {
-    for (var _i = 0, _a = path.node.body; _i < _a.length; _i++) {
-        var statement = _a[_i];
-        if (isTypeImport(statement)) {
-            var importDeclaration = statement;
-            // Remove .lite from path if exists, as that will be stripped
-            if (importDeclaration.source.value.endsWith('.lite')) {
-                importDeclaration.source.value = importDeclaration.source.value.replace(/\.lite$/, '');
-            }
-            (0, exports.collectTypes)(statement, context);
-        }
-    }
-}
-exports.handleTypeImports = handleTypeImports;

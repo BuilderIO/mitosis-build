@@ -5,6 +5,7 @@ describe('src-generator', function () {
     describe('isStatement', function () {
         test('is an expression', function () {
             expect((0, src_generator_1.isStatement)('a.b')).toBe(false);
+            expect((0, src_generator_1.isStatement)('a.b!')).toBe(false);
             expect((0, src_generator_1.isStatement)('1?2:"bar"')).toBe(false);
             expect((0, src_generator_1.isStatement)('"var x; return foo + \'\\"\';"')).toBe(false);
             expect((0, src_generator_1.isStatement)('"foo" + `bar\nbaz`')).toBe(false);

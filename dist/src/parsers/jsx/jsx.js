@@ -55,9 +55,10 @@ var function_1 = require("fp-ts/lib/function");
 var imports_1 = require("./imports");
 var element_parser_1 = require("./element-parser");
 var function_parser_1 = require("./function-parser");
-var jsxPlugin = require('@babel/plugin-syntax-jsx');
-var tsPreset = require('@babel/preset-typescript');
+var preset_typescript_1 = __importDefault(require("@babel/preset-typescript"));
+var plugin_syntax_typescript_1 = __importDefault(require("@babel/plugin-syntax-typescript"));
 var types = babel.types;
+var typescriptBabelPreset = [preset_typescript_1.default, { isTSX: true, allExtensions: true }];
 var beforeParse = function (path) {
     path.traverse({
         FunctionDeclaration: function (path) {
@@ -73,29 +74,24 @@ var beforeParse = function (path) {
  * @returns A JSON representation of the Mitosis component
  */
 function parseJsx(jsx, _options) {
+    var _a;
     if (_options === void 0) { _options = {}; }
     var subComponentFunctions = [];
     var options = __assign({ typescript: false }, _options);
-    var output = babel.transform(jsx, {
+    var jsxToUse = options.typescript
+        ? jsx
+        : // strip typescript types by running through babel's TS preset.
+            (_a = babel.transform(jsx, {
+                configFile: false,
+                babelrc: false,
+                presets: [typescriptBabelPreset],
+            })) === null || _a === void 0 ? void 0 : _a.code;
+    var output = babel.transform(jsxToUse, {
         configFile: false,
         babelrc: false,
         comments: false,
-        presets: [
-            [
-                tsPreset,
-                {
-                    isTSX: true,
-                    allExtensions: true,
-                    // If left to its default `false`, then this will strip away:
-                    // - unused JS imports
-                    // - types imports within regular JS import syntax
-                    // When outputting to TS, we must set it to `true` to preserve these imports.
-                    onlyRemoveTypeImports: options.typescript,
-                },
-            ],
-        ],
         plugins: [
-            jsxPlugin,
+            [plugin_syntax_typescript_1.default, { isTSX: true }],
             function () { return ({
                 visitor: {
                     JSXExpressionContainer: function (path, context) {
@@ -112,7 +108,6 @@ function parseJsx(jsx, _options) {
                             component: (0, create_mitosis_component_1.createMitosisComponent)(),
                         };
                         var keepStatements = path.node.body.filter(function (statement) { return (0, helpers_1.isImportOrDefaultExport)(statement) || (0, component_types_1.isTypeOrInterface)(statement); });
-                        (0, component_types_1.handleTypeImports)(path, context);
                         context.builder.component.exports = (0, exports_1.generateExports)(path);
                         subComponentFunctions = path.node.body
                             .filter(function (node) {
@@ -149,14 +144,14 @@ function parseJsx(jsx, _options) {
                         var node = path.node;
                         if (babel.types.isTSInterfaceDeclaration(node.declaration) ||
                             babel.types.isTSTypeAliasDeclaration(node.declaration)) {
-                            (0, component_types_1.collectTypes)(path.node, context);
+                            (0, component_types_1.collectTypes)(path, context);
                         }
                     },
                     TSTypeAliasDeclaration: function (path, context) {
-                        (0, component_types_1.collectTypes)(path.node, context);
+                        (0, component_types_1.collectTypes)(path, context);
                     },
                     TSInterfaceDeclaration: function (path, context) {
-                        (0, component_types_1.collectTypes)(path.node, context);
+                        (0, component_types_1.collectTypes)(path, context);
                     },
                 },
             }); },

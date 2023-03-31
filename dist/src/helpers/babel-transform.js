@@ -31,12 +31,14 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
     }
     return to.concat(ar || Array.prototype.slice.call(from));
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.babelTransformExpression = exports.babelTransformCode = exports.babelTransform = void 0;
 var babel = __importStar(require("@babel/core"));
-var jsxPlugin = require('@babel/plugin-syntax-jsx');
-var tsPreset = require('@babel/preset-typescript');
-var decorators = require('@babel/plugin-syntax-decorators');
+var plugin_syntax_typescript_1 = __importDefault(require("@babel/plugin-syntax-typescript"));
+var plugin_syntax_decorators_1 = __importDefault(require("@babel/plugin-syntax-decorators"));
 var function_1 = require("fp-ts/lib/function");
 var patterns_1 = require("./patterns");
 var handleErrorOrExpression = function (_a) {
@@ -73,9 +75,13 @@ var babelTransform = function (code, visitor) {
         sourceFileName: 'file.tsx',
         configFile: false,
         babelrc: false,
-        presets: [[tsPreset, { isTSX: true, allExtensions: true }]],
+        // TO-DO: keep doing this if `typescript: true`
+        // presets: [[tsPreset, { isTSX: true, allExtensions: true }]],
         parserOpts: { allowReturnOutsideFunction: true },
-        plugins: __spreadArray([[decorators, { legacy: true }], jsxPlugin], (visitor ? [function () { return ({ visitor: visitor }); }] : []), true),
+        plugins: __spreadArray([
+            [plugin_syntax_typescript_1.default, { isTSX: true }],
+            [plugin_syntax_decorators_1.default, { legacy: true }]
+        ], (visitor ? [function () { return ({ visitor: visitor }); }] : []), true),
     });
 };
 exports.babelTransform = babelTransform;
@@ -112,8 +118,7 @@ var babelTransformExpression = function (code, visitor, initialType) {
         return '';
     }
     var isGetter = code.trim().startsWith('get ');
-    return (0, function_1.pipe)(code, function (code) {
-        code = isGetter ? code.replace('get', 'function ') : code;
+    return (0, function_1.pipe)(code, isGetter ? patterns_1.replaceGetterWithFunction : function_1.identity, function (code) {
         var type = getType(code, initialType);
         var useCode = type === 'functionBody' ? "function(){".concat(code, "}") : code;
         return { type: type, useCode: useCode };
@@ -130,8 +135,6 @@ var babelTransformExpression = function (code, visitor, initialType) {
         else {
             return handleErrorOrExpression({ code: code, useCode: useCode, result: null, visitor: visitor });
         }
-    }, function (transformed) {
-        return isGetter ? transformed.replace('function ', 'get ') : transformed;
-    });
+    }, isGetter ? patterns_1.replaceFunctionWithGetter : function_1.identity);
 };
 exports.babelTransformExpression = babelTransformExpression;

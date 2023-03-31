@@ -3,6 +3,6 @@ import { Context } from './types';
 declare const types: typeof babel.types;
 export declare const getPropsTypeRef: (node: babel.types.FunctionDeclaration, context: Context) => string | undefined;
 export declare const isTypeOrInterface: (node: babel.Node) => boolean;
-export declare const collectTypes: (node: babel.Node, context: Context) => void;
-export declare function handleTypeImports(path: babel.NodePath<babel.types.Program>, context: Context): void;
+import { NodePath as BabelTraverseNodePath } from '@babel/traverse';
+export declare const collectTypes: (path: BabelTraverseNodePath<babel.types.TSTypeAliasDeclaration> | BabelTraverseNodePath<babel.types.ExportNamedDeclaration> | BabelTraverseNodePath<babel.types.TSInterfaceDeclaration> | BabelTraverseNodePath<babel.types.TSTypeAliasDeclaration>, context: Context) => void;
 export {};

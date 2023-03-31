@@ -22,16 +22,22 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.isCodeBodyIdentifier = exports.isExpression = exports.isCodeBodyExpression = exports.parseCode = void 0;
 var babel = __importStar(require("@babel/core"));
-var jsxPlugin = require('@babel/plugin-syntax-jsx');
-var tsPreset = require('@babel/preset-typescript');
-var decorators = require('@babel/plugin-syntax-decorators');
+var plugin_syntax_typescript_1 = __importDefault(require("@babel/plugin-syntax-typescript"));
+var preset_typescript_1 = __importDefault(require("@babel/preset-typescript"));
+var plugin_syntax_decorators_1 = __importDefault(require("@babel/plugin-syntax-decorators"));
 function parseCode(code) {
     var ast = babel.parse(code, {
-        presets: [[tsPreset, { isTSX: true, allExtensions: true }]],
-        plugins: [[decorators, { legacy: true }], jsxPlugin],
+        presets: [[preset_typescript_1.default, { isTSX: true, allExtensions: true }]],
+        plugins: [
+            [plugin_syntax_typescript_1.default, { isTSX: true }],
+            [plugin_syntax_decorators_1.default, { legacy: true }],
+        ],
     });
     var body = babel.types.isFile(ast)
         ? ast.program.body

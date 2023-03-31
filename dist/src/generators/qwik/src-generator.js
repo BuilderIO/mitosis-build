@@ -570,10 +570,15 @@ function literalTagName(symbol) {
  * it is not 100% but a good enough approximation
  */
 function isStatement(code) {
+    // remove trailing `!` as it is used to mark a non-null assertion in TS
+    // it messes up the logic afterwards
+    if (code.endsWith('!')) {
+        code = code.substr(0, code.length - 1);
+    }
     code = code.trim();
     if ((code.startsWith('(') && code.endsWith(')')) ||
         (code.startsWith('{') && code.endsWith('}'))) {
-        // Code starting with `(` is most likely and IFF and hence is an expression.
+        // Code starting with `(` is most likely an IFF and hence is an expression.
         return false;
     }
     var codeNoStrings = code.replace(STRING_LITERAL, 'STRING_LITERAL');

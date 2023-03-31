@@ -509,22 +509,30 @@ var runTestsForJsx = function () {
             }
         });
     }); });
-    JSX_TESTS.forEach(function (tests) {
-        Object.keys(tests).forEach(function (key) {
-            test(key, function () { return __awaiter(void 0, void 0, void 0, function () {
-                var component, _a;
-                return __generator(this, function (_b) {
-                    switch (_b.label) {
-                        case 0:
-                            _a = jsx_1.parseJsx;
-                            return [4 /*yield*/, tests[key]];
-                        case 1:
-                            component = _a.apply(void 0, [_b.sent()]);
-                            expect(component).toMatchSnapshot();
-                            return [2 /*return*/];
-                    }
+    var configurations = [
+        { typescript: true, testName: 'Typescript' },
+        { typescript: false, testName: 'Javascript' },
+    ];
+    configurations.forEach(function (config) {
+        describe(config.testName, function () {
+            JSX_TESTS.forEach(function (tests) {
+                Object.keys(tests).forEach(function (key) {
+                    test(key, function () { return __awaiter(void 0, void 0, void 0, function () {
+                        var component, _a;
+                        return __generator(this, function (_b) {
+                            switch (_b.label) {
+                                case 0:
+                                    _a = jsx_1.parseJsx;
+                                    return [4 /*yield*/, tests[key]];
+                                case 1:
+                                    component = _a.apply(void 0, [_b.sent(), config]);
+                                    expect(component).toMatchSnapshot();
+                                    return [2 /*return*/];
+                            }
+                        });
+                    }); });
                 });
-            }); });
+            });
         });
     });
 };
@@ -555,27 +563,27 @@ var runTestsForTarget = function (_a) {
         { options: __assign(__assign({}, options), { typescript: false }), testName: 'Javascript Test' },
         { options: __assign(__assign({}, options), { typescript: true }), testName: 'Typescript Test' },
     ];
-    var parsers = [
-        {
-            name: 'jsx',
-            parser: function (x) { return __awaiter(void 0, void 0, void 0, function () { return __generator(this, function (_a) {
-                return [2 /*return*/, (0, jsx_1.parseJsx)(x, { typescript: options.typescript })];
-            }); }); },
-            testsArray: JSX_TESTS_FOR_TARGET[target],
-        },
-        {
-            name: 'svelte',
-            parser: function (x) { return __awaiter(void 0, void 0, void 0, function () { return __generator(this, function (_a) {
-                return [2 /*return*/, (0, __1.parseSvelte)(x)];
-            }); }); },
-            testsArray: [SVELTE_SYNTAX_TESTS],
-        },
-    ];
-    var _loop_1 = function (name_1, parser, testsArray) {
-        if (testsArray) {
-            describe(name_1, function () {
-                configurations.forEach(function (_a) {
-                    var options = _a.options, testName = _a.testName;
+    configurations.forEach(function (_a) {
+        var options = _a.options, testName = _a.testName;
+        var parsers = [
+            {
+                name: 'jsx',
+                parser: function (x) { return __awaiter(void 0, void 0, void 0, function () { return __generator(this, function (_a) {
+                    return [2 /*return*/, (0, jsx_1.parseJsx)(x, { typescript: options.typescript })];
+                }); }); },
+                testsArray: JSX_TESTS_FOR_TARGET[target],
+            },
+            {
+                name: 'svelte',
+                parser: function (x) { return __awaiter(void 0, void 0, void 0, function () { return __generator(this, function (_a) {
+                    return [2 /*return*/, (0, __1.parseSvelte)(x)];
+                }); }); },
+                testsArray: [SVELTE_SYNTAX_TESTS],
+            },
+        ];
+        var _loop_1 = function (name_1, parser, testsArray) {
+            if (testsArray) {
+                describe(name_1, function () {
                     if (name_1 === 'jsx' && options.typescript === false) {
                         test('Remove Internal mitosis package', function () { return __awaiter(void 0, void 0, void 0, function () {
                             var component, _a, output;
@@ -623,12 +631,12 @@ var runTestsForTarget = function (_a) {
                         });
                     });
                 });
-            });
+            }
+        };
+        for (var _i = 0, parsers_1 = parsers; _i < parsers_1.length; _i++) {
+            var _b = parsers_1[_i], name_1 = _b.name, parser = _b.parser, testsArray = _b.testsArray;
+            _loop_1(name_1, parser, testsArray);
         }
-    };
-    for (var _i = 0, parsers_1 = parsers; _i < parsers_1.length; _i++) {
-        var _b = parsers_1[_i], name_1 = _b.name, parser = _b.parser, testsArray = _b.testsArray;
-        _loop_1(name_1, parser, testsArray);
-    }
+    });
 };
 exports.runTestsForTarget = runTestsForTarget;
