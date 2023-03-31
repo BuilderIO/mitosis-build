@@ -1,4 +1,15 @@
 "use strict";
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     var desc = Object.getOwnPropertyDescriptor(m, k);
@@ -35,14 +46,15 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.babelTransformExpression = exports.babelTransformCode = exports.babelTransform = void 0;
+exports.convertTypeScriptToJS = exports.babelTransformExpression = exports.babelTransformCode = void 0;
+var preset_typescript_1 = __importDefault(require("@babel/preset-typescript"));
 var babel = __importStar(require("@babel/core"));
 var plugin_syntax_typescript_1 = __importDefault(require("@babel/plugin-syntax-typescript"));
 var plugin_syntax_decorators_1 = __importDefault(require("@babel/plugin-syntax-decorators"));
 var function_1 = require("fp-ts/lib/function");
 var patterns_1 = require("./patterns");
 var handleErrorOrExpression = function (_a) {
-    var code = _a.code, useCode = _a.useCode, result = _a.result, visitor = _a.visitor;
+    var code = _a.code, useCode = _a.useCode, result = _a.result, visitor = _a.visitor, stripTypes = _a.stripTypes;
     try {
         // If it can't, e.g. this is an expression or code fragment, modify the code below and try again
         // Detect method fragments. These get passed sometimes and otherwise
@@ -57,7 +69,7 @@ var handleErrorOrExpression = function (_a) {
         // Parse the code as an expression (instead of the default, a block) by giving it a fake variable assignment
         // e.g. if the code parsed is { ... } babel will treat that as a block by deafult, unless processed as an expression
         // that is an object
-        "let _ = ".concat(useCode), function (code) { return (0, exports.babelTransformCode)(code, visitor); }, trimSemicolons, 
+        "let _ = ".concat(useCode), function (code) { return (0, exports.babelTransformCode)(code, visitor, stripTypes); }, trimSemicolons, 
         // Remove our fake variable assignment
         function (str) { return str.replace(/let _ =\s/, ''); });
         if (isMethodOrGetter) {
@@ -70,22 +82,18 @@ var handleErrorOrExpression = function (_a) {
         throw err;
     }
 };
-var babelTransform = function (code, visitor) {
-    return babel.transform(code, {
-        sourceFileName: 'file.tsx',
-        configFile: false,
-        babelrc: false,
-        // TO-DO: keep doing this if `typescript: true`
-        // presets: [[tsPreset, { isTSX: true, allExtensions: true }]],
-        parserOpts: { allowReturnOutsideFunction: true },
-        plugins: __spreadArray([
+var babelTransform = function (_a) {
+    var code = _a.code, visitor = _a.visitor, stripTypes = _a.stripTypes;
+    return babel.transform(code, __assign(__assign({ sourceFileName: 'file.tsx', configFile: false, babelrc: false, parserOpts: { allowReturnOutsideFunction: true } }, (stripTypes ? { presets: [[preset_typescript_1.default, { isTSX: true, allExtensions: true }]] } : {})), { plugins: __spreadArray([
             [plugin_syntax_typescript_1.default, { isTSX: true }],
             [plugin_syntax_decorators_1.default, { legacy: true }]
-        ], (visitor ? [function () { return ({ visitor: visitor }); }] : []), true),
-    });
+        ], (visitor ? [function () { return ({ visitor: visitor }); }] : []), true) }));
 };
-exports.babelTransform = babelTransform;
-var babelTransformCode = function (code, visitor) { var _a; return ((_a = (0, exports.babelTransform)(code, visitor)) === null || _a === void 0 ? void 0 : _a.code) || ''; };
+var babelTransformCode = function (code, visitor, stripTypes) {
+    var _a;
+    if (stripTypes === void 0) { stripTypes = false; }
+    return ((_a = babelTransform({ code: code, visitor: visitor, stripTypes: stripTypes })) === null || _a === void 0 ? void 0 : _a.code) || '';
+};
 exports.babelTransformCode = babelTransformCode;
 // Babel adds trailing semicolons, but for expressions we need those gone
 // TODO: maybe detect if the original code ended with one, and keep it if so, for the case
@@ -112,8 +120,9 @@ var getType = function (code, initialType) {
     }
     return initialType;
 };
-var babelTransformExpression = function (code, visitor, initialType) {
+var babelTransformExpression = function (code, visitor, initialType, stripTypes) {
     if (initialType === void 0) { initialType = 'unknown'; }
+    if (stripTypes === void 0) { stripTypes = false; }
     if (!code) {
         return '';
     }
@@ -126,15 +135,19 @@ var babelTransformExpression = function (code, visitor, initialType) {
         var type = _a.type, useCode = _a.useCode;
         if (type !== 'expression') {
             try {
-                return (0, function_1.pipe)((0, exports.babelTransformCode)(useCode, visitor), trimExpression(type));
+                return (0, function_1.pipe)((0, exports.babelTransformCode)(useCode, visitor, stripTypes), trimExpression(type));
             }
             catch (error) {
-                return handleErrorOrExpression({ code: code, useCode: useCode, result: null, visitor: visitor });
+                return handleErrorOrExpression({ code: code, useCode: useCode, result: null, visitor: visitor, stripTypes: stripTypes });
             }
         }
         else {
-            return handleErrorOrExpression({ code: code, useCode: useCode, result: null, visitor: visitor });
+            return handleErrorOrExpression({ code: code, useCode: useCode, result: null, visitor: visitor, stripTypes: stripTypes });
         }
     }, isGetter ? patterns_1.replaceFunctionWithGetter : function_1.identity);
 };
 exports.babelTransformExpression = babelTransformExpression;
+var convertTypeScriptToJS = function (code) {
+    return (0, exports.babelTransformExpression)(code, {}, 'unknown', true);
+};
+exports.convertTypeScriptToJS = convertTypeScriptToJS;

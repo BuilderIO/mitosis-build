@@ -109,6 +109,18 @@ var componentToSvelte = function (userProvidedOptions) {
         var component = _a.component;
         var options = (0, merge_options_1.mergeOptions)(DEFAULT_OPTIONS, userProvidedOptions);
         options.plugins = __spreadArray(__spreadArray([], (options.plugins || []), true), [
+            // Strip types from any JS code that ends up in the template, because Svelte does not support TS code in templates.
+            (0, process_code_1.CODE_PROCESSOR_PLUGIN)(function (codeType) {
+                switch (codeType) {
+                    case 'bindings':
+                    case 'properties':
+                        return babel_transform_1.convertTypeScriptToJS;
+                    case 'hooks':
+                    case 'hooks-deps':
+                    case 'state':
+                        return function (x) { return x; };
+                }
+            }),
             (0, process_code_1.CODE_PROCESSOR_PLUGIN)(function (codeType) {
                 switch (codeType) {
                     case 'hooks':
@@ -251,7 +263,7 @@ var componentToSvelte = function (userProvidedOptions) {
             }
             catch (err) {
                 console.warn('Could not prettify');
-                console.warn({ string: str }, err);
+                console.warn(str, err);
             }
         }
         str = str.replace(/<script>\n<\/script>/g, '').trim();

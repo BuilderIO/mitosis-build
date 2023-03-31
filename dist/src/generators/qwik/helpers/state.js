@@ -16,7 +16,7 @@ exports.getStateMethodsAndGetters = exports.getLexicalScopeVars = exports.emitSt
 var traverse_1 = __importDefault(require("traverse"));
 var convert_method_to_function_1 = require("./convert-method-to-function");
 var stable_inject_1 = require("./stable-inject");
-var transform_code_1 = require("./transform-code");
+var babel_transform_1 = require("../../../helpers/babel-transform");
 /**
  * @param file
  * @param stateInit
@@ -43,7 +43,6 @@ function emitStateMethods(file, componentState, lexicalArgs) {
     var methodMap = getStateMethodsAndGetters(componentState);
     for (var key in componentState) {
         var stateValue = componentState[key];
-        console.log(componentState);
         switch (stateValue === null || stateValue === void 0 ? void 0 : stateValue.type) {
             case 'method':
             case 'getter':
@@ -64,10 +63,9 @@ function emitStateMethods(file, componentState, lexicalArgs) {
                 }
                 if (!file.options.isTypeScript) {
                     // Erase type information
-                    code = (0, transform_code_1.convertTypeScriptToJS)(code);
+                    code = (0, babel_transform_1.convertTypeScriptToJS)(code);
                 }
                 file.exportConst(functionName, 'function ' + code, true);
-                console.log(functionName, 'function ' + code);
                 continue;
             case 'property':
                 stateValues[key] = stateValue.code;

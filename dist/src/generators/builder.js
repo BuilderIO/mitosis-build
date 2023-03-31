@@ -263,7 +263,6 @@ var componentToBuilder = function (options) {
             if ((0, builder_1.isBuilderElement)(el)) {
                 var value = subComponentMap[(_a = el.component) === null || _a === void 0 ? void 0 : _a.name];
                 if (value) {
-                    console.log('applied?');
                     (0, lodash_1.set)(el, 'component.options.symbol.content', value);
                 }
             }

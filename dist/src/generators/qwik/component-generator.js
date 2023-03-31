@@ -13,9 +13,9 @@ var plugins_1 = require("../../modules/plugins");
 var stable_inject_1 = require("./helpers/stable-inject");
 var merge_options_1 = require("../../helpers/merge-options");
 var state_2 = require("./helpers/state");
-var transform_code_1 = require("./helpers/transform-code");
 var process_code_1 = require("../../helpers/plugins/process-code");
 var replace_identifiers_1 = require("../../helpers/replace-identifiers");
+var babel_transform_1 = require("../../helpers/babel-transform");
 Error.stackTraceLimit = 9999;
 var DEBUG = false;
 var PLUGINS = [
@@ -150,7 +150,7 @@ function emitUseTask(file, component) {
         component.hooks.onUpdate.forEach(function (onUpdate) {
             file.src.emit(file.import(file.qwikModule, 'useTask$').localName, '(({track})=>{');
             emitTrackExpressions(file.src, onUpdate.deps);
-            file.src.emit((0, transform_code_1.convertTypeScriptToJS)(onUpdate.code));
+            file.src.emit((0, babel_transform_1.convertTypeScriptToJS)(onUpdate.code));
             file.src.emit('});');
         });
     }

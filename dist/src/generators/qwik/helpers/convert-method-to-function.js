@@ -13,7 +13,6 @@ function convertMethodToFunction(code, properties, lexicalArgs) {
     var lastCh = null;
     while (idx < end) {
         var ch = code.charCodeAt(idx++);
-        // console.log(mode, code[idx - 1]);
         switch (mode) {
             case "code" /* Mode.code */:
                 if (ch === QUOTE_DOUBLE) {

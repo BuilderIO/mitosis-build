@@ -196,7 +196,7 @@ var processBinding = function (_a) {
         });
     }
     catch (e) {
-        console.log('could not process bindings in ', { code: code });
+        console.error('could not process bindings in ', { code: code });
         throw e;
     }
 };
