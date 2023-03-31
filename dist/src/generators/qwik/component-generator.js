@@ -14,6 +14,8 @@ var stable_inject_1 = require("./helpers/stable-inject");
 var merge_options_1 = require("../../helpers/merge-options");
 var state_2 = require("./helpers/state");
 var transform_code_1 = require("./helpers/transform-code");
+var process_code_1 = require("../../helpers/plugins/process-code");
+var replace_identifiers_1 = require("../../helpers/replace-identifiers");
 Error.stackTraceLimit = 9999;
 var DEBUG = false;
 var PLUGINS = [
@@ -25,6 +27,30 @@ var PLUGINS = [
             },
         },
     }); },
+    (0, process_code_1.CODE_PROCESSOR_PLUGIN)(function (codeType, json) {
+        switch (codeType) {
+            case 'bindings':
+            case 'state':
+            case 'hooks':
+            case 'hooks-deps':
+            case 'properties':
+                // update signal getters to have `.value`
+                return function (code, k) {
+                    // `ref` should not update the signal value access
+                    if (k === 'ref') {
+                        return code;
+                    }
+                    Object.keys(json.refs).forEach(function (ref) {
+                        code = (0, replace_identifiers_1.replaceIdentifiers)({
+                            code: code,
+                            from: ref,
+                            to: function (x) { return (x === ref ? "".concat(x, ".value") : "".concat(ref, ".value.").concat(x)); },
+                        });
+                    });
+                    return code;
+                };
+        }
+    }),
 ];
 var DEFAULT_OPTIONS = {
     plugins: PLUGINS,
@@ -70,7 +96,6 @@ var componentToQwik = function (userOptions) {
                     emitUseClientEffect(file, component);
                     emitUseMount(file, component);
                     emitUseTask(file, component);
-                    emitUseCleanup(file, component);
                     emitTagNameHack(file, component, (_a = component.meta.useMetadata) === null || _a === void 0 ? void 0 : _a.elementTag);
                     emitTagNameHack(file, component, (_b = component.meta.useMetadata) === null || _b === void 0 ? void 0 : _b.componentElementTag);
                     emitJSX(file, component, mutable_1);
@@ -111,13 +136,13 @@ function emitUseClientEffect(file, component) {
         // This is called useMount, but in practice it is used as
         // useClientEffect. Not sure if this is correct, but for now.
         var code = component.hooks.onMount.code;
-        file.src.emit(file.import(file.qwikModule, 'useClientEffect$').localName, '(()=>{', code, '});');
+        file.src.emit(file.import(file.qwikModule, 'useVisibleTask$').localName, '(()=>{', code, '});');
     }
 }
 function emitUseMount(file, component) {
     if (component.hooks.onInit) {
         var code = component.hooks.onInit.code;
-        file.src.emit(file.import(file.qwikModule, 'useMount$').localName, '(()=>{', code, '});');
+        file.src.emit(file.import(file.qwikModule, 'useTask$').localName, '(()=>{', code, '});');
     }
 }
 function emitUseTask(file, component) {
@@ -138,12 +163,6 @@ function emitTrackExpressions(src, deps) {
     dependencies.forEach(function (dep) {
         src.emit("track(() => ".concat(dep, ");"));
     });
-}
-function emitUseCleanup(file, component) {
-    if (component.hooks.onUnMount) {
-        var code = component.hooks.onUnMount.code;
-        file.src.emit(file.import(file.qwikModule, 'useCleanup$').localName, '(()=>{', code, '});');
-    }
 }
 function emitJSX(file, component, mutable) {
     var directives = new Map();
@@ -186,7 +205,7 @@ function emitUseContext(file, component) {
 }
 function emitUseRef(file, component) {
     Object.keys(component.refs).forEach(function (refKey) {
-        file.src.emit("const ", refKey, '=', file.import(file.qwikModule, 'useRef').localName, '();');
+        file.src.emit("const ", refKey, '=', file.import(file.qwikModule, 'useSignal').localName, "".concat(file.options.isTypeScript ? '<Element>' : '', "();"));
     });
 }
 function emitUseStyles(file, component) {
