@@ -43,6 +43,7 @@ var merge_options_1 = require("../../helpers/merge-options");
 var process_code_1 = require("../../helpers/plugins/process-code");
 var strip_state_and_props_refs_1 = require("../../helpers/strip-state-and-props-refs");
 var bindings_1 = require("../../helpers/bindings");
+var babel_transform_1 = require("../../helpers/babel-transform");
 // Transform <foo.bar key="value" /> to <component :is="foo.bar" key="value" />
 function processDynamicComponents(json, _options) {
     (0, traverse_1.default)(json).forEach(function (node) {
@@ -112,7 +113,9 @@ var componentToVue = function (userOptions) {
                     case 'state':
                         return function (code) { return (0, helpers_1.processBinding)({ code: code, options: options, json: component }); };
                     case 'bindings':
-                        return function (code) { return (0, helpers_1.processBinding)({ code: code, options: options, json: component, codeType: codeType }); };
+                        return (0, function_1.flow)(
+                        // Strip types from any JS code that ends up in the template, because Vue does not support TS code in templates.
+                        babel_transform_1.convertTypeScriptToJS, function (code) { return (0, helpers_1.processBinding)({ code: code, options: options, json: component, codeType: codeType }); });
                     case 'hooks-deps':
                         return function (c) { return (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(c, { includeProps: false }); };
                     case 'properties':
@@ -124,7 +127,9 @@ var componentToVue = function (userOptions) {
                     case 'hooks':
                         return function (code) { return (0, helpers_1.processBinding)({ code: code, options: options, json: component }); };
                     case 'bindings':
-                        return function (code) { return (0, helpers_1.processBinding)({ code: code, options: options, json: component, codeType: codeType }); };
+                        return (0, function_1.flow)(
+                        // Strip types from any JS code that ends up in the template, because Vue does not support TS code in templates.
+                        babel_transform_1.convertTypeScriptToJS, function (code) { return (0, helpers_1.processBinding)({ code: code, options: options, json: component, codeType: codeType }); });
                     case 'properties':
                     case 'hooks-deps':
                         return function (c) { return c; };
