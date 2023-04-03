@@ -269,6 +269,7 @@ var componentToAngular = function (userOptions) {
                     case 'hooks-deps':
                     case 'state':
                     case 'properties':
+                    case 'dynamic-jsx-elements':
                         return function (x) { return x; };
                 }
             }),

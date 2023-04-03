@@ -61,7 +61,7 @@ export declare class Symbol {
 }
 export declare class Imports {
     imports: Map<string, Map<string, Symbol>>;
-    get(moduleName: string, symbolName: string, as?: string): Symbol;
+    get(moduleName: string, symbolName: string, asVar?: string): Symbol;
     hasImport(localName: string): boolean;
 }
 export declare function quote(text: string): string;

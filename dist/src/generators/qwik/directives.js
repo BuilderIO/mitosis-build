@@ -4,7 +4,7 @@ var __makeTemplateObject = (this && this.__makeTemplateObject) || function (cook
     return cooked;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CoreButton = exports.__passThroughProps__ = exports.Image = exports.DIRECTIVES = void 0;
+exports.Image = exports.DIRECTIVES = void 0;
 var for_1 = require("../../helpers/nodes/for");
 var minify_1 = require("../minify");
 var src_generator_1 = require("./src-generator");
@@ -124,7 +124,6 @@ function __passThroughProps__(dstProps, srcProps) {
     }
     return dstProps;
 }
-exports.__passThroughProps__ = __passThroughProps__;
 function CoreButton(props) {
     var hasLink = !!props.link;
     var hProps = {
@@ -135,5 +134,4 @@ function CoreButton(props) {
     };
     return h(hasLink ? 'a' : props.tagName$ || 'span', __passThroughProps__(hProps, props));
 }
-exports.CoreButton = CoreButton;
 var templateObject_1, templateObject_2, templateObject_3;

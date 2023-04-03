@@ -4,4 +4,6 @@ declare type ReplaceArgs = {
     to: string | ((identifier: string) => string) | null;
 };
 export declare const replaceIdentifiers: ({ code, from, to }: ReplaceArgs) => string;
+export declare const replaceStateIdentifier: (to: ReplaceArgs['to']) => (code: string) => string;
+export declare const replacePropsIdentifier: (to: ReplaceArgs['to']) => (code: string) => string;
 export {};

@@ -20,7 +20,11 @@ export declare type StateValues = Record<PropertyName, StateValue>;
  * @param file
  * @param stateInit
  */
-export declare function emitUseStore(file: File, stateInit: StateInit): void;
+export declare function emitUseStore({ file, stateInit, isDeep, }: {
+    file: File;
+    stateInit: StateInit;
+    isDeep: boolean;
+}): void;
 export declare function emitStateMethodsAndRewriteBindings(file: File, component: MitosisComponent, metadata: Record<string, any>): StateInit;
 export declare function getLexicalScopeVars(component: MitosisComponent): string[];
 export declare type MethodMap = Record<string, 'method' | 'getter'>;

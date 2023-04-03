@@ -6,6 +6,7 @@ var strip_state_and_props_refs_1 = require("../../../helpers/strip-state-and-pro
 var function_1 = require("fp-ts/lib/function");
 var transform_state_setters_1 = require("../../../helpers/transform-state-setters");
 var capitalize_1 = require("../../../helpers/capitalize");
+var replace_identifiers_1 = require("../../../helpers/replace-identifiers");
 var getStateSetterName = function (stateName) { return "set".concat((0, capitalize_1.capitalize)(stateName)); };
 exports.getStateSetterName = getStateSetterName;
 var getStateTypeForValue = function (_a) {
@@ -73,32 +74,26 @@ var updateStateSettersInCode = function (_a) {
     };
 };
 var updateStateGettersInCode = function (options, component) {
-    return function (value) {
-        return (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(value, {
-            includeState: true,
-            includeProps: false,
-            replaceWith: function (name) {
-                var stateType = (0, exports.getStateTypeForValue)({ value: name, component: component, options: options });
-                var state = component.state[name];
-                switch (stateType) {
-                    case 'signals':
-                        if (
-                        // signal accessors are lazy, so we need to add a function call to property calls
-                        (state === null || state === void 0 ? void 0 : state.type) === 'property' ||
-                            // getters become plain functions, requiring a function call to access their value
-                            (state === null || state === void 0 ? void 0 : state.type) === 'getter') {
-                            return "".concat(name, "()");
-                        }
-                        else {
-                            return name;
-                        }
-                    case 'store':
-                    case 'mutable':
-                        return name;
+    return (0, replace_identifiers_1.replaceStateIdentifier)(function (name) {
+        var stateType = (0, exports.getStateTypeForValue)({ value: name, component: component, options: options });
+        var state = component.state[name];
+        switch (stateType) {
+            case 'signals':
+                if (
+                // signal accessors are lazy, so we need to add a function call to property calls
+                (state === null || state === void 0 ? void 0 : state.type) === 'property' ||
+                    // getters become plain functions, requiring a function call to access their value
+                    (state === null || state === void 0 ? void 0 : state.type) === 'getter') {
+                    return "".concat(name, "()");
                 }
-            },
-        });
-    };
+                else {
+                    return name;
+                }
+            case 'store':
+            case 'mutable':
+                return name;
+        }
+    });
 };
 var updateStateCode = function (_a) {
     var options = _a.options, component = _a.component, _b = _a.updateSetters, updateSetters = _b === void 0 ? true : _b;

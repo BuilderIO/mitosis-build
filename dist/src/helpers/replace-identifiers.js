@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.replaceIdentifiers = void 0;
+exports.replacePropsIdentifier = exports.replaceStateIdentifier = exports.replaceIdentifiers = void 0;
 var core_1 = require("@babel/core");
 var generator_1 = __importDefault(require("@babel/generator"));
 var function_1 = require("fp-ts/lib/function");
@@ -141,3 +141,11 @@ var replaceIdentifiers = function (_a) {
     }
 };
 exports.replaceIdentifiers = replaceIdentifiers;
+var replaceStateIdentifier = function (to) { return function (code) {
+    return (0, exports.replaceIdentifiers)({ code: code, from: 'state', to: to });
+}; };
+exports.replaceStateIdentifier = replaceStateIdentifier;
+var replacePropsIdentifier = function (to) { return function (code) {
+    return (0, exports.replaceIdentifiers)({ code: code, from: 'props', to: to });
+}; };
+exports.replacePropsIdentifier = replacePropsIdentifier;

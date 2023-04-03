@@ -1,6 +1,6 @@
 import { Plugin } from '../../types/plugins';
 import { MitosisComponent } from '../../types/mitosis-component';
-declare type CodeType = 'hooks' | 'hooks-deps' | 'bindings' | 'properties' | 'state';
+declare type CodeType = 'hooks' | 'hooks-deps' | 'bindings' | 'properties' | 'state' | 'dynamic-jsx-elements';
 declare function codeProcessor(codeType: CodeType, json: MitosisComponent): (code: string, hookType: string) => string;
 declare type CodeProcessor = typeof codeProcessor;
 /**

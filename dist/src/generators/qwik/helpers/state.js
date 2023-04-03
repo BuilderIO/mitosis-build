@@ -21,7 +21,8 @@ var babel_transform_1 = require("../../../helpers/babel-transform");
  * @param file
  * @param stateInit
  */
-function emitUseStore(file, stateInit) {
+function emitUseStore(_a) {
+    var file = _a.file, stateInit = _a.stateInit, isDeep = _a.isDeep;
     var state = stateInit[0];
     var hasState = state && Object.keys(state).length > 0;
     if (hasState) {
@@ -29,7 +30,8 @@ function emitUseStore(file, stateInit) {
         if (file.options.isTypeScript) {
             file.src.emit('<any>');
         }
-        file.src.emit("(".concat((0, stable_inject_1.stableInject)(state), ");"));
+        var fnArgs = [(0, stable_inject_1.stableInject)(state), isDeep ? '{deep: true}' : undefined].filter(Boolean);
+        file.src.emit("(".concat(fnArgs, ");"));
     }
     else {
         // TODO hack for now so that `state` variable is defined, even though it is never read.
@@ -45,22 +47,15 @@ function emitStateMethods(file, componentState, lexicalArgs) {
         var stateValue = componentState[key];
         switch (stateValue === null || stateValue === void 0 ? void 0 : stateValue.type) {
             case 'method':
-            case 'getter':
             case 'function':
                 var code = stateValue.code;
                 var prefixIdx = 0;
-                if (stateValue.type === 'getter') {
-                    prefixIdx += 'get '.length;
-                }
-                else if (stateValue.type === 'function') {
+                if (stateValue.type === 'function') {
                     prefixIdx += 'function '.length;
                 }
                 code = code.substring(prefixIdx);
                 code = (0, convert_method_to_function_1.convertMethodToFunction)(code, methodMap, lexicalArgs).replace('(', "(".concat(lexicalArgs.join(','), ","));
                 var functionName = code.split(/\(/)[0];
-                if (stateValue.type === 'getter') {
-                    stateInit.push("state.".concat(key, "=").concat(functionName, "(").concat(lexicalArgs.join(','), ")"));
-                }
                 if (!file.options.isTypeScript) {
                     // Erase type information
                     code = (0, babel_transform_1.convertTypeScriptToJS)(code);

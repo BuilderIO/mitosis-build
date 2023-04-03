@@ -190,11 +190,11 @@ function rewriteHandlers(file, handlers, bindings, symbolBindings) {
         if (Object.prototype.hasOwnProperty.call(bindings, key)) {
             var bindingValue = bindings[key];
             var bindingExpr = bindingValue.code;
-            var handlerBlock = void 0;
+            var handlerBlock = handlers.get(bindingExpr);
             if (key == 'css') {
                 continue;
             }
-            else if ((handlerBlock = handlers.get(bindingExpr))) {
+            else if (handlerBlock) {
                 key = "".concat(key, "$");
                 bindingExpr = (0, src_generator_1.invoke)(file.import(file.qwikModule, 'qrl'), [
                     (0, src_generator_1.quote)(file.qrlPrefix + 'high.js'),

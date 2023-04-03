@@ -456,7 +456,7 @@ var Imports = /** @class */ (function () {
     function Imports() {
         this.imports = new Map();
     }
-    Imports.prototype.get = function (moduleName, symbolName, as) {
+    Imports.prototype.get = function (moduleName, symbolName, asVar) {
         var importSymbols = this.imports.get(moduleName);
         if (!importSymbols) {
             importSymbols = new Map();
@@ -464,7 +464,7 @@ var Imports = /** @class */ (function () {
         }
         var symbol = importSymbols.get(symbolName);
         if (!symbol) {
-            symbol = new Symbol(symbolName, as || symbolName);
+            symbol = new Symbol(symbolName, asVar || symbolName);
             importSymbols.set(symbolName, symbol);
         }
         return symbol;

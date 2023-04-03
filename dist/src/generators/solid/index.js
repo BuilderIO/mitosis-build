@@ -135,6 +135,7 @@ var componentToSolid = function (passedOptions) {
             (0, process_code_1.CODE_PROCESSOR_PLUGIN)(function (codeType) {
                 switch (codeType) {
                     case 'state':
+                    case 'dynamic-jsx-elements':
                         return function (c) { return c; };
                     case 'bindings':
                     case 'hooks':

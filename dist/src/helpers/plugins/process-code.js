@@ -22,6 +22,7 @@ var preProcessNodeCode = function (_a) {
             value.code = bindingsProcessor(value.code, key);
         }
     }
+    json.name = codeProcessor('dynamic-jsx-elements', parentComponent)(json.name, '');
 };
 /**
  * Given a `codeProcessor` function, processes all code expressions within a Mitosis component.

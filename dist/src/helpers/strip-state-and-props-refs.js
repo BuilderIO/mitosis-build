@@ -83,14 +83,14 @@ var stripStateAndPropsRefs = function (code, _options) {
     var newCode = code || '';
     var _a = __assign(__assign({}, DEFAULT_OPTIONS), _options), replaceWith = _a.replaceWith, includeProps = _a.includeProps, includeState = _a.includeState;
     if (includeProps !== false) {
-        newCode = (0, replace_identifiers_1.replaceIdentifiers)({ code: newCode, from: 'props', to: replaceWith || null });
+        newCode = (0, replace_identifiers_1.replacePropsIdentifier)(replaceWith)(newCode);
         // TODO: webcomponent edge-case
         if (/el\.this\.props/.test(newCode)) {
             newCode = newCode.replace(/el\.this\.props/g, 'el.props');
         }
     }
     if (includeState !== false) {
-        newCode = (0, replace_identifiers_1.replaceIdentifiers)({ code: newCode, from: 'state', to: replaceWith || null });
+        newCode = (0, replace_identifiers_1.replaceStateIdentifier)(replaceWith)(newCode);
     }
     return newCode;
 };

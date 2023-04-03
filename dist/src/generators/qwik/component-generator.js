@@ -6,7 +6,6 @@ var fast_clone_1 = require("../../helpers/fast-clone");
 var collect_css_1 = require("../../helpers/styles/collect-css");
 var state_1 = require("../../helpers/state");
 var add_prevent_default_1 = require("./helpers/add-prevent-default");
-var convert_method_to_function_1 = require("./helpers/convert-method-to-function");
 var jsx_1 = require("./jsx");
 var src_generator_1 = require("./src-generator");
 var plugins_1 = require("../../modules/plugins");
@@ -34,6 +33,7 @@ var PLUGINS = [
             case 'hooks':
             case 'hooks-deps':
             case 'properties':
+            case 'dynamic-jsx-elements':
                 // update signal getters to have `.value`
                 return function (code, k) {
                     // `ref` should not update the signal value access
@@ -47,7 +47,19 @@ var PLUGINS = [
                             to: function (x) { return (x === ref ? "".concat(x, ".value") : "".concat(ref, ".value.").concat(x)); },
                         });
                     });
-                    return code;
+                    // update signal getters to have `.value`
+                    return (0, replace_identifiers_1.replaceStateIdentifier)(function (name) {
+                        var state = json.state[name];
+                        switch (state === null || state === void 0 ? void 0 : state.type) {
+                            case 'getter':
+                                return "".concat(name, ".value");
+                            case 'function':
+                            case 'method':
+                            case 'property':
+                            case undefined:
+                                return "state.".concat(name);
+                        }
+                    })(code);
                 };
         }
     }),
@@ -77,27 +89,27 @@ var componentToQwik = function (userOptions) {
             emitImports(file, component);
             emitTypes(file, component);
             emitExports(file, component);
-            var metadata = component.meta.useMetadata || {};
-            var isLightComponent = ((_c = (_b = metadata === null || metadata === void 0 ? void 0 : metadata.qwik) === null || _b === void 0 ? void 0 : _b.component) === null || _c === void 0 ? void 0 : _c.isLight) || false;
-            var mutable_1 = ((_d = metadata === null || metadata === void 0 ? void 0 : metadata.qwik) === null || _d === void 0 ? void 0 : _d.mutable) || [];
-            var imports_1 = ((_e = metadata === null || metadata === void 0 ? void 0 : metadata.qwik) === null || _e === void 0 ? void 0 : _e.imports) || {};
+            var metadata_1 = component.meta.useMetadata || {};
+            var isLightComponent = ((_c = (_b = metadata_1 === null || metadata_1 === void 0 ? void 0 : metadata_1.qwik) === null || _b === void 0 ? void 0 : _b.component) === null || _c === void 0 ? void 0 : _c.isLight) || false;
+            var mutable_1 = ((_d = metadata_1 === null || metadata_1 === void 0 ? void 0 : metadata_1.qwik) === null || _d === void 0 ? void 0 : _d.mutable) || [];
+            var imports_1 = ((_e = metadata_1 === null || metadata_1 === void 0 ? void 0 : metadata_1.qwik) === null || _e === void 0 ? void 0 : _e.imports) || {};
             Object.keys(imports_1).forEach(function (key) { return file.import(imports_1[key], key); });
-            var state_3 = (0, state_2.emitStateMethodsAndRewriteBindings)(file, component, metadata);
+            var state_3 = (0, state_2.emitStateMethodsAndRewriteBindings)(file, component, metadata_1);
             var hasState_1 = (0, state_1.checkHasState)(component);
             var css_1 = null;
             var componentFn = (0, src_generator_1.arrowFnBlock)(['props'], [
                 function () {
-                    var _a, _b;
+                    var _a;
                     css_1 = emitUseStyles(file, component);
                     emitUseContext(file, component);
                     emitUseRef(file, component);
-                    hasState_1 && (0, state_2.emitUseStore)(file, state_3);
+                    hasState_1 &&
+                        (0, state_2.emitUseStore)({ file: file, stateInit: state_3, isDeep: (_a = metadata_1 === null || metadata_1 === void 0 ? void 0 : metadata_1.qwik) === null || _a === void 0 ? void 0 : _a.hasDeepStore });
+                    emitUseComputed(file, component);
                     emitUseContextProvider(file, component);
                     emitUseClientEffect(file, component);
                     emitUseMount(file, component);
                     emitUseTask(file, component);
-                    emitTagNameHack(file, component, (_a = component.meta.useMetadata) === null || _a === void 0 ? void 0 : _a.elementTag);
-                    emitTagNameHack(file, component, (_b = component.meta.useMetadata) === null || _b === void 0 ? void 0 : _b.componentElementTag);
                     emitJSX(file, component, mutable_1);
                 },
             ], [(component.propsTypeRef || 'any') + (isLightComponent ? '&{key?:any}' : '')]);
@@ -125,11 +137,6 @@ function emitExports(file, component) {
         var code = exportObj.code.startsWith('export ') ? exportObj.code : "export ".concat(exportObj.code);
         file.src.emit(code);
     });
-}
-function emitTagNameHack(file, component, metadataValue) {
-    if (typeof metadataValue === 'string' && metadataValue) {
-        file.src.emit(metadataValue, '=', (0, convert_method_to_function_1.convertMethodToFunction)(metadataValue, (0, state_2.getStateMethodsAndGetters)(component.state), (0, state_2.getLexicalScopeVars)(component)), ';');
-    }
 }
 function emitUseClientEffect(file, component) {
     if (component.hooks.onMount) {
@@ -264,4 +271,14 @@ function extractGetterBody(code) {
     var start = code.indexOf('{');
     var end = code.lastIndexOf('}');
     return code.substring(start + 1, end).trim();
+}
+function emitUseComputed(file, component) {
+    for (var _i = 0, _a = Object.entries(component.state); _i < _a.length; _i++) {
+        var _b = _a[_i], key = _b[0], stateValue = _b[1];
+        switch (stateValue === null || stateValue === void 0 ? void 0 : stateValue.type) {
+            case 'getter':
+                file.src.const("\n          ".concat(key, " = ").concat(file.import(file.qwikModule, 'useComputed$').localName, "(() => {\n            ").concat(extractGetterBody(stateValue.code), "\n          })\n        "));
+                continue;
+        }
+    }
 }

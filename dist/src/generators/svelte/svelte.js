@@ -118,6 +118,7 @@ var componentToSvelte = function (userProvidedOptions) {
                     case 'hooks':
                     case 'hooks-deps':
                     case 'state':
+                    case 'dynamic-jsx-elements':
                         return function (x) { return x; };
                 }
             }),
@@ -131,6 +132,8 @@ var componentToSvelte = function (userProvidedOptions) {
                         return (0, function_1.flow)((0, helpers_2.stripStateAndProps)({ json: json, options: options }), patterns_1.stripGetter);
                     case 'properties':
                         return (0, helpers_2.stripStateAndProps)({ json: json, options: options });
+                    case 'dynamic-jsx-elements':
+                        return function (x) { return x; };
                 }
             }),
         ], false);

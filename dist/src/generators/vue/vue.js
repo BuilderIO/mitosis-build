@@ -41,8 +41,8 @@ var compositionApi_1 = require("./compositionApi");
 var blocks_1 = require("./blocks");
 var merge_options_1 = require("../../helpers/merge-options");
 var process_code_1 = require("../../helpers/plugins/process-code");
-var strip_state_and_props_refs_1 = require("../../helpers/strip-state-and-props-refs");
 var bindings_1 = require("../../helpers/bindings");
+var replace_identifiers_1 = require("../../helpers/replace-identifiers");
 var babel_transform_1 = require("../../helpers/babel-transform");
 // Transform <foo.bar key="value" /> to <component :is="foo.bar" key="value" />
 function processDynamicComponents(json, _options) {
@@ -117,8 +117,9 @@ var componentToVue = function (userOptions) {
                         // Strip types from any JS code that ends up in the template, because Vue does not support TS code in templates.
                         babel_transform_1.convertTypeScriptToJS, function (code) { return (0, helpers_1.processBinding)({ code: code, options: options, json: component, codeType: codeType }); });
                     case 'hooks-deps':
-                        return function (c) { return (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(c, { includeProps: false }); };
+                        return (0, replace_identifiers_1.replaceStateIdentifier)(null);
                     case 'properties':
+                    case 'dynamic-jsx-elements':
                         return function (c) { return c; };
                 }
             }
@@ -131,6 +132,7 @@ var componentToVue = function (userOptions) {
                         // Strip types from any JS code that ends up in the template, because Vue does not support TS code in templates.
                         babel_transform_1.convertTypeScriptToJS, function (code) { return (0, helpers_1.processBinding)({ code: code, options: options, json: component, codeType: codeType }); });
                     case 'properties':
+                    case 'dynamic-jsx-elements':
                     case 'hooks-deps':
                         return function (c) { return c; };
                     case 'state':

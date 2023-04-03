@@ -22,8 +22,6 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getContextKey = exports.checkIfContextHasStrName = exports.getContextValue = exports.processBinding = exports.getContextNames = exports.renameMitosisComponentsToKebabCase = exports.encodeQuotes = exports.invertBooleanExpression = exports.getOnUpdateHookName = exports.addBindingsToJson = exports.addPropertiesToJson = void 0;
 var get_state_object_string_1 = require("../../helpers/get-state-object-string");
-var strip_state_and_props_refs_1 = require("../../helpers/strip-state-and-props-refs");
-var function_1 = require("fp-ts/lib/function");
 var babel_transform_1 = require("../../helpers/babel-transform");
 var core_1 = require("@babel/core");
 var lodash_1 = require("lodash");
@@ -31,6 +29,7 @@ var patterns_1 = require("../../helpers/patterns");
 var replace_identifiers_1 = require("../../helpers/replace-identifiers");
 var slots_1 = require("../../helpers/slots");
 var html_tags_1 = require("../../constants/html_tags");
+var function_1 = require("fp-ts/lib/function");
 var addPropertiesToJson = function (properties) {
     return function (json) { return (__assign(__assign({}, json), { properties: __assign(__assign({}, json.properties), properties) })); };
 };
@@ -148,52 +147,36 @@ function optionsApiStateAndPropsReplace(name, thisPrefix, codeType) {
 var processBinding = function (_a) {
     var code = _a.code, options = _a.options, json = _a.json, _b = _a.preserveGetter, preserveGetter = _b === void 0 ? false : _b, _c = _a.thisPrefix, thisPrefix = _c === void 0 ? 'this' : _c, codeType = _a.codeType;
     try {
-        return (0, function_1.pipe)(
-        // processed twice, once for props and once for state
-        (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(code, {
-            includeState: false,
-            includeProps: true,
-            replaceWith: function (name) {
-                switch (options.api) {
-                    // keep pointing to `props.${value}`
-                    case 'composition':
-                        if (codeType === 'bindings') {
-                            return (0, slots_1.isSlotProperty)(name)
-                                ? (0, slots_1.replaceSlotsInString)(name, function (x) { return "$slots.".concat(x); })
-                                : name;
-                        }
-                        if (name === 'children' || name.startsWith('children.')) {
-                            return "useSlots().default";
-                        }
-                        return (0, slots_1.isSlotProperty)(name)
-                            ? (0, slots_1.replaceSlotsInString)(name, function (x) { return "useSlots().".concat(x); })
-                            : "props.".concat(name);
-                    case 'options':
-                        return optionsApiStateAndPropsReplace(name, thisPrefix, codeType);
-                }
-            },
-        }), function (code) {
-            return (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(code, {
-                includeState: true,
-                includeProps: false,
-                replaceWith: function (name) {
-                    switch (options.api) {
-                        case 'composition':
-                            return name;
-                        case 'options':
-                            return optionsApiStateAndPropsReplace(name, thisPrefix, codeType);
+        return (0, function_1.pipe)(code, (0, replace_identifiers_1.replacePropsIdentifier)(function (name) {
+            switch (options.api) {
+                // keep pointing to `props.${value}`
+                case 'composition':
+                    if (codeType === 'bindings') {
+                        return (0, slots_1.isSlotProperty)(name) ? (0, slots_1.replaceSlotsInString)(name, function (x) { return "$slots.".concat(x); }) : name;
                     }
-                },
-            });
-        }, function (x) {
-            return (0, function_1.pipe)(x, 
-            // bindings does not need process refs and prefix this
-            function (code) {
-                return codeType === 'bindings'
-                    ? code
-                    : processRefs({ input: code, component: json, options: options, thisPrefix: thisPrefix });
-            }, function (code) { return (codeType === 'bindings' ? code : prefixMethodsWithThis(code, json, options)); }, function (code) { return (preserveGetter === false ? (0, patterns_1.stripGetter)(code) : code); });
-        });
+                    if (name === 'children' || name.startsWith('children.')) {
+                        return "useSlots().default";
+                    }
+                    return (0, slots_1.isSlotProperty)(name)
+                        ? (0, slots_1.replaceSlotsInString)(name, function (x) { return "useSlots().".concat(x); })
+                        : "props.".concat(name);
+                case 'options':
+                    return optionsApiStateAndPropsReplace(name, thisPrefix, codeType);
+            }
+        }), (0, replace_identifiers_1.replaceStateIdentifier)(function (name) {
+            switch (options.api) {
+                case 'composition':
+                    return name;
+                case 'options':
+                    return optionsApiStateAndPropsReplace(name, thisPrefix, codeType);
+            }
+        }), 
+        // bindings does not need process refs and prefix this
+        function (x) {
+            return codeType === 'bindings'
+                ? x
+                : processRefs({ input: x, component: json, options: options, thisPrefix: thisPrefix });
+        }, function (x) { return (codeType === 'bindings' ? x : prefixMethodsWithThis(x, json, options)); }, function (x) { return (preserveGetter === false ? (0, patterns_1.stripGetter)(x) : x); });
     }
     catch (e) {
         console.error('could not process bindings in ', { code: code });
