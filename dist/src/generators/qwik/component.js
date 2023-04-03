@@ -27,6 +27,7 @@ var jsx_1 = require("./jsx");
 var src_generator_1 = require("./src-generator");
 var stable_serialize_1 = require("./helpers/stable-serialize");
 var styles_1 = require("./helpers/styles");
+var directives_1 = require("./directives");
 function createFileSet(options) {
     if (options === void 0) { options = {}; }
     var opts = __assign({ qwikLib: '@builder.io/qwik', qrlPrefix: './', output: 'ts', minify: false, jsx: true }, options);
@@ -105,6 +106,8 @@ function addComponent(fileSet, component, opts) {
         fileSet.med.import(fileSet.med.qwikModule, 'h');
         fileSet.med.exportConst(name, code, true);
     });
+    fileSet.low.exportConst('__proxyMerge__', directives_1.DIRECTIVES['__proxyMerge__'], true);
+    fileSet.high.exportConst('__proxyMerge__', directives_1.DIRECTIVES['__proxyMerge__'], true);
 }
 exports.addComponent = addComponent;
 function generateStyles(fromFile, dstFile, symbol, scoped) {
@@ -130,7 +133,12 @@ function addBuilderBlockClass(children) {
 }
 function renderUseLexicalScope(file) {
     return function () {
-        return this.emit('const state=', file.import(file.qwikModule, 'useLexicalScope').localName, '()[0]');
+        if (this.file.options.isBuilder) {
+            return this.emit('const [s,p,l]=', file.import(file.qwikModule, 'useLexicalScope').localName, '();', 'const state=__proxyMerge__(s,p,l);');
+        }
+        else {
+            return this.emit('const state=', file.import(file.qwikModule, 'useLexicalScope').localName, '()[0]');
+        }
     };
 }
 exports.renderUseLexicalScope = renderUseLexicalScope;
@@ -147,20 +155,22 @@ function addComponentOnMount(componentFile, onRenderEmit, componentName, compone
     if (component.inputs) {
         component.inputs.forEach(function (input) {
             input.defaultValue !== undefined &&
-                inputInitializer.push('if(!state.hasOwnProperty("', input.name, '"))state.', input.name, '=', (0, stable_serialize_1.stableJSONserialize)(input.defaultValue), ';');
+                inputInitializer.push('if(!s.hasOwnProperty("', input.name, '"))s.', input.name, '=', (0, stable_serialize_1.stableJSONserialize)(input.defaultValue), ';');
         });
     }
     componentFile.exportConst(componentName + 'OnMount', function () {
         var _this = this;
-        this.emit((0, src_generator_1.arrowFnValue)(['props'], function () {
+        this.emit((0, src_generator_1.arrowFnValue)(['p'], function () {
             var _a;
             return _this.emit.apply(_this, __spreadArray(__spreadArray(['{',
-                'const state=',
+                'const s=',
                 componentFile.import(componentFile.qwikModule, 'useStore').localName,
                 '(()=>{',
-                'const state = Object.assign({},props,typeof __STATE__==="object"?__STATE__[props.serverStateId]:undefined);'], inputInitializer, false), [inlineCode((_a = component.hooks.onMount) === null || _a === void 0 ? void 0 : _a.code),
+                'const state=structuredClone(typeof __STATE__==="object"?__STATE__[p.serverStateId]:{});'], inputInitializer, false), [inlineCode((_a = component.hooks.onMount) === null || _a === void 0 ? void 0 : _a.code),
                 'return state;',
-                '});',
+                '},{deep:true});',
+                'const l={};',
+                'const state=__proxyMerge__(s,p,l);',
                 useStyles,
                 onRenderEmit,
                 ';}'], false));

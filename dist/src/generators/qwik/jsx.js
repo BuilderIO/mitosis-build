@@ -86,15 +86,12 @@ function renderJSXNodes(file, directives, handlers, children, styles, parentSymb
                     });
                     _this.emit(directive(child, blockFn_1));
                     !_this.isJSX && _this.emit(',');
+                    includedHelperDirectives(directive.toString(), directives);
                 }
                 else {
                     if (typeof directive == 'string') {
                         directives.set(childName, directive);
-                        Array.from(directive.matchAll(/(__[^_]+__)/g)).forEach(function (match) {
-                            var name = match[0];
-                            var code = directives_1.DIRECTIVES[name];
-                            typeof code == 'string' && directives.set(name, code);
-                        });
+                        includedHelperDirectives(directive, directives);
                         if (file.module !== 'med' && file.imports.hasImport(childName)) {
                             file.import('./med.js', childName);
                         }
@@ -147,6 +144,13 @@ function renderJSXNodes(file, directives, handlers, children, styles, parentSymb
     };
 }
 exports.renderJSXNodes = renderJSXNodes;
+function includedHelperDirectives(directive, directives) {
+    Array.from(directive.matchAll(/(__[\w]+__)/g)).forEach(function (match) {
+        var name = match[0];
+        var code = directives_1.DIRECTIVES[name];
+        typeof code == 'string' && directives.set(name, code);
+    });
+}
 function isSymbol(name) {
     return name.charAt(0) == name.charAt(0).toUpperCase();
 }
@@ -199,7 +203,7 @@ function rewriteHandlers(file, handlers, bindings, symbolBindings) {
                 bindingExpr = (0, src_generator_1.invoke)(file.import(file.qwikModule, 'qrl'), [
                     (0, src_generator_1.quote)(file.qrlPrefix + 'high.js'),
                     (0, src_generator_1.quote)(handlerBlock),
-                    '[state]',
+                    file.options.isBuilder ? '[s,p,l]' : '[state]',
                 ]);
             }
             else if (symbolBindings && key.startsWith('symbol.data.')) {

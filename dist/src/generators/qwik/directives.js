@@ -40,12 +40,17 @@ exports.DIRECTIVES = {
                 _this.emit('(', expr, '||[]).map(');
                 _this.isBuilder && _this.emit('(('), _this.emit('function(', forArgs, '){');
                 if (_this.isBuilder) {
-                    _this.emit('var state=Object.assign({},this,{', (0, src_generator_1.iteratorProperty)(expr), ':', forName, '==null?{}:', forName, '});');
+                    _this.emit('const l={...this,', (0, src_generator_1.iteratorProperty)(expr), ':', forName, '==null?{}:', forName, ',', function () {
+                        return forArgs.forEach(function (arg) {
+                            _this.emit(arg, ':', arg, ',');
+                        });
+                    }, '};');
+                    _this.emit('const state = __proxyMerge__(s,p,l);');
                 }
                 _this.emit('return(');
                 blockFn();
                 _this.emit(');}');
-                _this.isBuilder && _this.emit(').bind(state))');
+                _this.isBuilder && _this.emit(').bind(l))');
                 _this.emit(')');
             });
         };
@@ -53,6 +58,7 @@ exports.DIRECTIVES = {
     Image: (0, minify_1.minify)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["", ""], ["", ""])), Image),
     CoreButton: (0, minify_1.minify)(templateObject_2 || (templateObject_2 = __makeTemplateObject(["", ""], ["", ""])), CoreButton),
     __passThroughProps__: (0, minify_1.minify)(templateObject_3 || (templateObject_3 = __makeTemplateObject(["", ""], ["", ""])), __passThroughProps__),
+    __proxyMerge__: (0, minify_1.minify)(templateObject_4 || (templateObject_4 = __makeTemplateObject(["", ""], ["", ""])), __proxyMerge__),
 };
 function Image(props) {
     var _a;
@@ -134,4 +140,23 @@ function CoreButton(props) {
     };
     return h(hasLink ? 'a' : props.tagName$ || 'span', __passThroughProps__(hProps, props));
 }
-var templateObject_1, templateObject_2, templateObject_3;
+function __proxyMerge__(state, props, local) {
+    return new Proxy(state, {
+        get: function (obj, prop) {
+            if (local && prop in local) {
+                return local[prop];
+            }
+            else if (props && prop in props) {
+                return props[prop];
+            }
+            else {
+                return state[prop];
+            }
+        },
+        set: function (obj, prop, value) {
+            obj[prop] = value;
+            return true;
+        },
+    });
+}
+var templateObject_1, templateObject_2, templateObject_3, templateObject_4;

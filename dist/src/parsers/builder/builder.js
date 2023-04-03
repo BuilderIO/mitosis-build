@@ -306,6 +306,7 @@ var componentMappers = __assign(__assign({ Symbol: function (block, options) {
             },
             scope: {
                 forName: block.component.options.repeat.itemName,
+                indexName: '$index',
             },
             children: (block.children || []).map(function (child) { return (0, exports.builderElementToMitosisNode)(child, options); }),
         });
@@ -382,6 +383,44 @@ var builderElementToMitosisNode = function (block, options, _internalOptions) {
     if (((_b = block.component) === null || _b === void 0 ? void 0 : _b.name) === 'Core:Fragment') {
         block.component.name = 'Fragment';
     }
+    var forBinding = (_c = block.repeat) === null || _c === void 0 ? void 0 : _c.collection;
+    if (forBinding) {
+        var isFragment = ((_d = block.component) === null || _d === void 0 ? void 0 : _d.name) === 'Fragment';
+        // TODO: handle having other things, like a repeat too
+        if (isFragment) {
+            return (0, create_mitosis_node_1.createMitosisNode)({
+                name: 'For',
+                bindings: {
+                    each: (0, bindings_1.createSingleBinding)({
+                        code: wrapBindingIfNeeded((_e = block.repeat) === null || _e === void 0 ? void 0 : _e.collection, options),
+                    }),
+                },
+                scope: {
+                    forName: ((_f = block.repeat) === null || _f === void 0 ? void 0 : _f.itemName) || 'item',
+                    indexName: '$index',
+                },
+                children: ((_g = block.children) === null || _g === void 0 ? void 0 : _g.map(function (child) { return (0, exports.builderElementToMitosisNode)(child, options); })) || [],
+            });
+        }
+        else {
+            var useBlock = ((_h = block.component) === null || _h === void 0 ? void 0 : _h.name) === 'Core:Fragment' && ((_j = block.children) === null || _j === void 0 ? void 0 : _j.length) === 1
+                ? block.children[0]
+                : block;
+            return (0, create_mitosis_node_1.createMitosisNode)({
+                name: 'For',
+                bindings: {
+                    each: (0, bindings_1.createSingleBinding)({
+                        code: wrapBindingIfNeeded((_k = block.repeat) === null || _k === void 0 ? void 0 : _k.collection, options),
+                    }),
+                },
+                scope: {
+                    forName: ((_l = block.repeat) === null || _l === void 0 ? void 0 : _l.itemName) || 'item',
+                    indexName: '$index',
+                },
+                children: [(0, exports.builderElementToMitosisNode)((0, lodash_1.omit)(useBlock, 'repeat'), options)],
+            });
+        }
+    }
     // Special builder properties
     // TODO: support hide and repeat
     var blockBindings = getBlockBindings(block, options);
@@ -393,13 +432,13 @@ var builderElementToMitosisNode = function (block, options, _internalOptions) {
         code = "!(".concat(wrapBindingIfNeeded(blockBindings.hide, options), ")");
     }
     if (code) {
-        var isFragment = ((_c = block.component) === null || _c === void 0 ? void 0 : _c.name) === 'Fragment';
+        var isFragment = ((_m = block.component) === null || _m === void 0 ? void 0 : _m.name) === 'Fragment';
         // TODO: handle having other things, like a repeat too
         if (isFragment) {
             return (0, create_mitosis_node_1.createMitosisNode)({
                 name: 'Show',
                 bindings: { when: (0, bindings_1.createSingleBinding)({ code: code }) },
-                children: ((_d = block.children) === null || _d === void 0 ? void 0 : _d.map(function (child) { return (0, exports.builderElementToMitosisNode)(child, options); })) || [],
+                children: ((_o = block.children) === null || _o === void 0 ? void 0 : _o.map(function (child) { return (0, exports.builderElementToMitosisNode)(child, options); })) || [],
             });
         }
         else {
@@ -409,42 +448,6 @@ var builderElementToMitosisNode = function (block, options, _internalOptions) {
                 children: [
                     (0, exports.builderElementToMitosisNode)(__assign(__assign({}, block), { code: __assign(__assign({}, block.code), { bindings: (0, lodash_1.omit)(blockBindings, 'show', 'hide') }), bindings: (0, lodash_1.omit)(blockBindings, 'show', 'hide') }), options),
                 ],
-            });
-        }
-    }
-    var forBinding = (_e = block.repeat) === null || _e === void 0 ? void 0 : _e.collection;
-    if (forBinding) {
-        var isFragment = ((_f = block.component) === null || _f === void 0 ? void 0 : _f.name) === 'Fragment';
-        // TODO: handle having other things, like a repeat too
-        if (isFragment) {
-            return (0, create_mitosis_node_1.createMitosisNode)({
-                name: 'For',
-                bindings: {
-                    each: (0, bindings_1.createSingleBinding)({
-                        code: wrapBindingIfNeeded((_g = block.repeat) === null || _g === void 0 ? void 0 : _g.collection, options),
-                    }),
-                },
-                scope: {
-                    forName: ((_h = block.repeat) === null || _h === void 0 ? void 0 : _h.itemName) || 'item',
-                },
-                children: ((_j = block.children) === null || _j === void 0 ? void 0 : _j.map(function (child) { return (0, exports.builderElementToMitosisNode)(child, options); })) || [],
-            });
-        }
-        else {
-            var useBlock = ((_k = block.component) === null || _k === void 0 ? void 0 : _k.name) === 'Core:Fragment' && ((_l = block.children) === null || _l === void 0 ? void 0 : _l.length) === 1
-                ? block.children[0]
-                : block;
-            return (0, create_mitosis_node_1.createMitosisNode)({
-                name: 'For',
-                bindings: {
-                    each: (0, bindings_1.createSingleBinding)({
-                        code: wrapBindingIfNeeded((_m = block.repeat) === null || _m === void 0 ? void 0 : _m.collection, options),
-                    }),
-                },
-                scope: {
-                    forName: ((_o = block.repeat) === null || _o === void 0 ? void 0 : _o.itemName) || 'item',
-                },
-                children: [(0, exports.builderElementToMitosisNode)((0, lodash_1.omit)(useBlock, 'repeat'), options)],
             });
         }
     }
