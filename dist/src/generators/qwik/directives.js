@@ -45,7 +45,7 @@ exports.DIRECTIVES = {
                             _this.emit(arg, ':', arg, ',');
                         });
                     }, '};');
-                    _this.emit('const state = __proxyMerge__(s,p,l);');
+                    _this.emit('const state = __proxyMerge__(s,l);');
                 }
                 _this.emit('return(');
                 blockFn();
@@ -140,14 +140,11 @@ function CoreButton(props) {
     };
     return h(hasLink ? 'a' : props.tagName$ || 'span', __passThroughProps__(hProps, props));
 }
-function __proxyMerge__(state, props, local) {
+function __proxyMerge__(state, local) {
     return new Proxy(state, {
         get: function (obj, prop) {
             if (local && prop in local) {
                 return local[prop];
-            }
-            else if (props && prop in props) {
-                return props[prop];
             }
             else {
                 return state[prop];

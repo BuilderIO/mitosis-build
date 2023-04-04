@@ -209,7 +209,7 @@ function rewriteHandlers(file, handlers, bindings, symbolBindings) {
                 bindingExpr = (0, src_generator_1.invoke)(file.import(file.qwikModule, 'qrl'), [
                     (0, src_generator_1.quote)(file.qrlPrefix + 'high.js'),
                     (0, src_generator_1.quote)(handlerBlock),
-                    file.options.isBuilder ? '[s,p,l]' : '[state]',
+                    file.options.isBuilder ? '[s,l]' : '[state]',
                 ]);
             }
             else if (symbolBindings && key.startsWith('symbol.data.')) {
