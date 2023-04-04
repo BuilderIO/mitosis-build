@@ -179,7 +179,7 @@ function emitJSX(file, component, mutable) {
     if (file.options.isPretty) {
         file.src.emit('\n\n');
     }
-    file.src.emit('return ', (0, jsx_1.renderJSXNodes)(file, directives, handlers, component.children, styles, parentSymbolBindings));
+    file.src.emit('return ', (0, jsx_1.renderJSXNodes)(file, directives, handlers, component.children, styles, null, parentSymbolBindings));
 }
 function emitUseContextProvider(file, component) {
     Object.entries(component.context.set).forEach(function (_a) {

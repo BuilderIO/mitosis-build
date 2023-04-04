@@ -99,7 +99,7 @@ function addComponent(fileSet, component, opts) {
     var directives = new Map();
     var rootChildren = component.children;
     addComponentOnMount(onRenderFile, function () {
-        return this.emit('return ', (0, jsx_1.renderJSXNodes)(onRenderFile, directives, handlers, rootChildren, styles, {}), ';');
+        return this.emit('return ', (0, jsx_1.renderJSXNodes)(onRenderFile, directives, handlers, rootChildren, styles, null, {}), ';');
     }, componentName, component, useStyles);
     componentFile.exportConst(componentName, (0, src_generator_1.invoke)(componentFile.import(componentFile.qwikModule, 'componentQrl'), [generateQrl(componentFile, onRenderFile, componentName + 'OnMount')], ['any', 'any']));
     directives.forEach(function (code, name) {

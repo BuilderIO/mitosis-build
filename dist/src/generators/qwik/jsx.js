@@ -32,11 +32,12 @@ var src_generator_1 = require("./src-generator");
  * @param handlers A set of handlers which we came across so that they can be rendered
  * @param children A list of children to convert to JSX
  * @param styles Store for styles which we came across so that they can be rendered.
+ * @param key Key to be used for the node if needed
  * @param parentSymbolBindings A set of bindings from parent to be written into the child.
  * @param root True if this is the root JSX, and may need a Fragment wrapper.
  * @returns
  */
-function renderJSXNodes(file, directives, handlers, children, styles, parentSymbolBindings, root) {
+function renderJSXNodes(file, directives, handlers, children, styles, key, parentSymbolBindings, root) {
     if (root === void 0) { root = true; }
     return function () {
         var _this = this;
@@ -119,10 +120,15 @@ function renderJSXNodes(file, directives, handlers, children, styles, parentSymb
                             props.class = addClass(styleProps.CLASS_NAME, props.class);
                         }
                     }
+                    key = props['builder-id'] || key;
+                    if (props.innerHTML) {
+                        // Special case. innerHTML requires `key` in Qwik
+                        props = __assign({ key: key || 'default' }, props);
+                    }
                     var symbolBindings = {};
                     var bindings = rewriteHandlers(file, handlers, child.bindings, symbolBindings);
                     _this.jsxBegin(childName, props, __assign(__assign(__assign({}, bindings), parentSymbolBindings), specialBindings));
-                    renderJSXNodes(file, directives, handlers, child.children, styles, symbolBindings, false).call(_this);
+                    renderJSXNodes(file, directives, handlers, child.children, styles, key, symbolBindings, false).call(_this);
                     _this.jsxEnd(childName);
                 }
             }
@@ -137,7 +143,7 @@ function renderJSXNodes(file, directives, handlers, children, styles, parentSymb
                 children = children.filter(function (c) { return !isEmptyTextNode(c); });
                 var childNeedsFragment = children.length > 1 || (children.length && isTextNode(children[0]));
                 childNeedsFragment && srcBuilder.jsxBeginFragment(fragmentSymbol);
-                renderJSXNodes(file, directives, handlers, children, styles, {}, false).call(srcBuilder);
+                renderJSXNodes(file, directives, handlers, children, styles, null, {}, false).call(srcBuilder);
                 childNeedsFragment && srcBuilder.jsxEndFragment();
             };
         }
