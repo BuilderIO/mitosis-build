@@ -99,7 +99,7 @@ function addComponent(fileSet, component, opts) {
     var directives = new Map();
     var rootChildren = component.children;
     addComponentOnMount(onRenderFile, function () {
-        return this.emit('return ', (0, jsx_1.renderJSXNodes)(onRenderFile, directives, handlers, rootChildren, styles, {}), ';');
+        return this.emit('return ', (0, jsx_1.renderJSXNodes)(onRenderFile, directives, handlers, rootChildren, styles, null, {}), ';');
     }, componentName, component, useStyles);
     componentFile.exportConst(componentName, (0, src_generator_1.invoke)(componentFile.import(componentFile.qwikModule, 'componentQrl'), [generateQrl(componentFile, onRenderFile, componentName + 'OnMount')], ['any', 'any']));
     directives.forEach(function (code, name) {
@@ -107,6 +107,7 @@ function addComponent(fileSet, component, opts) {
         fileSet.med.exportConst(name, code, true);
     });
     fileSet.low.exportConst('__proxyMerge__', directives_1.DIRECTIVES['__proxyMerge__'], true);
+    fileSet.med.exportConst('__proxyMerge__', directives_1.DIRECTIVES['__proxyMerge__'], true);
     fileSet.high.exportConst('__proxyMerge__', directives_1.DIRECTIVES['__proxyMerge__'], true);
 }
 exports.addComponent = addComponent;
@@ -134,7 +135,7 @@ function addBuilderBlockClass(children) {
 function renderUseLexicalScope(file) {
     return function () {
         if (this.file.options.isBuilder) {
-            return this.emit('const [s,p,l]=', file.import(file.qwikModule, 'useLexicalScope').localName, '();', 'const state=__proxyMerge__(s,p,l);');
+            return this.emit('const [s,l]=', file.import(file.qwikModule, 'useLexicalScope').localName, '();', 'const state=__proxyMerge__(s,l);');
         }
         else {
             return this.emit('const state=', file.import(file.qwikModule, 'useLexicalScope').localName, '()[0]');
@@ -155,7 +156,7 @@ function addComponentOnMount(componentFile, onRenderEmit, componentName, compone
     if (component.inputs) {
         component.inputs.forEach(function (input) {
             input.defaultValue !== undefined &&
-                inputInitializer.push('if(!s.hasOwnProperty("', input.name, '"))s.', input.name, '=', (0, stable_serialize_1.stableJSONserialize)(input.defaultValue), ';');
+                inputInitializer.push('if(!state.hasOwnProperty("', input.name, '"))state.', input.name, '=', (0, stable_serialize_1.stableJSONserialize)(input.defaultValue), ';');
         });
     }
     componentFile.exportConst(componentName + 'OnMount', function () {
@@ -166,11 +167,11 @@ function addComponentOnMount(componentFile, onRenderEmit, componentName, compone
                 'const s=',
                 componentFile.import(componentFile.qwikModule, 'useStore').localName,
                 '(()=>{',
-                'const state=structuredClone(typeof __STATE__==="object"?__STATE__[p.serverStateId]:{});'], inputInitializer, false), [inlineCode((_a = component.hooks.onMount) === null || _a === void 0 ? void 0 : _a.code),
+                'const state=Object.assign({},structuredClone(typeof __STATE__==="object"&&__STATE__[p.serverStateId]),p);'], inputInitializer, false), [inlineCode((_a = component.hooks.onMount) === null || _a === void 0 ? void 0 : _a.code),
                 'return state;',
                 '},{deep:true});',
                 'const l={};',
-                'const state=__proxyMerge__(s,p,l);',
+                'const state=__proxyMerge__(s,l);',
                 useStyles,
                 onRenderEmit,
                 ';}'], false));
