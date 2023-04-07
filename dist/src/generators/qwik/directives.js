@@ -87,7 +87,7 @@ function Image(props) {
                 .map(function (size) {
                 return updateQueryParam(webpImage_1, 'width', size) + ' ' + size + 'w';
             })
-                .concat([image])
+                .concat([tryAppendWidth(image)])
                 .join(', ');
             imgProps.srcset = srcset;
             jsx = jsx = [
@@ -118,6 +118,14 @@ function Image(props) {
             return uri.replace(re, '$1' + key + '=' + encodeURIComponent(value) + '$2');
         }
         return uri + separator + key + '=' + encodeURIComponent(value);
+    }
+    function tryAppendWidth(url) {
+        var match = url.match(/[?&]width=(\d+)/);
+        var width = match && match[1];
+        if (width) {
+            return url + ' ' + width + 'w';
+        }
+        return url;
     }
 }
 exports.Image = Image;
