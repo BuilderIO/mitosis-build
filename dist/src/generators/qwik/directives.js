@@ -87,7 +87,7 @@ function Image(props) {
                 .map(function (size) {
                 return updateQueryParam(webpImage_1, 'width', size) + ' ' + size + 'w';
             })
-                .concat([tryAppendWidth(image)])
+                .concat(tryAppendWidth(image))
                 .join(', ');
             imgProps.srcset = srcset;
             jsx = jsx = [
@@ -123,9 +123,9 @@ function Image(props) {
         var match = url.match(/[?&]width=(\d+)/);
         var width = match && match[1];
         if (width) {
-            return url + ' ' + width + 'w';
+            return [url + ' ' + width + 'w'];
         }
-        return url;
+        return [];
     }
 }
 exports.Image = Image;
