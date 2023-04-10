@@ -1,7 +1,7 @@
-import { BaseTranspilerOptions, Transpiler } from '../types/config';
+import { BaseTranspilerOptions, TranspilerGenerator } from '../types/transpiler';
 export interface ToHtmlOptions extends BaseTranspilerOptions {
     format?: 'class' | 'script';
     prefix?: string;
 }
-export declare const componentToHtml: (options?: ToHtmlOptions) => Transpiler;
-export declare const componentToCustomElement: (options?: ToHtmlOptions) => Transpiler;
+export declare const componentToHtml: TranspilerGenerator<ToHtmlOptions>;
+export declare const componentToCustomElement: TranspilerGenerator<ToHtmlOptions>;

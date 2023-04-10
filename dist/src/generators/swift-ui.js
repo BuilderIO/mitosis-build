@@ -18,46 +18,48 @@ var get_state_object_string_1 = require("../helpers/get-state-object-string");
 var get_styles_1 = require("../helpers/get-styles");
 var is_children_1 = __importDefault(require("../helpers/is-children"));
 var is_mitosis_node_1 = require("../helpers/is-mitosis-node");
+var mitosis_node_1 = require("../types/mitosis-node");
+var state_1 = require("../helpers/state");
 var scrolls = function (json) {
     var _a;
     return ((_a = (0, get_styles_1.getStyles)(json)) === null || _a === void 0 ? void 0 : _a.overflow) === 'auto';
 };
 var mappers = {
     Fragment: function (json, options) {
-        return "".concat(json.children
-            .map(function (item) { return blockToSwift(item, options); })
-            .join('\n'));
+        return "".concat(json.children.map(function (item) { return blockToSwift(item, options); }).join('\n'));
     },
     link: function () { return ''; },
     Image: function (json, options) {
-        return ("Image(".concat(processBinding(json.bindings.image, options) ||
-            "\"".concat(json.properties.image, "\""), ")") +
+        var _a;
+        return ("Image(".concat(processBinding((_a = json.bindings.image) === null || _a === void 0 ? void 0 : _a.code, options) || "\"".concat(json.properties.image, "\""), ")") +
             getStyleString(json, options) +
             getActionsString(json, options));
     },
     input: function (json, options) {
+        var _a, _b;
         var name = json.properties.$name;
         var str = "TextField(".concat(json.bindings.placeholder
-            ? processBinding(json.bindings.placeholder, options)
+            ? processBinding((_a = json.bindings.placeholder) === null || _a === void 0 ? void 0 : _a.code, options)
             : json.properties.placeholder
-                ? JSON.stringify(json.bindings.placeholder)
+                ? JSON.stringify(json.bindings.placeholder.code)
                 : '""', ", text: $").concat(name, ")") +
             getStyleString(json, options) +
             getActionsString(json, options);
         if (json.bindings.onChange) {
-            str += "\n        .onChange(of: ".concat(name, ") { ").concat(name, " in \n          ").concat(processBinding(wrapAction("var event = { target: { value: \"\\(".concat(name, ")\" } };\n              ").concat(json.bindings.onChange)), options), " \n        }");
+            str += "\n        .onChange(of: ".concat(name, ") { ").concat(name, " in \n          ").concat(processBinding(wrapAction("var event = { target: { value: \"\\(".concat(name, ")\" } };\n              ").concat((_b = json.bindings.onChange) === null || _b === void 0 ? void 0 : _b.code)), options), " \n        }");
         }
         return str;
     },
 };
 var blockToSwift = function (json, options) {
+    var _a, _b;
     if (mappers[json.name]) {
         return mappers[json.name](json, options);
     }
     // TODO: Add support for `{props.children}` bindings
     // Right now we return an empty string because the generated code
     // is very likely wrong.
-    if ((0, is_children_1.default)(json)) {
+    if ((0, is_children_1.default)({ node: json })) {
         return '/* `props.children` is not supported yet for SwiftUI */';
     }
     if (json.properties._text) {
@@ -67,7 +69,7 @@ var blockToSwift = function (json, options) {
         return "Text(\"".concat(json.properties._text.trim().replace(/\s+/g, ' '), "\")");
     }
     if (json.bindings._text) {
-        return "Text(".concat(processBinding(json.bindings._text, options), ".toString())");
+        return "Text(".concat(processBinding(json.bindings._text.code, options), ".toString())");
     }
     var str = '';
     var children = json.children.filter(filter_empty_text_nodes_1.filterEmptyTextNodes);
@@ -90,13 +92,13 @@ var blockToSwift = function (json, options) {
         delete json.properties.placeholder;
         json.properties._ = placeholder || '';
     }
-    if (json.name === 'For') {
-        str += "ForEach(".concat(processBinding(json.bindings.each, options), ", id: \\.self) { ").concat(json.properties._forName, " in ").concat(children
+    if ((0, mitosis_node_1.checkIsForNode)(json)) {
+        str += "ForEach(".concat(processBinding((_a = json.bindings.each) === null || _a === void 0 ? void 0 : _a.code, options), ", id: \\.self) { ").concat(json.scope.forName, " in ").concat(children
             .map(function (item) { return blockToSwift(item, options); })
             .join('\n'), " }");
     }
     else if (json.name === 'Show') {
-        str += "if ".concat(processBinding(json.bindings.when, options), " {\n      ").concat(children.map(function (item) { return blockToSwift(item, options); }).join('\n'), "\n    }");
+        str += "if ".concat(processBinding((_b = json.bindings.when) === null || _b === void 0 ? void 0 : _b.code, options), " {\n      ").concat(children.map(function (item) { return blockToSwift(item, options); }).join('\n'), "\n    }");
     }
     else {
         str += "".concat(name, "(");
@@ -137,9 +139,7 @@ var blockToSwift = function (json, options) {
         str += ")";
         str += " {";
         if (json.children) {
-            str += json.children
-                .map(function (item) { return blockToSwift(item, options); })
-                .join('\n');
+            str += json.children.map(function (item) { return blockToSwift(item, options); }).join('\n');
         }
         str += "}";
         str += getStyleString(json, options);
@@ -151,7 +151,7 @@ var wrapAction = function (str) { return "(() => { ".concat(str, " })()"); };
 function getActionsString(json, options) {
     var str = '';
     if (json.bindings.onClick) {
-        str += "\n.onTapGesture {\n      ".concat(processBinding(wrapAction(json.bindings.onClick), options), "\n    }");
+        str += "\n.onTapGesture {\n      ".concat(processBinding(wrapAction(json.bindings.onClick.code), options), "\n    }");
     }
     return str;
 }
@@ -195,7 +195,7 @@ var processBinding = function (str, options) {
     return "eval(code: \"".concat(str, "\")");
 };
 function componentHasDynamicData(json) {
-    var hasState = Object.keys(json.state).length > 0;
+    var hasState = (0, state_1.checkHasState)(json);
     if (hasState) {
         return true;
     }
@@ -214,6 +214,7 @@ function mapDataForSwiftCompatability(json) {
     var inputIndex = 0;
     json.meta.inputNames = json.meta.inputNames || [];
     (0, traverse_1.default)(json).forEach(function (node) {
+        var _a;
         if ((0, is_mitosis_node_1.isMitosisNode)(node)) {
             if (node.name === 'input') {
                 if (!Object.keys(node.bindings).filter(function (item) { return item !== 'css'; }).length) {
@@ -222,7 +223,8 @@ function mapDataForSwiftCompatability(json) {
                 if (!node.properties.$name) {
                     node.properties.$name = "input".concat(++inputIndex);
                 }
-                json.meta.inputNames[node.properties.$name] = node.bindings.value || '';
+                json.meta.inputNames[node.properties.$name] =
+                    ((_a = node.bindings.value) === null || _a === void 0 ? void 0 : _a.code) || '';
             }
         }
     });
@@ -245,9 +247,7 @@ var componentToSwift = function (options) {
         var json = (0, fast_clone_1.fastClone)(component);
         mapDataForSwiftCompatability(json);
         var hasDyanmicData = componentHasDynamicData(json);
-        var children = json.children
-            .map(function (item) { return blockToSwift(item, options); })
-            .join('\n');
+        var children = json.children.map(function (item) { return blockToSwift(item, options); }).join('\n');
         var hasInputNames = Object.keys(json.meta.inputNames || {}).length > 0;
         var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    import SwiftUI\n    ", "\n\n    struct ", ": View {\n      ", "\n\n      var body: some View {\n        VStack {\n          ", "\n        }", "\n      }\n    }\n  "], ["\n    import SwiftUI\n    ", "\n\n    struct ", ": View {\n      ", "\n\n      var body: some View {\n        VStack {\n          ", "\n        }", "\n      }\n    }\n  "])), !hasDyanmicData
             ? ''

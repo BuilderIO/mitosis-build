@@ -1,9 +1,5 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.contextToVue = void 0;
-function contextToVue(context, options) {
-    if (options === void 0) { options = {}; }
-    var str = "\n    // Noop file\n    export default {};\n  ";
-    return str;
-}
-exports.contextToVue = contextToVue;
+var context_with_symbol_key_1 = require("./helpers/context-with-symbol-key");
+exports.contextToVue = context_with_symbol_key_1.getContextWithSymbolKey;

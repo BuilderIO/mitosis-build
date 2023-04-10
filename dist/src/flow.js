@@ -1,4 +1,6 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.Fragment = exports.Show = exports.Slot = exports.For = void 0;
 /**
  * Flow control based on Solid
  *
@@ -7,8 +9,6 @@
  *
  * These elements all compile away so they return `null`
  */
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.Show = exports.Slot = exports.For = void 0;
 function For(props) {
     return null;
 }
@@ -21,3 +21,7 @@ function Show(props) {
     return null;
 }
 exports.Show = Show;
+function Fragment(props) {
+    return null;
+}
+exports.Fragment = Fragment;

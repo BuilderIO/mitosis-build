@@ -1,12 +1,14 @@
-import { JSONObject } from '../types/json';
+import { MitosisContext } from '../types/mitosis-context';
 import { MitosisComponent } from '../types/mitosis-component';
-export declare type GetStateObjectStringOptions = {
+interface GetStateObjectStringOptions {
     data?: boolean;
     functions?: boolean;
     getters?: boolean;
-    valueMapper?: (code: string, type: 'data' | 'function' | 'getter') => string;
+    valueMapper?: (code: string, type: 'data' | 'function' | 'getter', typeParameter?: string) => string;
     format?: 'object' | 'class' | 'variables';
     keyPrefix?: string;
-};
-export declare const getMemberObjectString: (object: JSONObject, options?: GetStateObjectStringOptions) => string;
+}
+export declare const getMemberObjectString: (object: MitosisComponent['state'], userOptions?: GetStateObjectStringOptions) => string;
+export declare const stringifyContextValue: (object: MitosisContext['value'], userOptions?: GetStateObjectStringOptions) => string;
 export declare const getStateObjectStringFromComponent: (component: MitosisComponent, options?: GetStateObjectStringOptions) => string;
+export {};

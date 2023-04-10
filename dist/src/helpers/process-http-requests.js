@@ -2,13 +2,13 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.processHttpRequests = void 0;
 function processHttpRequests(json) {
-    var _a, _b;
-    var httpRequests = (_a = json.meta.useMetadata) === null || _a === void 0 ? void 0 : _a.httpRequests;
-    var onMount = ((_b = json.hooks.onMount) === null || _b === void 0 ? void 0 : _b.code) ? json.hooks.onMount : { code: '' };
+    var _a, _b, _c;
+    var httpRequests = (_b = (_a = json === null || json === void 0 ? void 0 : json.meta) === null || _a === void 0 ? void 0 : _a.useMetadata) === null || _b === void 0 ? void 0 : _b.httpRequests;
+    var onMount = ((_c = json.hooks.onMount) === null || _c === void 0 ? void 0 : _c.code) ? json.hooks.onMount : { code: '' };
     if (httpRequests) {
         for (var key in httpRequests) {
             if (!json.state[key]) {
-                json.state[key] = null;
+                json.state[key] = { code: 'null', type: 'property' };
             }
             var value = httpRequests[key];
             // TODO: unravel our proxy. aka parse out methods, header, etc

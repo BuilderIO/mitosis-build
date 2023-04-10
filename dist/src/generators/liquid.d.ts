@@ -1,4 +1,4 @@
-import { BaseTranspilerOptions, Transpiler } from '../types/config';
+import { BaseTranspilerOptions, TranspilerGenerator } from '../types/transpiler';
 export interface ToLiquidOptions extends BaseTranspilerOptions {
     reactive?: boolean;
 }
@@ -8,4 +8,4 @@ export interface ToLiquidOptions extends BaseTranspilerOptions {
  * Shopify will reject our PUT to update the template
  */
 export declare const isValidLiquidBinding: (str?: string) => boolean;
-export declare const componentToLiquid: (options?: ToLiquidOptions) => Transpiler;
+export declare const componentToLiquid: TranspilerGenerator<ToLiquidOptions>;

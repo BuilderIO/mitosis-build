@@ -26,7 +26,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.parseContext = void 0;
 var babel = __importStar(require("@babel/core"));
 var create_mitosis_context_1 = require("../helpers/create-mitosis-context");
-var jsx_1 = require("./jsx");
+var state_1 = require("./jsx/state");
 var types = babel.types;
 var tsPreset = require('@babel/preset-typescript');
 function parseContext(code, options) {
@@ -51,7 +51,7 @@ function parseContext(code, options) {
                                         if (types.isObjectExpression(firstArg)) {
                                             // TODO: support non object values by parsing any node type
                                             // like the logic within each property value of parseStateObject
-                                            context.value = (0, jsx_1.parseStateObject)(firstArg);
+                                            context.value = (0, state_1.parseStateObjectToMitosisState)(firstArg);
                                             found = true;
                                         }
                                     }

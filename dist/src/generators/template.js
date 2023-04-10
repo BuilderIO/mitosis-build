@@ -9,21 +9,21 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.componentToTemplate = void 0;
 var standalone_1 = require("prettier/standalone");
-var collect_styles_1 = require("../helpers/collect-styles");
+var collect_css_1 = require("../helpers/styles/collect-css");
 var fast_clone_1 = require("../helpers/fast-clone");
 var jsx_1 = require("../parsers/jsx");
+var mitosis_node_1 = require("../types/mitosis-node");
 var plugins_1 = require("../modules/plugins");
 var dedent_1 = __importDefault(require("dedent"));
 var get_state_object_string_1 = require("../helpers/get-state-object-string");
 var mappers = {
     Fragment: function (json, options) {
-        return "<div>".concat(json.children
-            .map(function (item) { return blockToTemplate(item, options); })
-            .join('\n'), "</div>");
+        return "<div>".concat(json.children.map(function (item) { return blockToTemplate(item, options); }).join('\n'), "</div>");
     },
 };
 // TODO: spread support
 var blockToTemplate = function (json, options) {
+    var _a, _b, _c, _d, _e;
     if (options === void 0) { options = {}; }
     if (mappers[json.name]) {
         return mappers[json.name](json, options);
@@ -32,24 +32,20 @@ var blockToTemplate = function (json, options) {
         return json.properties._text;
     }
     if (json.bindings._text) {
-        return "${".concat(json.bindings._text, "}");
+        return "${".concat((_a = json.bindings._text) === null || _a === void 0 ? void 0 : _a.code, "}");
     }
     var str = '';
-    if (json.name === 'For') {
-        str += "${".concat(json.bindings.each, "?.map(").concat(json.properties._forName, " => `");
+    if ((0, mitosis_node_1.checkIsForNode)(json)) {
+        str += "${".concat((_b = json.bindings.each) === null || _b === void 0 ? void 0 : _b.code, "?.map(").concat(json.scope.forName, " => `");
         if (json.children) {
-            str += json.children
-                .map(function (item) { return blockToTemplate(item, options); })
-                .join('\n');
+            str += json.children.map(function (item) { return blockToTemplate(item, options); }).join('\n');
         }
         str += '`).join("")}';
     }
     else if (json.name === 'Show') {
-        str += "${!(".concat(json.bindings.when, ") ? '' : `");
+        str += "${!(".concat((_c = json.bindings.when) === null || _c === void 0 ? void 0 : _c.code, ") ? '' : `");
         if (json.children) {
-            str += json.children
-                .map(function (item) { return blockToTemplate(item, options); })
-                .join('\n');
+            str += json.children.map(function (item) { return blockToTemplate(item, options); }).join('\n');
         }
         str += '`}';
     }
@@ -68,10 +64,10 @@ var blockToTemplate = function (json, options) {
             str += " ".concat(key, "=\"").concat(value, "\" ");
         }
         for (var key in json.bindings) {
-            if (key === '_spread' || key === 'ref' || key === 'css') {
+            if (((_d = json.bindings[key]) === null || _d === void 0 ? void 0 : _d.type) === 'spread' || key === 'ref' || key === 'css') {
                 continue;
             }
-            var value = json.bindings[key];
+            var value = (_e = json.bindings[key]) === null || _e === void 0 ? void 0 : _e.code;
             // TODO: proper babel transform to replace. Util for this
             var useValue = value;
             if (key.startsWith('on')) {
@@ -86,9 +82,7 @@ var blockToTemplate = function (json, options) {
         }
         str += '>';
         if (json.children) {
-            str += json.children
-                .map(function (item) { return blockToTemplate(item, options); })
-                .join('\n');
+            str += json.children.map(function (item) { return blockToTemplate(item, options); }).join('\n');
         }
         str += "</".concat(json.name, ">");
     }
@@ -103,7 +97,7 @@ var componentToTemplate = function (options) {
         if (options.plugins) {
             json = (0, plugins_1.runPreJsonPlugins)(json, options.plugins);
         }
-        var css = (0, collect_styles_1.collectCss)(json);
+        var css = (0, collect_css_1.collectCss)(json);
         if (options.plugins) {
             json = (0, plugins_1.runPostJsonPlugins)(json, options.plugins);
         }

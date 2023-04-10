@@ -1,6 +1,3 @@
-import { MitosisContext } from '../../types/mitosis-context';
-declare type ContextToVueOptions = {
-    format?: boolean;
-};
-export declare function contextToVue(context: MitosisContext, options?: ContextToVueOptions): string;
-export {};
+export declare const contextToVue: (options: Pick<import("../..").BaseTranspilerOptions, "prettier">) => ({ context }: {
+    context: import("../../types/mitosis-context").MitosisContext;
+}) => string;
