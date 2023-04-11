@@ -19,8 +19,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.markoFormatHtml = exports.postprocessHtml = exports.preprocessHtml = exports.componentToMarko = void 0;
-var dedent_1 = __importDefault(require("dedent"));
 var standalone_1 = require("prettier/standalone");
+var dedent_1 = require("../../helpers/dedent");
 var get_state_object_string_1 = require("../../helpers/get-state-object-string");
 var render_imports_1 = require("../../helpers/render-imports");
 var jsx_1 = require("../../parsers/jsx");
@@ -176,7 +176,7 @@ var componentToMarko = function (userOptions) {
                 console.warn('Could not format css', err);
             }
         }
-        var jsString = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    ", "\n\n    class {\n        ", "\n\n        ", "\n\n        ", "\n      \n        ", "\n        ", "\n        ", "\n    }\n  "], ["\n    ", "\n\n    class {\n        ", "\n\n        ", "\n\n        ", "\n      \n        ", "\n        ", "\n        ", "\n    }\n  "])), (0, render_imports_1.renderPreComponent)({ component: json, target: 'marko' }), methodsString, !hasState
+        var jsString = (0, dedent_1.dedent)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    ", "\n\n    class {\n        ", "\n\n        ", "\n\n        ", "\n      \n        ", "\n        ", "\n        ", "\n    }\n  "], ["\n    ", "\n\n    class {\n        ", "\n\n        ", "\n\n        ", "\n      \n        ", "\n        ", "\n        ", "\n    }\n  "])), (0, render_imports_1.renderPreComponent)({ component: json, target: 'marko' }), methodsString, !hasState
             ? ''
             : "onCreate(".concat(thisHasProps ? 'input' : '', ") {\n          this.state = ").concat(dataString, "\n        }"), Array.from(domRefs)
             .map(function (refName) { return "get ".concat((0, lodash_1.camelCase)(refName), "() { \n            return this.getEl('").concat((0, lodash_1.camelCase)(refName), "')\n          }"); })

@@ -3,13 +3,10 @@ var __makeTemplateObject = (this && this.__makeTemplateObject) || function (cook
     if (Object.defineProperty) { Object.defineProperty(cooked, "raw", { value: raw }); } else { cooked.raw = raw; }
     return cooked;
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.componentToStencil = void 0;
-var dedent_1 = __importDefault(require("dedent"));
 var standalone_1 = require("prettier/standalone");
+var dedent_1 = require("../../helpers/dedent");
 var get_state_object_string_1 = require("../../helpers/get-state-object-string");
 var render_imports_1 = require("../../helpers/render-imports");
 var jsx_1 = require("../../parsers/jsx");
@@ -132,7 +129,7 @@ var componentToStencil = function (options) {
                 console.warn('Could not format css', err);
             }
         }
-        var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    ", "\n\n    import { Component, Prop, h, State, Fragment } from '@stencil/core';\n\n    @Component({\n      tag: '", "',\n      ", "\n    })\n    export default class ", " {\n    \n      ", "\n\n        ", "\n        ", "\n      \n        ", "\n        ", "\n        ", "\n    \n      render() {\n        return (", "\n        \n          ", "\n\n        ", ")\n      }\n    }\n  "], ["\n    ", "\n\n    import { Component, Prop, h, State, Fragment } from '@stencil/core';\n\n    @Component({\n      tag: '"
+        var str = (0, dedent_1.dedent)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    ", "\n\n    import { Component, Prop, h, State, Fragment } from '@stencil/core';\n\n    @Component({\n      tag: '", "',\n      ", "\n    })\n    export default class ", " {\n    \n      ", "\n\n        ", "\n        ", "\n      \n        ", "\n        ", "\n        ", "\n    \n      render() {\n        return (", "\n        \n          ", "\n\n        ", ")\n      }\n    }\n  "], ["\n    ", "\n\n    import { Component, Prop, h, State, Fragment } from '@stencil/core';\n\n    @Component({\n      tag: '"
             /**
              * You can set the tagName in your Mitosis component as
              *

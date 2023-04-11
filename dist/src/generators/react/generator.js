@@ -19,11 +19,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.componentToReact = exports.componentToPreact = exports.contextPropDrillingKey = void 0;
-var dedent_1 = __importDefault(require("dedent"));
 var json5_1 = __importDefault(require("json5"));
 var standalone_1 = require("prettier/standalone");
 var collect_css_1 = require("../../helpers/styles/collect-css");
 var create_mitosis_node_1 = require("../../helpers/create-mitosis-node");
+var dedent_1 = require("../../helpers/dedent");
 var fast_clone_1 = require("../../helpers/fast-clone");
 var get_refs_1 = require("../../helpers/get-refs");
 var get_props_ref_1 = require("../../helpers/get-props-ref");
@@ -292,7 +292,7 @@ var _componentToReact = function (json, options, isSubComponent) {
     var componentArgs = ["props".concat(options.typescript ? ":".concat(propType) : ''), options.forwardRef]
         .filter(Boolean)
         .join(',');
-    var componentBody = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n\n    ", "\n    ", "\n\n    ", "\n\n    ", "\n\n    return (\n      ", "\n      ", "\n      ", "\n      ", "\n    );\n  "], ["\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n\n    ", "\n    ", "\n\n    ", "\n\n    ", "\n\n    return (\n      ", "\n      ", "\n      ", "\n      ", "\n    );\n  "])), options.contextType === 'prop-drill'
+    var componentBody = (0, dedent_1.dedent)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n\n    ", "\n    ", "\n\n    ", "\n\n    ", "\n\n    return (\n      ", "\n      ", "\n      ", "\n      ", "\n    );\n  "], ["\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n\n    ", "\n    ", "\n\n    ", "\n\n    ", "\n\n    return (\n      ", "\n      ", "\n      ", "\n      ", "\n    );\n  "])), options.contextType === 'prop-drill'
         ? "const ".concat(exports.contextPropDrillingKey, " = { ...props['").concat(exports.contextPropDrillingKey, "'] };")
         : '', hasStateArgument ? '' : refsString, hasState
         ? options.stateType === 'mobx'
@@ -326,7 +326,7 @@ var _componentToReact = function (json, options, isSubComponent) {
         : componentHasStyles && options.stylesType === 'style-tag'
             ? "<style>{`".concat(css, "`}</style>")
             : '', wrap ? (0, helpers_2.closeFrag)(options) : '');
-    var str = (0, dedent_1.default)(templateObject_2 || (templateObject_2 = __makeTemplateObject(["\n  ", "\n  ", "\n  ", "\n  ", "\n    ", "\n    ", "\n    ", "\n    ", "function ", "(", ") {\n    ", "\n  }", "\n\n    ", "\n\n    ", "\n\n    ", "\n    ", "\n\n  "], ["\n  ", "\n  ", "\n  ", "\n  ", "\n    ", "\n    ", "\n    ", "\n    ", "function ", "(", ") {\n    ", "\n  }", "\n\n    ", "\n\n    ", "\n\n    ", "\n    ", "\n\n  "])), getDefaultImport(json, options), styledComponentsCode ? "import styled from 'styled-components';\n" : '', reactLibImports.size
+    var str = (0, dedent_1.dedent)(templateObject_2 || (templateObject_2 = __makeTemplateObject(["\n  ", "\n  ", "\n  ", "\n  ", "\n    ", "\n    ", "\n    ", "\n    ", "function ", "(", ") {\n    ", "\n  }", "\n\n    ", "\n\n    ", "\n\n    ", "\n    ", "\n\n  "], ["\n  ", "\n  ", "\n  ", "\n  ", "\n    ", "\n    ", "\n    ", "\n    ", "function ", "(", ") {\n    ", "\n  }", "\n\n    ", "\n\n    ", "\n\n    ", "\n    ", "\n\n  "])), getDefaultImport(json, options), styledComponentsCode ? "import styled from 'styled-components';\n" : '', reactLibImports.size
         ? "import { ".concat(Array.from(reactLibImports).join(', '), " } from '").concat(options.preact ? 'preact/hooks' : 'react', "'")
         : '', componentHasStyles && options.stylesType === 'emotion' && options.format !== 'lite'
         ? "/** @jsx jsx */\n    import { jsx } from '@emotion/react'".trim()

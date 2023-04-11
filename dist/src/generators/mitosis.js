@@ -28,9 +28,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.componentToMitosis = exports.blockToMitosis = exports.DEFAULT_FORMAT = void 0;
-var dedent_1 = __importDefault(require("dedent"));
 var json5_1 = __importDefault(require("json5"));
 var standalone_1 = require("prettier/standalone");
+var dedent_1 = require("../helpers/dedent");
 var fast_clone_1 = require("../helpers/fast-clone");
 var get_components_1 = require("../helpers/get-components");
 var get_refs_1 = require("../helpers/get-refs");
@@ -157,7 +157,7 @@ var componentToMitosis = function (toMitosisOptions) {
         var needsMitosisCoreImport = Boolean(hasState || refs.length || mitosisComponents.length);
         var stringifiedUseMetadata = json5_1.default.stringify(component.meta.useMetadata);
         // TODO: smart only pull in imports as needed
-        var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    ", "\n    ", "\n    ", "\n\n    ", "\n\n    ", "\n\n    export default function ", "(props) {\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      return (", "\n        ", "\n        ", ")\n    }\n\n  "], ["\n    ", "\n    ", "\n    ", "\n\n    ", "\n\n    ", "\n\n    export default function ", "(props) {\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      return (", "\n        ", "\n        ", ")\n    }\n\n  "])), !needsMitosisCoreImport
+        var str = (0, dedent_1.dedent)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    ", "\n    ", "\n    ", "\n\n    ", "\n\n    ", "\n\n    export default function ", "(props) {\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      return (", "\n        ", "\n        ", ")\n    }\n\n  "], ["\n    ", "\n    ", "\n    ", "\n\n    ", "\n\n    ", "\n\n    export default function ", "(props) {\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      return (", "\n        ", "\n        ", ")\n    }\n\n  "])), !needsMitosisCoreImport
             ? ''
             : "import { ".concat(!hasState ? '' : 'useStore, ', " ").concat(!refs.length ? '' : 'useRef, ', " ").concat(mitosisComponents.join(', '), " } from '@builder.io/mitosis';"), !otherComponents.length ? '' : "import { ".concat(otherComponents.join(','), " } from '@components';"), json.types ? json.types.join('\n') : '', (0, render_imports_1.renderPreComponent)({ component: json, target: 'mitosis' }), stringifiedUseMetadata && stringifiedUseMetadata !== '{}'
             ? "".concat(jsx_1.METADATA_HOOK_NAME, "(").concat(stringifiedUseMetadata, ")")

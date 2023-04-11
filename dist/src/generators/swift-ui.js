@@ -8,9 +8,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.componentToSwift = void 0;
-var dedent_1 = __importDefault(require("dedent"));
 var try_prettier_format_1 = require("../helpers/try-prettier-format");
 var traverse_1 = __importDefault(require("traverse"));
+var dedent_1 = require("../helpers/dedent");
 var fast_clone_1 = require("../helpers/fast-clone");
 var filter_empty_text_nodes_1 = require("../helpers/filter-empty-text-nodes");
 var generic_format_1 = require("../helpers/generic-format");
@@ -249,7 +249,7 @@ var componentToSwift = function (options) {
         var hasDyanmicData = componentHasDynamicData(json);
         var children = json.children.map(function (item) { return blockToSwift(item, options); }).join('\n');
         var hasInputNames = Object.keys(json.meta.inputNames || {}).length > 0;
-        var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    import SwiftUI\n    ", "\n\n    struct ", ": View {\n      ", "\n\n      var body: some View {\n        VStack {\n          ", "\n        }", "\n      }\n    }\n  "], ["\n    import SwiftUI\n    ", "\n\n    struct ", ": View {\n      ", "\n\n      var body: some View {\n        VStack {\n          ", "\n        }", "\n      }\n    }\n  "])), !hasDyanmicData
+        var str = (0, dedent_1.dedent)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    import SwiftUI\n    ", "\n\n    struct ", ": View {\n      ", "\n\n      var body: some View {\n        VStack {\n          ", "\n        }", "\n      }\n    }\n  "], ["\n    import SwiftUI\n    ", "\n\n    struct ", ": View {\n      ", "\n\n      var body: some View {\n        VStack {\n          ", "\n        }", "\n      }\n    }\n  "])), !hasDyanmicData
             ? ''
             : "import JavaScriptCore\n    \n    final class UpdateTracker: ObservableObject {\n        @Published var value = 0;\n    \n        func update() {\n            value += 1\n        }\n    }\n    ", component.name, !hasDyanmicData
             ? ''

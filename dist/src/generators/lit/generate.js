@@ -3,13 +3,10 @@ var __makeTemplateObject = (this && this.__makeTemplateObject) || function (cook
     if (Object.defineProperty) { Object.defineProperty(cooked, "raw", { value: raw }); } else { cooked.raw = raw; }
     return cooked;
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.componentToLit = void 0;
-var dedent_1 = __importDefault(require("dedent"));
 var standalone_1 = require("prettier/standalone");
+var dedent_1 = require("../../helpers/dedent");
 var get_state_object_string_1 = require("../../helpers/get-state-object-string");
 var render_imports_1 = require("../../helpers/render-imports");
 var jsx_1 = require("../../parsers/jsx");
@@ -180,7 +177,7 @@ var componentToLit = function (options) {
                 html = html.replace(/\n{3,}/g, '\n\n');
             }
         }
-        var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    ", "\n    import { LitElement, html, css } from 'lit';\n    import { customElement, property, state, query } from 'lit/decorators.js';\n\n    ", "\n    ", "\n\n    @customElement('", "')\n    export default class ", " extends LitElement {\n      ", "\n\n      ", "\n\n      ", "\n    \n  \n      ", "\n\n        ", "\n        ", "\n      \n        ", "\n        ", "\n        ", "\n    \n      render() {\n        return html`\n          ", "\n          ", "\n        `\n      }\n    }\n  "], ["\n    ", "\n    import { LitElement, html, css } from 'lit';\n    import { customElement, property, state, query } from 'lit/decorators.js';\n\n    ", "\n    ", "\n\n    @customElement('", "')\n    export default class ", " extends LitElement {\n      ", "\n\n      ", "\n\n      ", "\n    \n  \n      ", "\n\n        ", "\n        ", "\n      \n        ", "\n        ", "\n        ", "\n    \n      render() {\n        return html\\`\n          ", "\n          ", "\n        \\`\n      }\n    }\n  "])), (0, render_imports_1.renderPreComponent)({ component: json, target: 'lit' }), json.types ? json.types.join('\n') : '', hasSpread
+        var str = (0, dedent_1.dedent)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    ", "\n    import { LitElement, html, css } from 'lit';\n    import { customElement, property, state, query } from 'lit/decorators.js';\n\n    ", "\n    ", "\n\n    @customElement('", "')\n    export default class ", " extends LitElement {\n      ", "\n\n      ", "\n\n      ", "\n    \n  \n      ", "\n\n        ", "\n        ", "\n      \n        ", "\n        ", "\n        ", "\n    \n      render() {\n        return html`\n          ", "\n          ", "\n        `\n      }\n    }\n  "], ["\n    ", "\n    import { LitElement, html, css } from 'lit';\n    import { customElement, property, state, query } from 'lit/decorators.js';\n\n    ", "\n    ", "\n\n    @customElement('", "')\n    export default class ", " extends LitElement {\n      ", "\n\n      ", "\n\n      ", "\n    \n  \n      ", "\n\n        ", "\n        ", "\n      \n        ", "\n        ", "\n        ", "\n    \n      render() {\n        return html\\`\n          ", "\n          ", "\n        \\`\n      }\n    }\n  "])), (0, render_imports_1.renderPreComponent)({ component: json, target: 'lit' }), json.types ? json.types.join('\n') : '', hasSpread
             ? "\n      const spread = (properties) =>\n        directive((part) => {\n          for (const property in properties) {\n            const value = properties[attr];\n            part.element[property] = value;\n          }\n        });\n    "
             : '', ((_b = json.meta.useMetadata) === null || _b === void 0 ? void 0 : _b.tagName) || getCustomTagName(json.name, options), json.name, options.useShadowDom
             ? ''

@@ -21,7 +21,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.componentToBuilder = exports.blockToBuilder = void 0;
 var get_state_object_string_1 = require("../helpers/get-state-object-string");
 var fast_clone_1 = require("../helpers/fast-clone");
-var dedent_1 = __importDefault(require("dedent"));
+var dedent_1 = require("../helpers/dedent");
 var standalone_1 = require("prettier/standalone");
 var json5_1 = __importDefault(require("json5"));
 var is_upper_case_1 = require("../helpers/is-upper-case");
@@ -241,8 +241,8 @@ var componentToBuilder = function (options) {
         var result = (0, fast_clone_1.fastClone)({
             data: {
                 httpRequests: (_c = (_b = component === null || component === void 0 ? void 0 : component.meta) === null || _b === void 0 ? void 0 : _b.useMetadata) === null || _c === void 0 ? void 0 : _c.httpRequests,
-                jsCode: tryFormat((0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n        ", "\n\n        ", "\n        \n        ", "\n      "], ["\n        ", "\n\n        ", "\n        \n        ", "\n      "])), !(0, has_props_1.hasProps)(component) ? '' : "var props = state;", !hasState ? '' : "Object.assign(state, ".concat((0, get_state_object_string_1.getStateObjectStringFromComponent)(component), ");"), !((_d = component.hooks.onMount) === null || _d === void 0 ? void 0 : _d.code) ? '' : component.hooks.onMount.code)),
-                tsCode: tryFormat((0, dedent_1.default)(templateObject_2 || (templateObject_2 = __makeTemplateObject(["\n        ", "\n\n        ", "\n\n        ", "\n      "], ["\n        ", "\n\n        ", "\n\n        ", "\n      "])), !(0, has_props_1.hasProps)(component) ? '' : "var props = state;", !hasState ? '' : "useState(".concat((0, get_state_object_string_1.getStateObjectStringFromComponent)(component), ");"), !((_e = component.hooks.onMount) === null || _e === void 0 ? void 0 : _e.code)
+                jsCode: tryFormat((0, dedent_1.dedent)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n        ", "\n\n        ", "\n        \n        ", "\n      "], ["\n        ", "\n\n        ", "\n        \n        ", "\n      "])), !(0, has_props_1.hasProps)(component) ? '' : "var props = state;", !hasState ? '' : "Object.assign(state, ".concat((0, get_state_object_string_1.getStateObjectStringFromComponent)(component), ");"), !((_d = component.hooks.onMount) === null || _d === void 0 ? void 0 : _d.code) ? '' : component.hooks.onMount.code)),
+                tsCode: tryFormat((0, dedent_1.dedent)(templateObject_2 || (templateObject_2 = __makeTemplateObject(["\n        ", "\n\n        ", "\n\n        ", "\n      "], ["\n        ", "\n\n        ", "\n\n        ", "\n      "])), !(0, has_props_1.hasProps)(component) ? '' : "var props = state;", !hasState ? '' : "useState(".concat((0, get_state_object_string_1.getStateObjectStringFromComponent)(component), ");"), !((_e = component.hooks.onMount) === null || _e === void 0 ? void 0 : _e.code)
                     ? ''
                     : "onMount(() => {\n                ".concat(component.hooks.onMount.code, "\n              })"))),
                 blocks: component.children

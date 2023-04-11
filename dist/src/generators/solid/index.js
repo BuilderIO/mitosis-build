@@ -51,8 +51,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.componentToSolid = void 0;
-var dedent_1 = __importDefault(require("dedent"));
 var standalone_1 = require("prettier/standalone");
+var dedent_1 = require("../../helpers/dedent");
 var helpers_1 = require("../../helpers/styles/helpers");
 var get_refs_1 = require("../../helpers/get-refs");
 var render_imports_1 = require("../../helpers/render-imports");
@@ -177,7 +177,7 @@ var componentToSolid = function (passedOptions) {
         var storeImports = (_e = state === null || state === void 0 ? void 0 : state.import.store) !== null && _e !== void 0 ? _e : [];
         var propType = json.propsTypeRef || 'any';
         var propsArgs = "props".concat(options.typescript ? ":".concat(propType) : '');
-        var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n\n    function ", "(", ") {\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      return (", "\n        ", "\n        ", "\n        ", ")\n    }\n\n    export default ", ";\n  "], ["\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n\n    function ", "(", ") {\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      return (", "\n        ", "\n        ", "\n        ", ")\n    }\n\n    export default ", ";\n  "])), solidJSImports.length > 0 ? "import { ".concat(solidJSImports.join(', '), " } from 'solid-js';") : '', !foundDynamicComponents ? '' : "import { Dynamic } from 'solid-js/web';", storeImports.length > 0 ? "import { ".concat(storeImports.join(', '), " } from 'solid-js/store';") : '', !componentHasStyles && options.stylesType === 'styled-components'
+        var str = (0, dedent_1.dedent)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n\n    function ", "(", ") {\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      return (", "\n        ", "\n        ", "\n        ", ")\n    }\n\n    export default ", ";\n  "], ["\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n\n    function ", "(", ") {\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      return (", "\n        ", "\n        ", "\n        ", ")\n    }\n\n    export default ", ";\n  "])), solidJSImports.length > 0 ? "import { ".concat(solidJSImports.join(', '), " } from 'solid-js';") : '', !foundDynamicComponents ? '' : "import { Dynamic } from 'solid-js/web';", storeImports.length > 0 ? "import { ".concat(storeImports.join(', '), " } from 'solid-js/store';") : '', !componentHasStyles && options.stylesType === 'styled-components'
             ? ''
             : "import { css } from \"solid-styled-components\";", json.types && options.typescript ? json.types.join('\n') : '', (0, render_imports_1.renderPreComponent)({ component: json, target: 'solid' }), json.name, propsArgs, (_f = state === null || state === void 0 ? void 0 : state.str) !== null && _f !== void 0 ? _f : '', getRefsString(json, options), getContextString(json, options), !((_g = json.hooks.onMount) === null || _g === void 0 ? void 0 : _g.code) ? '' : "onMount(() => { ".concat(json.hooks.onMount.code, " })"), json.hooks.onUpdate
             ? json.hooks.onUpdate

@@ -19,9 +19,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.componentToVue3 = exports.componentToVue2 = void 0;
-var dedent_1 = __importDefault(require("dedent"));
 var standalone_1 = require("prettier/standalone");
 var collect_css_1 = require("../../helpers/styles/collect-css");
+var dedent_1 = require("../../helpers/dedent");
 var fast_clone_1 = require("../../helpers/fast-clone");
 var map_refs_1 = require("../../helpers/map-refs");
 var render_imports_1 = require("../../helpers/render-imports");
@@ -186,7 +186,7 @@ var componentToVue = function (userOptions) {
             (0, lodash_1.size)(slotsProps) && vueImports.push('useSlots');
         }
         var tsLangAttribute = options.typescript ? "lang='ts'" : '';
-        var str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    ", "\n\n\n    <script ", " ", ">\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n    </script>\n\n    ", "\n  "], ["\n    ", "\n\n\n    <script ", " ", ">\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n    </script>\n\n    ", "\n  "])), template.trim().length > 0
+        var str = (0, dedent_1.dedent)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    ", "\n\n\n    <script ", " ", ">\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n    </script>\n\n    ", "\n  "], ["\n    ", "\n\n\n    <script ", " ", ">\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n    </script>\n\n    ", "\n  "])), template.trim().length > 0
             ? "<template>\n      ".concat(template, "\n    </template>")
             : '', options.api === 'composition' ? 'setup' : '', tsLangAttribute, vueImports.length ? "import { ".concat((0, lodash_1.uniq)(vueImports).sort().join(', '), " } from \"vue\"") : '', (options.typescript && ((_h = component.types) === null || _h === void 0 ? void 0 : _h.join('\n'))) || '', (0, render_imports_1.renderPreComponent)({
             component: component,

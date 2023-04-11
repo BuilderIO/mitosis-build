@@ -3,9 +3,6 @@ var __makeTemplateObject = (this && this.__makeTemplateObject) || function (cook
     if (Object.defineProperty) { Object.defineProperty(cooked, "raw", { value: raw }); } else { cooked.raw = raw; }
     return cooked;
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.componentToTemplate = void 0;
 var standalone_1 = require("prettier/standalone");
@@ -14,7 +11,7 @@ var fast_clone_1 = require("../helpers/fast-clone");
 var jsx_1 = require("../parsers/jsx");
 var mitosis_node_1 = require("../types/mitosis-node");
 var plugins_1 = require("../modules/plugins");
-var dedent_1 = __importDefault(require("dedent"));
+var dedent_1 = require("../helpers/dedent");
 var get_state_object_string_1 = require("../helpers/get-state-object-string");
 var mappers = {
     Fragment: function (json, options) {
@@ -105,7 +102,7 @@ var componentToTemplate = function (options) {
         if (css.trim().length) {
             str += "<style>".concat(css, "</style>");
         }
-        str = (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    export default function template(props) {\n      let state = ", "\n\n      return `", "`\n    }\n  \n  "], ["\n    export default function template(props) {\n      let state = ", "\n\n      return \\`", "\\`\n    }\n  \n  "])), (0, get_state_object_string_1.getStateObjectStringFromComponent)(json), str.replace(/\s+/g, ' '));
+        str = (0, dedent_1.dedent)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    export default function template(props) {\n      let state = ", "\n\n      return `", "`\n    }\n  \n  "], ["\n    export default function template(props) {\n      let state = ", "\n\n      return \\`", "\\`\n    }\n  \n  "])), (0, get_state_object_string_1.getStateObjectStringFromComponent)(json), str.replace(/\s+/g, ' '));
         if (options.plugins) {
             str = (0, plugins_1.runPreCodePlugins)(str, options.plugins);
         }

@@ -17,10 +17,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.componentToSvelte = void 0;
-var dedent_1 = __importDefault(require("dedent"));
 var standalone_1 = require("prettier/standalone");
 var traverse_1 = __importDefault(require("traverse"));
 var collect_css_1 = require("../../helpers/styles/collect-css");
+var dedent_1 = require("../../helpers/dedent");
 var helpers_1 = require("../../helpers/styles/helpers");
 var fast_clone_1 = require("../../helpers/fast-clone");
 var get_props_1 = require("../../helpers/get-props");
@@ -179,7 +179,7 @@ var componentToSvelte = function (userProvidedOptions) {
         var str = '';
         var tsLangAttribute = options.typescript ? "lang='ts'" : '';
         if (options.typescript && ((_b = json.types) === null || _b === void 0 ? void 0 : _b.length)) {
-            str += (0, dedent_1.default)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n      <script context='module' ", ">\n        ", "\n      </script>\n      \n\n      \n\n      "], ["\n      <script context='module' ", ">\n        ", "\n      </script>\n      \\n\n      \\n\n      "])), tsLangAttribute, json.types ? json.types.join('\n\n') + '\n' : '');
+            str += (0, dedent_1.dedent)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n      <script context='module' ", ">\n        ", "\n      </script>\n      \n\n      \n\n      "], ["\n      <script context='module' ", ">\n        ", "\n      </script>\n      \\n\n      \\n\n      "])), tsLangAttribute, json.types ? json.types.join('\n\n') + '\n' : '');
         }
         // prepare svelte imports
         var svelteImports = [];
@@ -199,7 +199,7 @@ var componentToSvelte = function (userProvidedOptions) {
         if ((0, context_1.hasSetContext)(component)) {
             svelteImports.push('setContext');
         }
-        str += (0, dedent_1.default)(templateObject_2 || (templateObject_2 = __makeTemplateObject(["\n      <script ", ">\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n      ", "\n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n    </script>\n\n    ", "\n\n    ", "\n  "], ["\n      <script ", ">\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n      ", "\n      "
+        str += (0, dedent_1.dedent)(templateObject_2 || (templateObject_2 = __makeTemplateObject(["\n      <script ", ">\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n      ", "\n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n    </script>\n\n    ", "\n\n    ", "\n  "], ["\n      <script ", ">\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n      ", "\n      "
             // https://svelte.dev/repl/bd9b56891f04414982517bbd10c52c82?version=3.31.0
             , "\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      "
             // make sure this is after all other state/code is initialized
