@@ -22,6 +22,7 @@ var filter_empty_text_nodes_1 = require("../../helpers/filter-empty-text-nodes")
 var is_valid_attribute_name_1 = require("../../helpers/is-valid-attribute-name");
 var for_1 = require("../../helpers/nodes/for");
 var jsx_1 = require("../../parsers/jsx");
+var mitosis_node_1 = require("../../types/mitosis-node");
 var helpers_1 = require("./helpers");
 var state_1 = require("./state");
 var NODE_MAPPERS = {
@@ -98,10 +99,16 @@ var NODE_MAPPERS = {
     Show: function (json, options, component) {
         var _a;
         var wrap = (0, helpers_1.wrapInFragment)(json);
+        var wrapElse = json.meta.else &&
+            ((0, helpers_1.wrapInFragment)(json.meta.else) || (0, mitosis_node_1.checkIsForNode)(json.meta.else));
         return "{".concat((0, helpers_1.processBinding)((_a = json.bindings.when) === null || _a === void 0 ? void 0 : _a.code, options), " ? (\n      ").concat(wrap ? (0, helpers_1.openFrag)(options) : '').concat(json.children
             .filter(filter_empty_text_nodes_1.filterEmptyTextNodes)
             .map(function (item) { return (0, exports.blockToReact)(item, options, component); })
-            .join('\n')).concat(wrap ? (0, helpers_1.closeFrag)(options) : '', "\n    ) : ").concat(!json.meta.else ? 'null' : (0, exports.blockToReact)(json.meta.else, options, component), "}");
+            .join('\n')).concat(wrap ? (0, helpers_1.closeFrag)(options) : '', "\n    ) : ").concat(!json.meta.else
+            ? 'null'
+            : (wrapElse ? (0, helpers_1.openFrag)(options) : '') +
+                (0, exports.blockToReact)(json.meta.else, options, component) +
+                (wrapElse ? (0, helpers_1.closeFrag)(options) : ''), "}");
     },
 };
 var ATTTRIBUTE_MAPPERS = {
