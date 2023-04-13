@@ -1,6 +1,6 @@
 import * as CSS from 'csstype';
-import { MitosisNode } from '../../types/mitosis-node';
 import { MitosisComponent } from '../../types/mitosis-component';
+import { MitosisNode } from '../../types/mitosis-node';
 export declare const nodeHasCss: (node: MitosisNode) => boolean;
 export declare const nodeHasStyle: (node: MitosisNode) => boolean;
 export declare const hasCss: (component: MitosisComponent) => boolean;
