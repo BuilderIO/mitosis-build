@@ -4,10 +4,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.collectCss = void 0;
+var object_hash_1 = __importDefault(require("object-hash"));
 var traverse_1 = __importDefault(require("traverse"));
 var dash_case_1 = require("../dash-case");
 var is_mitosis_node_1 = require("../is-mitosis-node");
-var object_hash_1 = __importDefault(require("object-hash"));
 var helpers_1 = require("./helpers");
 var trimClassStr = function (classStr) { return classStr.trim().replace(/\s{2,}/g, ' '); };
 var updateClassForNode = function (item, className) {
@@ -69,7 +69,7 @@ var collectCss = function (json, options) {
 exports.collectCss = collectCss;
 var classStyleMapToCss = function (map) {
     var str = '';
-    for (var key in map) {
+    var _loop_1 = function (key) {
         var styles = (0, helpers_1.getStylesOnly)(map[key]);
         str += ".".concat(key, " {\n").concat((0, helpers_1.styleMapToCss)(styles), "\n}");
         var nestedSelectors = (0, helpers_1.getNestedSelectors)(map[key]);
@@ -79,12 +79,21 @@ var classStyleMapToCss = function (map) {
                 str += "".concat(nestedSelector, " { .").concat(key, " { ").concat((0, helpers_1.styleMapToCss)(value), " } }");
             }
             else {
-                var useSelector = nestedSelector.includes('&')
-                    ? nestedSelector.replace(/&/g, ".".concat(key))
-                    : ".".concat(key, " ").concat(nestedSelector);
-                str += "".concat(useSelector, " {\n").concat((0, helpers_1.styleMapToCss)(value), "\n}");
+                var getSelector = function (nestedSelector) {
+                    if (nestedSelector.startsWith(':')) {
+                        return ".".concat(key).concat(nestedSelector);
+                    }
+                    if (nestedSelector.includes('&')) {
+                        return nestedSelector.replace(/&/g, ".".concat(key));
+                    }
+                    return ".".concat(key, " ").concat(nestedSelector);
+                };
+                str += "".concat(getSelector(nestedSelector), " {\n").concat((0, helpers_1.styleMapToCss)(value), "\n}");
             }
         }
+    };
+    for (var key in map) {
+        _loop_1(key);
     }
     return str;
 };
