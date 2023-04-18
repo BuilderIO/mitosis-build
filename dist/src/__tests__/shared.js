@@ -272,6 +272,7 @@ var SHOW_TESTS = {
     rootShow: getRawFile('./data/blocks/rootShow.raw.tsx'),
     nestedShow: getRawFile('./data/show/nested-show.raw.tsx'),
     showWithFor: getRawFile('./data/show/show-with-for.raw.tsx'),
+    showWithRootText: getRawFile('./data/show/show-with-root-text.raw.tsx'),
 };
 var ADVANCED_REF = {
     AdvancedRef: getRawFile('./data/advanced-ref.raw.tsx'),

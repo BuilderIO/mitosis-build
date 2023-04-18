@@ -20,6 +20,7 @@ var is_children_1 = __importDefault(require("../../helpers/is-children"));
 var slots_1 = require("../../helpers/slots");
 var filter_empty_text_nodes_1 = require("../../helpers/filter-empty-text-nodes");
 var is_valid_attribute_name_1 = require("../../helpers/is-valid-attribute-name");
+var is_root_text_node_1 = require("../../helpers/is-root-text-node");
 var for_1 = require("../../helpers/nodes/for");
 var jsx_1 = require("../../parsers/jsx");
 var mitosis_node_1 = require("../../types/mitosis-node");
@@ -98,7 +99,7 @@ var NODE_MAPPERS = {
     },
     Show: function (json, options, component) {
         var _a;
-        var wrap = (0, helpers_1.wrapInFragment)(json);
+        var wrap = (0, helpers_1.wrapInFragment)(json) || (0, is_root_text_node_1.isRootTextNode)(json);
         var wrapElse = json.meta.else &&
             ((0, helpers_1.wrapInFragment)(json.meta.else) || (0, mitosis_node_1.checkIsForNode)(json.meta.else));
         return "{".concat((0, helpers_1.processBinding)((_a = json.bindings.when) === null || _a === void 0 ? void 0 : _a.code, options), " ? (\n      ").concat(wrap ? (0, helpers_1.openFrag)(options) : '').concat(json.children
