@@ -331,6 +331,10 @@ var componentMappers = __assign(__assign({ Symbol: function (block, options) {
             css: { code: JSON.stringify(css) },
         }));
         var properties = __assign({}, block.properties);
+        if (block.id)
+            properties['block-id'] = block.id;
+        if (block.class)
+            properties['class'] = block.class;
         if (block.layerName) {
             properties.$name = block.layerName;
         }
