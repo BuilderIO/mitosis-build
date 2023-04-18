@@ -143,7 +143,7 @@ function generateOptionsApiScript(component, options, path, template, props, onU
         }
         return "".concat(str, ",");
     };
-    return "\n        export default {\n        ".concat(!component.name
+    return "\n        export default ".concat(options.defineComponent ? 'defineComponent(' : '', " {\n        ").concat(!component.name
         ? ''
         : "name: '".concat(path && ((_a = options.namePrefix) === null || _a === void 0 ? void 0 : _a.call(options, path)) ? ((_b = options.namePrefix) === null || _b === void 0 ? void 0 : _b.call(options, path)) + '-' : '').concat((0, lodash_1.kebabCase)(component.name), "',"), "\n        ").concat(generateComponents(componentsUsed, options), "\n        ").concat(props.length ? getPropDefinition({ component: component, props: props }) : '', "\n        ").concat(dataString.length < 4
         ? ''
@@ -174,6 +174,6 @@ function generateOptionsApiScript(component, options, path, template, props, onU
         var k = _a[0], v = _a[1];
         return "".concat(k, ": ").concat(v);
     })
-        .join(','), "\n      }");
+        .join(','), "\n        }\n        ").concat(options.defineComponent ? ')' : '');
 }
 exports.generateOptionsApiScript = generateOptionsApiScript;

@@ -99,6 +99,7 @@ var BASE_OPTIONS = {
     plugins: [],
     vueVersion: 2,
     api: 'options',
+    defineComponent: true,
 };
 var componentToVue = function (userOptions) {
     return function (_a) {
@@ -173,6 +174,9 @@ var componentToVue = function (userOptions) {
         var vueImports = [];
         if (options.vueVersion >= 3 && options.asyncComponentImports) {
             vueImports.push('defineAsyncComponent');
+        }
+        if (options.api === 'options' && options.defineComponent) {
+            vueImports.push('defineComponent');
         }
         if (options.api === 'composition') {
             onUpdateWithDeps.length && vueImports.push('watch');
