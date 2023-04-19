@@ -190,13 +190,13 @@ var componentToVue = function (userOptions) {
             (0, lodash_1.size)(slotsProps) && vueImports.push('useSlots');
         }
         var tsLangAttribute = options.typescript ? "lang='ts'" : '';
-        var str = (0, dedent_1.dedent)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    ", "\n\n\n    <script ", " ", ">\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n    </script>\n\n    ", "\n  "], ["\n    ", "\n\n\n    <script ", " ", ">\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n    </script>\n\n    ", "\n  "])), template.trim().length > 0
+        var str = (0, dedent_1.dedent)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    ", "\n\n\n    <script ", " ", ">\n      ", "\n      \n      ", "\n      \n      ", "\n\n      ", "\n    </script>\n\n    ", "\n  "], ["\n    ", "\n\n\n    <script ", " ", ">\n      ", "\n      \n      ", "\n      \n      ", "\n\n      ", "\n    </script>\n\n    ", "\n  "])), template.trim().length > 0
             ? "<template>\n      ".concat(template, "\n    </template>")
-            : '', options.api === 'composition' ? 'setup' : '', tsLangAttribute, vueImports.length ? "import { ".concat((0, lodash_1.uniq)(vueImports).sort().join(', '), " } from \"vue\"") : '', (options.typescript && ((_h = component.types) === null || _h === void 0 ? void 0 : _h.join('\n'))) || '', (0, render_imports_1.renderPreComponent)({
+            : '', options.api === 'composition' ? 'setup' : '', tsLangAttribute, vueImports.length ? "import { ".concat((0, lodash_1.uniq)(vueImports).sort().join(', '), " } from \"vue\"") : '', (0, render_imports_1.renderPreComponent)({
             component: component,
             target: 'vue',
             asyncComponentImports: options.asyncComponentImports,
-        }), options.api === 'composition'
+        }), (options.typescript && ((_h = component.types) === null || _h === void 0 ? void 0 : _h.join('\n'))) || '', options.api === 'composition'
             ? (0, compositionApi_1.generateCompositionApiScript)(component, options, template, elementProps, onUpdateWithDeps, onUpdateWithoutDeps)
             : (0, optionsApi_1.generateOptionsApiScript)(component, options, path, template, elementProps, onUpdateWithDeps, onUpdateWithoutDeps), !css.trim().length
             ? ''
