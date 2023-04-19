@@ -156,8 +156,42 @@ describe('Builder', function () {
         });
         expect(mitosis.trim()).toEqual(code.trim());
     });
+    test('Regenerate loop with Text node when using CSS', function () {
+        var builderJson = {
+            data: {
+                blocks: [
+                    {
+                        '@type': '@builder.io/sdk:Element',
+                        '@version': 2,
+                        repeat: {
+                            collection: 'state.submenusItem.menuItems',
+                        },
+                        id: 'builder-ID',
+                        class: 'class-id',
+                        component: {
+                            name: 'Text',
+                            options: {
+                                text: 'text-content',
+                            },
+                        },
+                        responsiveStyles: {
+                            large: {
+                                padding: '2px',
+                            },
+                        },
+                    },
+                ],
+            },
+        };
+        var backToMitosis = (0, builder_2.builderContentToMitosisComponent)(builderJson);
+        console.log(JSON.stringify(backToMitosis, null, 2));
+        var mitosis = (0, mitosis_1.componentToMitosis)(mitosisOptions)({
+            component: backToMitosis,
+        });
+        expect(mitosis.trim()).toEqual((0, dedent_1.dedent)(templateObject_4 || (templateObject_4 = __makeTemplateObject(["\n      import { For } from \"@builder.io/mitosis\";\n\n      export default function MyComponent(props) {\n        return (\n          <For each={state.submenusItem.menuItems}>\n            {(item, index) => (\n              <div\n                block-id=\"builder-ID\"\n                class=\"class-id\"\n                css={{\n                  padding: \"2px\",\n                }}\n              >\n                text-content\n              </div>\n            )}\n          </For>\n        );\n      }\n    "], ["\n      import { For } from \"@builder.io/mitosis\";\n\n      export default function MyComponent(props) {\n        return (\n          <For each={state.submenusItem.menuItems}>\n            {(item, index) => (\n              <div\n                block-id=\"builder-ID\"\n                class=\"class-id\"\n                css={{\n                  padding: \"2px\",\n                }}\n              >\n                text-content\n              </div>\n            )}\n          </For>\n        );\n      }\n    "]))));
+    });
     test('Regenerate custom Hero', function () {
-        var code = (0, dedent_1.dedent)(templateObject_4 || (templateObject_4 = __makeTemplateObject(["\n      import { Hero } from \"@components\";\n\n      export default function MyComponent(props) {\n        return (\n          <Hero\n            title=\"Your Title Here\"\n            image=\"https://cdn.builder.io/api/v1/image/assets%2FYJIGb4i01jvw0SRdL5Bt%2F52dcecf48f9c48cc8ddd8f81fec63236\"\n            buttonLink=\"https://example.com\"\n            buttonText=\"Click\"\n            height={400}\n            css={{\n              display: \"flex\",\n              flexDirection: \"column\",\n              alignItems: \"stretch\",\n              position: \"relative\",\n              flexShrink: \"0\",\n              boxSizing: \"border-box\",\n              marginTop: \"200px\",\n            }}\n          />\n        );\n      }\n    "], ["\n      import { Hero } from \"@components\";\n\n      export default function MyComponent(props) {\n        return (\n          <Hero\n            title=\"Your Title Here\"\n            image=\"https://cdn.builder.io/api/v1/image/assets%2FYJIGb4i01jvw0SRdL5Bt%2F52dcecf48f9c48cc8ddd8f81fec63236\"\n            buttonLink=\"https://example.com\"\n            buttonText=\"Click\"\n            height={400}\n            css={{\n              display: \"flex\",\n              flexDirection: \"column\",\n              alignItems: \"stretch\",\n              position: \"relative\",\n              flexShrink: \"0\",\n              boxSizing: \"border-box\",\n              marginTop: \"200px\",\n            }}\n          />\n        );\n      }\n    "])));
+        var code = (0, dedent_1.dedent)(templateObject_5 || (templateObject_5 = __makeTemplateObject(["\n      import { Hero } from \"@components\";\n\n      export default function MyComponent(props) {\n        return (\n          <Hero\n            title=\"Your Title Here\"\n            image=\"https://cdn.builder.io/api/v1/image/assets%2FYJIGb4i01jvw0SRdL5Bt%2F52dcecf48f9c48cc8ddd8f81fec63236\"\n            buttonLink=\"https://example.com\"\n            buttonText=\"Click\"\n            height={400}\n            css={{\n              display: \"flex\",\n              flexDirection: \"column\",\n              alignItems: \"stretch\",\n              position: \"relative\",\n              flexShrink: \"0\",\n              boxSizing: \"border-box\",\n              marginTop: \"200px\",\n            }}\n          />\n        );\n      }\n    "], ["\n      import { Hero } from \"@components\";\n\n      export default function MyComponent(props) {\n        return (\n          <Hero\n            title=\"Your Title Here\"\n            image=\"https://cdn.builder.io/api/v1/image/assets%2FYJIGb4i01jvw0SRdL5Bt%2F52dcecf48f9c48cc8ddd8f81fec63236\"\n            buttonLink=\"https://example.com\"\n            buttonText=\"Click\"\n            height={400}\n            css={{\n              display: \"flex\",\n              flexDirection: \"column\",\n              alignItems: \"stretch\",\n              position: \"relative\",\n              flexShrink: \"0\",\n              boxSizing: \"border-box\",\n              marginTop: \"200px\",\n            }}\n          />\n        );\n      }\n    "])));
         var component = (0, jsx_1.parseJsx)(code);
         expect(component).toMatchSnapshot();
         var builderJson = (0, builder_1.componentToBuilder)()({ component: component });
@@ -171,7 +205,7 @@ describe('Builder', function () {
     });
     // TODO: fix divs and CoreFragment - need to find way to reproduce
     test.skip('Regenerate fragments', function () {
-        var code = (0, dedent_1.dedent)(templateObject_5 || (templateObject_5 = __makeTemplateObject(["\n      export default function MyComponent(props) {\n        return (\n          <>\n            Hello world\n\n            <>\n              <Fragment>Hi</Fragment>\n            </>\n          </>\n        );\n      }\n    "], ["\n      export default function MyComponent(props) {\n        return (\n          <>\n            Hello world\n\n            <>\n              <Fragment>Hi</Fragment>\n            </>\n          </>\n        );\n      }\n    "])));
+        var code = (0, dedent_1.dedent)(templateObject_6 || (templateObject_6 = __makeTemplateObject(["\n      export default function MyComponent(props) {\n        return (\n          <>\n            Hello world\n\n            <>\n              <Fragment>Hi</Fragment>\n            </>\n          </>\n        );\n      }\n    "], ["\n      export default function MyComponent(props) {\n        return (\n          <>\n            Hello world\n\n            <>\n              <Fragment>Hi</Fragment>\n            </>\n          </>\n        );\n      }\n    "])));
         var component = (0, jsx_1.parseJsx)(code);
         expect(component).toMatchSnapshot();
         var builderJson = (0, builder_1.componentToBuilder)()({ component: component });
@@ -185,7 +219,7 @@ describe('Builder', function () {
     });
     // TODO: get passing, don't add extra divs. or at least use spans instead so don't break layout
     test.skip('Regenerate span text', function () {
-        var code = (0, dedent_1.dedent)(templateObject_6 || (templateObject_6 = __makeTemplateObject(["\n      export default function MyComponent(props) {\n        return (\n          <div\n            css={{\n              display: \"block\",\n            }}\n          >\n            Hi there\n            <span\n              css={{\n                color: \"red\",\n              }}\n            >\n              Hello world\n            </span>\n          </div>\n        );\n      }\n    "], ["\n      export default function MyComponent(props) {\n        return (\n          <div\n            css={{\n              display: \"block\",\n            }}\n          >\n            Hi there\n            <span\n              css={{\n                color: \"red\",\n              }}\n            >\n              Hello world\n            </span>\n          </div>\n        );\n      }\n    "])));
+        var code = (0, dedent_1.dedent)(templateObject_7 || (templateObject_7 = __makeTemplateObject(["\n      export default function MyComponent(props) {\n        return (\n          <div\n            css={{\n              display: \"block\",\n            }}\n          >\n            Hi there\n            <span\n              css={{\n                color: \"red\",\n              }}\n            >\n              Hello world\n            </span>\n          </div>\n        );\n      }\n    "], ["\n      export default function MyComponent(props) {\n        return (\n          <div\n            css={{\n              display: \"block\",\n            }}\n          >\n            Hi there\n            <span\n              css={{\n                color: \"red\",\n              }}\n            >\n              Hello world\n            </span>\n          </div>\n        );\n      }\n    "])));
         var component = (0, jsx_1.parseJsx)(code);
         var builderJson = (0, builder_1.componentToBuilder)()({ component: component });
         var backToMitosis = (0, builder_2.builderContentToMitosisComponent)(builderJson);
@@ -195,4 +229,4 @@ describe('Builder', function () {
         expect(mitosis.trim()).toEqual(code.trim());
     });
 });
-var templateObject_1, templateObject_2, templateObject_3, templateObject_4, templateObject_5, templateObject_6;
+var templateObject_1, templateObject_2, templateObject_3, templateObject_4, templateObject_5, templateObject_6, templateObject_7;
