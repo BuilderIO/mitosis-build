@@ -184,7 +184,6 @@ describe('Builder', function () {
             },
         };
         var backToMitosis = (0, builder_2.builderContentToMitosisComponent)(builderJson);
-        console.log(JSON.stringify(backToMitosis, null, 2));
         var mitosis = (0, mitosis_1.componentToMitosis)(mitosisOptions)({
             component: backToMitosis,
         });
