@@ -102,6 +102,7 @@ var renderImport = function (_a) {
     var importValue = getImportValue(importedValues);
     var isComponentImport = (0, exports.checkIsComponentImport)(theImport);
     var shouldBeAsyncImport = asyncComponentImports && isComponentImport;
+    var isTypeImport = theImport.importKind === 'type';
     // For lit (components) we just want to do a plain import
     // https://lit.dev/docs/components/rendering/#composing-templates
     if (isComponentImport && target === 'lit') {
@@ -113,13 +114,15 @@ var renderImport = function (_a) {
             console.warn('Vue: Async Component imports cannot include named imports. Dropping async import. This might break your code.');
         }
         else {
-            return "const ".concat(importValue, " = () => import('").concat(path, "')\n      .then(x => x.default)\n      .catch(err => { \n        console.error('Error while attempting to dynamically import component ").concat(importValue, " at ").concat(path, "', err);\n        throw err;\n      });");
+            return "const ".concat(importValue, " = () => import('").concat(path, "')\n      .then(x => x.default)\n      .catch(err => {\n        console.error('Error while attempting to dynamically import component ").concat(importValue, " at ").concat(path, "', err);\n        throw err;\n      });");
         }
     }
     if (importMapper) {
         return importMapper(component, theImport, importedValues, componentsUsed);
     }
-    return importValue ? "import ".concat(importValue, " from '").concat(path, "';") : "import '".concat(path, "';");
+    return importValue
+        ? "import ".concat(isTypeImport ? 'type' : '', " ").concat(importValue, " from '").concat(path, "';")
+        : "import '".concat(path, "';");
 };
 exports.renderImport = renderImport;
 var renderImports = function (_a) {

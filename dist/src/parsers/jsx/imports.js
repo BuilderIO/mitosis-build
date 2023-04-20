@@ -46,6 +46,7 @@ var handleImportDeclaration = function (_a) {
     var importObject = {
         imports: {},
         path: path.node.source.value,
+        importKind: path.node.importKind,
     };
     for (var _i = 0, _b = path.node.specifiers; _i < _b.length; _i++) {
         var specifier = _b[_i];

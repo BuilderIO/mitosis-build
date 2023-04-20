@@ -27,6 +27,7 @@ export interface MitosisImport {
     imports: {
         [key: string]: string | undefined;
     };
+    importKind?: 'type' | 'typeof' | 'value' | null;
 }
 export interface ContextGetInfo {
     name: string;
