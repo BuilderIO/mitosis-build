@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var shared_1 = require("./shared");
+var test_generator_1 = require("./test-generator");
 describe('Parse JSX', function () {
-    (0, shared_1.runTestsForSvelteSyntax)();
+    (0, test_generator_1.runTestsForSvelteSyntax)();
 });

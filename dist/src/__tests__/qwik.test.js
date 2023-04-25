@@ -49,7 +49,7 @@ var builder_1 = require("../parsers/builder");
 var jsx_1 = require("../parsers/jsx");
 var compile_away_builder_components_1 = require("../plugins/compile-away-builder-components");
 var symbol_processor_1 = require("../symbols/symbol-processor");
-var shared_1 = require("./shared");
+var test_generator_1 = require("./test-generator");
 var todo_lite_tsx_raw_1 = __importDefault(require("../../../../examples/todo/src/components/todo.lite.tsx?raw"));
 var todos_lite_tsx_raw_1 = __importDefault(require("../../../../examples/todo/src/components/todos.lite.tsx?raw"));
 var debugFiles = true;
@@ -82,7 +82,7 @@ var debugOutput = function (fileSet) { return __awaiter(void 0, void 0, void 0, 
     });
 }); };
 describe('qwik', function () {
-    (0, shared_1.runTestsForTarget)({ options: {}, target: 'qwik', generator: component_generator_1.componentToQwik });
+    (0, test_generator_1.runTestsForTarget)({ options: {}, target: 'qwik', generator: component_generator_1.componentToQwik });
     describe('todo', function () {
         test('Todo.tsx', function () { return __awaiter(void 0, void 0, void 0, function () {
             var json, fileSet;

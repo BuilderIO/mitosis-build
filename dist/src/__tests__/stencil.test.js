@@ -1,9 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var stencil_1 = require("../generators/stencil");
-var shared_1 = require("./shared");
+var test_generator_1 = require("./test-generator");
 describe('Stencil', function () {
-    (0, shared_1.runTestsForTarget)({
+    (0, test_generator_1.runTestsForTarget)({
         target: 'stencil',
         generator: stencil_1.componentToStencil,
         options: {},

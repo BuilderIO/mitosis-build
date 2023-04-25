@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var taro_1 = require("../generators/taro");
-var shared_1 = require("./shared");
+var test_generator_1 = require("./test-generator");
 describe('Taro', function () {
-    (0, shared_1.runTestsForTarget)({ options: {}, target: 'taro', generator: taro_1.componentToTaro });
+    (0, test_generator_1.runTestsForTarget)({ options: {}, target: 'taro', generator: taro_1.componentToTaro });
 });
