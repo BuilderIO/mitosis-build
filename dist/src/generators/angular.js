@@ -442,7 +442,9 @@ var componentToAngular = function (userOptions) {
             }, ''), "\n            }"), !json.hooks.onUnMount
             ? ''
             : "ngOnDestroy() {\n              ".concat(json.hooks.onUnMount.code, "\n            }"));
-        str = generateNgModule(str, json.name, componentsUsed, json, options.bootstrapMapper);
+        if (options.standalone !== true) {
+            str = generateNgModule(str, json.name, componentsUsed, json, options.bootstrapMapper);
+        }
         if (options.plugins) {
             str = (0, plugins_1.runPreCodePlugins)(str, options.plugins);
         }
