@@ -17,9 +17,10 @@ var strip_state_and_props_refs_1 = require("../../helpers/strip-state-and-props-
 var helpers_2 = require("./helpers");
 var getCompositionPropDefinition = function (_a) {
     var options = _a.options, component = _a.component, props = _a.props;
+    var isTs = options.typescript;
     var str = 'const props = ';
     if (component.defaultProps) {
-        var generic = options.typescript ? "<".concat(component.propsTypeRef, ">") : '';
+        var generic = isTs ? "<".concat(component.propsTypeRef, ">") : '';
         var defalutPropsString = props
             .map(function (prop) {
             var _a;
@@ -31,7 +32,7 @@ var getCompositionPropDefinition = function (_a) {
             .join(',');
         str += "withDefaults(defineProps".concat(generic, "(), {").concat(defalutPropsString, "})");
     }
-    else if (options.typescript && component.propsTypeRef && component.propsTypeRef !== 'any') {
+    else if (isTs && component.propsTypeRef && component.propsTypeRef !== 'any') {
         str += "defineProps<".concat(component.propsTypeRef, ">()");
     }
     else {
@@ -41,13 +42,14 @@ var getCompositionPropDefinition = function (_a) {
 };
 function generateCompositionApiScript(component, options, template, props, onUpdateWithDeps, onUpdateWithoutDeps) {
     var _a, _b, _c, _d, _e, _f, _g;
+    var isTs = options.typescript;
     var refs = (0, get_state_object_string_1.getStateObjectStringFromComponent)(component, {
         data: true,
         functions: false,
         getters: false,
         format: 'variables',
         valueMapper: function (code, _, typeParameter) {
-            return options.typescript && typeParameter ? "ref<".concat(typeParameter, ">(").concat(code, ")") : "ref(".concat(code, ")");
+            return isTs && typeParameter ? "ref<".concat(typeParameter, ">(").concat(code, ")") : "ref(".concat(code, ")");
         },
         keyPrefix: 'const',
     });
@@ -58,7 +60,7 @@ function generateCompositionApiScript(component, options, template, props, onUpd
         format: 'variables',
     });
     if (template.includes('_classStringToObject')) {
-        methods += " function _classStringToObject(str) {\n      const obj = {};\n      if (typeof str !== 'string') { return obj }\n      const classNames = str.trim().split(/\\s+/);\n      for (const name of classNames) {\n        obj[name] = true;\n      }\n      return obj;\n    } ";
+        methods += " function _classStringToObject(str".concat(isTs ? ': string' : '', ") {\n      const obj").concat(isTs ? ': Record<string, boolean>' : '', " = {};\n      if (typeof str !== 'string') { return obj }\n      const classNames = str.trim().split(/\\s+/);\n      for (const name of classNames) {\n        obj[name] = true;\n      }\n      return obj;\n    } ");
     }
     var getterKeys = Object.keys((0, lodash_1.pickBy)(component.state, function (i) { return (i === null || i === void 0 ? void 0 : i.type) === 'getter'; }));
     var str = (0, dedent_1.dedent)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    ", "\n    ", "\n\n    ", "\n\n    ", "\n\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n\n    ", "\n\n    ", "\n    ", "\n  "], ["\n    ", "\n    ", "\n\n    ", "\n\n    ", "\n\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n\n    ", "\n\n    ", "\n    ", "\n  "])), props.length ? getCompositionPropDefinition({ component: component, props: props, options: options }) : '', refs, (_a = Object.entries(component.context.get)) === null || _a === void 0 ? void 0 : _a.map(function (_a) {
@@ -69,7 +71,7 @@ function generateCompositionApiScript(component, options, template, props, onUpd
         var key = (0, helpers_1.getContextKey)(contextSet);
         return "provide(".concat(key, ", ").concat(contextValue, ")");
     }).join('\n'), (_c = Object.keys(component.refs)) === null || _c === void 0 ? void 0 : _c.map(function (key) {
-        if (options.typescript) {
+        if (isTs) {
             return "const ".concat(key, " = ref<").concat(component.refs[key].typeParameter, ">()");
         }
         else {

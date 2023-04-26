@@ -66,6 +66,7 @@ function generateOptionsApiScript(component, options, path, template, props, onU
     var localExports = component.exports;
     var localVarAsData = [];
     var localVarAsFunc = [];
+    var isTs = options.typescript;
     if (localExports) {
         Object.keys(localExports).forEach(function (key) {
             if (localExports[key].usedInLocal) {
@@ -103,7 +104,7 @@ function generateOptionsApiScript(component, options, path, template, props, onU
     });
     var includeClassMapHelper = template.includes('_classStringToObject');
     if (includeClassMapHelper) {
-        functionsString = functionsString.replace(/}\s*$/, "_classStringToObject(str) {\n        const obj = {};\n        if (typeof str !== 'string') { return obj }\n        const classNames = str.trim().split(/\\s+/);\n        for (const name of classNames) {\n          obj[name] = true;\n        }\n        return obj;\n      }  }");
+        functionsString = functionsString.replace(/}\s*$/, "_classStringToObject(str".concat(isTs ? ': string' : '', ") {\n        const obj").concat(isTs ? ': Record<string, boolean>' : '', " = {};\n        if (typeof str !== 'string') { return obj }\n        const classNames = str.trim().split(/\\s+/);\n        for (const name of classNames) {\n          obj[name] = true;\n        }\n        return obj;\n      }  }"));
     }
     if (localVarAsFunc.length) {
         functionsString = functionsString.replace(/}\s*$/, "".concat(localVarAsFunc.join(','), "}"));
