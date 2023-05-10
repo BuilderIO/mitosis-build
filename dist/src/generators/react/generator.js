@@ -228,7 +228,7 @@ var _componentToReact = function (json, options, isSubComponent) {
     (0, map_refs_1.mapRefs)(json, function (refName) { return "".concat(refName, ".current"); });
     var hasState = (0, state_1.checkHasState)(json);
     var _m = (0, get_props_ref_1.getPropsRef)(json), forwardRef = _m[0], hasPropRef = _m[1];
-    var isForwardRef = Boolean(((_a = json.meta.useMetadata) === null || _a === void 0 ? void 0 : _a.forwardRef) || hasPropRef);
+    var isForwardRef = !options.preact && Boolean(((_a = json.meta.useMetadata) === null || _a === void 0 ? void 0 : _a.forwardRef) || hasPropRef);
     if (isForwardRef) {
         var meta = (_b = json.meta.useMetadata) === null || _b === void 0 ? void 0 : _b.forwardRef;
         options.forwardRef = meta || forwardRef;
@@ -268,7 +268,7 @@ var _componentToReact = function (json, options, isSubComponent) {
     if (allRefs.length) {
         reactLibImports.add('useRef');
     }
-    if (hasPropRef) {
+    if (!options.preact && hasPropRef) {
         reactLibImports.add('forwardRef');
     }
     if (((_c = json.hooks.onMount) === null || _c === void 0 ? void 0 : _c.code) ||

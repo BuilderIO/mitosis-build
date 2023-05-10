@@ -120,6 +120,9 @@ var ATTTRIBUTE_MAPPERS = {
 };
 // TODO: Maybe in the future allow defining `string | function` as values
 var BINDING_MAPPERS = __assign({ ref: function (ref, value, options) {
+        if (options === null || options === void 0 ? void 0 : options.preact) {
+            return [ref, value];
+        }
         var regexp = /(.+)?props\.(.+)( |\)|;|\()?$/m;
         if (regexp.test(value)) {
             var match = regexp.exec(value);
