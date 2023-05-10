@@ -90,6 +90,7 @@ var basicAttribute = getRawFile('./data/basic-attribute.raw.tsx');
 var basicMitosis = getRawFile('./data/basic-custom-mitosis-package.raw.tsx');
 var basicChildComponent = getRawFile('./data/basic-child-component.raw.tsx');
 var basicFor = getRawFile('./data/basic-for.raw.tsx');
+var basicForNoTagReference = getRawFile('./data/basic-for-no-tag-reference.raw');
 var basicRef = getRawFile('./data/basic-ref.raw.tsx');
 var basicForwardRef = getRawFile('./data/basic-forwardRef.raw.tsx');
 var basicForwardRefMetadata = getRawFile('./data/basic-forwardRef-metadata.raw.tsx');
@@ -184,6 +185,7 @@ var BASIC_TESTS = {
     BasicRefAssignment: basicRefAssignment,
     BasicChildComponent: basicChildComponent,
     BasicFor: basicFor,
+    basicForNoTagReference: basicForNoTagReference,
     Input: inputBlock,
     Submit: submitButtonBlock,
     Select: selectBlock,
