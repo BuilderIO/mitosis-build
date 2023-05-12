@@ -50,7 +50,7 @@ var processStateValue = function (options) {
             return '';
         }
         var getDefaultCase = function () {
-            return (0, function_1.pipe)(value, mapValue, function (x) { return "const [".concat(key, ", ").concat(getSetStateFnName(key), "] = useState(() => (").concat(x, "))"); });
+            return "const [".concat(key, ", ").concat(getSetStateFnName(key), "] = useState(() => (").concat(mapValue(value), "))");
         };
         var value = stateVal.code || '';
         var type = stateVal.type;

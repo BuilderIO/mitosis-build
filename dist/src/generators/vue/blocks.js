@@ -47,10 +47,15 @@ var BINDING_MAPPERS = {
 var NODE_MAPPERS = {
     Fragment: function (json, options, scope) {
         var children = json.children.filter(filter_empty_text_nodes_1.filterEmptyTextNodes);
-        if (options.vueVersion === 2 && (scope === null || scope === void 0 ? void 0 : scope.isRootNode) && children.length > 1) {
-            throw new Error('Vue 2 template should have a single root element');
+        var shouldAddDivFallback = options.vueVersion === 2 && (scope === null || scope === void 0 ? void 0 : scope.isRootNode) && children.length > 1;
+        var childrenStr = children.map(function (item) { return (0, exports.blockToVue)(item, options); }).join('\n');
+        if (shouldAddDivFallback) {
+            console.warn('WARNING: Vue 2 forbids multiple root elements. You provided a root Fragment with multiple elements. Wrapping elements in div as a workaround.');
+            return "<div>".concat(childrenStr, "</div>");
         }
-        return children.map(function (item) { return (0, exports.blockToVue)(item, options); }).join('\n');
+        else {
+            return childrenStr;
+        }
     },
     For: function (_json, options) {
         var _a, _b;
