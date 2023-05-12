@@ -158,7 +158,9 @@ function includedHelperDirectives(directive, directives) {
     });
 }
 function isSymbol(name) {
-    return name.charAt(0) == name.charAt(0).toUpperCase();
+    return (name.charAt(0) === name.charAt(0).toUpperCase() &&
+        // we want to exclude any property access, as that can't be a symbol
+        !name.includes('.'));
 }
 function addClass(className, existingClass) {
     return __spreadArray([className], (existingClass ? existingClass.split(' ') : []), true).join(' ');
