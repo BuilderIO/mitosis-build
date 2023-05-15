@@ -25,6 +25,7 @@ var bindings_1 = require("../../helpers/bindings");
 var merge_options_1 = require("../../helpers/merge-options");
 var is_children_1 = __importDefault(require("../../helpers/is-children"));
 var sanitize_react_native_block_styles_1 = require("./sanitize-react-native-block-styles");
+var html_tags_1 = require("../../constants/html_tags");
 var stylePropertiesThatMustBeNumber = new Set(['lineHeight']);
 var MEDIA_QUERY_KEY_REGEX = /^@media.*/;
 var sanitizeStyle = function (obj) { return function (key, value) {
@@ -98,7 +99,7 @@ var PROCESS_REACT_NATIVE_PLUGIN = function () { return ({
                     if ((0, is_children_1.default)({ node: node })) {
                         node.name = '';
                     }
-                    else if (node.name.toLowerCase() === node.name) {
+                    else if (node.name.toLowerCase() === node.name && html_tags_1.VALID_HTML_TAGS.includes(node.name)) {
                         node.name = 'View';
                     }
                     else if (((_a = node.properties._text) === null || _a === void 0 ? void 0 : _a.trim().length) ||
