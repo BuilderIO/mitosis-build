@@ -28,10 +28,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.extractContextComponents = void 0;
 var babel = __importStar(require("@babel/core"));
-var trace_reference_to_module_path_1 = require("../../helpers/trace-reference-to-module-path");
 var traverse_1 = __importDefault(require("traverse"));
 var create_mitosis_node_1 = require("../../helpers/create-mitosis-node");
 var is_mitosis_node_1 = require("../../helpers/is-mitosis-node");
+var trace_reference_to_module_path_1 = require("../../helpers/trace-reference-to-module-path");
 var state_1 = require("./state");
 var expressionToNode = function (str) {
     var code = "export default ".concat(str);

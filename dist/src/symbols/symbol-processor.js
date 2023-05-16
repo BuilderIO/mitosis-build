@@ -17,8 +17,8 @@ var __assign = (this && this.__assign) || function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.hashCode = exports.hashCodeAsString = exports.getJsxSymbolComponentName = exports.convertBuilderElementToMitosisComponent = exports.convertBuilderContentToSymbolHierarchy = exports.ensureAllSymbolsHaveIds = void 0;
 var traverse_1 = require("traverse");
-var builder_1 = require("../parsers/builder");
 var minify_1 = require("../generators/minify");
+var builder_1 = require("../parsers/builder");
 /**
  * Ensure every symbol in a BuilderContent tree has a unique ID.
  * Mutates the data tree directly.

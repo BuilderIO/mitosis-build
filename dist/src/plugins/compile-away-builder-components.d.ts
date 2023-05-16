@@ -1,7 +1,7 @@
 import { TraverseContext } from 'traverse';
+import { Plugin } from '..';
 import { MitosisComponent } from '../types/mitosis-component';
 import { MitosisNode } from '../types/mitosis-node';
-import { Plugin } from '..';
 declare type CompileAwayComponentsMap = {
     [key: string]: (node: MitosisNode, context: TraverseContext, components: CompileAwayComponentsMap) => MitosisNode | void;
 };

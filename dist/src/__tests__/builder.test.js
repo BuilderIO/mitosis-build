@@ -43,19 +43,19 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+var __1 = require("..");
 var builder_1 = require("../generators/builder");
-var mitosis_1 = require("../generators/mitosis");
 var html_1 = require("../generators/html");
+var mitosis_1 = require("../generators/mitosis");
+var dedent_1 = require("../helpers/dedent");
 var builder_2 = require("../parsers/builder");
 var jsx_1 = require("../parsers/jsx");
 var compile_away_builder_components_1 = require("../plugins/compile-away-builder-components");
-var __1 = require("..");
-var dedent_1 = require("../helpers/dedent");
-var stamped_io_raw_tsx_raw_1 = __importDefault(require("./data/blocks/stamped-io.raw.tsx?raw"));
+var columns_raw_tsx_raw_1 = __importDefault(require("./data/blocks/columns.raw.tsx?raw"));
 var custom_code_raw_tsx_raw_1 = __importDefault(require("./data/blocks/custom-code.raw.tsx?raw"));
 var embed_raw_tsx_raw_1 = __importDefault(require("./data/blocks/embed.raw.tsx?raw"));
 var image_raw_tsx_raw_1 = __importDefault(require("./data/blocks/image.raw.tsx?raw"));
-var columns_raw_tsx_raw_1 = __importDefault(require("./data/blocks/columns.raw.tsx?raw"));
+var stamped_io_raw_tsx_raw_1 = __importDefault(require("./data/blocks/stamped-io.raw.tsx?raw"));
 var lazy_load_section_json_raw_1 = __importDefault(require("./data/builder/lazy-load-section.json?raw"));
 var mitosisOptions = {
     format: 'legacy',

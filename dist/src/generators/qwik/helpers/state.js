@@ -14,9 +14,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getStateMethodsAndGetters = exports.getLexicalScopeVars = exports.emitStateMethodsAndRewriteBindings = exports.emitUseStore = void 0;
 var traverse_1 = __importDefault(require("traverse"));
+var babel_transform_1 = require("../../../helpers/babel-transform");
 var convert_method_to_function_1 = require("./convert-method-to-function");
 var stable_inject_1 = require("./stable-inject");
-var babel_transform_1 = require("../../../helpers/babel-transform");
 /**
  * @param file
  * @param stateInit

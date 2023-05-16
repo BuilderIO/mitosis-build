@@ -40,14 +40,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.parseSvelte = void 0;
-var compiler_1 = require("svelte/compiler");
-var svelte_preprocess_1 = __importDefault(require("svelte-preprocess"));
 var lodash_1 = require("lodash");
-var module_1 = require("./module");
-var instance_1 = require("./instance");
+var svelte_preprocess_1 = __importDefault(require("svelte-preprocess"));
+var compiler_1 = require("svelte/compiler");
 var css_1 = require("./css");
-var html_1 = require("./html");
 var post_process_1 = require("./helpers/post-process");
+var html_1 = require("./html");
+var instance_1 = require("./instance");
+var module_1 = require("./module");
 var typescript_1 = require("./typescript");
 function mapAstToMitosisJson(ast, name, string_, usesTypescript) {
     if (string_ === void 0) { string_ = ''; }

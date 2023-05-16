@@ -71,8 +71,8 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.runTestsForTarget = exports.runTestsForSvelteSyntax = exports.runTestsForJsx = void 0;
-var jsx_1 = require("../parsers/jsx");
 var __1 = require("..");
+var jsx_1 = require("../parsers/jsx");
 var getRawFile = function (path) { return Promise.resolve().then(function () { return __importStar(require("".concat(path, "?raw"))); }).then(function (x) { return x.default; }); };
 var basicForShow = getRawFile('./data/basic-for-show.raw.tsx');
 var basicBooleanAttribute = getRawFile('./data/basic-boolean-attribute.raw.tsx');

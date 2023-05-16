@@ -16,13 +16,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.updateStateSettersInCode = exports.updateStateSetters = exports.getUseStateCode = exports.processHookCode = void 0;
 var core_1 = require("@babel/core");
+var function_1 = require("fp-ts/lib/function");
 var traverse_1 = __importDefault(require("traverse"));
 var capitalize_1 = require("../../helpers/capitalize");
 var is_mitosis_node_1 = require("../../helpers/is-mitosis-node");
-var function_1 = require("fp-ts/lib/function");
-var helpers_1 = require("./helpers");
 var patterns_1 = require("../../helpers/patterns");
 var transform_state_setters_1 = require("../../helpers/transform-state-setters");
+var helpers_1 = require("./helpers");
 /**
  * Removes all `this.` references.
  */

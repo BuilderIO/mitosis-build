@@ -6,23 +6,23 @@ var __makeTemplateObject = (this && this.__makeTemplateObject) || function (cook
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.componentToStencil = void 0;
 var standalone_1 = require("prettier/standalone");
-var dedent_1 = require("../../helpers/dedent");
-var get_state_object_string_1 = require("../../helpers/get-state-object-string");
-var render_imports_1 = require("../../helpers/render-imports");
-var jsx_1 = require("../../parsers/jsx");
-var mitosis_node_1 = require("../../types/mitosis-node");
-var plugins_1 = require("../../modules/plugins");
-var fast_clone_1 = require("../../helpers/fast-clone");
-var strip_meta_properties_1 = require("../../helpers/strip-meta-properties");
-var collect_class_string_1 = require("./collect-class-string");
-var get_props_1 = require("../../helpers/get-props");
-var strip_state_and_props_refs_1 = require("../../helpers/strip-state-and-props-refs");
-var filter_empty_text_nodes_1 = require("../../helpers/filter-empty-text-nodes");
 var dash_case_1 = require("../../helpers/dash-case");
-var collect_css_1 = require("../../helpers/styles/collect-css");
+var dedent_1 = require("../../helpers/dedent");
+var fast_clone_1 = require("../../helpers/fast-clone");
+var filter_empty_text_nodes_1 = require("../../helpers/filter-empty-text-nodes");
+var get_props_1 = require("../../helpers/get-props");
+var get_state_object_string_1 = require("../../helpers/get-state-object-string");
 var indent_1 = require("../../helpers/indent");
 var map_refs_1 = require("../../helpers/map-refs");
 var for_1 = require("../../helpers/nodes/for");
+var render_imports_1 = require("../../helpers/render-imports");
+var strip_meta_properties_1 = require("../../helpers/strip-meta-properties");
+var strip_state_and_props_refs_1 = require("../../helpers/strip-state-and-props-refs");
+var collect_css_1 = require("../../helpers/styles/collect-css");
+var plugins_1 = require("../../modules/plugins");
+var jsx_1 = require("../../parsers/jsx");
+var mitosis_node_1 = require("../../types/mitosis-node");
+var collect_class_string_1 = require("./collect-class-string");
 var blockToStencil = function (json, options) {
     var _a, _b, _c, _d;
     if (options === void 0) { options = {}; }

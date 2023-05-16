@@ -5,8 +5,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.hasBindingsText = void 0;
 var traverse_1 = __importDefault(require("traverse"));
-var is_mitosis_node_1 = require("./is-mitosis-node");
 var is_children_1 = __importDefault(require("./is-children"));
+var is_mitosis_node_1 = require("./is-mitosis-node");
 var hasBindingsText = function (json) {
     var has = false;
     (0, traverse_1.default)(json).forEach(function (node) {

@@ -1,8 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.mapBuilderContentStateToMitosisState = void 0;
-var patterns_1 = require("../../helpers/patterns");
 var lodash_1 = require("lodash");
+var patterns_1 = require("../../helpers/patterns");
 var __DO_NOT_USE_FUNCTION_LITERAL_PREFIX = "@builder.io/mitosis/function:";
 var __DO_NOT_USE_METHOD_LITERAL_PREFIX = "@builder.io/mitosis/method:";
 /**

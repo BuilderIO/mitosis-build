@@ -7,11 +7,11 @@ exports.componentToTaro = exports.TagMap = exports.collectTaroStyles = exports.D
 var json5_1 = __importDefault(require("json5"));
 var lodash_1 = require("lodash");
 var traverse_1 = __importDefault(require("traverse"));
+var bindings_1 = require("../helpers/bindings");
 var fast_clone_1 = require("../helpers/fast-clone");
 var is_mitosis_node_1 = require("../helpers/is-mitosis-node");
-var react_1 = require("./react");
-var bindings_1 = require("../helpers/bindings");
 var merge_options_1 = require("../helpers/merge-options");
+var react_1 = require("./react");
 // @tarojs/components
 exports.DEFAULT_Component_SET = new Set([
     'View',

@@ -21,8 +21,8 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getState = void 0;
-var get_state_object_string_1 = require("../../../helpers/get-state-object-string");
 var function_1 = require("fp-ts/lib/function");
+var get_state_object_string_1 = require("../../../helpers/get-state-object-string");
 var state_1 = require("../../../helpers/state");
 var helpers_1 = require("./helpers");
 var signals_1 = require("./signals");

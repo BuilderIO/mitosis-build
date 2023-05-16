@@ -19,31 +19,31 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.componentToVue3 = exports.componentToVue2 = void 0;
+var function_1 = require("fp-ts/lib/function");
+var lodash_1 = require("lodash");
 var standalone_1 = require("prettier/standalone");
-var collect_css_1 = require("../../helpers/styles/collect-css");
+var traverse_1 = __importDefault(require("traverse"));
+var babel_transform_1 = require("../../helpers/babel-transform");
+var bindings_1 = require("../../helpers/bindings");
 var dedent_1 = require("../../helpers/dedent");
 var fast_clone_1 = require("../../helpers/fast-clone");
-var map_refs_1 = require("../../helpers/map-refs");
-var render_imports_1 = require("../../helpers/render-imports");
 var get_props_1 = require("../../helpers/get-props");
-var plugins_1 = require("../../modules/plugins");
-var strip_meta_properties_1 = require("../../helpers/strip-meta-properties");
 var is_mitosis_node_1 = require("../../helpers/is-mitosis-node");
-var traverse_1 = __importDefault(require("traverse"));
-var lodash_1 = require("lodash");
-var process_http_requests_1 = require("../../helpers/process-http-requests");
-var function_1 = require("fp-ts/lib/function");
-var slots_1 = require("../../helpers/slots");
-var functions_1 = require("../helpers/functions");
-var helpers_1 = require("./helpers");
-var optionsApi_1 = require("./optionsApi");
-var compositionApi_1 = require("./compositionApi");
-var blocks_1 = require("./blocks");
+var map_refs_1 = require("../../helpers/map-refs");
 var merge_options_1 = require("../../helpers/merge-options");
 var process_code_1 = require("../../helpers/plugins/process-code");
-var bindings_1 = require("../../helpers/bindings");
+var process_http_requests_1 = require("../../helpers/process-http-requests");
+var render_imports_1 = require("../../helpers/render-imports");
 var replace_identifiers_1 = require("../../helpers/replace-identifiers");
-var babel_transform_1 = require("../../helpers/babel-transform");
+var slots_1 = require("../../helpers/slots");
+var strip_meta_properties_1 = require("../../helpers/strip-meta-properties");
+var collect_css_1 = require("../../helpers/styles/collect-css");
+var plugins_1 = require("../../modules/plugins");
+var functions_1 = require("../helpers/functions");
+var blocks_1 = require("./blocks");
+var compositionApi_1 = require("./compositionApi");
+var helpers_1 = require("./helpers");
+var optionsApi_1 = require("./optionsApi");
 // Transform <foo.bar key="value" /> to <component :is="foo.bar" key="value" />
 function processDynamicComponents(json, _options) {
     (0, traverse_1.default)(json).forEach(function (node) {

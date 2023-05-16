@@ -15,11 +15,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.mapRefs = void 0;
-var traverse_1 = __importDefault(require("traverse"));
 var core_1 = require("@babel/core");
+var traverse_1 = __importDefault(require("traverse"));
+var babel_transform_1 = require("./babel-transform");
 var get_refs_1 = require("./get-refs");
 var is_mitosis_node_1 = require("./is-mitosis-node");
-var babel_transform_1 = require("./babel-transform");
 var patterns_1 = require("./patterns");
 var replaceRefsInString = function (code, refs, mapper) {
     return (0, babel_transform_1.babelTransformExpression)(code, {

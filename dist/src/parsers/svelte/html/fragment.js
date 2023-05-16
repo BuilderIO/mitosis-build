@@ -1,8 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.parseFragment = void 0;
-var mitosis_node_1 = require("../helpers/mitosis-node");
 var children_1 = require("../helpers/children");
+var mitosis_node_1 = require("../helpers/mitosis-node");
 function parseFragment(json, node) {
     var mitosisNode = (0, mitosis_node_1.createMitosisNode)();
     mitosisNode.name = 'Fragment';

@@ -35,13 +35,13 @@ var fast_clone_1 = require("../helpers/fast-clone");
 var get_components_1 = require("../helpers/get-components");
 var get_refs_1 = require("../helpers/get-refs");
 var get_state_object_string_1 = require("../helpers/get-state-object-string");
+var is_root_text_node_1 = require("../helpers/is-root-text-node");
 var map_refs_1 = require("../helpers/map-refs");
 var render_imports_1 = require("../helpers/render-imports");
+var state_1 = require("../helpers/state");
 var jsx_1 = require("../parsers/jsx");
 var mitosis_node_1 = require("../types/mitosis-node");
 var react_1 = require("./react");
-var state_1 = require("../helpers/state");
-var is_root_text_node_1 = require("../helpers/is-root-text-node");
 exports.DEFAULT_FORMAT = 'legacy';
 // Special isValidAttributeName for Mitosis so we can allow for $ in names
 var isValidAttributeName = function (str) {

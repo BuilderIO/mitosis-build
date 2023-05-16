@@ -1,6 +1,6 @@
-import { BaseTranspilerOptions, TranspilerGenerator } from '../types/transpiler';
 import { MitosisComponent } from '../types/mitosis-component';
 import { MitosisNode } from '../types/mitosis-node';
+import { BaseTranspilerOptions, TranspilerGenerator } from '../types/transpiler';
 export interface ToMitosisOptions extends BaseTranspilerOptions {
     format: 'react' | 'legacy';
 }

@@ -1,5 +1,5 @@
-import { MitosisContext } from '../types/mitosis-context';
 import { MitosisComponent } from '../types/mitosis-component';
+import { MitosisContext } from '../types/mitosis-context';
 interface GetStateObjectStringOptions {
     data?: boolean;
     functions?: boolean;

@@ -1,8 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.parseAction = void 0;
-var string_1 = require("../helpers/string");
 var astring_1 = require("astring");
+var string_1 = require("../helpers/string");
 function parseAction(json, nodeReference, attribute) {
     var _a, _b;
     var methodName = attribute.name;

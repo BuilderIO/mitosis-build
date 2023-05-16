@@ -40,11 +40,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.jsxElementToJson = void 0;
 var babel = __importStar(require("@babel/core"));
 var generator_1 = __importDefault(require("@babel/generator"));
-var nullable_1 = require("../../helpers/nullable");
-var create_mitosis_node_1 = require("../../helpers/create-mitosis-node");
 var function_1 = require("fp-ts/lib/function");
-var helpers_1 = require("./helpers");
 var bindings_1 = require("../../helpers/bindings");
+var create_mitosis_node_1 = require("../../helpers/create-mitosis-node");
+var nullable_1 = require("../../helpers/nullable");
+var helpers_1 = require("./helpers");
 var types = babel.types;
 var getForArguments = function (params) {
     var _a = params

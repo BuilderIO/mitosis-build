@@ -1,6 +1,6 @@
 import { BuilderContent, BuilderElement } from '@builder.io/sdk';
-import { MitosisNode } from '../../types/mitosis-node';
 import { MitosisComponent, MitosisState } from '../..';
+import { MitosisNode } from '../../types/mitosis-node';
 declare type InternalOptions = {
     skipMapper?: boolean;
 };

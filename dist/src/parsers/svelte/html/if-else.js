@@ -14,8 +14,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.parseIfElse = void 0;
 var astring_1 = require("astring");
 var _1 = require(".");
-var mitosis_node_1 = require("../helpers/mitosis-node");
 var children_1 = require("../helpers/children");
+var mitosis_node_1 = require("../helpers/mitosis-node");
 var bindings_1 = require("../../../helpers/bindings");
 function parseIfElse(json, node) {
     var _a, _b, _c;
