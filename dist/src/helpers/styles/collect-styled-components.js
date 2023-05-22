@@ -5,11 +5,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.collectStyledComponents = void 0;
 var lodash_1 = require("lodash");
-var object_hash_1 = __importDefault(require("object-hash"));
 var traverse_1 = __importDefault(require("traverse"));
 var capitalize_1 = require("../capitalize");
 var is_mitosis_node_1 = require("../is-mitosis-node");
 var is_upper_case_1 = require("../is-upper-case");
+var object_hash_1 = __importDefault(require("object-hash"));
 var helpers_1 = require("./helpers");
 var collectStyledComponents = function (json) {
     var styledComponentsCode = '';

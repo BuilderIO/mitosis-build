@@ -12,8 +12,8 @@ var __assign = (this && this.__assign) || function () {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.parseEach = void 0;
-var children_1 = require("../helpers/children");
 var mitosis_node_1 = require("../helpers/mitosis-node");
+var children_1 = require("../helpers/children");
 var bindings_1 = require("../../../helpers/bindings");
 function parseEach(json, node) {
     return __assign(__assign({}, (0, mitosis_node_1.createMitosisNode)()), { name: 'For', scope: { forName: node.context.name }, bindings: {

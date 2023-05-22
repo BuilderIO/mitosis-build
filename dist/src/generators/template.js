@@ -6,13 +6,13 @@ var __makeTemplateObject = (this && this.__makeTemplateObject) || function (cook
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.componentToTemplate = void 0;
 var standalone_1 = require("prettier/standalone");
-var dedent_1 = require("../helpers/dedent");
-var fast_clone_1 = require("../helpers/fast-clone");
-var get_state_object_string_1 = require("../helpers/get-state-object-string");
 var collect_css_1 = require("../helpers/styles/collect-css");
-var plugins_1 = require("../modules/plugins");
+var fast_clone_1 = require("../helpers/fast-clone");
 var jsx_1 = require("../parsers/jsx");
 var mitosis_node_1 = require("../types/mitosis-node");
+var plugins_1 = require("../modules/plugins");
+var dedent_1 = require("../helpers/dedent");
+var get_state_object_string_1 = require("../helpers/get-state-object-string");
 var mappers = {
     Fragment: function (json, options) {
         return "<div>".concat(json.children.map(function (item) { return blockToTemplate(item, options); }).join('\n'), "</div>");

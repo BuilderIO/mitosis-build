@@ -4,12 +4,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.componentToRsc = void 0;
-var traverse_1 = __importDefault(require("traverse"));
 var bindings_1 = require("../helpers/bindings");
+var traverse_1 = __importDefault(require("traverse"));
 var fast_clone_1 = require("../helpers/fast-clone");
 var is_mitosis_node_1 = require("../helpers/is-mitosis-node");
-var merge_options_1 = require("../helpers/merge-options");
 var react_1 = require("./react");
+var merge_options_1 = require("../helpers/merge-options");
 /**
  * Transform react to be RSC compatible, such as
  * - remove event listeners

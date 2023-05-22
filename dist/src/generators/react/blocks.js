@@ -16,12 +16,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.blockToReact = void 0;
 var lodash_1 = require("lodash");
-var filter_empty_text_nodes_1 = require("../../helpers/filter-empty-text-nodes");
 var is_children_1 = __importDefault(require("../../helpers/is-children"));
-var is_root_text_node_1 = require("../../helpers/is-root-text-node");
-var is_valid_attribute_name_1 = require("../../helpers/is-valid-attribute-name");
-var for_1 = require("../../helpers/nodes/for");
 var slots_1 = require("../../helpers/slots");
+var filter_empty_text_nodes_1 = require("../../helpers/filter-empty-text-nodes");
+var is_valid_attribute_name_1 = require("../../helpers/is-valid-attribute-name");
+var is_root_text_node_1 = require("../../helpers/is-root-text-node");
+var for_1 = require("../../helpers/nodes/for");
 var jsx_1 = require("../../parsers/jsx");
 var mitosis_node_1 = require("../../types/mitosis-node");
 var helpers_1 = require("./helpers");

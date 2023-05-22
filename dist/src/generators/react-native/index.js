@@ -17,14 +17,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.componentToReactNative = exports.collectReactNativeStyles = void 0;
 var json5_1 = __importDefault(require("json5"));
 var lodash_1 = require("lodash");
-var traverse_1 = __importDefault(require("traverse"));
-var html_tags_1 = require("../../constants/html_tags");
-var bindings_1 = require("../../helpers/bindings");
 var fast_clone_1 = require("../../helpers/fast-clone");
-var is_children_1 = __importDefault(require("../../helpers/is-children"));
+var traverse_1 = __importDefault(require("traverse"));
 var is_mitosis_node_1 = require("../../helpers/is-mitosis-node");
-var merge_options_1 = require("../../helpers/merge-options");
 var react_1 = require("../react");
+var bindings_1 = require("../../helpers/bindings");
+var merge_options_1 = require("../../helpers/merge-options");
+var is_children_1 = __importDefault(require("../../helpers/is-children"));
 var sanitize_react_native_block_styles_1 = require("./sanitize-react-native-block-styles");
 var stylePropertiesThatMustBeNumber = new Set(['lineHeight']);
 var MEDIA_QUERY_KEY_REGEX = /^@media.*/;
@@ -99,7 +98,7 @@ var PROCESS_REACT_NATIVE_PLUGIN = function () { return ({
                     if ((0, is_children_1.default)({ node: node })) {
                         node.name = '';
                     }
-                    else if (node.name.toLowerCase() === node.name && html_tags_1.VALID_HTML_TAGS.includes(node.name)) {
+                    else if (node.name.toLowerCase() === node.name) {
                         node.name = 'View';
                     }
                     else if (((_a = node.properties._text) === null || _a === void 0 ? void 0 : _a.trim().length) ||

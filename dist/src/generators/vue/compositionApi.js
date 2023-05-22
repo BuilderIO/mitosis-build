@@ -12,8 +12,9 @@ var json5_1 = __importDefault(require("json5"));
 var lodash_1 = require("lodash");
 var dedent_1 = require("../../helpers/dedent");
 var get_state_object_string_1 = require("../../helpers/get-state-object-string");
-var strip_state_and_props_refs_1 = require("../../helpers/strip-state-and-props-refs");
 var helpers_1 = require("./helpers");
+var strip_state_and_props_refs_1 = require("../../helpers/strip-state-and-props-refs");
+var helpers_2 = require("./helpers");
 var getCompositionPropDefinition = function (_a) {
     var options = _a.options, component = _a.component, props = _a.props;
     var isTs = options.typescript;
@@ -89,7 +90,7 @@ function generateCompositionApiScript(component, options, template, props, onUpd
         var computedCode = "const ".concat(key, " = computed(").concat(getterAsFunction, ")");
         return computedCode;
     }).join('\n')) || '', (onUpdateWithoutDeps === null || onUpdateWithoutDeps === void 0 ? void 0 : onUpdateWithoutDeps.map(function (hook) { return "onUpdated(() => ".concat(hook.code, ")"); }).join('\n')) || '', (onUpdateWithDeps === null || onUpdateWithDeps === void 0 ? void 0 : onUpdateWithDeps.map(function (hook) {
-        return "watch(() => ".concat((0, helpers_1.processBinding)({
+        return "watch(() => ".concat((0, helpers_2.processBinding)({
             code: hook.deps || '',
             options: options,
             json: component,

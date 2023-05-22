@@ -12,8 +12,8 @@ var __assign = (this && this.__assign) || function () {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.parseModule = void 0;
-var astring_1 = require("astring");
 var compiler_1 = require("svelte/compiler");
+var astring_1 = require("astring");
 function handleExportNamedDeclaration(json, node) {
     var _a;
     var _b, _c, _d;

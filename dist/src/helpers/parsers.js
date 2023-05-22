@@ -28,9 +28,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.isCodeBodyIdentifier = exports.isExpression = exports.isCodeBodyExpression = exports.parseCode = void 0;
 var babel = __importStar(require("@babel/core"));
-var plugin_syntax_decorators_1 = __importDefault(require("@babel/plugin-syntax-decorators"));
 var plugin_syntax_typescript_1 = __importDefault(require("@babel/plugin-syntax-typescript"));
 var preset_typescript_1 = __importDefault(require("@babel/preset-typescript"));
+var plugin_syntax_decorators_1 = __importDefault(require("@babel/plugin-syntax-decorators"));
 function parseCode(code) {
     var ast = babel.parse(code, {
         presets: [[preset_typescript_1.default, { isTSX: true, allExtensions: true }]],

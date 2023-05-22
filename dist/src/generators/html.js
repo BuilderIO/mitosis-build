@@ -26,35 +26,36 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.componentToCustomElement = exports.componentToHtml = void 0;
 var core_1 = require("@babel/core");
 var lodash_1 = require("lodash");
+var lodash_2 = require("lodash");
 var standalone_1 = require("prettier/standalone");
-var traverse_1 = __importDefault(require("traverse"));
-var babel_transform_1 = require("../helpers/babel-transform");
-var dash_case_1 = require("../helpers/dash-case");
-var fast_clone_1 = require("../helpers/fast-clone");
-var get_prop_functions_1 = require("../helpers/get-prop-functions");
-var get_props_1 = require("../helpers/get-props");
-var get_props_ref_1 = require("../helpers/get-props-ref");
-var get_refs_1 = require("../helpers/get-refs");
-var get_state_object_string_1 = require("../helpers/get-state-object-string");
-var has_bindings_text_1 = require("../helpers/has-bindings-text");
-var has_component_1 = require("../helpers/has-component");
 var has_props_1 = require("../helpers/has-props");
 var has_stateful_dom_1 = require("../helpers/has-stateful-dom");
-var is_children_1 = __importDefault(require("../helpers/is-children"));
-var is_component_1 = require("../helpers/is-component");
-var is_html_attribute_1 = require("../helpers/is-html-attribute");
-var is_mitosis_node_1 = require("../helpers/is-mitosis-node");
+var get_refs_1 = require("../helpers/get-refs");
 var map_refs_1 = require("../helpers/map-refs");
-var remove_surrounding_block_1 = require("../helpers/remove-surrounding-block");
-var render_imports_1 = require("../helpers/render-imports");
-var strip_meta_properties_1 = require("../helpers/strip-meta-properties");
-var strip_state_and_props_refs_1 = require("../helpers/strip-state-and-props-refs");
+var traverse_1 = __importDefault(require("traverse"));
+var babel_transform_1 = require("../helpers/babel-transform");
 var collect_css_1 = require("../helpers/styles/collect-css");
-var plugins_1 = require("../modules/plugins");
+var dash_case_1 = require("../helpers/dash-case");
+var fast_clone_1 = require("../helpers/fast-clone");
+var get_state_object_string_1 = require("../helpers/get-state-object-string");
+var has_component_1 = require("../helpers/has-component");
+var has_bindings_text_1 = require("../helpers/has-bindings-text");
+var is_component_1 = require("../helpers/is-component");
+var is_mitosis_node_1 = require("../helpers/is-mitosis-node");
+var is_html_attribute_1 = require("../helpers/is-html-attribute");
+var get_props_1 = require("../helpers/get-props");
+var get_props_ref_1 = require("../helpers/get-props-ref");
+var get_prop_functions_1 = require("../helpers/get-prop-functions");
 var jsx_1 = require("../parsers/jsx");
 var mitosis_node_1 = require("../types/mitosis-node");
-var function_1 = require("fp-ts/lib/function");
+var strip_state_and_props_refs_1 = require("../helpers/strip-state-and-props-refs");
+var plugins_1 = require("../modules/plugins");
+var is_children_1 = __importDefault(require("../helpers/is-children"));
+var strip_meta_properties_1 = require("../helpers/strip-meta-properties");
+var remove_surrounding_block_1 = require("../helpers/remove-surrounding-block");
+var render_imports_1 = require("../helpers/render-imports");
 var for_1 = require("../helpers/nodes/for");
+var function_1 = require("fp-ts/lib/function");
 var isAttribute = function (key) {
     return /-/.test(key);
 };
@@ -272,7 +273,7 @@ var blockToHtml = function (json, options, blockOptions) {
     }
     else {
         var component = childComponents.find(function (impName) { return impName === json.name; });
-        var elSelector = component ? (0, lodash_1.kebabCase)(json.name) : json.name;
+        var elSelector = component ? (0, lodash_2.kebabCase)(json.name) : json.name;
         str += "<".concat(elSelector, " ");
         // For now, spread is not supported
         // if (json.bindings._spread === '_spread') {
@@ -508,7 +509,7 @@ var componentToCustomElement = function (options) {
         var _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14;
         var component = _a.component;
         var ComponentName = component.name;
-        var kebabName = (0, lodash_1.kebabCase)(ComponentName);
+        var kebabName = (0, lodash_2.kebabCase)(ComponentName);
         var useOptions = __assign(__assign({ prefix: kebabName }, options), { onChangeJsById: {}, js: '', namesMap: {}, format: 'class' });
         var json = (0, fast_clone_1.fastClone)(component);
         if (options.plugins) {

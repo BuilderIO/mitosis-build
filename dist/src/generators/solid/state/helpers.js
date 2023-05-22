@@ -2,11 +2,11 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.updateStateCode = exports.getStateTypeForValue = exports.getStateSetterName = void 0;
 var core_1 = require("@babel/core");
+var strip_state_and_props_refs_1 = require("../../../helpers/strip-state-and-props-refs");
 var function_1 = require("fp-ts/lib/function");
+var transform_state_setters_1 = require("../../../helpers/transform-state-setters");
 var capitalize_1 = require("../../../helpers/capitalize");
 var replace_identifiers_1 = require("../../../helpers/replace-identifiers");
-var strip_state_and_props_refs_1 = require("../../../helpers/strip-state-and-props-refs");
-var transform_state_setters_1 = require("../../../helpers/transform-state-setters");
 var getStateSetterName = function (stateName) { return "set".concat((0, capitalize_1.capitalize)(stateName)); };
 exports.getStateSetterName = getStateSetterName;
 var getStateTypeForValue = function (_a) {

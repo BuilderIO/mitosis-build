@@ -11,9 +11,9 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getStoreCode = void 0;
 var core_1 = require("@babel/core");
-var function_1 = require("fp-ts/lib/function");
 var babel_transform_1 = require("../../../helpers/babel-transform");
 var capitalize_1 = require("../../../helpers/capitalize");
+var function_1 = require("fp-ts/lib/function");
 var patterns_1 = require("../../../helpers/patterns");
 var helpers_1 = require("./helpers");
 var collectUsedStateAndPropsInFunction = function (fnValue) {

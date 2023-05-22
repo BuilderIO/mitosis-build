@@ -2,19 +2,19 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.componentToQwik = void 0;
 var standalone_1 = require("prettier/standalone");
-var babel_transform_1 = require("../../helpers/babel-transform");
 var fast_clone_1 = require("../../helpers/fast-clone");
-var merge_options_1 = require("../../helpers/merge-options");
-var process_code_1 = require("../../helpers/plugins/process-code");
-var replace_identifiers_1 = require("../../helpers/replace-identifiers");
-var state_1 = require("../../helpers/state");
 var collect_css_1 = require("../../helpers/styles/collect-css");
-var plugins_1 = require("../../modules/plugins");
+var state_1 = require("../../helpers/state");
 var add_prevent_default_1 = require("./helpers/add-prevent-default");
-var stable_inject_1 = require("./helpers/stable-inject");
-var state_2 = require("./helpers/state");
 var jsx_1 = require("./jsx");
 var src_generator_1 = require("./src-generator");
+var plugins_1 = require("../../modules/plugins");
+var stable_inject_1 = require("./helpers/stable-inject");
+var merge_options_1 = require("../../helpers/merge-options");
+var state_2 = require("./helpers/state");
+var process_code_1 = require("../../helpers/plugins/process-code");
+var replace_identifiers_1 = require("../../helpers/replace-identifiers");
+var babel_transform_1 = require("../../helpers/babel-transform");
 Error.stackTraceLimit = 9999;
 var DEBUG = false;
 var PLUGINS = [

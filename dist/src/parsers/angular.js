@@ -4,15 +4,15 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.angularToMitosisComponent = void 0;
-var compiler_1 = require("@angular/compiler");
-var core_1 = require("@babel/core");
-var lodash_1 = require("lodash");
 var typescript_1 = __importDefault(require("typescript"));
-var babel_transform_1 = require("../helpers/babel-transform");
-var bindings_1 = require("../helpers/bindings");
-var capitalize_1 = require("../helpers/capitalize");
+var compiler_1 = require("@angular/compiler");
 var create_mitosis_component_1 = require("../helpers/create-mitosis-component");
 var create_mitosis_node_1 = require("../helpers/create-mitosis-node");
+var lodash_1 = require("lodash");
+var babel_transform_1 = require("../helpers/babel-transform");
+var core_1 = require("@babel/core");
+var capitalize_1 = require("../helpers/capitalize");
+var bindings_1 = require("../helpers/bindings");
 var getTsAST = function (code) {
     return typescript_1.default.createSourceFile('code.ts', code, typescript_1.default.ScriptTarget.Latest, true);
 };

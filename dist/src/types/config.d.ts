@@ -12,9 +12,6 @@ export declare type GeneratorOptions = {
     };
 };
 export declare type MitosisConfig = {
-    commonOptions?: {
-        typescript?: boolean;
-    };
     /**
      * List of targets to compile to.
      */

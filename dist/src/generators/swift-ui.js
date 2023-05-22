@@ -8,6 +8,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.componentToSwift = void 0;
+var try_prettier_format_1 = require("../helpers/try-prettier-format");
 var traverse_1 = __importDefault(require("traverse"));
 var dedent_1 = require("../helpers/dedent");
 var fast_clone_1 = require("../helpers/fast-clone");
@@ -17,9 +18,8 @@ var get_state_object_string_1 = require("../helpers/get-state-object-string");
 var get_styles_1 = require("../helpers/get-styles");
 var is_children_1 = __importDefault(require("../helpers/is-children"));
 var is_mitosis_node_1 = require("../helpers/is-mitosis-node");
-var state_1 = require("../helpers/state");
-var try_prettier_format_1 = require("../helpers/try-prettier-format");
 var mitosis_node_1 = require("../types/mitosis-node");
+var state_1 = require("../helpers/state");
 var scrolls = function (json) {
     var _a;
     return ((_a = (0, get_styles_1.getStyles)(json)) === null || _a === void 0 ? void 0 : _a.overflow) === 'auto';

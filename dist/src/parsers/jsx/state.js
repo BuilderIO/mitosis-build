@@ -39,13 +39,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.parseStateObjectToMitosisState = exports.mapStateIdentifiers = void 0;
 var babel = __importStar(require("@babel/core"));
-var function_1 = require("fp-ts/lib/function");
 var traverse_1 = __importDefault(require("traverse"));
 var babel_transform_1 = require("../../helpers/babel-transform");
 var capitalize_1 = require("../../helpers/capitalize");
 var is_mitosis_node_1 = require("../../helpers/is-mitosis-node");
 var replace_identifiers_1 = require("../../helpers/replace-identifiers");
 var helpers_1 = require("./helpers");
+var function_1 = require("fp-ts/lib/function");
 var types = babel.types;
 function mapStateIdentifiersInExpression(expression, stateProperties) {
     var setExpressions = stateProperties.map(function (propertyName) { return "set".concat((0, capitalize_1.capitalize)(propertyName)); });

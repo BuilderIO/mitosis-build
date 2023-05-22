@@ -48,14 +48,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.compileAwayBuilderComponents = exports.compileAwayBuilderComponentsFromTree = exports.components = void 0;
 var react_1 = require("@builder.io/react");
-var json5_1 = __importStar(require("json5")), JSON5 = json5_1;
 var lodash_1 = require("lodash");
 var traverse_1 = __importDefault(require("traverse"));
-var bindings_1 = require("../helpers/bindings");
 var create_mitosis_node_1 = require("../helpers/create-mitosis-node");
 var filter_empty_text_nodes_1 = require("../helpers/filter-empty-text-nodes");
 var is_mitosis_node_1 = require("../helpers/is-mitosis-node");
+var json5_1 = __importStar(require("json5")), JSON5 = json5_1;
 var builder_1 = require("../parsers/builder");
+var bindings_1 = require("../helpers/bindings");
 function getComponentInputNames(componentName) {
     var _a;
     var componentInfo = react_1.Builder.components.find(function (item) { return item.name === componentName; });

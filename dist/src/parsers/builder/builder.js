@@ -42,18 +42,18 @@ var babel = __importStar(require("@babel/core"));
 var generator_1 = __importDefault(require("@babel/generator"));
 var json5_1 = __importDefault(require("json5"));
 var lodash_1 = require("lodash");
+var fast_clone_1 = require("../../helpers/fast-clone");
 var traverse_1 = __importDefault(require("traverse"));
-var __1 = require("../..");
 var media_sizes_1 = require("../../constants/media-sizes");
-var bindings_1 = require("../../helpers/bindings");
 var capitalize_1 = require("../../helpers/capitalize");
 var create_mitosis_component_1 = require("../../helpers/create-mitosis-component");
 var create_mitosis_node_1 = require("../../helpers/create-mitosis-node");
-var fast_clone_1 = require("../../helpers/fast-clone");
-var parsers_1 = require("../../helpers/parsers");
 var jsx_1 = require("../jsx");
-var state_1 = require("../jsx/state");
+var parsers_1 = require("../../helpers/parsers");
+var __1 = require("../..");
 var helpers_1 = require("./helpers");
+var state_1 = require("../jsx/state");
+var bindings_1 = require("../../helpers/bindings");
 // Omit some superflous styles that can come from Builder's web importer
 var styleOmitList = [
     'backgroundRepeatX',

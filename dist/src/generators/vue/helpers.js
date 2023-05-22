@@ -21,15 +21,15 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getContextKey = exports.checkIfContextHasStrName = exports.getContextValue = exports.processBinding = exports.getContextNames = exports.renameMitosisComponentsToKebabCase = exports.encodeQuotes = exports.invertBooleanExpression = exports.getOnUpdateHookName = exports.addBindingsToJson = exports.addPropertiesToJson = void 0;
-var core_1 = require("@babel/core");
-var function_1 = require("fp-ts/lib/function");
-var lodash_1 = require("lodash");
-var html_tags_1 = require("../../constants/html_tags");
-var babel_transform_1 = require("../../helpers/babel-transform");
 var get_state_object_string_1 = require("../../helpers/get-state-object-string");
+var babel_transform_1 = require("../../helpers/babel-transform");
+var core_1 = require("@babel/core");
+var lodash_1 = require("lodash");
 var patterns_1 = require("../../helpers/patterns");
 var replace_identifiers_1 = require("../../helpers/replace-identifiers");
 var slots_1 = require("../../helpers/slots");
+var html_tags_1 = require("../../constants/html_tags");
+var function_1 = require("fp-ts/lib/function");
 var addPropertiesToJson = function (properties) {
     return function (json) { return (__assign(__assign({}, json), { properties: __assign(__assign({}, json.properties), properties) })); };
 };

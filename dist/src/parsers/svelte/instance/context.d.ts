@@ -1,4 +1,4 @@
-import type { ExpressionStatement, VariableDeclaration } from 'estree';
+import type { VariableDeclaration, ExpressionStatement } from 'estree';
 import type { SveltosisComponent } from '../types';
 export declare function parseGetContext(json: SveltosisComponent, node: VariableDeclaration): void;
 export declare function parseHasContext(json: SveltosisComponent, node: VariableDeclaration): void;

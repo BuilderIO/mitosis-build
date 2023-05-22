@@ -47,10 +47,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.convertTypeScriptToJS = exports.babelTransformExpression = exports.babelTransformCode = void 0;
-var babel = __importStar(require("@babel/core"));
-var plugin_syntax_decorators_1 = __importDefault(require("@babel/plugin-syntax-decorators"));
-var plugin_syntax_typescript_1 = __importDefault(require("@babel/plugin-syntax-typescript"));
 var preset_typescript_1 = __importDefault(require("@babel/preset-typescript"));
+var babel = __importStar(require("@babel/core"));
+var plugin_syntax_typescript_1 = __importDefault(require("@babel/plugin-syntax-typescript"));
+var plugin_syntax_decorators_1 = __importDefault(require("@babel/plugin-syntax-decorators"));
 var function_1 = require("fp-ts/lib/function");
 var patterns_1 = require("./patterns");
 var handleErrorOrExpression = function (_a) {

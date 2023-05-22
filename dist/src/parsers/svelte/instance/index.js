@@ -1,17 +1,17 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.parseInstance = void 0;
-var astring_1 = require("astring");
 var compiler_1 = require("svelte/compiler");
-var context_1 = require("./context");
-var expressions_1 = require("./expressions");
-var functions_1 = require("./functions");
+var astring_1 = require("astring");
 var hooks_1 = require("./hooks");
+var functions_1 = require("./functions");
+var context_1 = require("./context");
 var imports_1 = require("./imports");
 var properties_1 = require("./properties");
 var reactive_1 = require("./reactive");
 var references_1 = require("./references");
 var statements_1 = require("./statements");
+var expressions_1 = require("./expressions");
 var handleImportDeclaration = function (json, node) {
     (0, imports_1.parseImports)(json, node);
 };

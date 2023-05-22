@@ -1,5 +1,5 @@
-import { TraverseContext } from 'traverse';
 import { MitosisComponent } from '../types/mitosis-component';
+import { TraverseContext } from 'traverse';
 import { MitosisStyles } from '../types/mitosis-styles';
 declare type MapStylesOptions = {
     map: (styles: MitosisStyles, context: TraverseContext) => MitosisStyles;
