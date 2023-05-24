@@ -62,8 +62,9 @@ var collectCss = function (json, options) {
     if (options === void 0) { options = {}; }
     var styles = collectStyles(json, options);
     // TODO create and use a root selector
-    var css = classStyleMapToCss(styles);
-    css += ((_a = json.style) === null || _a === void 0 ? void 0 : _a.length) ? "\n".concat(json.style) : '';
+    var css = '';
+    css += !!((_a = json.style) === null || _a === void 0 ? void 0 : _a.length) ? "".concat(json.style, "\n") : '';
+    css += classStyleMapToCss(styles);
     return css;
 };
 exports.collectCss = collectCss;

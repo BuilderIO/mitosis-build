@@ -127,7 +127,7 @@ var DEFAULT_OPTIONS = {
 };
 var componentToSolid = function (passedOptions) {
     return function (_a) {
-        var _b, _c, _d, _e, _f, _g;
+        var _b, _c, _d, _e, _f, _g, _h;
         var component = _a.component;
         var json = (0, fast_clone_1.fastClone)(component);
         var options = (0, merge_options_1.mergeOptions)(DEFAULT_OPTIONS, passedOptions);
@@ -154,8 +154,11 @@ var componentToSolid = function (passedOptions) {
         }
         addProviderComponents(json, options);
         var componentHasStyles = (0, helpers_1.hasCss)(json);
+        var hasCustomStyles = !!((_b = json.style) === null || _b === void 0 ? void 0 : _b.length);
+        var shouldInjectCustomStyles = hasCustomStyles && options.stylesType === 'styled-components';
         var addWrapper = json.children.filter(filter_empty_text_nodes_1.filterEmptyTextNodes).length !== 1 ||
             options.stylesType === 'style-tag' ||
+            shouldInjectCustomStyles ||
             (0, is_root_text_node_1.isRootTextNode)(json);
         // we need to run this before we run the code processor plugin, so the dynamic component variables are transformed
         var foundDynamicComponents = processDynamicComponents(json, options);
@@ -172,14 +175,14 @@ var componentToSolid = function (passedOptions) {
             (0, context_1.hasGetContext)(json) ? 'useContext' : undefined,
             hasShowComponent ? 'Show' : undefined,
             hasForComponent ? 'For' : undefined,
-            ((_b = json.hooks.onMount) === null || _b === void 0 ? void 0 : _b.code) ? 'onMount' : undefined
-        ], (((_c = json.hooks.onUpdate) === null || _c === void 0 ? void 0 : _c.length) ? ['on', 'createEffect'] : []), true), ((_d = state === null || state === void 0 ? void 0 : state.import.solidjs) !== null && _d !== void 0 ? _d : []), true).filter(nullable_1.checkIsDefined));
-        var storeImports = (_e = state === null || state === void 0 ? void 0 : state.import.store) !== null && _e !== void 0 ? _e : [];
+            ((_c = json.hooks.onMount) === null || _c === void 0 ? void 0 : _c.code) ? 'onMount' : undefined
+        ], (((_d = json.hooks.onUpdate) === null || _d === void 0 ? void 0 : _d.length) ? ['on', 'createEffect'] : []), true), ((_e = state === null || state === void 0 ? void 0 : state.import.solidjs) !== null && _e !== void 0 ? _e : []), true).filter(nullable_1.checkIsDefined));
+        var storeImports = (_f = state === null || state === void 0 ? void 0 : state.import.store) !== null && _f !== void 0 ? _f : [];
         var propType = json.propsTypeRef || 'any';
         var propsArgs = "props".concat(options.typescript ? ":".concat(propType) : '');
-        var str = (0, dedent_1.dedent)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n\n    function ", "(", ") {\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      return (", "\n        ", "\n        ", "\n        ", ")\n    }\n\n    export default ", ";\n  "], ["\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n\n    function ", "(", ") {\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      return (", "\n        ", "\n        ", "\n        ", ")\n    }\n\n    export default ", ";\n  "])), solidJSImports.length > 0 ? "import { ".concat(solidJSImports.join(', '), " } from 'solid-js';") : '', !foundDynamicComponents ? '' : "import { Dynamic } from 'solid-js/web';", storeImports.length > 0 ? "import { ".concat(storeImports.join(', '), " } from 'solid-js/store';") : '', !componentHasStyles && options.stylesType === 'styled-components'
+        var str = (0, dedent_1.dedent)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n\n    function ", "(", ") {\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      return (", "\n        ", "\n        ", "\n        ", "\n        ", ")\n    }\n\n    export default ", ";\n  "], ["\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n    ", "\n\n    function ", "(", ") {\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      return (", "\n        ", "\n        ", "\n        ", "\n        ", ")\n    }\n\n    export default ", ";\n  "])), solidJSImports.length > 0 ? "import { ".concat(solidJSImports.join(', '), " } from 'solid-js';") : '', !foundDynamicComponents ? '' : "import { Dynamic } from 'solid-js/web';", storeImports.length > 0 ? "import { ".concat(storeImports.join(', '), " } from 'solid-js/store';") : '', !componentHasStyles && options.stylesType === 'styled-components'
             ? ''
-            : "import { css } from \"solid-styled-components\";", json.types && options.typescript ? json.types.join('\n') : '', (0, render_imports_1.renderPreComponent)({ component: json, target: 'solid' }), json.name, propsArgs, (_f = state === null || state === void 0 ? void 0 : state.str) !== null && _f !== void 0 ? _f : '', getRefsString(json, options), getContextString(json, options), !((_g = json.hooks.onMount) === null || _g === void 0 ? void 0 : _g.code) ? '' : "onMount(() => { ".concat(json.hooks.onMount.code, " })"), json.hooks.onUpdate
+            : "import { css } from \"solid-styled-components\";", json.types && options.typescript ? json.types.join('\n') : '', (0, render_imports_1.renderPreComponent)({ component: json, target: 'solid' }), json.name, propsArgs, (_g = state === null || state === void 0 ? void 0 : state.str) !== null && _g !== void 0 ? _g : '', getRefsString(json, options), getContextString(json, options), !((_h = json.hooks.onMount) === null || _h === void 0 ? void 0 : _h.code) ? '' : "onMount(() => { ".concat(json.hooks.onMount.code, " })"), json.hooks.onUpdate
             ? json.hooks.onUpdate
                 .map(function (hook, index) {
                 if (hook.deps) {
@@ -198,7 +201,7 @@ var componentToSolid = function (passedOptions) {
             .join('\n'), options.stylesType === 'style-tag' && css && css.trim().length > 4
             ? // We add the jsx attribute so prettier formats this nicely
                 "<style jsx>{`".concat(css, "`}</style>")
-            : '', addWrapper ? '</>' : '', json.name);
+            : '', shouldInjectCustomStyles ? "<style>{`".concat(json.style, "`}</style>") : '', addWrapper ? '</>' : '', json.name);
         if (options.plugins) {
             str = (0, plugins_1.runPreCodePlugins)(str, options.plugins);
         }
