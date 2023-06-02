@@ -204,6 +204,7 @@ var NODE_MAPPERS = {
         return "<slot name=\"".concat((0, slots_1.stripSlotPrefix)(slotName, SLOT_PREFIX).toLowerCase(), "\">").concat(renderChildren(), "</slot>");
     },
 };
+var SPECIAL_HTML_TAGS = ['style', 'script'];
 var stringifyBinding = function (node) {
     return function (_a) {
         var key = _a[0], value = _a[1];
@@ -292,11 +293,10 @@ var blockToVue = function (node, options, scope) {
     if ((0, is_children_1.default)({ node: node })) {
         return "<slot/>";
     }
-    if (node.name === 'style') {
-        // Vue doesn't allow <style>...</style> in templates, but does support the synonymous
-        // <component is="'style'">...</component>
+    if (SPECIAL_HTML_TAGS.includes(node.name)) {
+        // Vue doesn't allow style/script tags in templates, but does support them through dynamic components.
+        node.bindings.is = { code: "'".concat(node.name, "'"), type: 'single' };
         node.name = 'component';
-        node.bindings.is = { code: "'style'", type: 'single' };
     }
     if (node.properties._text) {
         return "".concat(node.properties._text);
