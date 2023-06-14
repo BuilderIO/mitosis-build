@@ -8,4 +8,11 @@ exports.HOOKS = {
     REF: 'useRef',
     DEFAULT_PROPS: 'useDefaultProps',
     STYLE: 'useStyle',
+    TARGET: 'useTarget',
+    METADATA: 'useMetadata',
+    MOUNT: 'onMount',
+    UNMOUNT: 'onUnMount',
+    UPDATE: 'onUpdate',
+    INIT: 'onInit',
+    SET_CONTEXT: 'setContext',
 };

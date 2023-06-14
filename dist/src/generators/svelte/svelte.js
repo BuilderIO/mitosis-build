@@ -107,7 +107,7 @@ var componentToSvelte = function (userProvidedOptions) {
     return function (_a) {
         var _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o;
         var component = _a.component;
-        var options = (0, merge_options_1.mergeOptions)(DEFAULT_OPTIONS, userProvidedOptions);
+        var options = (0, merge_options_1.initializeOptions)('svelte', DEFAULT_OPTIONS, userProvidedOptions);
         options.plugins = __spreadArray(__spreadArray([], (options.plugins || []), true), [
             // Strip types from any JS code that ends up in the template, because Svelte does not support TS code in templates.
             (0, process_code_1.CODE_PROCESSOR_PLUGIN)(function (codeType) {

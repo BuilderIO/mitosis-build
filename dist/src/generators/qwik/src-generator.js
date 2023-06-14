@@ -2,8 +2,8 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.iteratorProperty = exports.lastProperty = exports.isStatement = exports.iif = exports.arrowFnValue = exports.arrowFnBlock = exports.invoke = exports.quote = exports.Imports = exports.Symbol = exports.SrcBuilder = exports.File = void 0;
 var standalone_1 = require("prettier/standalone");
+var html_tags_1 = require("../../constants/html_tags");
 var builder_1 = require("../../parsers/builder");
-var jsx_1 = require("../../parsers/jsx");
 var stable_serialize_1 = require("./helpers/stable-serialize");
 var File = /** @class */ (function () {
     function File(filename, options, qwikModule, qrlPrefix) {
@@ -390,7 +390,7 @@ var SrcBuilder = /** @class */ (function () {
         }
     };
     SrcBuilder.prototype.isSelfClosingTag = function (symbol) {
-        return jsx_1.selfClosingTags.has(String(symbol));
+        return html_tags_1.SELF_CLOSING_HTML_TAGS.has(String(symbol));
     };
     SrcBuilder.prototype.jsxEnd = function (symbol) {
         if (this.isJSX) {

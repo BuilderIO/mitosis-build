@@ -22,6 +22,7 @@ exports.markoFormatHtml = exports.postprocessHtml = exports.preprocessHtml = exp
 var hash_sum_1 = __importDefault(require("hash-sum"));
 var lodash_1 = require("lodash");
 var standalone_1 = require("prettier/standalone");
+var html_tags_1 = require("../../constants/html_tags");
 var dash_case_1 = require("../../helpers/dash-case");
 var dedent_1 = require("../../helpers/dedent");
 var fast_clone_1 = require("../../helpers/fast-clone");
@@ -31,13 +32,13 @@ var get_state_object_string_1 = require("../../helpers/get-state-object-string")
 var has_props_1 = require("../../helpers/has-props");
 var indent_1 = require("../../helpers/indent");
 var map_refs_1 = require("../../helpers/map-refs");
+var merge_options_1 = require("../../helpers/merge-options");
 var for_1 = require("../../helpers/nodes/for");
 var render_imports_1 = require("../../helpers/render-imports");
 var strip_meta_properties_1 = require("../../helpers/strip-meta-properties");
 var strip_state_and_props_refs_1 = require("../../helpers/strip-state-and-props-refs");
 var collect_css_1 = require("../../helpers/styles/collect-css");
 var plugins_1 = require("../../modules/plugins");
-var jsx_1 = require("../../parsers/jsx");
 var mitosis_node_1 = require("../../types/mitosis-node");
 // Having issues with this, so off for now
 var USE_MARKO_PRETTIER = false;
@@ -93,7 +94,7 @@ var blockToMarko = function (json, options) {
             str += " ".concat(key, "=(").concat(processBinding(options.component, code), ") ");
         }
     }
-    if (jsx_1.selfClosingTags.has(json.name)) {
+    if (html_tags_1.SELF_CLOSING_HTML_TAGS.has(json.name)) {
         return str + ' />';
     }
     str += '>';
@@ -136,7 +137,7 @@ var componentToMarko = function (userOptions) {
         var _b, _c, _d;
         var component = _a.component;
         var json = (0, fast_clone_1.fastClone)(component);
-        var options = __assign(__assign({}, userOptions), { component: json });
+        var options = (0, merge_options_1.initializeOptions)('marko', __assign(__assign({}, userOptions), { component: json }));
         if (options.plugins) {
             json = (0, plugins_1.runPreJsonPlugins)(json, options.plugins);
         }

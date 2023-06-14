@@ -1,4 +1,6 @@
 import { JSX } from '@builder.io/mitosis/jsx-runtime';
+import { Dictionary } from './helpers/typescript';
+import { TargetBlock } from './types/mitosis-component';
 export * from './flow';
 export * from './generators/alpine';
 export * from './generators/angular';
@@ -48,26 +50,19 @@ declare function Provider<T>(props: {
 export declare type Context<T> = {
     Provider: typeof Provider<T>;
 };
-export declare const useStore: <T>(obj: T) => T;
-export declare const useState: <T>(obj: T) => [T, (value: T) => void];
-export declare const useRef: <T>(obj?: void | T | null | undefined) => T;
-export declare const useContext: <T = {
-    [key: string]: any;
-}>(key: Context<T>) => T;
-export declare const createContext: <T = {
-    [key: string]: any;
-}>(value: T) => Context<T>;
-export declare const setContext: <T = {
-    [key: string]: any;
-}>(key: Context<T>, value: Partial<T>) => void;
-export declare const onMount: (fn: () => any) => any;
-export declare const onUpdate: (fn: () => any, deps?: any[]) => any;
-export declare const onInit: (fn: () => any) => any;
-export declare const onUnMount: (fn: () => any) => any;
-export declare const useDynamicTag: (fn: () => any) => any;
-export declare const onError: (fn: () => any) => any;
-export declare const useMetadata: (obj: object) => any;
-export declare const useDefaultProps: <T = {
-    [key: string]: any;
-}>(value: T) => T;
-export declare const useStyle: (value: string) => any;
+export declare function useStore<T>(obj: T): T;
+export declare function useState<T>(obj: T): [T, (value: T) => void];
+export declare function useRef<T>(obj?: null | void | T): T;
+export declare function useContext<T = Dictionary<any>>(key: Context<T>): T;
+export declare function createContext<T = Dictionary<any>>(value: T): Context<T>;
+export declare function setContext<T = Dictionary<any>>(key: Context<T>, value: Partial<T>): void;
+export declare function onMount(fn: () => any): void;
+export declare function onUpdate(fn: () => any, deps?: any[]): void;
+export declare function onInit(fn: () => any): void;
+export declare function onUnMount(fn: () => any): void;
+export declare function useDynamicTag(fn: () => any): void;
+export declare function onError(fn: () => any): void;
+export declare function useMetadata(obj: object): void;
+export declare function useDefaultProps<T = Dictionary<any>>(value: T): T;
+export declare function useStyle(value: string): void;
+export declare function useTarget<Return>(dict: TargetBlock<Return>): Return;

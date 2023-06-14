@@ -74,7 +74,7 @@ var componentToQwik = function (userOptions) {
         var _component = _a.component, path = _a.path;
         // Make a copy we can safely mutate, similar to babel's toolchain
         var component = (0, fast_clone_1.fastClone)(_component);
-        var options = (0, merge_options_1.mergeOptions)(DEFAULT_OPTIONS, userOptions);
+        var options = (0, merge_options_1.initializeOptions)('qwik', DEFAULT_OPTIONS, userOptions);
         component = (0, plugins_1.runPreJsonPlugins)(component, options.plugins);
         component = (0, plugins_1.runPostJsonPlugins)(component, options.plugins);
         var isTypeScript = !!options.typescript;

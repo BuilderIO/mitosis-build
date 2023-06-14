@@ -2,13 +2,13 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.componentToLiquid = exports.isValidLiquidBinding = void 0;
 var standalone_1 = require("prettier/standalone");
+var html_tags_1 = require("../constants/html_tags");
 var fast_clone_1 = require("../helpers/fast-clone");
 var get_state_object_string_1 = require("../helpers/get-state-object-string");
 var strip_meta_properties_1 = require("../helpers/strip-meta-properties");
 var strip_state_and_props_refs_1 = require("../helpers/strip-state-and-props-refs");
 var collect_css_1 = require("../helpers/styles/collect-css");
 var plugins_1 = require("../modules/plugins");
-var jsx_1 = require("../parsers/jsx");
 var mitosis_node_1 = require("../types/mitosis-node");
 /**
  * Test if the binding expression would be likely to generate
@@ -94,7 +94,7 @@ var blockToLiquid = function (json, options) {
                 str += " ".concat(key, "=\"{{").concat(useValue, "}}\" ");
             }
         }
-        if (jsx_1.selfClosingTags.has(json.name)) {
+        if (html_tags_1.SELF_CLOSING_HTML_TAGS.has(json.name)) {
             return str + ' />';
         }
         str += '>';

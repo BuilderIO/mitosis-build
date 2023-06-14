@@ -69,6 +69,7 @@ var componentToRsc = function (_options) {
             stylesType: 'style-tag',
             stateType: 'variables',
             contextType: 'prop-drill',
+            rsc: true,
         });
         return (0, react_1.componentToReact)(options)({ component: json, path: path });
     };

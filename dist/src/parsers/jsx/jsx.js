@@ -57,6 +57,8 @@ var props_1 = require("./props");
 var state_1 = require("./state");
 var plugin_syntax_typescript_1 = __importDefault(require("@babel/plugin-syntax-typescript"));
 var preset_typescript_1 = __importDefault(require("@babel/preset-typescript"));
+var hooks_2 = require("../../constants/hooks");
+var use_target_1 = require("./hooks/use-target");
 var types = babel.types;
 var typescriptBabelPreset = [preset_typescript_1.default, { isTSX: true, allExtensions: true }];
 var beforeParse = function (path) {
@@ -114,9 +116,7 @@ function parseJsx(jsx, _options) {
                             return !types.isExportDefaultDeclaration(node) && types.isFunctionDeclaration(node);
                         })
                             .map(function (node) { return "export default ".concat((0, generator_1.default)(node).code); });
-                        var preComponentCode = (0, function_1.pipe)(path.node.body.filter(function (statement) { return !(0, helpers_1.isImportOrDefaultExport)(statement); }), function (statements) {
-                            return (0, hooks_1.collectModuleScopeHooks)(statements, context.builder.component, options);
-                        }, types.program, generator_1.default, function (generatorResult) { return generatorResult.code; });
+                        var preComponentCode = (0, function_1.pipe)(path.node.body.filter(function (statement) { return !(0, helpers_1.isImportOrDefaultExport)(statement); }), (0, hooks_1.collectModuleScopeHooks)(context.builder.component, options), types.program, generator_1.default, function (generatorResult) { return generatorResult.code; });
                         // TODO: support multiple? e.g. for others to add imports?
                         context.builder.component.hooks.preComponent = { code: preComponentCode };
                         path.replaceWith(types.program(keepStatements));
@@ -126,6 +126,31 @@ function parseJsx(jsx, _options) {
                         if (types.isIdentifier(node.id)) {
                             var name_1 = node.id.name;
                             if (name_1[0].toUpperCase() === name_1[0]) {
+                                path.traverse({
+                                    /**
+                                     * Plugin to find all `useTarget()` assignment calls inside of the component function body
+                                     * and replace them with a magic string.
+                                     */
+                                    CallExpression: function (path) {
+                                        var _a;
+                                        if (!types.isVariableDeclarator(path.parent))
+                                            return;
+                                        if (!types.isCallExpression(path.node))
+                                            return;
+                                        if (!types.isIdentifier(path.node.callee))
+                                            return;
+                                        if (path.node.callee.name !== hooks_2.HOOKS.TARGET)
+                                            return;
+                                        var targetBlock = (0, use_target_1.getUseTargetStatements)(path.node);
+                                        if (!targetBlock)
+                                            return;
+                                        var blockId = (0, use_target_1.getTargetId)(context.builder.component);
+                                        // replace the useTarget() call with a magic string
+                                        path.replaceWith(types.stringLiteral((0, use_target_1.getMagicString)(blockId)));
+                                        // store the target block in the component
+                                        context.builder.component.targetBlocks = __assign(__assign({}, context.builder.component.targetBlocks), (_a = {}, _a[blockId] = targetBlock, _a));
+                                    },
+                                });
                                 path.replaceWith((0, ast_1.jsonToAst)((0, function_parser_1.componentFunctionToJson)(node, context)));
                             }
                         }
@@ -157,7 +182,7 @@ function parseJsx(jsx, _options) {
             }); },
         ],
     });
-    var toParse = (0, replace_new_lines_in_strings_1.stripNewlinesInStrings)(output
+    var stringifiedMitosisComponent = (0, replace_new_lines_in_strings_1.stripNewlinesInStrings)(output
         .code.trim()
         // Occasional issues where comments get kicked to the top. Full fix should strip these sooner
         .replace(/^\/\*[\s\S]*?\*\/\s*/, '')
@@ -166,10 +191,10 @@ function parseJsx(jsx, _options) {
         .replace(/\n"/g, '"')
         .replace(/^\({/, '{')
         .replace(/}\);$/, '}'));
-    var parsed = (0, json_1.tryParseJson)(toParse);
-    (0, state_1.mapStateIdentifiers)(parsed);
-    (0, context_1.extractContextComponents)(parsed);
-    parsed.subComponents = subComponentFunctions.map(function (item) { return parseJsx(item, options); });
-    return parsed;
+    var mitosisComponent = (0, json_1.tryParseJson)(stringifiedMitosisComponent);
+    (0, state_1.mapStateIdentifiers)(mitosisComponent);
+    (0, context_1.extractContextComponents)(mitosisComponent);
+    mitosisComponent.subComponents = subComponentFunctions.map(function (item) { return parseJsx(item, options); });
+    return mitosisComponent;
 }
 exports.parseJsx = parseJsx;

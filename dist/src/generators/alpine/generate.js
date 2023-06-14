@@ -14,18 +14,19 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.componentToAlpine = exports.isValidAlpineBinding = exports.checkIsComponentNode = void 0;
 var lodash_1 = require("lodash");
 var standalone_1 = require("prettier/standalone");
+var html_tags_1 = require("../../constants/html_tags");
 var babel_transform_1 = require("../../helpers/babel-transform");
 var dash_case_1 = require("../../helpers/dash-case");
 var fast_clone_1 = require("../../helpers/fast-clone");
 var get_refs_1 = require("../../helpers/get-refs");
 var get_state_object_string_1 = require("../../helpers/get-state-object-string");
+var merge_options_1 = require("../../helpers/merge-options");
 var remove_surrounding_block_1 = require("../../helpers/remove-surrounding-block");
 var replace_identifiers_1 = require("../../helpers/replace-identifiers");
 var strip_meta_properties_1 = require("../../helpers/strip-meta-properties");
 var strip_state_and_props_refs_1 = require("../../helpers/strip-state-and-props-refs");
 var collect_css_1 = require("../../helpers/styles/collect-css");
 var plugins_1 = require("../../modules/plugins");
-var jsx_1 = require("../../parsers/jsx");
 var mitosis_node_1 = require("../../types/mitosis-node");
 var render_mount_hook_1 = require("./render-mount-hook");
 var render_update_hooks_1 = require("./render-update-hooks");
@@ -154,14 +155,15 @@ var blockToAlpine = function (json, options) {
             str += " ".concat(bind).concat(bindingType === 'spread' ? '' : key, "=\"").concat(useValue, "\" ").replace(':=', '=');
         }
     }
-    return jsx_1.selfClosingTags.has(json.name)
+    return html_tags_1.SELF_CLOSING_HTML_TAGS.has(json.name)
         ? "".concat(str, " />")
         : "".concat(str, ">").concat(((_b = json.children) !== null && _b !== void 0 ? _b : []).map(function (item) { return blockToAlpine(item, options); }).join('\n'), "</").concat(json.name, ">");
 };
-var componentToAlpine = function (options) {
-    if (options === void 0) { options = {}; }
+var componentToAlpine = function (_options) {
+    if (_options === void 0) { _options = {}; }
     return function (_a) {
         var component = _a.component;
+        var options = (0, merge_options_1.initializeOptions)('alpine', _options);
         var json = (0, fast_clone_1.fastClone)(component);
         if (options.plugins) {
             json = (0, plugins_1.runPreJsonPlugins)(json, options.plugins);

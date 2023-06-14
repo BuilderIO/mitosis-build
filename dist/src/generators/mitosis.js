@@ -30,6 +30,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.componentToMitosis = exports.blockToMitosis = exports.DEFAULT_FORMAT = void 0;
 var json5_1 = __importDefault(require("json5"));
 var standalone_1 = require("prettier/standalone");
+var hooks_1 = require("../constants/hooks");
+var html_tags_1 = require("../constants/html_tags");
 var dedent_1 = require("../helpers/dedent");
 var fast_clone_1 = require("../helpers/fast-clone");
 var get_components_1 = require("../helpers/get-components");
@@ -39,7 +41,6 @@ var is_root_text_node_1 = require("../helpers/is-root-text-node");
 var map_refs_1 = require("../helpers/map-refs");
 var render_imports_1 = require("../helpers/render-imports");
 var state_1 = require("../helpers/state");
-var jsx_1 = require("../parsers/jsx");
 var mitosis_node_1 = require("../types/mitosis-node");
 var react_1 = require("./react");
 exports.DEFAULT_FORMAT = 'legacy';
@@ -98,7 +99,7 @@ var blockToMitosis = function (json, toMitosisOptions, component) {
             }
         }
     }
-    if (jsx_1.selfClosingTags.has(json.name)) {
+    if (html_tags_1.SELF_CLOSING_HTML_TAGS.has(json.name)) {
         return str + ' />';
     }
     // Self close by default if no children
@@ -160,7 +161,7 @@ var componentToMitosis = function (toMitosisOptions) {
         var str = (0, dedent_1.dedent)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    ", "\n    ", "\n    ", "\n\n    ", "\n\n    ", "\n\n    export default function ", "(props) {\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      return (", "\n        ", "\n        ", ")\n    }\n\n  "], ["\n    ", "\n    ", "\n    ", "\n\n    ", "\n\n    ", "\n\n    export default function ", "(props) {\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      return (", "\n        ", "\n        ", ")\n    }\n\n  "])), !needsMitosisCoreImport
             ? ''
             : "import { ".concat(!hasState ? '' : 'useStore, ', " ").concat(!refs.length ? '' : 'useRef, ', " ").concat(mitosisComponents.join(', '), " } from '@builder.io/mitosis';"), !otherComponents.length ? '' : "import { ".concat(otherComponents.join(','), " } from '@components';"), json.types ? json.types.join('\n') : '', (0, render_imports_1.renderPreComponent)({ component: json, target: 'mitosis' }), stringifiedUseMetadata && stringifiedUseMetadata !== '{}'
-            ? "".concat(jsx_1.METADATA_HOOK_NAME, "(").concat(stringifiedUseMetadata, ")")
+            ? "".concat(hooks_1.HOOKS.METADATA, "(").concat(stringifiedUseMetadata, ")")
             : '', component.name, !hasState ? '' : "const state = useStore(".concat((0, get_state_object_string_1.getStateObjectStringFromComponent)(json), ");"), getRefsString(json, refs), !((_b = json.hooks.onMount) === null || _b === void 0 ? void 0 : _b.code) ? '' : "onMount(() => { ".concat(json.hooks.onMount.code, " })"), !((_c = json.hooks.onUnMount) === null || _c === void 0 ? void 0 : _c.code) ? '' : "onUnMount(() => { ".concat(json.hooks.onUnMount.code, " })"), addWrapper ? '<>' : '', json.children.map(function (item) { return (0, exports.blockToMitosis)(item, options, component); }).join('\n'), addWrapper ? '</>' : '');
         if (options.prettier !== false) {
             try {

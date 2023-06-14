@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.VALID_HTML_TAGS = void 0;
+exports.SELF_CLOSING_HTML_TAGS = exports.VALID_HTML_TAGS = void 0;
 exports.VALID_HTML_TAGS = [
     'html',
     'base',
@@ -180,3 +180,19 @@ exports.VALID_HTML_TAGS = [
     'use',
     'view',
 ];
+exports.SELF_CLOSING_HTML_TAGS = new Set([
+    'area',
+    'base',
+    'br',
+    'col',
+    'embed',
+    'hr',
+    'img',
+    'input',
+    'link',
+    'meta',
+    'param',
+    'source',
+    'track',
+    'wbr',
+]);

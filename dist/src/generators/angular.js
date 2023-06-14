@@ -53,7 +53,6 @@ var strip_meta_properties_1 = require("../helpers/strip-meta-properties");
 var strip_state_and_props_refs_1 = require("../helpers/strip-state-and-props-refs");
 var collect_css_1 = require("../helpers/styles/collect-css");
 var plugins_1 = require("../modules/plugins");
-var jsx_1 = require("../parsers/jsx");
 var mitosis_node_1 = require("../types/mitosis-node");
 var merge_options_1 = require("../helpers/merge-options");
 var process_code_1 = require("../helpers/plugins/process-code");
@@ -189,7 +188,7 @@ var blockToAngular = function (json, options, blockOptions) {
                 str += "[".concat(key, "]=\"").concat(code, "\" ");
             }
         }
-        if (jsx_1.selfClosingTags.has(json.name)) {
+        if (html_tags_1.SELF_CLOSING_HTML_TAGS.has(json.name)) {
             return str + ' />';
         }
         str += '>';
@@ -215,22 +214,22 @@ var processAngularCode = function (_a) {
         }), function (newCode) { return (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(newCode, { replaceWith: replaceWith }); });
     };
 };
+var DEFAULT_OPTIONS = {
+    preserveImports: false,
+    preserveFileExtensions: false,
+};
 var componentToAngular = function (userOptions) {
     if (userOptions === void 0) { userOptions = {}; }
     return function (_a) {
         var _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m;
         var _component = _a.component;
-        var DEFAULT_OPTIONS = {
-            preserveImports: false,
-            preserveFileExtensions: false,
-        };
         // Make a copy we can safely mutate, similar to babel's toolchain
         var json = (0, fast_clone_1.fastClone)(_component);
         var contextVars = Object.keys(((_b = json === null || json === void 0 ? void 0 : json.context) === null || _b === void 0 ? void 0 : _b.get) || {});
         var metaOutputVars = ((_d = (_c = json.meta) === null || _c === void 0 ? void 0 : _c.useMetadata) === null || _d === void 0 ? void 0 : _d.outputs) || [];
         var outputVars = (0, lodash_1.uniq)(__spreadArray(__spreadArray([], metaOutputVars, true), (0, get_prop_functions_1.getPropFunctions)(json), true));
         var stateVars = Object.keys((json === null || json === void 0 ? void 0 : json.state) || {});
-        var options = (0, merge_options_1.mergeOptions)(__assign(__assign({}, DEFAULT_OPTIONS), userOptions));
+        var options = (0, merge_options_1.initializeOptions)('angular', DEFAULT_OPTIONS, userOptions);
         options.plugins = __spreadArray(__spreadArray([], (options.plugins || []), true), [
             (0, process_code_1.CODE_PROCESSOR_PLUGIN)(function (codeType) {
                 switch (codeType) {

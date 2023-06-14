@@ -26,38 +26,31 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.transformAttributeName = exports.HTML_ATTR_FROM_JSX = exports.isImportOrDefaultExport = exports.parseCodeJson = exports.parseCode = exports.uncapitalize = void 0;
+exports.processHookCode = exports.getHook = void 0;
 var babel = __importStar(require("@babel/core"));
 var generator_1 = __importDefault(require("@babel/generator"));
-var json_1 = require("../../helpers/json");
-var typescript_1 = require("../../helpers/typescript");
 var types = babel.types;
-var uncapitalize = function (str) {
-    if (!str) {
-        return str;
+var getHook = function (node) {
+    var item = node;
+    if (types.isExpressionStatement(item)) {
+        var expression = item.expression;
+        if (types.isCallExpression(expression)) {
+            if (types.isIdentifier(expression.callee)) {
+                return expression;
+            }
+        }
     }
-    return str[0].toLowerCase() + str.slice(1);
+    return null;
 };
-exports.uncapitalize = uncapitalize;
-var parseCode = function (node) {
-    return (0, generator_1.default)(node).code;
+exports.getHook = getHook;
+var processHookCode = function (firstArg) {
+    return (0, generator_1.default)(firstArg.body)
+        .code.trim()
+        // Remove arbitrary block wrapping if any
+        // AKA
+        //  { console.log('hi') } -> console.log('hi')
+        .replace(/^{/, '')
+        .replace(/}$/, '')
+        .trim();
 };
-exports.parseCode = parseCode;
-var parseCodeJson = function (node) {
-    var code = (0, exports.parseCode)(node);
-    return (0, json_1.tryParseJson)(code);
-};
-exports.parseCodeJson = parseCodeJson;
-var isImportOrDefaultExport = function (node) {
-    return types.isExportDefaultDeclaration(node) || types.isImportDeclaration(node);
-};
-exports.isImportOrDefaultExport = isImportOrDefaultExport;
-exports.HTML_ATTR_FROM_JSX = {
-    htmlFor: 'for',
-};
-var transformAttributeName = function (name) {
-    if ((0, typescript_1.objectHasKey)(exports.HTML_ATTR_FROM_JSX, name))
-        return exports.HTML_ATTR_FROM_JSX[name];
-    return name;
-};
-exports.transformAttributeName = transformAttributeName;
+exports.processHookCode = processHookCode;

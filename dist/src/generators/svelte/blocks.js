@@ -4,8 +4,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.blockToSvelte = void 0;
-var jsx_1 = require("../../parsers/jsx");
 var html_tags_1 = require("../../constants/html_tags");
+var html_tags_2 = require("../../constants/html_tags");
 var bindings_1 = require("../../helpers/bindings");
 var is_children_1 = __importDefault(require("../../helpers/is-children"));
 var is_upper_case_1 = require("../../helpers/is-upper-case");
@@ -107,7 +107,7 @@ var getTagName = function (_a) {
         });
         return SVELTE_SPECIAL_TAGS.ELEMENT;
     }
-    var isValidHtmlTag = html_tags_1.VALID_HTML_TAGS.includes(json.name);
+    var isValidHtmlTag = html_tags_2.VALID_HTML_TAGS.includes(json.name);
     var isSpecialSvelteTag = json.name.startsWith('svelte:');
     // Check if any import matches `json.name`
     var hasMatchingImport = parentComponent.imports.some(function (_a) {
@@ -202,7 +202,7 @@ var blockToSvelte = function (_a) {
         str += "</".concat(tagName, ">");
         return str;
     }
-    if (jsx_1.selfClosingTags.has(tagName)) {
+    if (html_tags_1.SELF_CLOSING_HTML_TAGS.has(tagName)) {
         return str + ' />';
     }
     str += '>';

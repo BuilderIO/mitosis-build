@@ -212,9 +212,7 @@ var jsxElementToJson = function (node) {
                 var value = item.value;
                 // boolean attribute
                 if (value === null) {
-                    memo[key] = (0, bindings_1.createSingleBinding)({
-                        code: 'true',
-                    });
+                    memo[key] = (0, bindings_1.createSingleBinding)({ code: 'true' });
                     return memo;
                 }
                 if (types.isJSXExpressionContainer(value) && !types.isStringLiteral(value.expression)) {

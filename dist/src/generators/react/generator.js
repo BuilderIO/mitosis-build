@@ -139,7 +139,16 @@ var componentToReact = function (reactOptions) {
     return function (_a) {
         var component = _a.component, path = _a.path;
         var json = (0, fast_clone_1.fastClone)(component);
-        var options = (0, merge_options_1.mergeOptions)(DEFAULT_OPTIONS, reactOptions);
+        var target = reactOptions.preact
+            ? 'preact'
+            : reactOptions.type === 'native'
+                ? 'reactNative'
+                : reactOptions.type === 'taro'
+                    ? 'taro'
+                    : reactOptions.rsc
+                        ? 'rsc'
+                        : 'react';
+        var options = (0, merge_options_1.initializeOptions)(target, DEFAULT_OPTIONS, reactOptions);
         if (options.plugins) {
             json = (0, plugins_1.runPreJsonPlugins)(json, options.plugins);
         }

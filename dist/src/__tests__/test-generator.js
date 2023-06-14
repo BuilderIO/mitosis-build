@@ -115,6 +115,7 @@ var useStyle = getRawFile('./data/styles/use-style.raw.tsx');
 var useStyleOutsideComponent = getRawFile('./data/styles/use-style-outside-component.raw.tsx');
 var useStyleAndCss = getRawFile('./data/styles/use-style-and-css.raw.tsx');
 var styleClassAndCss = getRawFile('./data/styles/style-class-and-css.raw.tsx');
+var useTarget = getRawFile('./data/use-target.raw.tsx');
 var button = getRawFile('./data/blocks/button.raw.tsx');
 var classNameJsx = getRawFile('./data/blocks/classname-jsx.raw.tsx');
 var columns = getRawFile('./data/blocks/columns.raw.tsx');
@@ -245,6 +246,7 @@ var BASIC_TESTS = {
     referencingFunInsideHook: referencingFunInsideHook,
     svgComponent: svgComponent,
     renderBlock: renderBlock,
+    useTarget: useTarget,
 };
 var SLOTS_TESTS = {
     ContentSlotJSX: contentSlotJsx,

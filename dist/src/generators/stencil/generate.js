@@ -6,6 +6,7 @@ var __makeTemplateObject = (this && this.__makeTemplateObject) || function (cook
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.componentToStencil = void 0;
 var standalone_1 = require("prettier/standalone");
+var html_tags_1 = require("../../constants/html_tags");
 var dash_case_1 = require("../../helpers/dash-case");
 var dedent_1 = require("../../helpers/dedent");
 var fast_clone_1 = require("../../helpers/fast-clone");
@@ -14,13 +15,13 @@ var get_props_1 = require("../../helpers/get-props");
 var get_state_object_string_1 = require("../../helpers/get-state-object-string");
 var indent_1 = require("../../helpers/indent");
 var map_refs_1 = require("../../helpers/map-refs");
+var merge_options_1 = require("../../helpers/merge-options");
 var for_1 = require("../../helpers/nodes/for");
 var render_imports_1 = require("../../helpers/render-imports");
 var strip_meta_properties_1 = require("../../helpers/strip-meta-properties");
 var strip_state_and_props_refs_1 = require("../../helpers/strip-state-and-props-refs");
 var collect_css_1 = require("../../helpers/styles/collect-css");
 var plugins_1 = require("../../modules/plugins");
-var jsx_1 = require("../../parsers/jsx");
 var mitosis_node_1 = require("../../types/mitosis-node");
 var collect_class_string_1 = require("./collect-class-string");
 var blockToStencil = function (json, options) {
@@ -73,7 +74,7 @@ var blockToStencil = function (json, options) {
             str += " ".concat(key, "={").concat(processBinding(code), "} ");
         }
     }
-    if (jsx_1.selfClosingTags.has(json.name)) {
+    if (html_tags_1.SELF_CLOSING_HTML_TAGS.has(json.name)) {
         return str + ' />';
     }
     str += '>';
@@ -86,11 +87,12 @@ var blockToStencil = function (json, options) {
 function processBinding(code) {
     return (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(code, { replaceWith: 'this.' });
 }
-var componentToStencil = function (options) {
-    if (options === void 0) { options = {}; }
+var componentToStencil = function (_options) {
+    if (_options === void 0) { _options = {}; }
     return function (_a) {
         var _b, _c, _d, _e;
         var component = _a.component;
+        var options = (0, merge_options_1.initializeOptions)('stencil', _options);
         var json = (0, fast_clone_1.fastClone)(component);
         if (options.plugins) {
             json = (0, plugins_1.runPreJsonPlugins)(json, options.plugins);

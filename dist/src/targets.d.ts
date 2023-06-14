@@ -24,3 +24,4 @@ export declare const targets: {
     readonly rsc: import(".").TranspilerGenerator<Partial<import("./generators/react").ToReactOptions>, string>;
     readonly taro: import(".").TranspilerGenerator<Partial<import("./generators/react").ToReactOptions>, string>;
 };
+export declare type Targets = keyof typeof targets;

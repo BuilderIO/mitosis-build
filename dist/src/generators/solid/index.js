@@ -130,7 +130,7 @@ var componentToSolid = function (passedOptions) {
         var _b, _c, _d, _e, _f, _g, _h;
         var component = _a.component;
         var json = (0, fast_clone_1.fastClone)(component);
-        var options = (0, merge_options_1.mergeOptions)(DEFAULT_OPTIONS, passedOptions);
+        var options = (0, merge_options_1.initializeOptions)('solid', DEFAULT_OPTIONS, passedOptions);
         options.plugins = __spreadArray(__spreadArray([], (options.plugins || []), true), [
             (0, process_code_1.CODE_PROCESSOR_PLUGIN)(function (codeType) {
                 switch (codeType) {

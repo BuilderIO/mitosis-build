@@ -46,7 +46,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.componentFunctionToJson = exports.parseDefaultPropsHook = exports.generateUseStyleCode = void 0;
+exports.componentFunctionToJson = void 0;
 var babel = __importStar(require("@babel/core"));
 var generator_1 = __importDefault(require("@babel/generator"));
 var hooks_1 = require("../../constants/hooks");
@@ -57,29 +57,9 @@ var component_types_1 = require("./component-types");
 var element_parser_1 = require("./element-parser");
 var helpers_1 = require("./helpers");
 var hooks_2 = require("./hooks");
+var helpers_2 = require("./hooks/helpers");
 var state_1 = require("./state");
 var types = babel.types;
-function generateUseStyleCode(expression) {
-    return (0, generator_1.default)(expression.arguments[0]).code.replace(/(^("|'|`)|("|'|`)$)/g, '');
-}
-exports.generateUseStyleCode = generateUseStyleCode;
-function parseDefaultPropsHook(component, expression) {
-    var firstArg = expression.arguments[0];
-    if (types.isObjectExpression(firstArg)) {
-        component.defaultProps = (0, state_1.parseStateObjectToMitosisState)(firstArg, false);
-    }
-}
-exports.parseDefaultPropsHook = parseDefaultPropsHook;
-var processHookCode = function (firstArg) {
-    return (0, generator_1.default)(firstArg.body)
-        .code.trim()
-        // Remove arbitrary block wrapping if any
-        // AKA
-        //  { console.log('hi') } -> console.log('hi')
-        .replace(/^{/, '')
-        .replace(/}$/, '')
-        .trim();
-};
 /**
  * Parses function declarations within the Mitosis copmonent's body to JSON
  */
@@ -94,10 +74,9 @@ var componentFunctionToJson = function (node, context) {
         var item = _b[_i];
         if (types.isExpressionStatement(item)) {
             var expression = item.expression;
-            if (types.isCallExpression(expression)) {
-                if (types.isIdentifier(expression.callee)) {
-                    if (expression.callee.name === 'setContext' ||
-                        expression.callee.name === 'provideContext') {
+            if (types.isCallExpression(expression) && types.isIdentifier(expression.callee)) {
+                switch (expression.callee.name) {
+                    case hooks_1.HOOKS.SET_CONTEXT: {
                         var keyNode = expression.arguments[0];
                         var valueNode = expression.arguments[1];
                         if (types.isIdentifier(keyNode)) {
@@ -128,19 +107,21 @@ var componentFunctionToJson = function (node, context) {
                                 };
                             }
                         }
+                        break;
                     }
-                    else if (expression.callee.name === 'onMount') {
+                    case hooks_1.HOOKS.MOUNT: {
                         var firstArg = expression.arguments[0];
                         if (types.isFunctionExpression(firstArg) || types.isArrowFunctionExpression(firstArg)) {
-                            var code = processHookCode(firstArg);
+                            var code = (0, helpers_2.processHookCode)(firstArg);
                             hooks.onMount = { code: code };
                         }
+                        break;
                     }
-                    else if (expression.callee.name === 'onUpdate') {
+                    case hooks_1.HOOKS.UPDATE: {
                         var firstArg = expression.arguments[0];
                         var secondArg = expression.arguments[1];
                         if (types.isFunctionExpression(firstArg) || types.isArrowFunctionExpression(firstArg)) {
-                            var code = processHookCode(firstArg);
+                            var code = (0, helpers_2.processHookCode)(firstArg);
                             if (!secondArg ||
                                 (types.isArrayExpression(secondArg) && secondArg.elements.length > 0)) {
                                 var depsCode = secondArg ? (0, generator_1.default)(secondArg).code : '';
@@ -152,29 +133,34 @@ var componentFunctionToJson = function (node, context) {
                                 ], false);
                             }
                         }
+                        break;
                     }
-                    else if (expression.callee.name === 'onUnMount') {
+                    case hooks_1.HOOKS.UNMOUNT: {
                         var firstArg = expression.arguments[0];
                         if (types.isFunctionExpression(firstArg) || types.isArrowFunctionExpression(firstArg)) {
-                            var code = processHookCode(firstArg);
+                            var code = (0, helpers_2.processHookCode)(firstArg);
                             hooks.onUnMount = { code: code };
                         }
+                        break;
                     }
-                    else if (expression.callee.name === 'onInit') {
+                    case hooks_1.HOOKS.INIT: {
                         var firstArg = expression.arguments[0];
                         if (types.isFunctionExpression(firstArg) || types.isArrowFunctionExpression(firstArg)) {
-                            var code = processHookCode(firstArg);
+                            var code = (0, helpers_2.processHookCode)(firstArg);
                             hooks.onInit = { code: code };
                         }
+                        break;
                     }
-                    else if (expression.callee.name === hooks_1.HOOKS.DEFAULT_PROPS) {
-                        parseDefaultPropsHook(context.builder.component, expression);
+                    case hooks_1.HOOKS.DEFAULT_PROPS: {
+                        (0, hooks_2.parseDefaultPropsHook)(context.builder.component, expression);
+                        break;
                     }
-                    else if (expression.callee.name === hooks_1.HOOKS.STYLE) {
-                        context.builder.component.style = generateUseStyleCode(expression);
+                    case hooks_1.HOOKS.STYLE: {
+                        context.builder.component.style = (0, hooks_2.generateUseStyleCode)(expression);
+                        break;
                     }
-                    else if (expression.callee.name === hooks_2.METADATA_HOOK_NAME) {
-                        context.builder.component.meta[hooks_2.METADATA_HOOK_NAME] = __assign(__assign({}, context.builder.component.meta[hooks_2.METADATA_HOOK_NAME]), (0, helpers_1.parseCodeJson)(expression.arguments[0]));
+                    case hooks_1.HOOKS.METADATA: {
+                        context.builder.component.meta[hooks_1.HOOKS.METADATA] = __assign(__assign({}, context.builder.component.meta[hooks_1.HOOKS.METADATA]), (0, helpers_1.parseCodeJson)(expression.arguments[0]));
                     }
                 }
             }
@@ -219,9 +205,7 @@ var componentFunctionToJson = function (node, context) {
                         }
                     }
                 }
-                // Solid store format, like:
-                // const state = useStore({...})
-                if (init.callee.name === hooks_1.HOOKS.STORE) {
+                else if (init.callee.name === hooks_1.HOOKS.STORE) {
                     var firstArg = init.arguments[0];
                     if (types.isObjectExpression(firstArg)) {
                         var useStoreState = (0, state_1.parseStateObjectToMitosisState)(firstArg);

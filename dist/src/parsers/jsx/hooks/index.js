@@ -33,26 +33,29 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.collectModuleScopeHooks = exports.METADATA_HOOK_NAME = void 0;
-var babel = __importStar(require("@babel/core"));
-var hooks_1 = require("../../constants/hooks");
-var function_parser_1 = require("./function-parser");
-var helpers_1 = require("./helpers");
-var types = babel.types;
-var getHook = function (node) {
-    var item = node;
-    if (types.isExpressionStatement(item)) {
-        var expression = item.expression;
-        if (types.isCallExpression(expression)) {
-            if (types.isIdentifier(expression.callee)) {
-                return expression;
-            }
-        }
-    }
-    return null;
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-exports.METADATA_HOOK_NAME = 'useMetadata';
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.collectModuleScopeHooks = exports.generateUseStyleCode = exports.parseDefaultPropsHook = void 0;
+var babel = __importStar(require("@babel/core"));
+var generator_1 = __importDefault(require("@babel/generator"));
+var hooks_1 = require("../../../constants/hooks");
+var helpers_1 = require("../helpers");
+var state_1 = require("../state");
+var helpers_2 = require("./helpers");
+var types = babel.types;
+function parseDefaultPropsHook(component, expression) {
+    var firstArg = expression.arguments[0];
+    if (types.isObjectExpression(firstArg)) {
+        component.defaultProps = (0, state_1.parseStateObjectToMitosisState)(firstArg, false);
+    }
+}
+exports.parseDefaultPropsHook = parseDefaultPropsHook;
+function generateUseStyleCode(expression) {
+    return (0, generator_1.default)(expression.arguments[0]).code.replace(/(^("|'|`)|("|'|`)$)/g, '');
+}
+exports.generateUseStyleCode = generateUseStyleCode;
 /**
  * Transform useMetadata({...}) onto the component JSON as
  * meta: { metadataHook: { ... }}
@@ -60,22 +63,17 @@ exports.METADATA_HOOK_NAME = 'useMetadata';
  * This function collects metadata and removes the statement from
  * the returned nodes array
  */
-var collectModuleScopeHooks = function (nodes, component, options) {
+var collectModuleScopeHooks = function (component, options) { return function (nodes) {
     return nodes.filter(function (node) {
-        var hook = getHook(node);
+        var hook = (0, helpers_2.getHook)(node);
         if (!hook) {
             return true;
         }
         if (types.isIdentifier(hook.callee)) {
-            var metadataHooks = new Set((options.jsonHookNames || []).concat(exports.METADATA_HOOK_NAME));
+            var metadataHooks = new Set((options.jsonHookNames || []).concat(hooks_1.HOOKS.METADATA));
             if (metadataHooks.has(hook.callee.name)) {
                 try {
-                    if (component.meta[hook.callee.name]) {
-                        component.meta[hook.callee.name] = __assign(__assign({}, component.meta[hook.callee.name]), (0, helpers_1.parseCodeJson)(hook.arguments[0]));
-                    }
-                    else {
-                        component.meta[hook.callee.name] = (0, helpers_1.parseCodeJson)(hook.arguments[0]);
-                    }
+                    component.meta[hook.callee.name] = __assign(__assign({}, (component.meta[hook.callee.name] || {})), (0, helpers_1.parseCodeJson)(hook.arguments[0]));
                     return false;
                 }
                 catch (e) {
@@ -84,14 +82,14 @@ var collectModuleScopeHooks = function (nodes, component, options) {
                 }
             }
             else if (hook.callee.name === hooks_1.HOOKS.STYLE) {
-                component.style = (0, function_parser_1.generateUseStyleCode)(hook);
+                component.style = generateUseStyleCode(hook);
                 return false;
             }
             else if (hook.callee.name === hooks_1.HOOKS.DEFAULT_PROPS) {
-                (0, function_parser_1.parseDefaultPropsHook)(component, hook);
+                parseDefaultPropsHook(component, hook);
             }
         }
         return true;
     });
-};
+}; };
 exports.collectModuleScopeHooks = collectModuleScopeHooks;
