@@ -1,3 +1,4 @@
+import { ComponentMetadata } from '../../../types/metadata';
 import { MitosisComponent } from '../../../types/mitosis-component';
 import { File } from '../src-generator';
 /**
@@ -23,9 +24,9 @@ export declare type StateValues = Record<PropertyName, StateValue>;
 export declare function emitUseStore({ file, stateInit, isDeep, }: {
     file: File;
     stateInit: StateInit;
-    isDeep: boolean;
+    isDeep?: boolean;
 }): void;
-export declare function emitStateMethodsAndRewriteBindings(file: File, component: MitosisComponent, metadata: Record<string, any>): StateInit;
+export declare function emitStateMethodsAndRewriteBindings(file: File, component: MitosisComponent, metadata?: ComponentMetadata): StateInit;
 export declare function getLexicalScopeVars(component: MitosisComponent): string[];
 export declare type MethodMap = Record<string, 'method' | 'getter'>;
 export declare function getStateMethodsAndGetters(state: MitosisComponent['state']): MethodMap;

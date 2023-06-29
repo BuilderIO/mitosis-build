@@ -229,7 +229,12 @@ var componentToAngular = function (userOptions) {
         var metaOutputVars = ((_d = (_c = json.meta) === null || _c === void 0 ? void 0 : _c.useMetadata) === null || _d === void 0 ? void 0 : _d.outputs) || [];
         var outputVars = (0, lodash_1.uniq)(__spreadArray(__spreadArray([], metaOutputVars, true), (0, get_prop_functions_1.getPropFunctions)(json), true));
         var stateVars = Object.keys((json === null || json === void 0 ? void 0 : json.state) || {});
-        var options = (0, merge_options_1.initializeOptions)('angular', DEFAULT_OPTIONS, userOptions);
+        var options = (0, merge_options_1.initializeOptions)({
+            target: 'angular',
+            component: _component,
+            defaults: DEFAULT_OPTIONS,
+            userOptions: userOptions,
+        });
         options.plugins = __spreadArray(__spreadArray([], (options.plugins || []), true), [
             (0, process_code_1.CODE_PROCESSOR_PLUGIN)(function (codeType) {
                 switch (codeType) {

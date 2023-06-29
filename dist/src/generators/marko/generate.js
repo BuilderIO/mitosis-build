@@ -137,7 +137,11 @@ var componentToMarko = function (userOptions) {
         var _b, _c, _d;
         var component = _a.component;
         var json = (0, fast_clone_1.fastClone)(component);
-        var options = (0, merge_options_1.initializeOptions)('marko', __assign(__assign({}, userOptions), { component: json }));
+        var options = (0, merge_options_1.initializeOptions)({
+            target: 'marko',
+            component: component,
+            defaults: __assign(__assign({}, userOptions), { component: json }),
+        });
         if (options.plugins) {
             json = (0, plugins_1.runPreJsonPlugins)(json, options.plugins);
         }

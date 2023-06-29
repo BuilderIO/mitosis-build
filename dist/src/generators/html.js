@@ -419,7 +419,11 @@ var componentToHtml = function (_options) {
     return function (_a) {
         var _b, _c, _d, _e, _f, _g, _h, _j, _k;
         var component = _a.component;
-        var options = (0, merge_options_1.initializeOptions)('html', __assign(__assign({}, _options), { onChangeJsById: {}, js: '', namesMap: {}, format: 'script' }));
+        var options = (0, merge_options_1.initializeOptions)({
+            target: 'html',
+            component: component,
+            defaults: __assign(__assign({}, _options), { onChangeJsById: {}, js: '', namesMap: {}, format: 'script' }),
+        });
         var json = (0, fast_clone_1.fastClone)(component);
         if (options.plugins) {
             json = (0, plugins_1.runPreJsonPlugins)(json, options.plugins);
@@ -510,7 +514,11 @@ var componentToCustomElement = function (_options) {
         var component = _a.component;
         var ComponentName = component.name;
         var kebabName = (0, lodash_1.kebabCase)(ComponentName);
-        var options = (0, merge_options_1.initializeOptions)('customElement', __assign(__assign({ prefix: kebabName }, _options), { onChangeJsById: {}, js: '', namesMap: {}, format: 'class' }));
+        var options = (0, merge_options_1.initializeOptions)({
+            target: 'customElement',
+            component: component,
+            defaults: __assign(__assign({ prefix: kebabName }, _options), { onChangeJsById: {}, js: '', namesMap: {}, format: 'class' }),
+        });
         var json = (0, fast_clone_1.fastClone)(component);
         if (options.plugins) {
             json = (0, plugins_1.runPreJsonPlugins)(json, options.plugins);

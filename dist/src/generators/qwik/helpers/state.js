@@ -74,7 +74,7 @@ function emitStateMethodsAndRewriteBindings(file, component, metadata) {
     var lexicalArgs = getLexicalScopeVars(component);
     var state = emitStateMethods(file, component.state, lexicalArgs);
     var methodMap = getStateMethodsAndGetters(component.state);
-    rewriteCodeExpr(component, methodMap, lexicalArgs, (_a = metadata.qwik) === null || _a === void 0 ? void 0 : _a.replace);
+    rewriteCodeExpr(component, methodMap, lexicalArgs, (_a = metadata === null || metadata === void 0 ? void 0 : metadata.qwik) === null || _a === void 0 ? void 0 : _a.replace);
     return state;
 }
 exports.emitStateMethodsAndRewriteBindings = emitStateMethodsAndRewriteBindings;

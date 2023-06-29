@@ -92,7 +92,7 @@ var componentToStencil = function (_options) {
     return function (_a) {
         var _b, _c, _d, _e;
         var component = _a.component;
-        var options = (0, merge_options_1.initializeOptions)('stencil', _options);
+        var options = (0, merge_options_1.initializeOptions)({ target: 'stencil', component: component, defaults: _options });
         var json = (0, fast_clone_1.fastClone)(component);
         if (options.plugins) {
             json = (0, plugins_1.runPreJsonPlugins)(json, options.plugins);

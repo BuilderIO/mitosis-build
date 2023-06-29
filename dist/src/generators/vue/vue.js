@@ -105,7 +105,12 @@ var componentToVue = function (userOptions) {
     return function (_a) {
         var _b, _c, _d, _e, _f, _g, _h;
         var component = _a.component, path = _a.path;
-        var options = (0, merge_options_1.initializeOptions)((userOptions === null || userOptions === void 0 ? void 0 : userOptions.vueVersion) === 2 ? 'vue2' : 'vue3', BASE_OPTIONS, userOptions);
+        var options = (0, merge_options_1.initializeOptions)({
+            target: (userOptions === null || userOptions === void 0 ? void 0 : userOptions.vueVersion) === 2 ? 'vue2' : 'vue3',
+            component: component,
+            defaults: BASE_OPTIONS,
+            userOptions: userOptions,
+        });
         options.plugins.unshift((0, process_code_1.CODE_PROCESSOR_PLUGIN)(function (codeType) {
             if (options.api === 'composition') {
                 switch (codeType) {

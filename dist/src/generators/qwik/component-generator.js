@@ -77,7 +77,12 @@ var componentToQwik = function (userOptions) {
         var _component = _a.component, path = _a.path;
         // Make a copy we can safely mutate, similar to babel's toolchain
         var component = (0, fast_clone_1.fastClone)(_component);
-        var options = (0, merge_options_1.initializeOptions)('qwik', DEFAULT_OPTIONS, userOptions);
+        var options = (0, merge_options_1.initializeOptions)({
+            target: 'qwik',
+            component: component,
+            defaults: DEFAULT_OPTIONS,
+            userOptions: userOptions,
+        });
         component = (0, plugins_1.runPreJsonPlugins)(component, options.plugins);
         component = (0, plugins_1.runPostJsonPlugins)(component, options.plugins);
         var isTypeScript = !!options.typescript;
@@ -92,7 +97,7 @@ var componentToQwik = function (userOptions) {
             emitImports(file, component);
             emitTypes(file, component);
             emitExports(file, component);
-            var metadata_1 = component.meta.useMetadata || {};
+            var metadata_1 = component.meta.useMetadata;
             var isLightComponent = ((_c = (_b = metadata_1 === null || metadata_1 === void 0 ? void 0 : metadata_1.qwik) === null || _b === void 0 ? void 0 : _b.component) === null || _c === void 0 ? void 0 : _c.isLight) || false;
             var mutable_1 = ((_d = metadata_1 === null || metadata_1 === void 0 ? void 0 : metadata_1.qwik) === null || _d === void 0 ? void 0 : _d.mutable) || [];
             var imports_1 = ((_e = metadata_1 === null || metadata_1 === void 0 ? void 0 : metadata_1.qwik) === null || _e === void 0 ? void 0 : _e.imports) || {};

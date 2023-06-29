@@ -163,7 +163,7 @@ var componentToAlpine = function (_options) {
     if (_options === void 0) { _options = {}; }
     return function (_a) {
         var component = _a.component;
-        var options = (0, merge_options_1.initializeOptions)('alpine', _options);
+        var options = (0, merge_options_1.initializeOptions)({ target: 'alpine', component: component, defaults: _options });
         var json = (0, fast_clone_1.fastClone)(component);
         if (options.plugins) {
             json = (0, plugins_1.runPreJsonPlugins)(json, options.plugins);

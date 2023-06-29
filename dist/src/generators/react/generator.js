@@ -148,7 +148,12 @@ var componentToReact = function (reactOptions) {
                     : reactOptions.rsc
                         ? 'rsc'
                         : 'react';
-        var options = (0, merge_options_1.initializeOptions)(target, DEFAULT_OPTIONS, reactOptions);
+        var options = (0, merge_options_1.initializeOptions)({
+            target: target,
+            component: component,
+            defaults: DEFAULT_OPTIONS,
+            userOptions: reactOptions,
+        });
         if (options.plugins) {
             json = (0, plugins_1.runPreJsonPlugins)(json, options.plugins);
         }
