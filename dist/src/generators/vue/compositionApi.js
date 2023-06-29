@@ -66,7 +66,7 @@ function generateCompositionApiScript(component, options, template, props, onUpd
         var key = _a[0], context = _a[1];
         return "const ".concat(key, " = inject(").concat((0, helpers_1.getContextKey)(context), ")");
     }).join('\n'), (_b = Object.values(component.context.set)) === null || _b === void 0 ? void 0 : _b.map(function (contextSet) {
-        var contextValue = (0, helpers_1.getContextValue)({ json: component, options: options })(contextSet);
+        var contextValue = (0, helpers_1.getContextValue)(contextSet);
         var key = (0, helpers_1.getContextKey)(contextSet);
         return "provide(".concat(key, ", ").concat(contextValue, ")");
     }).join('\n'), (_c = Object.keys(component.refs)) === null || _c === void 0 ? void 0 : _c.map(function (key) {

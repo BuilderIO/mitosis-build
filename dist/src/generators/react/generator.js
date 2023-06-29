@@ -102,7 +102,7 @@ function provideContext(json, options) {
             }
             else if (ref) {
                 json.children = [
-                    (0, create_mitosis_node_1.createMitosisNode)(__assign({ name: 'Context.Provider', children: json.children }, (ref && {
+                    (0, create_mitosis_node_1.createMitosisNode)(__assign({ name: "".concat(name_2, ".Provider"), children: json.children }, (ref && {
                         bindings: {
                             value: (0, bindings_1.createSingleBinding)({ code: ref }),
                         },

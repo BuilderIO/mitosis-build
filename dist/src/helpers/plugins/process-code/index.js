@@ -27,6 +27,7 @@ var preProcessNodeCode = function (_a) {
 };
 var createCodeProcessorPlugin = function (codeProcessor) {
     return function (json) {
+        var _a;
         function processHook(key, hook) {
             hook.code = codeProcessor('hooks', json)(hook.code, key);
             if (hook.deps) {
@@ -55,11 +56,34 @@ var createCodeProcessorPlugin = function (codeProcessor) {
             var state = json.state[key];
             if (state) {
                 state.code = codeProcessor('state', json)(state.code, key);
+                if (state.typeParameter) {
+                    state.typeParameter = codeProcessor('types', json)(state.typeParameter, key);
+                }
+            }
+        }
+        for (var key in json.context.set) {
+            var set = json.context.set[key];
+            if (set.ref) {
+                set.ref = codeProcessor('context-set', json)(set.ref, key);
+            }
+            if (set.value) {
+                for (var key_1 in set.value) {
+                    var value = set.value[key_1];
+                    if (value) {
+                        value.code = codeProcessor('context-set', json)(value.code, key_1);
+                    }
+                }
             }
         }
         (0, traverse_nodes_1.traverseNodes)(json, function (node) {
             preProcessNodeCode({ json: node, codeProcessor: codeProcessor, parentComponent: json });
         });
+        if (json.types) {
+            json.types = (_a = json.types) === null || _a === void 0 ? void 0 : _a.map(function (type) { return codeProcessor('types', json)(type, ''); });
+        }
+        if (json.propsTypeRef) {
+            json.propsTypeRef = codeProcessor('types', json)(json.propsTypeRef, '');
+        }
     };
 };
 exports.createCodeProcessorPlugin = createCodeProcessorPlugin;

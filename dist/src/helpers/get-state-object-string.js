@@ -52,7 +52,7 @@ var convertStateMemberToString = function (_a) {
                 if (data === false) {
                     return undefined;
                 }
-                return "".concat(keyPrefix, " ").concat(key).concat(keyValueDelimiter, " ").concat(valueMapper(code, 'data', typeParameter));
+                return "".concat(keyPrefix, " ").concat(key).concat(keyValueDelimiter, " ").concat(valueMapper(code, 'data', typeParameter, key));
             }
             default:
                 break;

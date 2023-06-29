@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.replacePropsIdentifier = exports.replaceStateIdentifier = exports.replaceIdentifiers = void 0;
+exports.replaceNodes = exports.replacePropsIdentifier = exports.replaceStateIdentifier = exports.replaceIdentifiers = void 0;
 var core_1 = require("@babel/core");
 var generator_1 = __importDefault(require("@babel/generator"));
 var function_1 = require("fp-ts/lib/function");
@@ -59,7 +59,7 @@ var _replaceIdentifiers = function (path, _a) {
             }
             else {
                 try {
-                    var newMemberExpression = (0, function_1.pipe)(getToParam(path), to, function (expression) {
+                    var newMemberExpression = (0, function_1.pipe)(getToParam(path), function (x) { return to(x, memberExpressionObject.name); }, function (expression) {
                         var _a = expression.split('.'), head = _a[0], tail = _a.slice(1);
                         return [head, tail.join('.')];
                     }, function (_a) {
@@ -102,6 +102,9 @@ var _replaceIdentifiers = function (path, _a) {
         }
     }
 };
+/**
+ * @deprecated Use `replaceNodes` instead.
+ */
 var replaceIdentifiers = function (_a) {
     var code = _a.code, from = _a.from, to = _a.to;
     try {
@@ -132,11 +135,6 @@ var replaceIdentifiers = function (_a) {
         function (code) { return code.trim(); });
     }
     catch (err) {
-        // console.error('could not replace identifiers for ', {
-        //   code,
-        //   from: from.toString(),
-        //   to: to?.toString(),
-        // });
         throw err;
     }
 };
@@ -149,3 +147,50 @@ var replacePropsIdentifier = function (to) { return function (code) {
     return (0, exports.replaceIdentifiers)({ code: code, from: 'props', to: to });
 }; };
 exports.replacePropsIdentifier = replacePropsIdentifier;
+/**
+ * Replaces all instances of a Babel AST Node with a new Node within a code string.
+ * Uses `generate()` to convert the Node to a string and compare them.
+ */
+var replaceNodes = function (_a) {
+    var code = _a.code, nodeMaps = _a.nodeMaps;
+    var searchAndReplace = function (path) {
+        var _a, _b, _c, _d;
+        if ((_b = (_a = path.node) === null || _a === void 0 ? void 0 : _a._builder_meta) === null || _b === void 0 ? void 0 : _b.newlyGenerated) {
+            return;
+        }
+        for (var _i = 0, nodeMaps_1 = nodeMaps; _i < nodeMaps_1.length; _i++) {
+            var _e = nodeMaps_1[_i], from = _e.from, to = _e.to;
+            if ((_d = (_c = path.node) === null || _c === void 0 ? void 0 : _c._builder_meta) === null || _d === void 0 ? void 0 : _d.newlyGenerated) {
+                return;
+            }
+            // if (path.node.type !== from.type) return;
+            if ((0, generator_1.default)(path.node).code === (0, generator_1.default)(from).code) {
+                var x = core_1.types.cloneNode(to);
+                x._builder_meta = { newlyGenerated: true };
+                try {
+                    path.replaceWith(x);
+                }
+                catch (err) {
+                    console.log('error replacing', {
+                        code: code,
+                        orig: (0, generator_1.default)(path.node).code,
+                        to: (0, generator_1.default)(x).code,
+                    });
+                    // throw err;
+                }
+            }
+        }
+    };
+    return (0, babel_transform_1.babelTransformExpression)(code, {
+        MemberExpression: function (path) {
+            searchAndReplace(path);
+        },
+        Identifier: function (path) {
+            searchAndReplace(path);
+        },
+        OptionalMemberExpression: function (path) {
+            searchAndReplace(path);
+        },
+    });
+};
+exports.replaceNodes = replaceNodes;

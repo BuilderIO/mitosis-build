@@ -39,36 +39,67 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.parseStateObjectToMitosisState = exports.mapStateIdentifiers = void 0;
 var babel = __importStar(require("@babel/core"));
+var generator_1 = __importDefault(require("@babel/generator"));
 var function_1 = require("fp-ts/lib/function");
 var traverse_1 = __importDefault(require("traverse"));
 var babel_transform_1 = require("../../helpers/babel-transform");
 var capitalize_1 = require("../../helpers/capitalize");
 var is_mitosis_node_1 = require("../../helpers/is-mitosis-node");
-var replace_identifiers_1 = require("../../helpers/replace-identifiers");
+var process_code_1 = require("../../helpers/plugins/process-code");
 var helpers_1 = require("./helpers");
 var types = babel.types;
 function mapStateIdentifiersInExpression(expression, stateProperties) {
     var setExpressions = stateProperties.map(function (propertyName) { return "set".concat((0, capitalize_1.capitalize)(propertyName)); });
-    return (0, function_1.pipe)((0, replace_identifiers_1.replaceIdentifiers)({
-        code: expression,
-        from: stateProperties,
-        to: function (name) { return "state.".concat(name); },
-    }), function (code) {
-        return (0, babel_transform_1.babelTransformExpression)(
-        // foo -> state.foo
-        code, {
-            CallExpression: function (path) {
-                if (types.isIdentifier(path.node.callee)) {
-                    if (setExpressions.includes(path.node.callee.name)) {
-                        // setFoo -> foo
-                        var statePropertyName = (0, helpers_1.uncapitalize)(path.node.callee.name.slice(3));
-                        // setFoo(...) -> state.foo = ...
-                        path.replaceWith(types.assignmentExpression('=', types.identifier("state.".concat(statePropertyName)), path.node.arguments[0]));
+    return (0, function_1.pipe)((0, babel_transform_1.babelTransformExpression)(expression, {
+        Identifier: function (path) {
+            if (stateProperties.includes(path.node.name)) {
+                if (
+                // ignore member expressions, as the `stateProperty` is going to be at the module scope.
+                !(types.isMemberExpression(path.parent) && path.parent.property === path.node) &&
+                    !(types.isOptionalMemberExpression(path.parent) && path.parent.property === path.node) &&
+                    // ignore declarations of that state property, e.g. `function foo() {}`
+                    !types.isDeclaration(path.parent) &&
+                    !types.isFunctionDeclaration(path.parent) &&
+                    !(types.isFunctionExpression(path.parent) && path.parent.id === path.node) &&
+                    // ignore object keys
+                    !(types.isObjectProperty(path.parent) && path.parent.key === path.node)) {
+                    var hasTypeParent_1 = false;
+                    path.findParent(function (parent) {
+                        if (types.isTSType(parent) || types.isTSInterfaceBody(parent)) {
+                            hasTypeParent_1 = true;
+                            return true;
+                        }
+                        return false;
+                    });
+                    if (hasTypeParent_1) {
+                        return;
+                    }
+                    var newExpression = types.memberExpression(types.identifier('state'), types.identifier(path.node.name));
+                    try {
+                        path.replaceWith(newExpression);
+                    }
+                    catch (err) {
+                        console.log('err: ', {
+                            from: (0, generator_1.default)(path.parent).code,
+                            fromChild: (0, generator_1.default)(path.node).code,
+                            to: newExpression,
+                            // err,
+                        });
                     }
                 }
-            },
-        });
-    }, function (code) { return code.trim(); });
+            }
+        },
+        CallExpression: function (path) {
+            if (types.isIdentifier(path.node.callee)) {
+                if (setExpressions.includes(path.node.callee.name)) {
+                    // setFoo -> foo
+                    var statePropertyName = (0, helpers_1.uncapitalize)(path.node.callee.name.slice(3));
+                    // setFoo(...) -> state.foo = ...
+                    path.replaceWith(types.assignmentExpression('=', types.identifier("state.".concat(statePropertyName)), path.node.arguments[0]));
+                }
+            }
+        },
+    }), function (code) { return code.trim(); });
 }
 var consolidateClassBindings = function (item) {
     if (item.bindings.className) {
@@ -102,21 +133,10 @@ var consolidateClassBindings = function (item) {
  */
 function mapStateIdentifiers(json) {
     var stateProperties = Object.keys(json.state);
-    for (var key in json.state) {
-        var stateVal = json.state[key];
-        if (typeof (stateVal === null || stateVal === void 0 ? void 0 : stateVal.code) === 'string' && stateVal.type === 'function') {
-            json.state[key] = {
-                code: mapStateIdentifiersInExpression(stateVal.code, stateProperties),
-                type: 'function',
-            };
-        }
-    }
+    var plugin = (0, process_code_1.createCodeProcessorPlugin)(function () { return function (code) { return mapStateIdentifiersInExpression(code, stateProperties); }; });
+    plugin(json);
     (0, traverse_1.default)(json).forEach(function (item) {
         if ((0, is_mitosis_node_1.isMitosisNode)(item)) {
-            for (var key in item.bindings) {
-                var value = item.bindings[key];
-                item.bindings[key].code = mapStateIdentifiersInExpression(value.code, stateProperties);
-            }
             consolidateClassBindings(item);
         }
     });
@@ -145,11 +165,13 @@ var processStateObjectSlice = function (item) {
                 return {
                     code: (0, helpers_1.parseCode)(item.value.expression).trim(),
                     type: 'property',
+                    propertyType: 'normal',
                 };
             }
             return {
                 code: (0, helpers_1.parseCode)(item.value).trim(),
                 type: 'property',
+                propertyType: 'normal',
             };
         }
     }
@@ -180,11 +202,13 @@ var processDefaultPropsSlice = function (item) {
                 return {
                     code: (0, helpers_1.parseCode)(item.value.expression),
                     type: 'property',
+                    propertyType: 'normal',
                 };
             }
             return {
                 code: (0, helpers_1.parseCode)(item.value),
                 type: 'property',
+                propertyType: 'normal',
             };
         }
     }

@@ -14,6 +14,7 @@ function parseAction(json, nodeReference, attribute) {
     json.state[actionHandler] = {
         code: 'null',
         type: 'property',
+        propertyType: 'normal',
     };
     var initHandler = "if (".concat(nodeReference, ") { ").concat(actionHandler, " = ").concat(methodName, "(").concat(nodeReference, ", ").concat(parameters, "); };\n");
     // Handle Mount

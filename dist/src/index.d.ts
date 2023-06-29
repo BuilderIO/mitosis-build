@@ -1,6 +1,7 @@
 import { JSX } from '@builder.io/mitosis/jsx-runtime';
 import { Dictionary } from './helpers/typescript';
-import { TargetBlock } from './types/mitosis-component';
+import { ComponentMetadata } from './types/metadata';
+import { ReactivityType, TargetBlock } from './types/mitosis-component';
 export * from './flow';
 export * from './generators/alpine';
 export * from './generators/angular';
@@ -50,19 +51,34 @@ declare function Provider<T>(props: {
 export declare type Context<T> = {
     Provider: typeof Provider<T>;
 };
+export declare type Signal<T> = {
+    value: T;
+};
 export declare function useStore<T>(obj: T): T;
-export declare function useState<T>(obj: T): [T, (value: T) => void];
+export declare function useState<T>(obj: T, args: {
+    reactive: true;
+}): [Signal<T>, (value: T) => void];
+export declare function useState<T>(obj: T, args?: {
+    reactive?: boolean;
+}): [T, (value: T) => void];
 export declare function useRef<T>(obj?: null | void | T): T;
-export declare function useContext<T = Dictionary<any>>(key: Context<T>): T;
-export declare function createContext<T = Dictionary<any>>(value: T): Context<T>;
-export declare function setContext<T = Dictionary<any>>(key: Context<T>, value: Partial<T>): void;
+export declare function useContext<T = Dictionary<any>>(key: Context<T>, type?: ReactivityType): T;
+export declare function createContext<T = Dictionary<any>>(value: T, args: {
+    reactive: true;
+}): Context<Signal<T>>;
+export declare function createContext<T = Dictionary<any>>(value: T, args?: {
+    reactive?: boolean;
+}): Context<T>;
+export declare function setContext<T = Dictionary<any>>(key: Context<T>, value: Partial<T>, options?: {
+    type?: ReactivityType;
+}): void;
 export declare function onMount(fn: () => any): void;
 export declare function onUpdate(fn: () => any, deps?: any[]): void;
 export declare function onInit(fn: () => any): void;
 export declare function onUnMount(fn: () => any): void;
 export declare function useDynamicTag(fn: () => any): void;
 export declare function onError(fn: () => any): void;
-export declare function useMetadata(obj: object): void;
+export declare function useMetadata(obj: ComponentMetadata): void;
 export declare function useDefaultProps<T = Dictionary<any>>(value: T): T;
 export declare function useStyle(value: string): void;
 export declare function useTarget<Return>(dict: TargetBlock<Return>): Return;

@@ -32,24 +32,17 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
     return to.concat(ar || Array.prototype.slice.call(from));
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.handleImportDeclaration = void 0;
+exports.handleImportDeclaration = exports.mapImportDeclarationToMitosisImport = void 0;
 var babel = __importStar(require("@babel/core"));
 var types = babel.types;
-var handleImportDeclaration = function (_a) {
-    var options = _a.options, path = _a.path, context = _a.context;
-    // @builder.io/mitosis or React imports compile away
-    var customPackages = (options === null || options === void 0 ? void 0 : options.compileAwayPackages) || [];
-    if (__spreadArray(['react', '@builder.io/mitosis', '@emotion/react'], customPackages, true).includes(path.node.source.value)) {
-        path.remove();
-        return;
-    }
+var mapImportDeclarationToMitosisImport = function (node) {
     var importObject = {
         imports: {},
-        path: path.node.source.value,
-        importKind: path.node.importKind,
+        path: node.source.value,
+        importKind: node.importKind,
     };
-    for (var _i = 0, _b = path.node.specifiers; _i < _b.length; _i++) {
-        var specifier = _b[_i];
+    for (var _i = 0, _a = node.specifiers; _i < _a.length; _i++) {
+        var specifier = _a[_i];
         if (types.isImportSpecifier(specifier)) {
             importObject.imports[specifier.local.name] = specifier.imported.name;
         }
@@ -60,6 +53,18 @@ var handleImportDeclaration = function (_a) {
             importObject.imports[specifier.local.name] = '*';
         }
     }
+    return importObject;
+};
+exports.mapImportDeclarationToMitosisImport = mapImportDeclarationToMitosisImport;
+var handleImportDeclaration = function (_a) {
+    var options = _a.options, path = _a.path, context = _a.context;
+    // @builder.io/mitosis or React imports compile away
+    var customPackages = (options === null || options === void 0 ? void 0 : options.compileAwayPackages) || [];
+    if (__spreadArray(['react', '@builder.io/mitosis', '@emotion/react'], customPackages, true).includes(path.node.source.value)) {
+        path.remove();
+        return;
+    }
+    var importObject = (0, exports.mapImportDeclarationToMitosisImport)(path.node);
     context.builder.component.imports.push(importObject);
     path.remove();
 };

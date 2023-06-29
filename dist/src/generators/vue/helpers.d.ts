@@ -18,7 +18,7 @@ declare type ProcessBinding = {
     codeType?: 'state' | 'hooks' | 'bindings' | 'hooks-deps' | 'properties';
 };
 export declare const processBinding: ({ code, options, json, preserveGetter, thisPrefix, codeType, }: ProcessBinding) => string;
-export declare const getContextValue: (args: Pick<ProcessBinding, 'options' | 'json' | 'thisPrefix'>) => ({ name, ref, value }: ContextSetInfo) => Nullable<string>;
+export declare const getContextValue: ({ name, ref, value }: ContextSetInfo) => Nullable<string>;
 export declare const checkIfContextHasStrName: (context: ContextGetInfo | ContextSetInfo) => boolean;
 export declare const getContextKey: (context: ContextGetInfo | ContextSetInfo) => string;
 export {};

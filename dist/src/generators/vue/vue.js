@@ -117,10 +117,15 @@ var componentToVue = function (userOptions) {
                         return (0, function_1.flow)(
                         // Strip types from any JS code that ends up in the template, because Vue does not support TS code in templates.
                         babel_transform_1.convertTypeScriptToJS, function (code) { return (0, helpers_1.processBinding)({ code: code, options: options, json: component, codeType: codeType }); });
+                    case 'context-set':
+                        return function (code) {
+                            return (0, helpers_1.processBinding)({ code: code, options: options, json: component, preserveGetter: true });
+                        };
                     case 'hooks-deps':
                         return (0, replace_identifiers_1.replaceStateIdentifier)(null);
                     case 'properties':
                     case 'dynamic-jsx-elements':
+                    case 'types':
                         return function (c) { return c; };
                 }
             }
@@ -135,9 +140,20 @@ var componentToVue = function (userOptions) {
                     case 'properties':
                     case 'dynamic-jsx-elements':
                     case 'hooks-deps':
+                    case 'types':
                         return function (c) { return c; };
                     case 'state':
                         return function (c) { return (0, helpers_1.processBinding)({ code: c, options: options, json: component }); };
+                    case 'context-set':
+                        return function (code) {
+                            return (0, helpers_1.processBinding)({
+                                code: code,
+                                options: options,
+                                json: component,
+                                thisPrefix: '_this',
+                                preserveGetter: true,
+                            });
+                        };
                 }
             }
         }));

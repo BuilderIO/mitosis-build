@@ -40,7 +40,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.parseJsx = void 0;
 var babel = __importStar(require("@babel/core"));
 var generator_1 = __importDefault(require("@babel/generator"));
+var plugin_syntax_typescript_1 = __importDefault(require("@babel/plugin-syntax-typescript"));
+var preset_typescript_1 = __importDefault(require("@babel/preset-typescript"));
 var function_1 = require("fp-ts/lib/function");
+var hooks_1 = require("../../constants/hooks");
 var create_mitosis_component_1 = require("../../helpers/create-mitosis-component");
 var json_1 = require("../../helpers/json");
 var replace_new_lines_in_strings_1 = require("../../helpers/replace-new-lines-in-strings");
@@ -51,14 +54,12 @@ var element_parser_1 = require("./element-parser");
 var exports_1 = require("./exports");
 var function_parser_1 = require("./function-parser");
 var helpers_1 = require("./helpers");
-var hooks_1 = require("./hooks");
+var hooks_2 = require("./hooks");
+var use_target_1 = require("./hooks/use-target");
 var imports_1 = require("./imports");
 var props_1 = require("./props");
 var state_1 = require("./state");
-var plugin_syntax_typescript_1 = __importDefault(require("@babel/plugin-syntax-typescript"));
-var preset_typescript_1 = __importDefault(require("@babel/preset-typescript"));
-var hooks_2 = require("../../constants/hooks");
-var use_target_1 = require("./hooks/use-target");
+var types_identification_1 = require("./types-identification");
 var types = babel.types;
 var typescriptBabelPreset = [preset_typescript_1.default, { isTSX: true, allExtensions: true }];
 var beforeParse = function (path) {
@@ -116,7 +117,7 @@ function parseJsx(jsx, _options) {
                             return !types.isExportDefaultDeclaration(node) && types.isFunctionDeclaration(node);
                         })
                             .map(function (node) { return "export default ".concat((0, generator_1.default)(node).code); });
-                        var preComponentCode = (0, function_1.pipe)(path.node.body.filter(function (statement) { return !(0, helpers_1.isImportOrDefaultExport)(statement); }), (0, hooks_1.collectModuleScopeHooks)(context.builder.component, options), types.program, generator_1.default, function (generatorResult) { return generatorResult.code; });
+                        var preComponentCode = (0, function_1.pipe)(path.node.body.filter(function (statement) { return !(0, helpers_1.isImportOrDefaultExport)(statement); }), (0, hooks_2.collectModuleScopeHooks)(context.builder.component, options), types.program, generator_1.default, function (generatorResult) { return generatorResult.code; });
                         // TODO: support multiple? e.g. for others to add imports?
                         context.builder.component.hooks.preComponent = { code: preComponentCode };
                         path.replaceWith(types.program(keepStatements));
@@ -133,13 +134,11 @@ function parseJsx(jsx, _options) {
                                      */
                                     CallExpression: function (path) {
                                         var _a;
-                                        if (!types.isVariableDeclarator(path.parent))
-                                            return;
                                         if (!types.isCallExpression(path.node))
                                             return;
                                         if (!types.isIdentifier(path.node.callee))
                                             return;
-                                        if (path.node.callee.name !== hooks_2.HOOKS.TARGET)
+                                        if (path.node.callee.name !== hooks_1.HOOKS.TARGET)
                                             return;
                                         var targetBlock = (0, use_target_1.getUseTargetStatements)(path.node);
                                         if (!targetBlock)
@@ -182,8 +181,11 @@ function parseJsx(jsx, _options) {
             }); },
         ],
     });
-    var stringifiedMitosisComponent = (0, replace_new_lines_in_strings_1.stripNewlinesInStrings)(output
-        .code.trim()
+    if (!output || !output.code) {
+        throw new Error('Could not parse JSX');
+    }
+    var stringifiedMitosisComponent = (0, replace_new_lines_in_strings_1.stripNewlinesInStrings)(output.code
+        .trim()
         // Occasional issues where comments get kicked to the top. Full fix should strip these sooner
         .replace(/^\/\*[\s\S]*?\*\/\s*/, '')
         // Weird bug with adding a newline in a normal at end of a normal string that can't have one
@@ -195,6 +197,31 @@ function parseJsx(jsx, _options) {
     (0, state_1.mapStateIdentifiers)(mitosisComponent);
     (0, context_1.extractContextComponents)(mitosisComponent);
     mitosisComponent.subComponents = subComponentFunctions.map(function (item) { return parseJsx(item, options); });
+    var signalTypeImportName = (0, types_identification_1.getSignalImportName)(jsxToUse);
+    if (signalTypeImportName) {
+        mitosisComponent.signals = { signalTypeImportName: signalTypeImportName };
+    }
+    if (options.tsProject && options.filePath) {
+        var reactiveValues = (0, types_identification_1.findSignals)({
+            filePath: options.filePath,
+            project: options.tsProject.project,
+            signalSymbol: options.tsProject.signalSymbol,
+        });
+        reactiveValues.props.forEach(function (prop) {
+            var _a;
+            mitosisComponent.props = __assign(__assign({}, mitosisComponent.props), (_a = {}, _a[prop] = { propertyType: 'reactive' }, _a));
+        });
+        reactiveValues.state.forEach(function (state) {
+            if (!mitosisComponent.state[state])
+                return;
+            mitosisComponent.state[state].propertyType = 'reactive';
+        });
+        reactiveValues.context.forEach(function (context) {
+            if (!mitosisComponent.context.get[context])
+                return;
+            mitosisComponent.context.get[context].type = 'reactive';
+        });
+    }
     return mitosisComponent;
 }
 exports.parseJsx = parseJsx;

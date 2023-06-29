@@ -47,11 +47,24 @@ function parseContext(code, options) {
                                 if (types.isCallExpression(expression)) {
                                     if (types.isIdentifier(expression.callee) &&
                                         expression.callee.name === 'createContext') {
-                                        var firstArg = expression.arguments[0];
+                                        var _b = expression.arguments, firstArg = _b[0], secondArg = _b[1];
                                         if (types.isObjectExpression(firstArg)) {
                                             // TODO: support non object values by parsing any node type
                                             // like the logic within each property value of parseStateObject
                                             context.value = (0, state_1.parseStateObjectToMitosisState)(firstArg);
+                                            if (types.isObjectExpression(secondArg)) {
+                                                for (var _c = 0, _d = secondArg.properties; _c < _d.length; _c++) {
+                                                    var prop = _d[_c];
+                                                    if (!types.isProperty(prop) || !types.isIdentifier(prop.key))
+                                                        continue;
+                                                    var isReactive = prop.key.name === 'reactive';
+                                                    if (isReactive &&
+                                                        types.isBooleanLiteral(prop.value) &&
+                                                        prop.value.value) {
+                                                        context.type = 'reactive';
+                                                    }
+                                                }
+                                            }
                                             found = true;
                                         }
                                     }

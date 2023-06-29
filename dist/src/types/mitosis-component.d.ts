@@ -1,6 +1,7 @@
 import { Dictionary } from '../helpers/typescript';
 import { Target } from './config';
 import { JSONObject } from './json';
+import { ComponentMetadata } from './metadata';
 import { MitosisNode } from './mitosis-node';
 /**
  * @example
@@ -30,11 +31,15 @@ export interface MitosisImport {
     };
     importKind?: 'type' | 'typeof' | 'value' | null;
 }
-export interface ContextGetInfo {
+export declare type ReactivityType = 'normal' | 'reactive';
+export declare type ContextOptions = {
+    type?: ReactivityType;
+};
+export interface ContextGetInfo extends ContextOptions {
     name: string;
     path: string;
 }
-export interface ContextSetInfo {
+export interface ContextSetInfo extends ContextOptions {
     name: string;
     value?: MitosisState;
     ref?: string;
@@ -58,8 +63,9 @@ export interface MitosisExport {
 export declare type StateValueType = 'function' | 'getter' | 'method' | 'property';
 export declare type StateValue = {
     code: string;
-    type: StateValueType;
     typeParameter?: string;
+    type: StateValueType;
+    propertyType?: ReactivityType;
 };
 export declare type MitosisState = Dictionary<StateValue | undefined>;
 export declare type TargetBlock<Return, Targets extends Target = Target> = Partial<{
@@ -74,13 +80,21 @@ export declare type MitosisComponent = {
     imports: MitosisImport[];
     exports?: MitosisExports;
     meta: JSONObject & {
-        useMetadata?: JSONObject;
+        useMetadata?: ComponentMetadata;
     };
     inputs: MitosisComponentInput[];
     state: MitosisState;
     context: {
         get: Dictionary<ContextGetInfo>;
         set: Dictionary<ContextSetInfo>;
+    };
+    signals?: {
+        signalTypeImportName?: string;
+    };
+    props?: {
+        [name: string]: {
+            propertyType: ReactivityType;
+        };
     };
     refs: {
         [useRef: string]: {

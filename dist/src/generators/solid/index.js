@@ -110,13 +110,14 @@ var getRefsString = function (json, options) {
 };
 function addProviderComponents(json, options) {
     for (var key in json.context.set) {
-        var _a = json.context.set[key], name_1 = _a.name, value = _a.value;
+        var _a = json.context.set[key], name_1 = _a.name, value = _a.value, ref = _a.ref;
+        var bindingValue = value
+            ? (0, bindings_1.createSingleBinding)({ code: (0, get_state_object_string_1.stringifyContextValue)(value) })
+            : ref
+                ? (0, bindings_1.createSingleBinding)({ code: ref })
+                : undefined;
         json.children = [
-            (0, create_mitosis_node_1.createMitosisNode)(__assign({ name: "".concat(name_1, ".Provider"), children: json.children }, (value && {
-                bindings: {
-                    value: (0, bindings_1.createSingleBinding)({ code: (0, get_state_object_string_1.stringifyContextValue)(value) }),
-                },
-            }))),
+            (0, create_mitosis_node_1.createMitosisNode)(__assign({ name: "".concat(name_1, ".Provider"), children: json.children }, (bindingValue && { bindings: { value: bindingValue } }))),
         ];
     }
 }
@@ -135,7 +136,9 @@ var componentToSolid = function (passedOptions) {
             (0, process_code_1.CODE_PROCESSOR_PLUGIN)(function (codeType) {
                 switch (codeType) {
                     case 'state':
+                    case 'context-set':
                     case 'dynamic-jsx-elements':
+                    case 'types':
                         return function (c) { return c; };
                     case 'bindings':
                     case 'hooks':

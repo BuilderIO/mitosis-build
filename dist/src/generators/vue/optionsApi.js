@@ -25,7 +25,7 @@ var getContextProvideString = function (json, options) {
     return "{\n    ".concat(Object.values(json.context.set)
         .map(function (setVal) {
         var key = (0, helpers_1.getContextKey)(setVal);
-        return "[".concat(key, "]: ").concat((0, helpers_1.getContextValue)({ options: options, json: json, thisPrefix: '_this' })(setVal));
+        return "[".concat(key, "]: ").concat((0, helpers_1.getContextValue)(setVal));
     })
         .join(','), "\n  }");
 };

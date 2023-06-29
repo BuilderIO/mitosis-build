@@ -170,13 +170,9 @@ var processBinding = function (_a) {
                 case 'options':
                     return optionsApiStateAndPropsReplace(name, thisPrefix, codeType);
             }
-        }), 
-        // bindings does not need process refs and prefix this
-        function (x) {
-            return codeType === 'bindings'
-                ? x
-                : processRefs({ input: x, component: json, options: options, thisPrefix: thisPrefix });
-        }, function (x) { return (codeType === 'bindings' ? x : prefixMethodsWithThis(x, json, options)); }, function (x) { return (preserveGetter === false ? (0, patterns_1.stripGetter)(x) : x); });
+        }), codeType === 'bindings'
+            ? function_1.identity
+            : (0, function_1.flow)(function (x) { return processRefs({ input: x, component: json, options: options, thisPrefix: thisPrefix }); }, function (x) { return prefixMethodsWithThis(x, json, options); }), preserveGetter === false ? patterns_1.stripGetter : function_1.identity);
     }
     catch (e) {
         console.error('could not process bindings in ', { code: code });
@@ -184,18 +180,10 @@ var processBinding = function (_a) {
     }
 };
 exports.processBinding = processBinding;
-var getContextValue = function (args) {
-    return function (_a) {
-        var name = _a.name, ref = _a.ref, value = _a.value;
-        var valueStr = value
-            ? (0, get_state_object_string_1.stringifyContextValue)(value, {
-                valueMapper: function (code) { return (0, exports.processBinding)(__assign(__assign({ code: code }, args), { preserveGetter: true })); },
-            })
-            : ref
-                ? (0, exports.processBinding)(__assign(__assign({ code: ref }, args), { preserveGetter: true }))
-                : null;
-        return valueStr;
-    };
+var getContextValue = function (_a) {
+    var name = _a.name, ref = _a.ref, value = _a.value;
+    var valueStr = value ? (0, get_state_object_string_1.stringifyContextValue)(value) : ref;
+    return valueStr;
 };
 exports.getContextValue = getContextValue;
 var checkIfContextHasStrName = function (context) {

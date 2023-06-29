@@ -6,8 +6,9 @@ declare type SveltosisStateValue = StateValue & {
 };
 export declare function preventNameCollissions(json: SveltosisComponent, item: SveltosisStateValue, prepend?: string, append?: string): {
     code: string;
-    type: "function" | "getter" | "method" | "property";
     typeParameter?: string | undefined;
+    type: "function" | "getter" | "method" | "property";
+    propertyType?: import("../../../types/mitosis-component").ReactivityType | undefined;
     arguments?: string[] | undefined;
 };
 export declare function postProcess(json: SveltosisComponent): void;

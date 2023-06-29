@@ -102,9 +102,7 @@ var updateStateSettersInCode = function (value, options) {
         value: value,
         transformer: function (_a) {
             var path = _a.path, propertyName = _a.propertyName;
-            var node = path.node;
-            var newExpression = core_1.types.callExpression(core_1.types.identifier(getSetStateFnName(propertyName)), [node.right]);
-            return newExpression;
+            return core_1.types.callExpression(core_1.types.identifier(getSetStateFnName(propertyName)), [path.node.right]);
         },
     });
 };

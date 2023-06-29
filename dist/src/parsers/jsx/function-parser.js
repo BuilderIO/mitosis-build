@@ -192,11 +192,25 @@ var componentFunctionToJson = function (node, context) {
                             };
                         }
                         else {
+                            var stateOptions = init.arguments[1];
+                            var propertyType = 'normal';
+                            if (types.isObjectExpression(stateOptions)) {
+                                for (var _c = 0, _d = stateOptions.properties; _c < _d.length; _c++) {
+                                    var prop = _d[_c];
+                                    if (!types.isProperty(prop) || !types.isIdentifier(prop.key))
+                                        continue;
+                                    var isReactive = prop.key.name === 'reactive';
+                                    if (isReactive && types.isBooleanLiteral(prop.value) && prop.value.value) {
+                                        propertyType = 'reactive';
+                                    }
+                                }
+                            }
                             // Value as init, like:
                             // useState(true)
                             state[varName] = {
                                 code: (0, helpers_1.parseCode)(value),
                                 type: 'property',
+                                propertyType: propertyType,
                             };
                         }
                         // Typescript Parameter

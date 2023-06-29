@@ -21,6 +21,7 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.initializeOptions = exports.mergeOptions = void 0;
+var process_signals_1 = require("./plugins/process-signals");
 var process_target_blocks_1 = require("./plugins/process-target-blocks");
 /**
  * Merges options while combining the `plugins` array, and adds any default plugins.
@@ -37,7 +38,7 @@ var initializeOptions = function (target, a, b, c) {
     if (b === void 0) { b = {}; }
     var options = (0, exports.mergeOptions)(a, b, c);
     // we want this plugin to run first in every case, as it replaces magic strings with the correct code.
-    options.plugins.unshift((0, process_target_blocks_1.processTargetBlocks)(target));
+    options.plugins.unshift((0, process_target_blocks_1.processTargetBlocks)(target), (0, process_signals_1.getSignalTypePlugin)({ target: target }), (0, process_signals_1.getSignalAccessPlugin)({ target: target }));
     return options;
 };
 exports.initializeOptions = initializeOptions;

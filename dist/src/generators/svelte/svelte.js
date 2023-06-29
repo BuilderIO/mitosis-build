@@ -47,7 +47,12 @@ var getContextCode = function (json) {
         .map(function (_a) {
         var key = _a[0], context = _a[1];
         var name = context.name;
-        return "let ".concat(key, " = getContext(").concat(name, ".key);");
+        var contextType = (0, context_1.getContextType)({ component: json, context: context });
+        switch (contextType) {
+            case 'reactive':
+            case 'normal':
+                return "let ".concat(key, " = getContext(").concat(name, ".key);");
+        }
     })
         .join('\n');
 };
@@ -57,13 +62,22 @@ var setContextCode = function (_a) {
     return Object.values(json.context.set)
         .map(function (context) {
         var value = context.value, name = context.name, ref = context.ref;
-        var key = value ? "".concat(name, ".key") : name;
+        var nameIsStringLiteral = (name.startsWith("'") && name.endsWith("'")) ||
+            (name.startsWith('"') && name.endsWith('"'));
+        var key = nameIsStringLiteral ? name : "".concat(name, ".key");
         var valueStr = value
             ? processCode((0, get_state_object_string_1.stringifyContextValue)(value))
             : ref
                 ? processCode(ref)
                 : 'undefined';
-        return "setContext(".concat(key, ", ").concat(valueStr, ");");
+        var contextType = (0, context_1.getContextType)({ component: json, context: context });
+        switch (contextType) {
+            case 'normal':
+                return "setContext(".concat(key, ", ").concat(valueStr, ");");
+            case 'reactive':
+                var storeName = "".concat(name, "ContextStoreValue");
+                return "\n            const ".concat(storeName, " = writable(").concat(valueStr, ");\n            setContext(").concat(key, ", ").concat(storeName, ");\n          ");
+        }
     })
         .join('\n');
 };
@@ -118,7 +132,9 @@ var componentToSvelte = function (userProvidedOptions) {
                     case 'hooks':
                     case 'hooks-deps':
                     case 'state':
+                    case 'context-set':
                     case 'dynamic-jsx-elements':
+                    case 'types':
                         return function (x) { return x; };
                 }
             }),
@@ -131,8 +147,10 @@ var componentToSvelte = function (userProvidedOptions) {
                     case 'state':
                         return (0, function_1.flow)((0, helpers_2.stripStateAndProps)({ json: json, options: options }), patterns_1.stripGetter);
                     case 'properties':
-                        return (0, helpers_2.stripStateAndProps)({ json: json, options: options });
+                    case 'context-set':
+                        return (0, function_1.flow)((0, helpers_2.stripStateAndProps)({ json: json, options: options }));
                     case 'dynamic-jsx-elements':
+                    case 'types':
                         return function (x) { return x; };
                 }
             }),
@@ -142,19 +160,33 @@ var componentToSvelte = function (userProvidedOptions) {
         json = (0, plugins_1.runPreJsonPlugins)(json, options.plugins);
         useBindValue(json, options);
         (0, getters_to_functions_1.gettersToFunctions)(json);
-        var props = Array.from((0, get_props_1.getProps)(json)).filter(function (prop) { return !(0, slots_1.isSlotProperty)(prop); });
+        var filteredProps = Array.from((0, get_props_1.getProps)(json))
+            .filter(function (prop) { return !(0, slots_1.isSlotProperty)(prop); })
+            // map $prop to prop for reactive state
+            .map(function (x) { return (x.startsWith('$') ? x.slice(1) : x); });
+        // this helps make sure we don't have duplicate props
+        var props = Array.from(new Set(filteredProps));
         var refs = Array.from((0, get_refs_1.getRefs)(json))
             .map((0, helpers_2.stripStateAndProps)({ json: json, options: options }))
             .filter(function (x) { return !props.includes(x); });
         json = (0, plugins_1.runPostJsonPlugins)(json, options.plugins);
         var css = (0, collect_css_1.collectCss)(json);
         (0, strip_meta_properties_1.stripMetaProperties)(json);
+        var usesWritable = false;
         var dataString = (0, function_1.pipe)((0, get_state_object_string_1.getStateObjectStringFromComponent)(json, {
             data: true,
             functions: false,
             getters: false,
             format: options.stateType === 'proxies' ? 'object' : 'variables',
             keyPrefix: options.stateType === 'variables' ? 'let ' : '',
+            valueMapper: function (code, _t, _p, key) {
+                var _a;
+                if (((_a = json.state[key]) === null || _a === void 0 ? void 0 : _a.propertyType) === 'reactive') {
+                    usesWritable = true;
+                    return "writable(".concat(code, ")");
+                }
+                return code;
+            },
         }), babel_transform_1.babelTransformCode);
         var getterString = (0, function_1.pipe)((0, get_state_object_string_1.getStateObjectStringFromComponent)(json, {
             data: false,
@@ -199,6 +231,9 @@ var componentToSvelte = function (userProvidedOptions) {
         if ((0, context_1.hasSetContext)(component)) {
             svelteImports.push('setContext');
         }
+        if (usesWritable) {
+            svelteStoreImports.push('writable');
+        }
         str += (0, dedent_1.dedent)(templateObject_2 || (templateObject_2 = __makeTemplateObject(["\n      <script ", ">\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n      ", "\n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n    </script>\n\n    ", "\n\n    ", "\n  "], ["\n      <script ", ">\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n      ", "\n      "
             // https://svelte.dev/repl/bd9b56891f04414982517bbd10c52c82?version=3.31.0
             , "\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      "
@@ -235,7 +270,7 @@ var componentToSvelte = function (userProvidedOptions) {
                 return "afterUpdate(() => { ".concat(code, " });");
             }
             var fnName = "onUpdateFn_".concat(index);
-            return "\n              function ".concat(fnName, "() {\n                ").concat(code, "\n              }\n              $: ").concat(fnName, "(...").concat(deps, ")\n            ");
+            return "\n              function ".concat(fnName, "(..._args").concat(options.typescript ? ': any[]' : '', ") {\n                ").concat(code, "\n              }\n              $: ").concat(fnName, "(...").concat(deps, ")\n            ");
         }).join(';')) || '', 
         // make sure this is after all other state/code is initialized
         setContextCode({ json: json, options: options }), !((_o = json.hooks.onUnMount) === null || _o === void 0 ? void 0 : _o.code) ? '' : "onDestroy(() => { ".concat(json.hooks.onUnMount.code, " });"), json.children

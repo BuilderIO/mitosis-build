@@ -28,8 +28,11 @@ var PLUGINS = [
     }); },
     (0, process_code_1.CODE_PROCESSOR_PLUGIN)(function (codeType, json) {
         switch (codeType) {
+            case 'types':
+                return function (c) { return c; };
             case 'bindings':
             case 'state':
+            case 'context-set':
             case 'hooks':
             case 'hooks-deps':
             case 'properties':
@@ -184,24 +187,31 @@ function emitJSX(file, component, mutable) {
 function emitUseContextProvider(file, component) {
     Object.entries(component.context.set).forEach(function (_a) {
         var _ctxKey = _a[0], context = _a[1];
-        file.src.emit("\n      ".concat(file.import(file.qwikModule, 'useContextProvider').localName, "(\n        ").concat(context.name, ", ").concat(file.import(file.qwikModule, 'useStore').localName, "({\n      "));
-        for (var _i = 0, _b = Object.entries(context.value || {}); _i < _b.length; _i++) {
-            var _c = _b[_i], prop = _c[0], propValue = _c[1];
-            file.src.emit("".concat(prop, ": "));
-            switch (propValue === null || propValue === void 0 ? void 0 : propValue.type) {
-                case 'getter':
-                    file.src.emit("(()=>{\n            ".concat(extractGetterBody(propValue.code), "\n          })()"));
-                    break;
-                case 'function':
-                case 'method':
-                    throw new Error('Qwik: Functions are not supported in context');
-                case 'property':
-                    file.src.emit((0, stable_inject_1.stableInject)(propValue.code));
-                    break;
-            }
-            file.src.emit(',');
+        file.src.emit("".concat(file.import(file.qwikModule, 'useContextProvider').localName, "(").concat(context.name, ", "));
+        if (context.ref) {
+            file.src.emit("".concat(context.ref));
         }
-        file.src.emit('}));');
+        else {
+            file.src.emit("".concat(file.import(file.qwikModule, 'useStore').localName, "({"));
+            for (var _i = 0, _b = Object.entries(context.value || {}); _i < _b.length; _i++) {
+                var _c = _b[_i], prop = _c[0], propValue = _c[1];
+                file.src.emit("".concat(prop, ": "));
+                switch (propValue === null || propValue === void 0 ? void 0 : propValue.type) {
+                    case 'getter':
+                        file.src.emit("(()=>{\n            ".concat(extractGetterBody(propValue.code), "\n          })()"));
+                        break;
+                    case 'function':
+                    case 'method':
+                        throw new Error('Qwik: Functions are not supported in context');
+                    case 'property':
+                        file.src.emit((0, stable_inject_1.stableInject)(propValue.code));
+                        break;
+                }
+                file.src.emit(',');
+            }
+            file.src.emit('})');
+        }
+        file.src.emit(');');
     });
 }
 function emitUseContext(file, component) {
