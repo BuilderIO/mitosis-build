@@ -7,7 +7,7 @@ declare type TargetOptions = {
 };
 export declare type ComponentMetadata = {
     [index: string]: any;
-    options: TargetOptions;
+    options?: TargetOptions;
     qwik?: {
         component?: {
             isLight?: boolean;
