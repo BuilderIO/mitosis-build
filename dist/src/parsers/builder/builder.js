@@ -332,7 +332,7 @@ var componentMappers = __assign(__assign({ Symbol: function (block, options) {
         }));
         var properties = __assign({}, block.properties);
         if (block.id)
-            properties['block-id'] = block.id;
+            properties['builder-id'] = block.id;
         if (block.class)
             properties['class'] = block.class;
         if (block.layerName) {
