@@ -20,7 +20,7 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
     return to.concat(ar || Array.prototype.slice.call(from));
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getContextKey = exports.checkIfContextHasStrName = exports.getContextValue = exports.processBinding = exports.getContextNames = exports.renameMitosisComponentsToKebabCase = exports.encodeQuotes = exports.invertBooleanExpression = exports.getOnUpdateHookName = exports.addBindingsToJson = exports.addPropertiesToJson = void 0;
+exports.getContextKey = exports.checkIfContextHasStrName = exports.getContextValue = exports.processBinding = exports.getContextNames = exports.renameMitosisComponentsToKebabCase = exports.mapMitosisComponentToKebabCase = exports.encodeQuotes = exports.invertBooleanExpression = exports.getOnUpdateHookName = exports.addBindingsToJson = exports.addPropertiesToJson = void 0;
 var core_1 = require("@babel/core");
 var function_1 = require("fp-ts/lib/function");
 var lodash_1 = require("lodash");
@@ -47,6 +47,10 @@ function encodeQuotes(string) {
     return string.replace(/"/g, '&quot;');
 }
 exports.encodeQuotes = encodeQuotes;
+var mapMitosisComponentToKebabCase = function (componentName) {
+    return componentName.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
+};
+exports.mapMitosisComponentToKebabCase = mapMitosisComponentToKebabCase;
 // Transform <FooBar> to <foo-bar> as Vue2 needs
 var renameMitosisComponentsToKebabCase = function (str) {
     return str.replace(/<\/?\w+/g, function (match) {
@@ -55,7 +59,7 @@ var renameMitosisComponentsToKebabCase = function (str) {
             return match;
         }
         else {
-            return match.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
+            return (0, exports.mapMitosisComponentToKebabCase)(match);
         }
     });
 };

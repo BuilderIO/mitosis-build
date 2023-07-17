@@ -7,6 +7,7 @@ export declare const addBindingsToJson: (bindings: MitosisNode['bindings']) => (
 export declare const getOnUpdateHookName: (index: number) => string;
 export declare const invertBooleanExpression: (expression: string) => string;
 export declare function encodeQuotes(string: string): string;
+export declare const mapMitosisComponentToKebabCase: (componentName: string) => string;
 export declare const renameMitosisComponentsToKebabCase: (str: string) => string;
 export declare function getContextNames(json: MitosisComponent): string[];
 declare type ProcessBinding = {
