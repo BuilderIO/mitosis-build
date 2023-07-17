@@ -76,10 +76,26 @@ var collectReactNativeStyles = function (json) {
         }
         var styleSheetName = getStyleSheetName(item);
         var styleSheetAccess = "styles.".concat(styleSheetName);
-        item.bindings.style = (0, bindings_1.createSingleBinding)({
-            code: ((_c = item.bindings.style) === null || _c === void 0 ? void 0 : _c.code.replace(/}$/, ", ...".concat(styleSheetAccess, " }"))) || styleSheetAccess,
-        });
         styleMap[styleSheetName] = cssValue;
+        if (!item.bindings.style) {
+            item.bindings.style = (0, bindings_1.createSingleBinding)({
+                code: styleSheetAccess,
+            });
+            return;
+        }
+        try {
+            // run the code below only if the style binding is a JSON object
+            json5_1.default.parse(item.bindings.style.code || '{}');
+            item.bindings.style = (0, bindings_1.createSingleBinding)({
+                code: ((_c = item.bindings.style) === null || _c === void 0 ? void 0 : _c.code.replace(/}$/, ", ...".concat(styleSheetAccess, " }"))) || styleSheetAccess,
+            });
+        }
+        catch (e) {
+            // if not a JSON, then it's a property, so we should spread it.
+            item.bindings.style = (0, bindings_1.createSingleBinding)({
+                code: "{\n        ...".concat(styleSheetAccess, ",\n        ...").concat(item.bindings.style.code, "\n        }"),
+            });
+        }
     });
     return styleMap;
 };
