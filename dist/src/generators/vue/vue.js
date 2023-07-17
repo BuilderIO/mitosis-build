@@ -211,10 +211,6 @@ var componentToVue = function (userOptions) {
             (0, lodash_1.size)(slotsProps) && vueImports.push('useSlots');
         }
         var tsLangAttribute = options.typescript ? "lang='ts'" : '';
-        if (component.name === 'ContentVariants') {
-            console.log('setting');
-            global.TESTING = true;
-        }
         var str = (0, dedent_1.dedent)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    ", "\n\n\n    <script ", " ", ">\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n    </script>\n\n    ", "\n  "], ["\n    ", "\n\n\n    <script ", " ", ">\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n    </script>\n\n    ", "\n  "])), template.trim().length > 0
             ? "<template>\n      ".concat(template, "\n    </template>")
             : '', options.api === 'composition' ? 'setup' : '', tsLangAttribute, vueImports.length ? "import { ".concat((0, lodash_1.uniq)(vueImports).sort().join(', '), " } from \"vue\"") : '', (0, render_imports_1.renderPreComponent)({
@@ -227,12 +223,6 @@ var componentToVue = function (userOptions) {
             ? ''
             : "<style scoped>\n      ".concat(css, "\n    </style>"));
         str = (0, plugins_1.runPreCodePlugins)(str, options.plugins, { json: component });
-        if (component.name === 'ContentVariants') {
-            if (str.includes('<content')) {
-                console.log('found it before prettier');
-                // console.log(str);
-            }
-        }
         if (true || options.prettier !== false) {
             try {
                 str = (0, standalone_1.format)(str, {
