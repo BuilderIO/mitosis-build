@@ -201,6 +201,9 @@ var NODE_MAPPERS = {
             }
             return "\n        <template #".concat(key, ">\n          ").concat((_c = json.bindings[key]) === null || _c === void 0 ? void 0 : _c.code, "\n        </template>\n      ");
         }
+        if (slotName === 'default') {
+            return "<slot>".concat(renderChildren(), "</slot>");
+        }
         return "<slot name=\"".concat((0, slots_1.stripSlotPrefix)(slotName, SLOT_PREFIX).toLowerCase(), "\">").concat(renderChildren(), "</slot>");
     },
 };
@@ -304,7 +307,10 @@ var blockToVue = function (node, options, scope) {
     var textCode = (_a = node.bindings._text) === null || _a === void 0 ? void 0 : _a.code;
     if (textCode) {
         if ((0, slots_1.isSlotProperty)(textCode, SLOT_PREFIX)) {
-            return "<slot name=\"".concat((0, slots_1.stripSlotPrefix)(textCode, SLOT_PREFIX).toLowerCase(), "\"/>");
+            var slotName = (0, slots_1.stripSlotPrefix)(textCode, SLOT_PREFIX).toLowerCase();
+            if (slotName === 'default')
+                return "<slot/>";
+            return "<slot name=\"".concat(slotName, "\"/>");
         }
         return "{{".concat(textCode, "}}");
     }

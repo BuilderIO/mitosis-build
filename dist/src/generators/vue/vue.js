@@ -104,7 +104,9 @@ var BASE_OPTIONS = {
 var componentToVue = function (userOptions) {
     return function (_a) {
         var _b, _c, _d, _e, _f, _g, _h;
-        var component = _a.component, path = _a.path;
+        var _component = _a.component, path = _a.path;
+        // Make a copy we can safely mutate, similar to babel's toolchain can be used
+        var component = (0, fast_clone_1.fastClone)(_component);
         var options = (0, merge_options_1.initializeOptions)({
             target: (userOptions === null || userOptions === void 0 ? void 0 : userOptions.vueVersion) === 2 ? 'vue2' : 'vue3',
             component: component,
@@ -169,8 +171,6 @@ var componentToVue = function (userOptions) {
             options.plugins.unshift(functions_1.FUNCTION_HACK_PLUGIN);
             options.asyncComponentImports = false;
         }
-        // Make a copy we can safely mutate, similar to babel's toolchain can be used
-        component = (0, fast_clone_1.fastClone)(component);
         (0, process_http_requests_1.processHttpRequests)(component);
         processDynamicComponents(component, options);
         processForKeys(component, options);

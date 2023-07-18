@@ -136,15 +136,13 @@ function prefixMethodsWithThis(input, component, options) {
     }
 }
 function optionsApiStateAndPropsReplace(name, thisPrefix, codeType) {
-    if (codeType === 'bindings') {
-        return (0, slots_1.isSlotProperty)(name) ? (0, slots_1.replaceSlotsInString)(name, function (x) { return "$slots.".concat(x); }) : name;
-    }
+    var prefixToUse = codeType === 'bindings' ? '' : thisPrefix + '.';
     if (name === 'children' || name.startsWith('children.')) {
-        return "".concat(thisPrefix, ".$slots.default");
+        return "".concat(prefixToUse, "$slots.default");
     }
     return (0, slots_1.isSlotProperty)(name)
-        ? (0, slots_1.replaceSlotsInString)(name, function (x) { return "".concat(thisPrefix, ".$slots.").concat(x); })
-        : "".concat(thisPrefix, ".").concat(name);
+        ? (0, slots_1.replaceSlotsInString)(name, function (x) { return "".concat(prefixToUse, "$slots.").concat(x); })
+        : "".concat(prefixToUse).concat(name);
 }
 // TODO: migrate all stripStateAndPropsRefs to use this here
 // to properly replace context refs
@@ -155,15 +153,15 @@ var processBinding = function (_a) {
             switch (options.api) {
                 // keep pointing to `props.${value}`
                 case 'composition':
-                    if (codeType === 'bindings') {
-                        return (0, slots_1.isSlotProperty)(name) ? (0, slots_1.replaceSlotsInString)(name, function (x) { return "$slots.".concat(x); }) : name;
-                    }
+                    var slotPrefix_1 = codeType === 'bindings' ? '$slots' : 'useSlots()';
                     if (name === 'children' || name.startsWith('children.')) {
-                        return "useSlots().default";
+                        return "".concat(slotPrefix_1, ".default");
                     }
                     return (0, slots_1.isSlotProperty)(name)
-                        ? (0, slots_1.replaceSlotsInString)(name, function (x) { return "useSlots().".concat(x); })
-                        : "props.".concat(name);
+                        ? (0, slots_1.replaceSlotsInString)(name, function (x) { return "".concat(slotPrefix_1, ".").concat(x); })
+                        : codeType === 'bindings'
+                            ? name
+                            : "props.".concat(name);
                 case 'options':
                     return optionsApiStateAndPropsReplace(name, thisPrefix, codeType);
             }
