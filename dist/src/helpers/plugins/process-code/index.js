@@ -4,34 +4,26 @@ exports.CODE_PROCESSOR_PLUGIN = exports.createCodeProcessorPlugin = void 0;
 var function_1 = require("fp-ts/lib/function");
 var nullable_1 = require("../../nullable");
 var traverse_nodes_1 = require("../../traverse-nodes");
-/**
- * Process code in each node.
- */
-var preProcessNodeCode = function (_a) {
-    // const propertiesProcessor = codeProcessor('properties');
-    // for (const key in json.properties) {
-    //   const value = json.properties[key];
-    //   if (key !== '_text' && value) {
-    //     json.properties[key] = propertiesProcessor(value);
-    //   }
-    // }
-    var json = _a.json, codeProcessor = _a.codeProcessor, parentComponent = _a.parentComponent;
-    var bindingsProcessor = codeProcessor('bindings', parentComponent);
-    for (var key in json.bindings) {
-        var value = json.bindings[key];
-        if (value === null || value === void 0 ? void 0 : value.code) {
-            value.code = bindingsProcessor(value.code, key);
-        }
-    }
-    json.name = codeProcessor('dynamic-jsx-elements', parentComponent)(json.name, '');
-};
-var createCodeProcessorPlugin = function (codeProcessor) {
+var createCodeProcessorPlugin = function (codeProcessor, _a) {
+    var _b = _a === void 0 ? { processProperties: false } : _a, processProperties = _b.processProperties;
     return function (json) {
         var _a;
         function processHook(key, hook) {
-            hook.code = codeProcessor('hooks', json)(hook.code, key);
+            var result = codeProcessor('hooks', json)(hook.code, key);
+            if (typeof result === 'string') {
+                hook.code = result;
+            }
+            else {
+                result();
+            }
             if (hook.deps) {
-                hook.deps = codeProcessor('hooks-deps', json)(hook.deps, key);
+                var result_1 = codeProcessor('hooks-deps', json)(hook.deps, key);
+                if (typeof result_1 === 'string') {
+                    hook.deps = result_1;
+                }
+                else {
+                    result_1();
+                }
             }
         }
         /**
@@ -55,34 +47,103 @@ var createCodeProcessorPlugin = function (codeProcessor) {
         for (var key in json.state) {
             var state = json.state[key];
             if (state) {
-                state.code = codeProcessor('state', json)(state.code, key);
+                var result = codeProcessor('state', json)(state.code, key);
+                if (typeof result === 'string') {
+                    state.code = result;
+                }
+                else {
+                    result();
+                }
                 if (state.typeParameter) {
-                    state.typeParameter = codeProcessor('types', json)(state.typeParameter, key);
+                    var result_2 = codeProcessor('types', json)(state.typeParameter, key);
+                    if (typeof result_2 === 'string') {
+                        state.typeParameter = result_2;
+                    }
+                    else {
+                        result_2();
+                    }
                 }
             }
         }
         for (var key in json.context.set) {
             var set = json.context.set[key];
             if (set.ref) {
-                set.ref = codeProcessor('context-set', json)(set.ref, key);
+                var result = codeProcessor('context-set', json)(set.ref, key);
+                if (typeof result === 'string') {
+                    set.ref = result;
+                }
+                else {
+                    result();
+                }
             }
             if (set.value) {
                 for (var key_1 in set.value) {
                     var value = set.value[key_1];
                     if (value) {
-                        value.code = codeProcessor('context-set', json)(value.code, key_1);
+                        var result = codeProcessor('context-set', json)(value.code, key_1);
+                        if (typeof result === 'string') {
+                            value.code = result;
+                        }
+                        else {
+                            result();
+                        }
                     }
                 }
             }
         }
         (0, traverse_nodes_1.traverseNodes)(json, function (node) {
-            preProcessNodeCode({ json: node, codeProcessor: codeProcessor, parentComponent: json });
+            if (processProperties) {
+                for (var key in node.properties) {
+                    var value = node.properties[key];
+                    if (key !== '_text' && value) {
+                        var result_3 = codeProcessor('properties', json, node)(value, key);
+                        if (typeof result_3 === 'string') {
+                            node.properties[key] = result_3;
+                        }
+                        else {
+                            result_3();
+                        }
+                    }
+                }
+            }
+            for (var key in node.bindings) {
+                var value = node.bindings[key];
+                if (value === null || value === void 0 ? void 0 : value.code) {
+                    var result_4 = codeProcessor('bindings', json, node)(value.code, key);
+                    if (typeof result_4 === 'string') {
+                        value.code = result_4;
+                    }
+                    else {
+                        result_4();
+                    }
+                }
+            }
+            var result = codeProcessor('dynamic-jsx-elements', json)(node.name, '');
+            if (typeof result === 'string') {
+                node.name = result;
+            }
+            else {
+                result();
+            }
         });
         if (json.types) {
-            json.types = (_a = json.types) === null || _a === void 0 ? void 0 : _a.map(function (type) { return codeProcessor('types', json)(type, ''); });
+            json.types = (_a = json.types) === null || _a === void 0 ? void 0 : _a.map(function (type) {
+                var result = codeProcessor('types', json)(type, '');
+                if (typeof result === 'string') {
+                    return result;
+                }
+                result();
+                return type;
+            });
         }
         if (json.propsTypeRef) {
-            json.propsTypeRef = codeProcessor('types', json)(json.propsTypeRef, '');
+            var result = codeProcessor('types', json)(json.propsTypeRef, '');
+            if (typeof result === 'string') {
+                json.propsTypeRef = result;
+            }
+            else {
+                result();
+            }
         }
     };
 };

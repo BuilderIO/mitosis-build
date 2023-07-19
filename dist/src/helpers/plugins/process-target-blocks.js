@@ -1,7 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.processTargetBlocks = void 0;
-var function_1 = require("fp-ts/lib/function");
 var use_target_1 = require("../../parsers/jsx/hooks/use-target");
 var process_code_1 = require("./process-code");
 var getBlockForTarget = function (_a) {
@@ -22,7 +21,20 @@ var getBlockForTarget = function (_a) {
  * Processes `useTarget()` blocks for a given target.
  */
 var processTargetBlocks = function (target) {
-    return (0, function_1.pipe)((0, process_code_1.createCodeProcessorPlugin)(function (_codeType, json) { return function (code) {
+    var plugin = (0, process_code_1.createCodeProcessorPlugin)(function (codeType, json, node) { return function (code, key) {
+        if (codeType === 'properties') {
+            var matches_2 = code.includes(use_target_1.USE_TARGET_MAGIC_STRING);
+            var property = node === null || node === void 0 ? void 0 : node.properties[key];
+            if (!matches_2 || !property)
+                return code;
+            node.bindings[key] = {
+                code: '"' + property + '"',
+                type: 'single',
+            };
+            return function () {
+                delete node.properties[key];
+            };
+        }
         var matches = code.match(use_target_1.USE_TARGET_MAGIC_REGEX);
         if (!matches)
             return code;
@@ -40,8 +52,7 @@ var processTargetBlocks = function (target) {
             code = code.replaceAll(m, targetBlock.code);
         }
         return code;
-    }; }), function (plugin) {
-        return function () { return ({ json: { pre: plugin } }); };
-    });
+    }; }, { processProperties: true });
+    return function () { return ({ json: { pre: plugin } }); };
 };
 exports.processTargetBlocks = processTargetBlocks;

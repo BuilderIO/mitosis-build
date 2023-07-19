@@ -46,10 +46,10 @@ var idRegex = /\d*/;
 var REGEX_BLOCK_NAME = 'blockId';
 exports.USE_TARGET_MAGIC_REGEX = new RegExp(
 // make sure to capture the id of the target block
-"\"".concat(exports.USE_TARGET_MAGIC_STRING, "(?<").concat(REGEX_BLOCK_NAME, ">").concat(idRegex.source, ")\""), 'g');
+"[\"']".concat(exports.USE_TARGET_MAGIC_STRING, "(?<").concat(REGEX_BLOCK_NAME, ">").concat(idRegex.source, ")[\"']"), 'g');
 var getIdFromMatch = function (match) {
     var _a;
-    var USE_TARGET_MAGIC_REGEX_WITHOUT_G = new RegExp("\"".concat(exports.USE_TARGET_MAGIC_STRING, "(?<").concat(REGEX_BLOCK_NAME, ">").concat(idRegex.source, ")\""));
+    var USE_TARGET_MAGIC_REGEX_WITHOUT_G = new RegExp("[\"']".concat(exports.USE_TARGET_MAGIC_STRING, "(?<").concat(REGEX_BLOCK_NAME, ">").concat(idRegex.source, ")[\"']"));
     var result = match.match(USE_TARGET_MAGIC_REGEX_WITHOUT_G);
     if (!result)
         return undefined;
