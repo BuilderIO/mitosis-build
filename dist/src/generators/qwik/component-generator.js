@@ -109,11 +109,11 @@ var componentToQwik = function (userOptions) {
                 function () {
                     var _a;
                     css_1 = emitUseStyles(file, component);
+                    emitUseComputed(file, component);
                     emitUseContext(file, component);
                     emitUseRef(file, component);
                     hasState_1 &&
                         (0, state_2.emitUseStore)({ file: file, stateInit: state_3, isDeep: (_a = metadata_1 === null || metadata_1 === void 0 ? void 0 : metadata_1.qwik) === null || _a === void 0 ? void 0 : _a.hasDeepStore });
-                    emitUseComputed(file, component);
                     emitUseContextProvider(file, component);
                     emitUseClientEffect(file, component);
                     emitUseMount(file, component);
