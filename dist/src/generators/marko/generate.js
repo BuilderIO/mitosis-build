@@ -143,7 +143,7 @@ var componentToMarko = function (userOptions) {
             defaults: __assign(__assign({}, userOptions), { component: json }),
         });
         if (options.plugins) {
-            json = (0, plugins_1.runPreJsonPlugins)(json, options.plugins);
+            json = (0, plugins_1.runPreJsonPlugins)({ json: json, plugins: options.plugins });
         }
         var css = (0, collect_css_1.collectCss)(json, {
             prefix: (0, hash_sum_1.default)(json),
@@ -151,7 +151,7 @@ var componentToMarko = function (userOptions) {
         var domRefs = (0, get_refs_1.getRefs)(json);
         (0, map_refs_1.mapRefs)(json, function (refName) { return "this.".concat((0, lodash_1.camelCase)(refName)); });
         if (options.plugins) {
-            json = (0, plugins_1.runPostJsonPlugins)(json, options.plugins);
+            json = (0, plugins_1.runPostJsonPlugins)({ json: json, plugins: options.plugins });
         }
         (0, strip_meta_properties_1.stripMetaProperties)(json);
         var dataString = (0, get_state_object_string_1.getStateObjectStringFromComponent)(json, {
@@ -224,7 +224,7 @@ var componentToMarko = function (userOptions) {
             .replace(/\n{3,}/g, '\n\n')
             .trim();
         if (options.plugins) {
-            finalStr = (0, plugins_1.runPreCodePlugins)(finalStr, options.plugins);
+            finalStr = (0, plugins_1.runPreCodePlugins)({ json: json, code: finalStr, plugins: options.plugins });
         }
         if (USE_MARKO_PRETTIER && options.prettier !== false) {
             // Commented out for now as there are strange module import issues as
@@ -235,7 +235,7 @@ var componentToMarko = function (userOptions) {
             // });
         }
         if (options.plugins) {
-            finalStr = (0, plugins_1.runPostCodePlugins)(finalStr, options.plugins);
+            finalStr = (0, plugins_1.runPostCodePlugins)({ json: json, code: finalStr, plugins: options.plugins });
         }
         return finalStr;
     };

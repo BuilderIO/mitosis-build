@@ -140,7 +140,7 @@ function parseJsx(jsx, _options) {
                                             return;
                                         if (path.node.callee.name !== hooks_1.HOOKS.TARGET)
                                             return;
-                                        var targetBlock = (0, use_target_1.getUseTargetStatements)(path.node);
+                                        var targetBlock = (0, use_target_1.getUseTargetStatements)(path);
                                         if (!targetBlock)
                                             return;
                                         var blockId = (0, use_target_1.getTargetId)(context.builder.component);

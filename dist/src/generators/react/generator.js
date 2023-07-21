@@ -19,6 +19,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.componentToReact = exports.componentToPreact = exports.contextPropDrillingKey = void 0;
+var core_1 = require("@babel/core");
 var hash_sum_1 = __importDefault(require("hash-sum"));
 var json5_1 = __importDefault(require("json5"));
 var standalone_1 = require("prettier/standalone");
@@ -34,8 +35,10 @@ var handle_missing_state_1 = require("../../helpers/handle-missing-state");
 var is_root_text_node_1 = require("../../helpers/is-root-text-node");
 var map_refs_1 = require("../../helpers/map-refs");
 var merge_options_1 = require("../../helpers/merge-options");
+var process_code_1 = require("../../helpers/plugins/process-code");
 var process_http_requests_1 = require("../../helpers/process-http-requests");
 var render_imports_1 = require("../../helpers/render-imports");
+var replace_identifiers_1 = require("../../helpers/replace-identifiers");
 var replace_new_lines_in_strings_1 = require("../../helpers/replace-new-lines-in-strings");
 var state_1 = require("../../helpers/state");
 var strip_meta_properties_1 = require("../../helpers/strip-meta-properties");
@@ -124,11 +127,6 @@ function getContextString(component, options) {
     }
     return str;
 }
-var DEFAULT_OPTIONS = {
-    stateType: 'useState',
-    stylesType: 'styled-jsx',
-    type: 'dom',
-};
 var componentToPreact = function (reactOptions) {
     if (reactOptions === void 0) { reactOptions = {}; }
     return (0, exports.componentToReact)(__assign(__assign({}, reactOptions), { preact: true }));
@@ -148,6 +146,40 @@ var componentToReact = function (reactOptions) {
                     : reactOptions.rsc
                         ? 'rsc'
                         : 'react';
+        var stateType = reactOptions.stateType || 'useState';
+        var DEFAULT_OPTIONS = {
+            addUseClientDirectiveIfNeeded: true,
+            stateType: stateType,
+            stylesType: 'styled-jsx',
+            type: 'dom',
+            plugins: stateType === 'variables'
+                ? [
+                    (0, process_code_1.CODE_PROCESSOR_PLUGIN)(function (codeType, json) { return function (code, hookType) {
+                        if (codeType === 'types')
+                            return code;
+                        code = (0, replace_identifiers_1.replaceNodes)({
+                            code: code,
+                            nodeMaps: Object.entries(json.state)
+                                .filter(function (_a) {
+                                var key = _a[0], value = _a[1];
+                                return (value === null || value === void 0 ? void 0 : value.type) === 'getter';
+                            })
+                                .map(function (_a) {
+                                var key = _a[0], value = _a[1];
+                                var expr = core_1.types.memberExpression(core_1.types.identifier('state'), core_1.types.identifier(key));
+                                return {
+                                    from: expr,
+                                    // condition: (path) => !types.isObjectMethod(path.parent),
+                                    to: core_1.types.callExpression(expr, []),
+                                };
+                            }),
+                        });
+                        code = (0, replace_identifiers_1.replaceStateIdentifier)(null)(code);
+                        return code;
+                    }; }),
+                ]
+                : [],
+        };
         var options = (0, merge_options_1.initializeOptions)({
             target: target,
             component: component,
@@ -155,14 +187,14 @@ var componentToReact = function (reactOptions) {
             userOptions: reactOptions,
         });
         if (options.plugins) {
-            json = (0, plugins_1.runPreJsonPlugins)(json, options.plugins);
+            json = (0, plugins_1.runPreJsonPlugins)({ json: json, plugins: options.plugins });
         }
         var str = _componentToReact(json, options);
         str +=
             '\n\n\n' +
                 json.subComponents.map(function (item) { return _componentToReact(item, options, true); }).join('\n\n\n');
         if (options.plugins) {
-            str = (0, plugins_1.runPreCodePlugins)(str, options.plugins);
+            str = (0, plugins_1.runPreCodePlugins)({ json: json, code: str, plugins: options.plugins });
         }
         if (options.prettier !== false) {
             try {
@@ -182,7 +214,7 @@ var componentToReact = function (reactOptions) {
             }
         }
         if (options.plugins) {
-            str = (0, plugins_1.runPostCodePlugins)(str, options.plugins);
+            str = (0, plugins_1.runPostCodePlugins)({ json: json, code: str, plugins: options.plugins });
         }
         return str;
     };
@@ -218,7 +250,7 @@ var getPropsDefinition = function (_a) {
     return "".concat(json.name, ".defaultProps = {").concat(defaultPropsString, "};");
 };
 var _componentToReact = function (json, options, isSubComponent) {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o;
+    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q;
     if (isSubComponent === void 0) { isSubComponent = false; }
     (0, process_http_requests_1.processHttpRequests)(json);
     (0, handle_missing_state_1.handleMissingState)(json);
@@ -235,8 +267,9 @@ var _componentToReact = function (json, options, isSubComponent) {
     // const domRefs = getRefs(json);
     var allRefs = Object.keys(json.refs);
     (0, map_refs_1.mapRefs)(json, function (refName) { return "".concat(refName, ".current"); });
-    var hasState = (0, state_1.checkHasState)(json);
-    var _p = (0, get_props_ref_1.getPropsRef)(json), forwardRef = _p[0], hasPropRef = _p[1];
+    // Always use state if we are generate Builder react code
+    var hasState = options.stateType === 'builder' || (0, state_1.checkHasState)(json);
+    var _r = (0, get_props_ref_1.getPropsRef)(json), forwardRef = _r[0], hasPropRef = _r[1];
     var isForwardRef = !options.preact && Boolean(((_a = json.meta.useMetadata) === null || _a === void 0 ? void 0 : _a.forwardRef) || hasPropRef);
     if (isForwardRef) {
         var meta = (_b = json.meta.useMetadata) === null || _b === void 0 ? void 0 : _b.forwardRef;
@@ -245,13 +278,9 @@ var _componentToReact = function (json, options, isSubComponent) {
     var forwardRefType = options.typescript && json.propsTypeRef && forwardRef && json.propsTypeRef !== 'any'
         ? "<".concat(json.propsTypeRef, "[\"").concat(forwardRef, "\"]>")
         : '';
-    if (options.stateType === 'builder') {
-        // Always use state if we are generate Builder react code
-        hasState = true;
-    }
     var useStateCode = options.stateType === 'useState' ? (0, state_2.getUseStateCode)(json, options) : '';
     if (options.plugins) {
-        json = (0, plugins_1.runPostJsonPlugins)(json, options.plugins);
+        json = (0, plugins_1.runPostJsonPlugins)({ json: json, plugins: options.plugins });
     }
     var css = options.stylesType === 'styled-jsx'
         ? (0, collect_css_1.collectCss)(json)
@@ -295,7 +324,7 @@ var _componentToReact = function (json, options, isSubComponent) {
             (options.stylesType === 'styled-jsx' || options.stylesType === 'style-tag')) ||
         shouldInjectCustomStyles ||
         isRootSpecialNode(json);
-    var _q = getRefsString(json, allRefs, options), hasStateArgument = _q[0], refsString = _q[1];
+    var _s = getRefsString(json, allRefs, options), hasStateArgument = _s[0], refsString = _s[1];
     // NOTE: `collectReactNativeStyles` must run before style generation in the component generation body, as it has
     // side effects that delete styles bindings from the JSON.
     var reactNativeStyles = options.stylesType === 'react-native' && componentHasStyles
@@ -317,7 +346,17 @@ var _componentToReact = function (json, options, isSubComponent) {
                     : options.stateType === 'builder'
                         ? "const state = useBuilderState(".concat((0, get_state_object_string_1.getStateObjectStringFromComponent)(json), ");")
                         : options.stateType === 'variables'
-                            ? "const state = ".concat((0, get_state_object_string_1.getStateObjectStringFromComponent)(json), ";")
+                            ? (0, get_state_object_string_1.getStateObjectStringFromComponent)(json, {
+                                format: 'variables',
+                                keyPrefix: 'const',
+                                valueMapper: function (code, type, _, key) {
+                                    if (type === 'getter')
+                                        return "".concat(key, " = function ").concat(code.replace('get ', ''));
+                                    if (type === 'function')
+                                        return "".concat(key, " = function ").concat(code);
+                                    return code;
+                                },
+                            })
                             : "const state = useLocalProxy(".concat((0, get_state_object_string_1.getStateObjectStringFromComponent)(json), ");")
         : '', hasStateArgument ? refsString : '', getContextString(json, options), (0, helpers_2.getCode)((_h = json.hooks.init) === null || _h === void 0 ? void 0 : _h.code, options), contextStr || '', ((_j = json.hooks.onInit) === null || _j === void 0 ? void 0 : _j.code)
         ? "\n        useEffect(() => {\n          ".concat((0, state_2.processHookCode)({
@@ -339,7 +378,9 @@ var _componentToReact = function (json, options, isSubComponent) {
         : '', componentHasStyles && options.stylesType === 'style-tag'
         ? "<style>{`".concat(css, "`}</style>")
         : '', shouldInjectCustomStyles ? "<style>{`".concat(json.style, "`}</style>") : '', wrap ? (0, helpers_2.closeFrag)(options) : '');
-    var str = (0, dedent_1.dedent)(templateObject_2 || (templateObject_2 = __makeTemplateObject(["\n  ", "\n  ", "\n  ", "\n  ", "\n    ", "\n    ", "\n    ", "\n    ", "function ", "(", ") {\n    ", "\n  }", "\n\n    ", "\n\n    ", "\n\n    ", "\n    ", "\n\n  "], ["\n  ", "\n  ", "\n  ", "\n  ", "\n    ", "\n    ", "\n    ", "\n    ", "function ", "(", ") {\n    ", "\n  }", "\n\n    ", "\n\n    ", "\n\n    ", "\n    ", "\n\n  "])), getDefaultImport(json, options), styledComponentsCode ? "import styled from 'styled-components';\n" : '', reactLibImports.size
+    var isRsc = options.rsc && ((_q = (_p = json.meta.useMetadata) === null || _p === void 0 ? void 0 : _p.rsc) === null || _q === void 0 ? void 0 : _q.componentType) === 'server';
+    var shouldAddUseClientDirective = options.addUseClientDirectiveIfNeeded && !isRsc;
+    var str = (0, dedent_1.dedent)(templateObject_2 || (templateObject_2 = __makeTemplateObject(["\n  ", "\n  ", "\n  ", "\n  ", "\n  ", "\n    ", "\n    ", "\n    ", "\n    ", "function ", "(", ") {\n    ", "\n  }", "\n\n    ", "\n\n    ", "\n\n    ", "\n    ", "\n\n  "], ["\n  ", "\n  ", "\n  ", "\n  ", "\n  ", "\n    ", "\n    ", "\n    ", "\n    ", "function ", "(", ") {\n    ", "\n  }", "\n\n    ", "\n\n    ", "\n\n    ", "\n    ", "\n\n  "])), shouldAddUseClientDirective ? "'use client';" : '', getDefaultImport(json, options), styledComponentsCode ? "import styled from 'styled-components';\n" : '', reactLibImports.size
         ? "import { ".concat(Array.from(reactLibImports).join(', '), " } from '").concat(options.preact ? 'preact/hooks' : 'react', "'")
         : '', componentHasStyles && options.stylesType === 'emotion' && options.format !== 'lite'
         ? "/** @jsx jsx */\n    import { jsx } from '@emotion/react'".trim()

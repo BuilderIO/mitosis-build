@@ -147,6 +147,7 @@ var replacePropsIdentifier = function (to) { return function (code) {
     return (0, exports.replaceIdentifiers)({ code: code, from: 'props', to: to });
 }; };
 exports.replacePropsIdentifier = replacePropsIdentifier;
+var isNewlyGenerated = function (node) { var _a; return (_a = node === null || node === void 0 ? void 0 : node._builder_meta) === null || _a === void 0 ? void 0 : _a.newlyGenerated; };
 /**
  * Replaces all instances of a Babel AST Node with a new Node within a code string.
  * Uses `generate()` to convert the Node to a string and compare them.
@@ -154,17 +155,15 @@ exports.replacePropsIdentifier = replacePropsIdentifier;
 var replaceNodes = function (_a) {
     var code = _a.code, nodeMaps = _a.nodeMaps;
     var searchAndReplace = function (path) {
-        var _a, _b, _c, _d;
-        if ((_b = (_a = path.node) === null || _a === void 0 ? void 0 : _a._builder_meta) === null || _b === void 0 ? void 0 : _b.newlyGenerated) {
+        if (isNewlyGenerated(path.node) || isNewlyGenerated(path.parent))
             return;
-        }
         for (var _i = 0, nodeMaps_1 = nodeMaps; _i < nodeMaps_1.length; _i++) {
-            var _e = nodeMaps_1[_i], from = _e.from, to = _e.to;
-            if ((_d = (_c = path.node) === null || _c === void 0 ? void 0 : _c._builder_meta) === null || _d === void 0 ? void 0 : _d.newlyGenerated) {
+            var _a = nodeMaps_1[_i], from = _a.from, to = _a.to, condition = _a.condition;
+            if (isNewlyGenerated(path.node) || isNewlyGenerated(path.parent))
                 return;
-            }
             // if (path.node.type !== from.type) return;
-            if ((0, generator_1.default)(path.node).code === (0, generator_1.default)(from).code) {
+            var matchesCondition = condition ? condition(path) : true;
+            if ((0, generator_1.default)(path.node).code === (0, generator_1.default)(from).code && matchesCondition) {
                 var x = core_1.types.cloneNode(to);
                 x._builder_meta = { newlyGenerated: true };
                 try {

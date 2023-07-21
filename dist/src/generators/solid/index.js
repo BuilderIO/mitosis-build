@@ -158,7 +158,7 @@ var componentToSolid = function (passedOptions) {
             }),
         ], false);
         if (options.plugins) {
-            json = (0, plugins_1.runPreJsonPlugins)(json, options.plugins);
+            json = (0, plugins_1.runPreJsonPlugins)({ json: json, plugins: options.plugins });
         }
         addProviderComponents(json, options);
         var componentHasStyles = (0, helpers_1.hasCss)(json);
@@ -171,7 +171,7 @@ var componentToSolid = function (passedOptions) {
         // we need to run this before we run the code processor plugin, so the dynamic component variables are transformed
         var foundDynamicComponents = processDynamicComponents(json, options);
         if (options.plugins) {
-            json = (0, plugins_1.runPostJsonPlugins)(json, options.plugins);
+            json = (0, plugins_1.runPostJsonPlugins)({ json: json, plugins: options.plugins });
         }
         (0, strip_meta_properties_1.stripMetaProperties)(json);
         var css = options.stylesType === 'style-tag' && (0, collect_css_1.collectCss)(json, { prefix: (0, hash_sum_1.default)(json) });
@@ -211,7 +211,7 @@ var componentToSolid = function (passedOptions) {
                 "<style jsx>{`".concat(css, "`}</style>")
             : '', shouldInjectCustomStyles ? "<style>{`".concat(json.style, "`}</style>") : '', addWrapper ? '</>' : '', json.name);
         if (options.plugins) {
-            str = (0, plugins_1.runPreCodePlugins)(str, options.plugins);
+            str = (0, plugins_1.runPreCodePlugins)({ json: json, code: str, plugins: options.plugins });
         }
         if (options.prettier !== false) {
             str = (0, standalone_1.format)(str, {
@@ -220,7 +220,7 @@ var componentToSolid = function (passedOptions) {
             });
         }
         if (options.plugins) {
-            str = (0, plugins_1.runPostCodePlugins)(str, options.plugins);
+            str = (0, plugins_1.runPostCodePlugins)({ json: json, code: str, plugins: options.plugins });
         }
         return str;
     };

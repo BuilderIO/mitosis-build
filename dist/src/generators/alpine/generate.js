@@ -166,12 +166,12 @@ var componentToAlpine = function (_options) {
         var options = (0, merge_options_1.initializeOptions)({ target: 'alpine', component: component, defaults: _options });
         var json = (0, fast_clone_1.fastClone)(component);
         if (options.plugins) {
-            json = (0, plugins_1.runPreJsonPlugins)(json, options.plugins);
+            json = (0, plugins_1.runPreJsonPlugins)({ json: json, plugins: options.plugins });
         }
         var css = (0, collect_css_1.collectCss)(json);
         (0, strip_meta_properties_1.stripMetaProperties)(json);
         if (options.plugins) {
-            json = (0, plugins_1.runPostJsonPlugins)(json, options.plugins);
+            json = (0, plugins_1.runPostJsonPlugins)({ json: json, plugins: options.plugins });
         }
         var componentName = (0, lodash_1.camelCase)(json.name) || 'MyComponent';
         var stateObjectString = getStateObjectString(json);
@@ -188,7 +188,7 @@ var componentToAlpine = function (_options) {
             str += "<script>\n          ".concat((0, babel_transform_1.babelTransformCode)("document.addEventListener('alpine:init', () => {\n              Alpine.data('".concat(componentName, "', () => (").concat(stateObjectString, "))\n          })")), "\n        </script>");
         }
         if (options.plugins) {
-            str = (0, plugins_1.runPreCodePlugins)(str, options.plugins);
+            str = (0, plugins_1.runPreCodePlugins)({ json: json, code: str, plugins: options.plugins });
         }
         if (options.prettier !== false) {
             try {
@@ -208,7 +208,7 @@ var componentToAlpine = function (_options) {
             }
         }
         if (options.plugins) {
-            str = (0, plugins_1.runPostCodePlugins)(str, options.plugins);
+            str = (0, plugins_1.runPostCodePlugins)({ json: json, code: str, plugins: options.plugins });
         }
         return str;
     };

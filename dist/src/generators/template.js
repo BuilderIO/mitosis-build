@@ -92,11 +92,11 @@ var componentToTemplate = function (options) {
         var component = _a.component;
         var json = (0, fast_clone_1.fastClone)(component);
         if (options.plugins) {
-            json = (0, plugins_1.runPreJsonPlugins)(json, options.plugins);
+            json = (0, plugins_1.runPreJsonPlugins)({ json: json, plugins: options.plugins });
         }
         var css = (0, collect_css_1.collectCss)(json);
         if (options.plugins) {
-            json = (0, plugins_1.runPostJsonPlugins)(json, options.plugins);
+            json = (0, plugins_1.runPostJsonPlugins)({ json: json, plugins: options.plugins });
         }
         var str = json.children.map(function (item) { return blockToTemplate(item); }).join('\n');
         if (css.trim().length) {
@@ -104,7 +104,7 @@ var componentToTemplate = function (options) {
         }
         str = (0, dedent_1.dedent)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    export default function template(props) {\n      let state = ", "\n\n      return `", "`\n    }\n  \n  "], ["\n    export default function template(props) {\n      let state = ", "\n\n      return \\`", "\\`\n    }\n  \n  "])), (0, get_state_object_string_1.getStateObjectStringFromComponent)(json), str.replace(/\s+/g, ' '));
         if (options.plugins) {
-            str = (0, plugins_1.runPreCodePlugins)(str, options.plugins);
+            str = (0, plugins_1.runPreCodePlugins)({ json: json, code: str, plugins: options.plugins });
         }
         if (options.prettier !== false) {
             try {
@@ -124,7 +124,7 @@ var componentToTemplate = function (options) {
             }
         }
         if (options.plugins) {
-            str = (0, plugins_1.runPostCodePlugins)(str, options.plugins);
+            str = (0, plugins_1.runPostCodePlugins)({ json: json, code: str, plugins: options.plugins });
         }
         return str;
     };

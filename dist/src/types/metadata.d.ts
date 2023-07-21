@@ -12,6 +12,7 @@ export declare type ComponentMetadata = {
         component?: {
             isLight?: boolean;
         };
+        setUseStoreFirst?: boolean;
         hasDeepStore?: boolean;
         mutable?: string[];
         imports?: Dictionary<string>;
@@ -19,6 +20,9 @@ export declare type ComponentMetadata = {
     };
     solid?: {
         state?: Dictionary<SolidState>;
+    };
+    rsc?: {
+        componentType?: 'client' | 'server';
     };
 };
 export {};

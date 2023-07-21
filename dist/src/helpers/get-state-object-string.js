@@ -34,19 +34,19 @@ var convertStateMemberToString = function (_a) {
                 if (functions === false || typeof code !== 'string') {
                     return undefined;
                 }
-                return "".concat(keyPrefix, " ").concat(key, " ").concat(keyValueDelimiter, " ").concat(valueMapper(code, 'function', typeParameter));
+                return "".concat(keyPrefix, " ").concat(key, " ").concat(keyValueDelimiter, " ").concat(valueMapper(code, 'function', typeParameter, key));
             }
             case 'method': {
                 if (functions === false || typeof code !== 'string') {
                     return undefined;
                 }
-                return "".concat(keyPrefix, " ").concat(valueMapper(code, 'function', typeParameter));
+                return "".concat(keyPrefix, " ").concat(valueMapper(code, 'function', typeParameter, key));
             }
             case 'getter': {
                 if (getters === false || typeof code !== 'string') {
                     return undefined;
                 }
-                return "".concat(keyPrefix, " ").concat(valueMapper(code, 'getter', typeParameter));
+                return "".concat(keyPrefix, " ").concat(valueMapper(code, 'getter', typeParameter, key));
             }
             case 'property': {
                 if (data === false) {

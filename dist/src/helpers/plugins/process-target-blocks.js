@@ -4,11 +4,7 @@ exports.processTargetBlocks = void 0;
 var use_target_1 = require("../../parsers/jsx/hooks/use-target");
 var process_code_1 = require("./process-code");
 var getBlockForTarget = function (_a) {
-    var _b;
-    var target = _a.target, json = _a.json, targetId = _a.targetId;
-    var targetBlock = (_b = json.targetBlocks) === null || _b === void 0 ? void 0 : _b[targetId];
-    if (!targetBlock)
-        return undefined;
+    var target = _a.target, targetBlock = _a.targetBlock;
     switch (target) {
         case 'vue3':
         case 'vue':
@@ -22,6 +18,7 @@ var getBlockForTarget = function (_a) {
  */
 var processTargetBlocks = function (target) {
     var plugin = (0, process_code_1.createCodeProcessorPlugin)(function (codeType, json, node) { return function (code, key) {
+        var _a;
         if (codeType === 'properties') {
             var matches_2 = code.includes(use_target_1.USE_TARGET_MAGIC_STRING);
             var property = node === null || node === void 0 ? void 0 : node.properties[key];
@@ -45,11 +42,22 @@ var processTargetBlocks = function (target) {
             if (!targetId)
                 continue;
             // find the target block in the component, or the default target block
-            var targetBlock = getBlockForTarget({ target: target, json: json, targetId: targetId });
+            var targetBlock = (_a = json.targetBlocks) === null || _a === void 0 ? void 0 : _a[targetId];
             if (!targetBlock) {
-                throw new Error("Could not find `useTarget()` value in \"".concat(json.name, "\" for target \"").concat(target, "\", and no default value was set."));
+                throw new Error("Could not find `useTarget()` value in \"".concat(json.name, "\"."));
             }
-            code = code.replaceAll(m, targetBlock.code);
+            var block = getBlockForTarget({ target: target, targetBlock: targetBlock });
+            if (!block) {
+                if (targetBlock.settings.requiresDefault) {
+                    throw new Error("Could not find `useTarget()` value in \"".concat(json.name, "\" for target \"").concat(target, "\", and no default value was set."));
+                }
+                else {
+                    // if we don't need a default, then that means we allow for nothing to be injected, e.g. when we are in a function body.
+                    code = code.replaceAll(m, '');
+                    continue;
+                }
+            }
+            code = code.replaceAll(m, block.code);
         }
         return code;
     }; }, { processProperties: true });

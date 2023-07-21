@@ -174,7 +174,7 @@ var componentToVue = function (userOptions) {
         (0, process_http_requests_1.processHttpRequests)(component);
         processDynamicComponents(component, options);
         processForKeys(component, options);
-        component = (0, plugins_1.runPreJsonPlugins)(component, options.plugins);
+        component = (0, plugins_1.runPreJsonPlugins)({ json: component, plugins: options.plugins });
         if (options.api === 'options') {
             (0, map_refs_1.mapRefs)(component, function (refName) { return "this.$refs.".concat(refName); });
         }
@@ -182,7 +182,7 @@ var componentToVue = function (userOptions) {
         var props = Array.from((0, get_props_1.getProps)(component));
         var elementProps = props.filter(function (prop) { return !(0, slots_1.isSlotProperty)(prop); });
         var slotsProps = props.filter(function (prop) { return (0, slots_1.isSlotProperty)(prop); });
-        component = (0, plugins_1.runPostJsonPlugins)(component, options.plugins);
+        component = (0, plugins_1.runPostJsonPlugins)({ json: component, plugins: options.plugins });
         var css = (0, collect_css_1.collectCss)(component, {
             prefix: (_c = (_b = options.cssNamespace) === null || _b === void 0 ? void 0 : _b.call(options)) !== null && _c !== void 0 ? _c : undefined,
         });
@@ -222,7 +222,12 @@ var componentToVue = function (userOptions) {
             : (0, optionsApi_1.generateOptionsApiScript)(component, options, path, template, elementProps, onUpdateWithDeps, onUpdateWithoutDeps), !css.trim().length
             ? ''
             : "<style scoped>\n      ".concat(css, "\n    </style>"));
-        str = (0, plugins_1.runPreCodePlugins)(str, options.plugins, { json: component });
+        str = (0, plugins_1.runPreCodePlugins)({
+            json: component,
+            code: str,
+            plugins: options.plugins,
+            options: { json: component },
+        });
         if (true || options.prettier !== false) {
             try {
                 str = (0, standalone_1.format)(str, {
@@ -240,7 +245,7 @@ var componentToVue = function (userOptions) {
                 console.warn('Could not prettify', { string: str }, err);
             }
         }
-        str = (0, plugins_1.runPostCodePlugins)(str, options.plugins);
+        str = (0, plugins_1.runPostCodePlugins)({ json: component, code: str, plugins: options.plugins });
         for (var _i = 0, removePatterns_1 = removePatterns; _i < removePatterns_1.length; _i++) {
             var pattern = removePatterns_1[_i];
             str = str.replace(pattern, '').trim();

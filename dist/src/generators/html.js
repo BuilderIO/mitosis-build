@@ -426,7 +426,7 @@ var componentToHtml = function (_options) {
         });
         var json = (0, fast_clone_1.fastClone)(component);
         if (options.plugins) {
-            json = (0, plugins_1.runPreJsonPlugins)(json, options.plugins);
+            json = (0, plugins_1.runPreJsonPlugins)({ json: json, plugins: options.plugins });
         }
         addUpdateAfterSet(json, options);
         var componentHasProps = (0, has_props_1.hasProps)(json);
@@ -434,7 +434,7 @@ var componentToHtml = function (_options) {
         var hasShow = (0, has_component_1.hasComponent)('Show', json);
         var hasTextBinding = (0, has_bindings_text_1.hasBindingsText)(json);
         if (options.plugins) {
-            json = (0, plugins_1.runPostJsonPlugins)(json, options.plugins);
+            json = (0, plugins_1.runPostJsonPlugins)({ json: json, plugins: options.plugins });
         }
         var css = (0, collect_css_1.collectCss)(json, {
             prefix: options.prefix,
@@ -480,7 +480,7 @@ var componentToHtml = function (_options) {
                 : "\n          // Helper to render loops\n          function renderLoop(template, array, itemName, itemIndex, collectionName) {\n            const collection = [];\n            for (let [index, value] of array.entries()) {\n              const elementFragment = template.content.cloneNode(true);\n              const children = Array.from(elementFragment.childNodes)\n              const localScope = {};\n              let scope = localScope;\n              if (template?.scope) {\n                const getParent = {\n                  get(target, prop, receiver) {\n                    if (prop in target) {\n                      return target[prop];\n                    }\n                    if (prop in template.scope) {\n                      return template.scope[prop];\n                    }\n                    return target[prop];\n                  }\n                };\n                scope = new Proxy(localScope, getParent);\n              }\n              children.forEach((child) => {\n                if (itemName !== undefined) {\n                  scope[itemName] = value;\n                }\n                if (itemIndex !== undefined) {\n                  scope[itemIndex] = index;\n                }\n                if (collectionName !== undefined) {\n                  scope[collectionName] = array;\n                }\n                child.scope = scope;\n                if (template.context) {\n                  child.context = template.context;\n                }\n                this.nodesToDestroy.push(child);\n                collection.unshift(child);\n              });\n              collection.forEach(child => template.after(child));\n            }\n          }\n\n          function getScope(el, name) {\n            do {\n              let value = el?.scope?.[name]\n              if (value !== undefined) {\n                return value\n              }\n            } while ((el = el.parentNode));\n          }\n        ", "\n      })()\n      </script>\n    ");
         }
         if (options.plugins) {
-            str = (0, plugins_1.runPreCodePlugins)(str, options.plugins);
+            str = (0, plugins_1.runPreCodePlugins)({ json: json, code: str, plugins: options.plugins });
         }
         if (options.prettier !== false) {
             try {
@@ -500,7 +500,7 @@ var componentToHtml = function (_options) {
             }
         }
         if (options.plugins) {
-            str = (0, plugins_1.runPostCodePlugins)(str, options.plugins);
+            str = (0, plugins_1.runPostCodePlugins)({ json: json, code: str, plugins: options.plugins });
         }
         return str;
     };
@@ -521,7 +521,7 @@ var componentToCustomElement = function (_options) {
         });
         var json = (0, fast_clone_1.fastClone)(component);
         if (options.plugins) {
-            json = (0, plugins_1.runPreJsonPlugins)(json, options.plugins);
+            json = (0, plugins_1.runPreJsonPlugins)({ json: json, plugins: options.plugins });
         }
         var _15 = (0, get_props_ref_1.getPropsRef)(json, true), forwardProp = _15[0], hasPropRef = _15[1];
         var contextVars = Object.keys(((_b = json === null || json === void 0 ? void 0 : json.context) === null || _b === void 0 ? void 0 : _b.get) || {});
@@ -556,7 +556,7 @@ var componentToCustomElement = function (_options) {
         var hasScope = hasLoop;
         var hasShow = (0, has_component_1.hasComponent)('Show', json);
         if (options.plugins) {
-            json = (0, plugins_1.runPostJsonPlugins)(json, options.plugins);
+            json = (0, plugins_1.runPostJsonPlugins)({ json: json, plugins: options.plugins });
         }
         var css = '';
         if ((_c = options === null || options === void 0 ? void 0 : options.experimental) === null || _c === void 0 ? void 0 : _c.css) {
@@ -740,7 +740,7 @@ var componentToCustomElement = function (_options) {
             ? (_14 = options === null || options === void 0 ? void 0 : options.experimental) === null || _14 === void 0 ? void 0 : _14.customElementsDefine(kebabName, component, options)
             : "customElements.define('".concat(kebabName, "', ").concat(ComponentName, ");"), "\n    ");
         if (options.plugins) {
-            str = (0, plugins_1.runPreCodePlugins)(str, options.plugins);
+            str = (0, plugins_1.runPreCodePlugins)({ json: json, code: str, plugins: options.plugins });
         }
         if (options.prettier !== false) {
             try {
@@ -760,7 +760,7 @@ var componentToCustomElement = function (_options) {
             }
         }
         if (options.plugins) {
-            str = (0, plugins_1.runPostCodePlugins)(str, options.plugins);
+            str = (0, plugins_1.runPostCodePlugins)({ json: json, code: str, plugins: options.plugins });
         }
         return str;
     };

@@ -112,12 +112,12 @@ var componentToLiquid = function (options) {
         var component = _a.component;
         var json = (0, fast_clone_1.fastClone)(component);
         if (options.plugins) {
-            json = (0, plugins_1.runPreJsonPlugins)(json, options.plugins);
+            json = (0, plugins_1.runPreJsonPlugins)({ json: json, plugins: options.plugins });
         }
         var css = (0, collect_css_1.collectCss)(json);
         (0, strip_meta_properties_1.stripMetaProperties)(json);
         if (options.plugins) {
-            json = (0, plugins_1.runPostJsonPlugins)(json, options.plugins);
+            json = (0, plugins_1.runPostJsonPlugins)({ json: json, plugins: options.plugins });
         }
         var str = json.children.map(function (item) { return blockToLiquid(item); }).join('\n');
         if (css.trim().length) {
@@ -130,7 +130,7 @@ var componentToLiquid = function (options) {
             }
         }
         if (options.plugins) {
-            str = (0, plugins_1.runPreCodePlugins)(str, options.plugins);
+            str = (0, plugins_1.runPreCodePlugins)({ json: json, code: str, plugins: options.plugins });
         }
         if (options.prettier !== false) {
             try {
@@ -150,7 +150,7 @@ var componentToLiquid = function (options) {
             }
         }
         if (options.plugins) {
-            str = (0, plugins_1.runPostCodePlugins)(str, options.plugins);
+            str = (0, plugins_1.runPostCodePlugins)({ json: json, code: str, plugins: options.plugins });
         }
         return str;
     };

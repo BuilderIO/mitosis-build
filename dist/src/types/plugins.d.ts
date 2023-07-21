@@ -5,7 +5,7 @@ export declare type Plugin = (options?: any) => {
         post?: (json: MitosisComponent) => MitosisComponent | void;
     };
     code?: {
-        pre?: (code: string) => string;
-        post?: (code: string) => string;
+        pre?: (code: string, json: MitosisComponent) => string;
+        post?: (code: string, json: MitosisComponent) => string;
     };
 };

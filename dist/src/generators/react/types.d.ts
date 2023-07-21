@@ -13,4 +13,5 @@ export interface ToReactOptions extends BaseTranspilerOptions {
      * option
      */
     contextType?: 'context' | 'prop-drill';
+    addUseClientDirectiveIfNeeded?: boolean;
 }

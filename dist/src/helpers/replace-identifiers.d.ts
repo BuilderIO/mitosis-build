@@ -19,6 +19,7 @@ export declare const replaceNodes: ({ code, nodeMaps, }: {
     code: string;
     nodeMaps: {
         from: types.Node;
+        condition?: ((path: babel.NodePath<types.Node>) => boolean) | undefined;
         to: types.Node;
     }[];
 }) => string;

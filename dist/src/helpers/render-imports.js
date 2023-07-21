@@ -54,7 +54,7 @@ exports.checkIsComponentImport = checkIsComponentImport;
 var transformImportPath = function (theImport, target, preserveFileExtensions) {
     // We need to drop the `.lite` from context files, because the context generator does so as well.
     if (theImport.path.endsWith('.context.lite')) {
-        return theImport.path.replace('.lite', '.js');
+        return theImport.path.replace('.lite', '');
     }
     if ((0, exports.checkIsComponentImport)(theImport) && !preserveFileExtensions) {
         return theImport.path.replace('.lite', getFileExtensionForTarget(target));

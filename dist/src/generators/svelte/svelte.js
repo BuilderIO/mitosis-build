@@ -162,7 +162,7 @@ var componentToSvelte = function (userProvidedOptions) {
         ], false);
         // Make a copy we can safely mutate, similar to babel's toolchain
         var json = (0, fast_clone_1.fastClone)(component);
-        json = (0, plugins_1.runPreJsonPlugins)(json, options.plugins);
+        json = (0, plugins_1.runPreJsonPlugins)({ json: json, plugins: options.plugins });
         useBindValue(json, options);
         (0, getters_to_functions_1.gettersToFunctions)(json);
         var filteredProps = Array.from((0, get_props_1.getProps)(json))
@@ -174,7 +174,7 @@ var componentToSvelte = function (userProvidedOptions) {
         var refs = Array.from((0, get_refs_1.getRefs)(json))
             .map((0, helpers_2.stripStateAndProps)({ json: json, options: options }))
             .filter(function (x) { return !props.includes(x); });
-        json = (0, plugins_1.runPostJsonPlugins)(json, options.plugins);
+        json = (0, plugins_1.runPostJsonPlugins)({ json: json, plugins: options.plugins });
         var css = (0, collect_css_1.collectCss)(json);
         (0, strip_meta_properties_1.stripMetaProperties)(json);
         var usesWritable = false;
@@ -289,7 +289,7 @@ var componentToSvelte = function (userProvidedOptions) {
             .join('\n'), !css.trim().length
             ? ''
             : "<style>\n      ".concat(css, "\n    </style>"));
-        str = (0, plugins_1.runPreCodePlugins)(str, options.plugins);
+        str = (0, plugins_1.runPreCodePlugins)({ json: json, code: str, plugins: options.plugins });
         if (options.prettier !== false) {
             try {
                 str = (0, standalone_1.format)(str, {
@@ -310,7 +310,7 @@ var componentToSvelte = function (userProvidedOptions) {
             }
         }
         str = str.replace(/<script>\n<\/script>/g, '').trim();
-        str = (0, plugins_1.runPostCodePlugins)(str, options.plugins);
+        str = (0, plugins_1.runPostCodePlugins)({ json: json, code: str, plugins: options.plugins });
         return str;
     };
 };

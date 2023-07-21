@@ -74,6 +74,11 @@ export declare type TargetBlock<Return, Targets extends Target = Target> = Parti
 export declare type TargetBlockCode = TargetBlock<{
     code: string;
 }>;
+export declare type TargetBlockDefinition = TargetBlockCode & {
+    settings: {
+        requiresDefault: boolean;
+    };
+};
 export declare type MitosisComponent = {
     '@type': '@builder.io/mitosis/component';
     name: string;
@@ -111,7 +116,7 @@ export declare type MitosisComponent = {
         postComponent?: extendedHook;
         onUpdate?: extendedHook[];
     };
-    targetBlocks?: Dictionary<TargetBlockCode>;
+    targetBlocks?: Dictionary<TargetBlockDefinition>;
     children: MitosisNode[];
     subComponents: MitosisComponent[];
     types?: string[];

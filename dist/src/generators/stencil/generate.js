@@ -95,13 +95,13 @@ var componentToStencil = function (_options) {
         var options = (0, merge_options_1.initializeOptions)({ target: 'stencil', component: component, defaults: _options });
         var json = (0, fast_clone_1.fastClone)(component);
         if (options.plugins) {
-            json = (0, plugins_1.runPreJsonPlugins)(json, options.plugins);
+            json = (0, plugins_1.runPreJsonPlugins)({ json: json, plugins: options.plugins });
         }
         var props = (0, get_props_1.getProps)(component);
         var css = (0, collect_css_1.collectCss)(json);
         (0, map_refs_1.mapRefs)(component, function (refName) { return "this.".concat(refName); });
         if (options.plugins) {
-            json = (0, plugins_1.runPostJsonPlugins)(json, options.plugins);
+            json = (0, plugins_1.runPostJsonPlugins)({ json: json, plugins: options.plugins });
         }
         (0, strip_meta_properties_1.stripMetaProperties)(json);
         var dataString = (0, get_state_object_string_1.getStateObjectStringFromComponent)(json, {
@@ -163,7 +163,7 @@ var componentToStencil = function (_options) {
             ? ''
             : json.hooks.onUpdate.map(function (hook) { return "componentDidUpdate() { ".concat(processBinding(hook.code), " }"); }), wrap ? '<>' : '', json.children.map(function (item) { return blockToStencil(item, options); }).join('\n'), wrap ? '</>' : '');
         if (options.plugins) {
-            str = (0, plugins_1.runPreCodePlugins)(str, options.plugins);
+            str = (0, plugins_1.runPreCodePlugins)({ json: json, code: str, plugins: options.plugins });
         }
         if (options.prettier !== false) {
             str = (0, standalone_1.format)(str, {
@@ -172,7 +172,7 @@ var componentToStencil = function (_options) {
             });
         }
         if (options.plugins) {
-            str = (0, plugins_1.runPostCodePlugins)(str, options.plugins);
+            str = (0, plugins_1.runPostCodePlugins)({ json: json, code: str, plugins: options.plugins });
         }
         return str;
     };

@@ -83,8 +83,8 @@ var componentToQwik = function (userOptions) {
             defaults: DEFAULT_OPTIONS,
             userOptions: userOptions,
         });
-        component = (0, plugins_1.runPreJsonPlugins)(component, options.plugins);
-        component = (0, plugins_1.runPostJsonPlugins)(component, options.plugins);
+        component = (0, plugins_1.runPreJsonPlugins)({ json: component, plugins: options.plugins });
+        component = (0, plugins_1.runPostJsonPlugins)({ json: component, plugins: options.plugins });
         var isTypeScript = !!options.typescript;
         var file = new src_generator_1.File(component.name + (isTypeScript ? '.ts' : '.js'), {
             isPretty: true,
@@ -105,15 +105,18 @@ var componentToQwik = function (userOptions) {
             var state_3 = (0, state_2.emitStateMethodsAndRewriteBindings)(file, component, metadata_1);
             var hasState_1 = (0, state_1.checkHasState)(component);
             var css_1 = null;
+            var emitStore_1 = function () { var _a; return hasState_1 && (0, state_2.emitUseStore)({ file: file, stateInit: state_3, isDeep: (_a = metadata_1 === null || metadata_1 === void 0 ? void 0 : metadata_1.qwik) === null || _a === void 0 ? void 0 : _a.hasDeepStore }); };
             var componentFn = (0, src_generator_1.arrowFnBlock)(['props'], [
                 function () {
-                    var _a;
+                    var _a, _b;
+                    if ((_a = metadata_1 === null || metadata_1 === void 0 ? void 0 : metadata_1.qwik) === null || _a === void 0 ? void 0 : _a.setUseStoreFirst)
+                        emitStore_1();
                     css_1 = emitUseStyles(file, component);
                     emitUseComputed(file, component);
                     emitUseContext(file, component);
                     emitUseRef(file, component);
-                    hasState_1 &&
-                        (0, state_2.emitUseStore)({ file: file, stateInit: state_3, isDeep: (_a = metadata_1 === null || metadata_1 === void 0 ? void 0 : metadata_1.qwik) === null || _a === void 0 ? void 0 : _a.hasDeepStore });
+                    if (!((_b = metadata_1 === null || metadata_1 === void 0 ? void 0 : metadata_1.qwik) === null || _b === void 0 ? void 0 : _b.setUseStoreFirst))
+                        emitStore_1();
                     emitUseContextProvider(file, component);
                     emitUseClientEffect(file, component);
                     emitUseMount(file, component);
@@ -128,8 +131,16 @@ var componentToQwik = function (userOptions) {
             emitStyles(file, css_1);
             DEBUG && file.exportConst('COMPONENT', JSON.stringify(component));
             var sourceFile = file.toString();
-            sourceFile = (0, plugins_1.runPreCodePlugins)(sourceFile, options.plugins);
-            sourceFile = (0, plugins_1.runPostCodePlugins)(sourceFile, options.plugins);
+            sourceFile = (0, plugins_1.runPreCodePlugins)({
+                json: component,
+                code: sourceFile,
+                plugins: options.plugins,
+            });
+            sourceFile = (0, plugins_1.runPostCodePlugins)({
+                json: component,
+                code: sourceFile,
+                plugins: options.plugins,
+            });
             return sourceFile;
         }
         catch (e) {

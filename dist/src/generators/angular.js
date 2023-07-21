@@ -281,7 +281,7 @@ var componentToAngular = function (userOptions) {
             }),
         ], false);
         if (options.plugins) {
-            json = (0, plugins_1.runPreJsonPlugins)(json, options.plugins);
+            json = (0, plugins_1.runPreJsonPlugins)({ json: json, plugins: options.plugins });
         }
         var _o = (0, get_props_ref_1.getPropsRef)(json, true), forwardProp = _o[0], hasPropRef = _o[1];
         var childComponents = [];
@@ -339,7 +339,7 @@ var componentToAngular = function (userOptions) {
             return "this.".concat(isDomRef ? '' : '_').concat(refName).concat(isDomRef ? '.nativeElement' : '');
         });
         if (options.plugins) {
-            json = (0, plugins_1.runPostJsonPlugins)(json, options.plugins);
+            json = (0, plugins_1.runPostJsonPlugins)({ json: json, plugins: options.plugins });
         }
         var css = (0, collect_css_1.collectCss)(json);
         if (options.prettier !== false) {
@@ -452,13 +452,13 @@ var componentToAngular = function (userOptions) {
             str = generateNgModule(str, json.name, componentsUsed, json, options.bootstrapMapper);
         }
         if (options.plugins) {
-            str = (0, plugins_1.runPreCodePlugins)(str, options.plugins);
+            str = (0, plugins_1.runPreCodePlugins)({ json: json, code: str, plugins: options.plugins });
         }
         if (options.prettier !== false) {
             str = tryFormat(str, 'typescript');
         }
         if (options.plugins) {
-            str = (0, plugins_1.runPostCodePlugins)(str, options.plugins);
+            str = (0, plugins_1.runPostCodePlugins)({ json: json, code: str, plugins: options.plugins });
         }
         return str;
     };

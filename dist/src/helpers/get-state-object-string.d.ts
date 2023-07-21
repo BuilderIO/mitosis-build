@@ -1,6 +1,6 @@
 import { MitosisComponent } from '../types/mitosis-component';
 import { MitosisContext } from '../types/mitosis-context';
-declare type ValueMapper = (code: string, type: 'data' | 'function' | 'getter', typeParameter?: string, key?: string) => string;
+declare type ValueMapper = (code: string, type: 'data' | 'function' | 'getter', typeParameter: string | undefined, key: string | undefined) => string;
 interface GetStateObjectStringOptions {
     data?: boolean;
     functions?: boolean;

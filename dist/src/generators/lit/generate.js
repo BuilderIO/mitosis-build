@@ -119,14 +119,14 @@ var componentToLit = function (_options) {
         var options = (0, merge_options_1.initializeOptions)({ target: 'lit', component: component, defaults: _options });
         var json = (0, fast_clone_1.fastClone)(component);
         if (options.plugins) {
-            json = (0, plugins_1.runPreJsonPlugins)(json, options.plugins);
+            json = (0, plugins_1.runPreJsonPlugins)({ json: json, plugins: options.plugins });
         }
         var props = (0, get_props_1.getProps)(component);
         var css = (0, collect_css_1.collectCss)(json);
         var domRefs = (0, get_refs_1.getRefs)(json);
         (0, map_refs_1.mapRefs)(component, function (refName) { return "this.".concat((0, lodash_1.camelCase)(refName)); });
         if (options.plugins) {
-            json = (0, plugins_1.runPostJsonPlugins)(json, options.plugins);
+            json = (0, plugins_1.runPostJsonPlugins)({ json: json, plugins: options.plugins });
         }
         (0, strip_meta_properties_1.stripMetaProperties)(json);
         var dataString = (0, get_state_object_string_1.getStateObjectStringFromComponent)(json, {
@@ -197,7 +197,7 @@ var componentToLit = function (_options) {
             ? ''
             : "updated() { \n              ".concat(json.hooks.onUpdate.map(function (hook) { return processBinding(hook.code); }).join('\n\n'), " \n            }"), options.useShadowDom || !css.length ? '' : "<style>".concat(css, "</style>"), (0, indent_1.indent)(html, 8));
         if (options.plugins) {
-            str = (0, plugins_1.runPreCodePlugins)(str, options.plugins);
+            str = (0, plugins_1.runPreCodePlugins)({ json: json, code: str, plugins: options.plugins });
         }
         if (options.prettier !== false) {
             try {
@@ -211,7 +211,7 @@ var componentToLit = function (_options) {
             }
         }
         if (options.plugins) {
-            str = (0, plugins_1.runPostCodePlugins)(str, options.plugins);
+            str = (0, plugins_1.runPostCodePlugins)({ json: json, code: str, plugins: options.plugins });
         }
         return str;
     };

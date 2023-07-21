@@ -1,5 +1,5 @@
 import * as babel from '@babel/core';
-import { MitosisComponent, TargetBlockCode } from '../../../types/mitosis-component';
+import { MitosisComponent, TargetBlockDefinition } from '../../../types/mitosis-component';
 declare const types: typeof babel.types;
 export declare const getTargetId: (component: MitosisComponent) => string;
 export declare const getMagicString: (targetId: string) => string;
@@ -9,5 +9,5 @@ export declare const getIdFromMatch: (match: string) => string | undefined;
 /**
  * This function finds `useTarget()` and converts it our JSON representation
  */
-export declare const getUseTargetStatements: (useTargetHook: babel.types.CallExpression) => TargetBlockCode | undefined;
+export declare const getUseTargetStatements: (path: babel.NodePath<babel.types.CallExpression>) => TargetBlockDefinition | undefined;
 export {};
