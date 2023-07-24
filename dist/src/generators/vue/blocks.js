@@ -211,6 +211,7 @@ var SPECIAL_HTML_TAGS = ['style', 'script'];
 var stringifyBinding = function (node) {
     return function (_a) {
         var key = _a[0], value = _a[1];
+        var isValidHtmlTag = html_tags_1.VALID_HTML_TAGS.includes(node.name);
         if (value.type === 'spread') {
             return ''; // we handle this after
         }
@@ -222,7 +223,8 @@ var stringifyBinding = function (node) {
         else {
             // TODO: proper babel transform to replace. Util for this
             var useValue = (value === null || value === void 0 ? void 0 : value.code) || '';
-            if (key.startsWith('on')) {
+            if (key.startsWith('on') && isValidHtmlTag) {
+                // handle html native on[event] props
                 var _b = value.arguments, cusArgs = _b === void 0 ? ['event'] : _b;
                 var event_1 = key.replace('on', '').toLowerCase();
                 if (event_1 === 'change' && node.name === 'input') {
@@ -236,6 +238,11 @@ var stringifyBinding = function (node) {
                 }), isAssignmentExpression ? function_1.identity : remove_surrounding_block_1.removeSurroundingBlock, remove_surrounding_block_1.removeSurroundingBlock, helpers_1.encodeQuotes);
                 var eventHandlerKey = "".concat(SPECIAL_PROPERTIES.V_ON_AT).concat(event_1);
                 return "".concat(eventHandlerKey, "=\"").concat(eventHandlerValue, "\"");
+            }
+            else if (key.startsWith('on')) {
+                // handle on[custom event] props
+                var _c = node.bindings[key].arguments, cusArgs = _c === void 0 ? ['event'] : _c;
+                return ":".concat(key, "=\"(").concat(cusArgs.join(','), ") => ").concat((0, helpers_1.encodeQuotes)(useValue), "\"");
             }
             else if (key === 'ref') {
                 return "ref=\"".concat((0, helpers_1.encodeQuotes)(useValue), "\"");

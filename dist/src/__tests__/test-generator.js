@@ -128,6 +128,7 @@ var image = getRawFile('./data/blocks/image.raw.tsx');
 var imageState = getRawFile('./data/blocks/img-state.raw.tsx');
 var img = getRawFile('./data/blocks/img.raw.tsx');
 var inputBlock = getRawFile('./data/blocks/input.raw.tsx');
+var inputParentBlock = getRawFile('./data/blocks/input-parent.raw.tsx');
 var multipleOnUpdate = getRawFile('./data/blocks/multiple-onUpdate.raw.tsx');
 var multipleOnUpdateWithDeps = getRawFile('./data/blocks/multiple-onUpdateWithDeps.raw.tsx');
 var onInit = getRawFile('./data/blocks/onInit.raw.tsx');
@@ -189,6 +190,7 @@ var BASIC_TESTS = {
     BasicFor: basicFor,
     basicForNoTagReference: basicForNoTagReference,
     Input: inputBlock,
+    InputParent: inputParentBlock,
     Submit: submitButtonBlock,
     Select: selectBlock,
     Button: button,

@@ -125,18 +125,20 @@ var getTagName = function (_a) {
     }
     return json.name;
 };
-var stringifyBinding = function (options) {
+var stringifyBinding = function (node, options) {
     return function (_a) {
         var key = _a[0], binding = _a[1];
         if (key === 'innerHTML' || !binding) {
             return '';
         }
         var code = binding.code, _b = binding.arguments, cusArgs = _b === void 0 ? ['event'] : _b, type = binding.type;
+        var isValidHtmlTag = html_tags_2.VALID_HTML_TAGS.includes(node.name);
         if (type === 'spread') {
             var spreadValue = key === 'props' ? '$$props' : code;
             return " {...".concat(spreadValue, "} ");
         }
-        else if (key.startsWith('on')) {
+        else if (key.startsWith('on') && isValidHtmlTag) {
+            // handle html native on[event] props
             var event_1 = key.replace('on', '').toLowerCase();
             // TODO: handle quotes in event handler values
             var valueWithoutBlock = (0, remove_surrounding_block_1.removeSurroundingBlock)(code);
@@ -145,6 +147,16 @@ var stringifyBinding = function (options) {
             }
             else {
                 return " on:".concat(event_1, "=\"{").concat(cusArgs.join(','), " => {").concat(valueWithoutBlock, "}}\" ");
+            }
+        }
+        else if (key.startsWith('on')) {
+            // handle on[custom event] props
+            var valueWithoutBlock = (0, remove_surrounding_block_1.removeSurroundingBlock)(code);
+            if (valueWithoutBlock === key) {
+                return " ".concat(key, "={").concat(valueWithoutBlock, "} ");
+            }
+            else {
+                return " ".concat(key, "={(").concat(cusArgs.join(','), ") => ").concat(valueWithoutBlock, "}");
             }
         }
         else if (key === 'ref') {
@@ -192,7 +204,9 @@ var blockToSvelte = function (_a) {
         var value = json.properties[key];
         str += " ".concat(key, "=\"").concat(value, "\" ");
     }
-    var stringifiedBindings = Object.entries(json.bindings).map(stringifyBinding(options)).join('');
+    var stringifiedBindings = Object.entries(json.bindings)
+        .map(stringifyBinding(json, options))
+        .join('');
     str += stringifiedBindings;
     // if we have innerHTML, it doesn't matter whether we have closing tags or not, or children or not.
     // we use the innerHTML content as children and don't render the self-closing tag.
