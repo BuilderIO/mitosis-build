@@ -41,6 +41,8 @@ __exportStar(require("./generators/taro"), exports);
 __exportStar(require("./generators/template"), exports);
 __exportStar(require("./generators/vue"), exports);
 __exportStar(require("./helpers/is-mitosis-node"), exports);
+__exportStar(require("./helpers/signals"), exports);
+__exportStar(require("./helpers/typescript-project"), exports);
 __exportStar(require("./parsers/angular"), exports);
 __exportStar(require("./parsers/builder"), exports);
 __exportStar(require("./parsers/context"), exports);

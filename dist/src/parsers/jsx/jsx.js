@@ -47,6 +47,7 @@ var hooks_1 = require("../../constants/hooks");
 var create_mitosis_component_1 = require("../../helpers/create-mitosis-component");
 var json_1 = require("../../helpers/json");
 var replace_new_lines_in_strings_1 = require("../../helpers/replace-new-lines-in-strings");
+var signals_1 = require("../../helpers/signals");
 var ast_1 = require("./ast");
 var component_types_1 = require("./component-types");
 var context_1 = require("./context");
@@ -58,8 +59,8 @@ var hooks_2 = require("./hooks");
 var use_target_1 = require("./hooks/use-target");
 var imports_1 = require("./imports");
 var props_1 = require("./props");
+var signals_2 = require("./signals");
 var state_1 = require("./state");
-var types_identification_1 = require("./types-identification");
 var types = babel.types;
 var typescriptBabelPreset = [preset_typescript_1.default, { isTSX: true, allExtensions: true }];
 var beforeParse = function (path) {
@@ -197,12 +198,12 @@ function parseJsx(jsx, _options) {
     (0, state_1.mapStateIdentifiers)(mitosisComponent);
     (0, context_1.extractContextComponents)(mitosisComponent);
     mitosisComponent.subComponents = subComponentFunctions.map(function (item) { return parseJsx(item, options); });
-    var signalTypeImportName = (0, types_identification_1.getSignalImportName)(jsxToUse);
+    var signalTypeImportName = (0, signals_1.getSignalImportName)(jsxToUse);
     if (signalTypeImportName) {
         mitosisComponent.signals = { signalTypeImportName: signalTypeImportName };
     }
     if (options.tsProject && options.filePath) {
-        var reactiveValues = (0, types_identification_1.findSignals)({
+        var reactiveValues = (0, signals_2.findSignals)({
             filePath: options.filePath,
             project: options.tsProject.project,
             signalSymbol: options.tsProject.signalSymbol,

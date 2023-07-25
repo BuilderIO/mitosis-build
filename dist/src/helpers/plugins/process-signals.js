@@ -6,11 +6,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getSignalAccessPlugin = exports.getSignalTypePlugin = exports.replaceSignalSetters = void 0;
 var core_1 = require("@babel/core");
 var generator_1 = __importDefault(require("@babel/generator"));
-var types_identification_1 = require("../../parsers/jsx/types-identification");
 var babel_transform_1 = require("../babel-transform");
 var capitalize_1 = require("../capitalize");
 var nullable_1 = require("../nullable");
 var replace_identifiers_1 = require("../replace-identifiers");
+var signals_1 = require("../signals");
 var process_code_1 = require("./process-code");
 var replaceSignalSetters = function (_a) {
     var code = _a.code, nodeMaps = _a.nodeMaps;
@@ -75,7 +75,7 @@ var getSignalTypePlugin = function (_a) {
                             return function (code) {
                                 var _a;
                                 if ((_a = json.signals) === null || _a === void 0 ? void 0 : _a.signalTypeImportName) {
-                                    return (0, types_identification_1.mapSignalType)({
+                                    return (0, signals_1.mapSignalType)({
                                         code: code,
                                         signalImportName: json.signals.signalTypeImportName,
                                         target: target,
@@ -87,7 +87,7 @@ var getSignalTypePlugin = function (_a) {
                 })(json);
                 if ((_a = json.signals) === null || _a === void 0 ? void 0 : _a.signalTypeImportName) {
                     json.imports = json.imports || [];
-                    var signalMappedImport = (0, types_identification_1.getSignalMitosisImportForTarget)(target);
+                    var signalMappedImport = (0, signals_1.getSignalMitosisImportForTarget)(target);
                     if (signalMappedImport) {
                         json.imports.push(signalMappedImport);
                     }
