@@ -82,14 +82,7 @@ var checkIsObjectWithCodeBlock = function (obj) {
     return typeof obj == 'object' && (obj === null || obj === void 0 ? void 0 : obj.code) && typeof obj.code === 'string';
 };
 function getLexicalScopeVars(component) {
-    return __spreadArray(__spreadArray(__spreadArray([
-        'props',
-        'state'
-    ], Object.keys(component.refs), true), Object.keys(component.context.get), true), Object.keys(component.state).filter(function (key) {
-        var _a;
-        var stateType = (_a = component.state[key]) === null || _a === void 0 ? void 0 : _a.type;
-        return stateType === 'getter' || stateType === 'function';
-    }), true);
+    return __spreadArray(__spreadArray(['props', 'state'], Object.keys(component.refs), true), Object.keys(component.context.get), true);
 }
 exports.getLexicalScopeVars = getLexicalScopeVars;
 function rewriteCodeExpr(component, methodMap, lexicalArgs, replace) {
