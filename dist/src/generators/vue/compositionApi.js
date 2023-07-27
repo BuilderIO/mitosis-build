@@ -88,7 +88,7 @@ function generateCompositionApiScript(component, options, template, props, onUpd
         var getterAsFunction = code.replace(key, '').trim().replace(/^\(\)/, '() =>');
         var computedCode = "const ".concat(key, " = computed(").concat(getterAsFunction, ")");
         return computedCode;
-    }).join('\n')) || '', (onUpdateWithoutDeps === null || onUpdateWithoutDeps === void 0 ? void 0 : onUpdateWithoutDeps.map(function (hook) { return "onUpdated(() => ".concat(hook.code, ")"); }).join('\n')) || '', (onUpdateWithDeps === null || onUpdateWithDeps === void 0 ? void 0 : onUpdateWithDeps.map(function (hook) {
+    }).join('\n')) || '', (onUpdateWithoutDeps === null || onUpdateWithoutDeps === void 0 ? void 0 : onUpdateWithoutDeps.map(function (hook) { return "onUpdated(() => {".concat(hook.code, "})"); }).join('\n')) || '', (onUpdateWithDeps === null || onUpdateWithDeps === void 0 ? void 0 : onUpdateWithDeps.map(function (hook) {
         return "watch(() => ".concat((0, helpers_1.processBinding)({
             code: hook.deps || '',
             options: options,
