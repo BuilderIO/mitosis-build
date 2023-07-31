@@ -6,7 +6,7 @@ var typescript_project_1 = require("../../helpers/typescript-project");
 var findSignals = function (args) {
     var project = args.project, signalSymbol = args.signalSymbol;
     var ast = args.code
-        ? args.project.createSourceFile('homepage2.lite.tsx', args.code)
+        ? args.project.createSourceFile('temp.lite.tsx', args.code)
         : args.filePath
             ? args.project.getSourceFileOrThrow(args.filePath)
             : undefined;
@@ -20,12 +20,33 @@ var findSignals = function (args) {
     };
     var propsSymbol = (0, typescript_project_1.getPropsSymbol)(ast);
     var contextSymbols = (0, typescript_project_1.getContextSymbols)(ast);
+    var checkIsSignalSymbol = function (type) { var _a; return ((_a = type.getTargetType()) === null || _a === void 0 ? void 0 : _a.getAliasSymbol()) === signalSymbol; };
+    var checkIsOptionalSignal = function (node) {
+        var hasUndefined = false;
+        var hasSignal = false;
+        var perfectMatch = node
+            .getType()
+            .getUnionTypes()
+            .every(function (type) {
+            if (type.isUndefined()) {
+                hasUndefined = true;
+                return true;
+            }
+            else if (checkIsSignalSymbol(type)) {
+                hasSignal = true;
+                return true;
+            }
+            return false;
+        });
+        return perfectMatch && hasUndefined && hasSignal;
+    };
     ast.forEachDescendant(function (parentNode) {
-        var _a;
         if (ts_morph_1.Node.isPropertyAccessExpression(parentNode)) {
             var node = parentNode.getExpression();
-            var aliasSymbol = (_a = node.getType().getTargetType()) === null || _a === void 0 ? void 0 : _a.getAliasSymbol();
-            var isSignal = aliasSymbol === signalSymbol;
+            var isOptionalAccess = parentNode.hasQuestionDotToken();
+            var isSignal = isOptionalAccess
+                ? checkIsOptionalSignal(node)
+                : checkIsSignalSymbol(node.getType());
             if (!isSignal)
                 return;
             var isInsideType_1 = false;

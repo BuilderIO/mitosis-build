@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.mapSignalTypeInTSFile = exports.mapSignalType = exports.getSignalImportName = exports.getSignalMitosisImportForTarget = exports.getSignalMappingForTarget = void 0;
+exports.mapSignalTypeInTSFile = exports.mapSignalType = exports.getSignalImportName = exports.getSignalMitosisImportForTarget = void 0;
 var core_1 = require("@babel/core");
 var function_1 = require("fp-ts/lib/function");
 var babel_transform_1 = require("../../helpers/babel-transform");
@@ -21,9 +21,8 @@ var getSignalMappingForTarget = function (target) {
             return undefined;
     }
 };
-exports.getSignalMappingForTarget = getSignalMappingForTarget;
 var getSignalMitosisImportForTarget = function (target) {
-    var signalType = (0, exports.getSignalMappingForTarget)(target);
+    var signalType = getSignalMappingForTarget(target);
     if (!signalType) {
         return undefined;
     }
@@ -64,7 +63,7 @@ var getSignalImportName = function (code) {
 exports.getSignalImportName = getSignalImportName;
 var addSignalImport = function (_a) {
     var code = _a.code, target = _a.target;
-    var signalType = (0, exports.getSignalMappingForTarget)(target);
+    var signalType = getSignalMappingForTarget(target);
     if (!signalType) {
         return code;
     }
@@ -80,18 +79,21 @@ var addSignalImport = function (_a) {
  */
 var mapSignalType = function (_a) {
     var code = _a.code, target = _a.target, _b = _a.signalImportName, signalImportName = _b === void 0 ? (0, exports.getSignalImportName)(code) : _b;
-    var signalType = (0, exports.getSignalMappingForTarget)(target);
+    var signalType = getSignalMappingForTarget(target);
+    var map = function (path) {
+        var _a;
+        if (core_1.types.isIdentifier(path.node.typeName) && path.node.typeName.name === signalImportName) {
+            var params = ((_a = path.node.typeParameters) === null || _a === void 0 ? void 0 : _a.params) || [];
+            var newType = (signalType === null || signalType === void 0 ? void 0 : signalType.getTypeReference)
+                ? signalType.getTypeReference(params)
+                : // if no mapping exists, drop `Signal` and just use the generic type passed to `Signal` as-is.
+                    params[0];
+            path.replaceWith(newType);
+        }
+    };
     return (0, babel_transform_1.babelTransformExpression)(code, {
         TSTypeReference: function (path) {
-            var _a;
-            if (core_1.types.isIdentifier(path.node.typeName) && path.node.typeName.name === signalImportName) {
-                var params = ((_a = path.node.typeParameters) === null || _a === void 0 ? void 0 : _a.params) || [];
-                var newType = (signalType === null || signalType === void 0 ? void 0 : signalType.getTypeReference)
-                    ? signalType.getTypeReference(params)
-                    : // if no mapping exists, drop `Signal` and just use the generic type passed to `Signal` as-is.
-                        params[0];
-                path.replaceWith(newType);
-            }
+            map(path);
         },
     });
 };

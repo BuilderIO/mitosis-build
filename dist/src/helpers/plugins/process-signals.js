@@ -130,12 +130,19 @@ var getSignalAccessPlugin = function (_a) {
                     var nodeMaps = [];
                     for (var propName in json.props) {
                         if (json.props[propName].propertyType === 'reactive') {
+                            var getter = core_1.types.memberExpression(core_1.types.identifier('props'), mapSignal.getter(propName));
+                            var setter = mapSignal.setter
+                                ? core_1.types.memberExpression(core_1.types.identifier('props'), mapSignal.setter(propName))
+                                : undefined;
                             nodeMaps.push({
                                 from: core_1.types.memberExpression(core_1.types.memberExpression(core_1.types.identifier('props'), core_1.types.identifier(propName)), core_1.types.identifier('value')),
-                                to: core_1.types.memberExpression(core_1.types.identifier('props'), mapSignal.getter(propName)),
-                                setTo: mapSignal.setter
-                                    ? core_1.types.memberExpression(core_1.types.identifier('props'), mapSignal.setter(propName))
-                                    : undefined,
+                                to: getter,
+                                setTo: setter,
+                            });
+                            nodeMaps.push({
+                                from: core_1.types.optionalMemberExpression(core_1.types.memberExpression(core_1.types.identifier('props'), core_1.types.identifier(propName)), core_1.types.identifier('value'), false, true),
+                                to: getter,
+                                setTo: setter,
                             });
                         }
                     }
@@ -150,10 +157,17 @@ var getSignalAccessPlugin = function (_a) {
                     }
                     for (var propName in json.state) {
                         if (((_a = json.state[propName]) === null || _a === void 0 ? void 0 : _a.propertyType) === 'reactive') {
+                            var to = core_1.types.memberExpression(core_1.types.identifier('state'), mapSignal.getter(propName));
+                            var setTO = mapSignal.setter ? mapSignal.setter(propName) : undefined;
                             nodeMaps.push({
                                 from: core_1.types.memberExpression(core_1.types.memberExpression(core_1.types.identifier('state'), core_1.types.identifier(propName)), core_1.types.identifier('value')),
-                                to: core_1.types.memberExpression(core_1.types.identifier('state'), mapSignal.getter(propName)),
-                                setTo: mapSignal.setter ? mapSignal.setter(propName) : undefined,
+                                to: to,
+                                setTo: setTO,
+                            });
+                            nodeMaps.push({
+                                from: core_1.types.optionalMemberExpression(core_1.types.memberExpression(core_1.types.identifier('state'), core_1.types.identifier(propName)), core_1.types.identifier('value'), false, true),
+                                to: to,
+                                setTo: setTO,
                             });
                         }
                     }
@@ -162,8 +176,15 @@ var getSignalAccessPlugin = function (_a) {
                     if (filteredNodeMaps.length) {
                         code = (0, exports.replaceSignalSetters)({ code: code, nodeMaps: filteredNodeMaps });
                     }
+                    var isK = x.name === 'Blocks' && code.includes('props.context?.value');
+                    if (isK) {
+                        console.log({ before: code });
+                    }
                     if (nodeMaps.length) {
                         code = (0, replace_identifiers_1.replaceNodes)({ code: code, nodeMaps: nodeMaps });
+                    }
+                    if (isK) {
+                        console.log({ after: code });
                     }
                     return code;
                 }; })(x);

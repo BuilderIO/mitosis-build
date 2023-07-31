@@ -1,9 +1,4 @@
-import { types } from '@babel/core';
 import { Target } from '../../types/config';
-export declare const getSignalMappingForTarget: (target: Target) => {
-    getTypeReference: (generics?: types.TSType[]) => types.TSTypeReference;
-    importDeclaration: types.ImportDeclaration;
-} | undefined;
 export declare const getSignalMitosisImportForTarget: (target: Target) => import("../..").MitosisImport | undefined;
 export declare const getSignalImportName: (code: string) => string | undefined;
 /**
