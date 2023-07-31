@@ -176,15 +176,8 @@ var getSignalAccessPlugin = function (_a) {
                     if (filteredNodeMaps.length) {
                         code = (0, exports.replaceSignalSetters)({ code: code, nodeMaps: filteredNodeMaps });
                     }
-                    var isK = x.name === 'Blocks' && code.includes('props.context?.value');
-                    if (isK) {
-                        console.log({ before: code });
-                    }
                     if (nodeMaps.length) {
                         code = (0, replace_identifiers_1.replaceNodes)({ code: code, nodeMaps: nodeMaps });
-                    }
-                    if (isK) {
-                        console.log({ after: code });
                     }
                     return code;
                 }; })(x);
