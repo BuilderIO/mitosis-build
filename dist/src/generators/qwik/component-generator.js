@@ -6,6 +6,7 @@ var babel_transform_1 = require("../../helpers/babel-transform");
 var fast_clone_1 = require("../../helpers/fast-clone");
 var merge_options_1 = require("../../helpers/merge-options");
 var process_code_1 = require("../../helpers/plugins/process-code");
+var render_imports_1 = require("../../helpers/render-imports");
 var replace_identifiers_1 = require("../../helpers/replace-identifiers");
 var state_1 = require("../../helpers/state");
 var collect_css_1 = require("../../helpers/styles/collect-css");
@@ -287,9 +288,14 @@ function emitImports(file, component) {
     // <SELF> is used for self-referencing within the file.
     file.import('<SELF>', component.name);
     (_a = component.imports) === null || _a === void 0 ? void 0 : _a.forEach(function (i) {
+        var importPath = (0, render_imports_1.transformImportPath)({
+            target: 'qwik',
+            theImport: i,
+            preserveFileExtensions: false,
+        });
         Object.keys(i.imports).forEach(function (key) {
             var keyValue = i.imports[key];
-            file.import(i.path.replace('.lite', '').replace('.tsx', ''), keyValue, key);
+            file.import(importPath, keyValue, key);
         });
     });
 }

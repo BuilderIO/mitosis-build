@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.renderExportAndLocal = exports.renderPreComponent = exports.renderImports = exports.renderImport = exports.checkIsComponentImport = void 0;
+exports.renderExportAndLocal = exports.renderPreComponent = exports.renderImports = exports.renderImport = exports.transformImportPath = exports.checkIsComponentImport = void 0;
+var component_file_extensions_1 = require("./component-file-extensions");
 var DEFAULT_IMPORT = 'default';
 var STAR_IMPORT = '*';
 var getStarImport = function (_a) {
@@ -23,44 +24,35 @@ var getDefaultImport = function (_a) {
     }
     return null;
 };
-var getFileExtensionForTarget = function (target) {
-    switch (target) {
-        case 'svelte':
-            return '.svelte';
-        case 'solid':
-            return '.jsx';
-        case 'vue':
-        case 'vue2':
-        case 'vue3':
-            return '.vue';
-        case 'marko':
-            return '.marko';
-        case 'lit':
-            return '.js';
-        case 'angular':
-            return '';
-        // these `.lite` extensions are handled in the `transpile` step of the CLI.
-        // TO-DO: consolidate file-extension renaming to this file, and remove `.lite` replaces from the CLI `transpile`. (outdated) ?
-        // Bit team wanted to make sure React and Angular behaved the same in regards to imports - ALU 10/05/22
-        case 'qwik':
-        default:
-            return '.lite';
-    }
+var CONTEXT_IMPORTS = ['context.lite', 'context.lite.ts', 'context.lite.js'];
+var checkIsContextImport = function (theImport) {
+    return CONTEXT_IMPORTS.some(function (contextPath) { return theImport.path.endsWith(contextPath); });
 };
 var checkIsComponentImport = function (theImport) {
-    return theImport.path.endsWith('.lite') && !theImport.path.endsWith('.context.lite');
+    return !checkIsContextImport(theImport) &&
+        component_file_extensions_1.COMPONENT_IMPORT_EXTENSIONS.some(function (contextPath) { return theImport.path.endsWith(contextPath); });
 };
 exports.checkIsComponentImport = checkIsComponentImport;
-var transformImportPath = function (theImport, target, preserveFileExtensions) {
+var transformImportPath = function (_a) {
+    var theImport = _a.theImport, target = _a.target, preserveFileExtensions = _a.preserveFileExtensions;
     // We need to drop the `.lite` from context files, because the context generator does so as well.
-    if (theImport.path.endsWith('.context.lite')) {
-        return theImport.path.replace('.lite', '');
+    if (checkIsContextImport(theImport)) {
+        var path_1 = theImport.path;
+        CONTEXT_IMPORTS.forEach(function (contextPath) {
+            if (path_1.endsWith(contextPath)) {
+                path_1 = path_1.replace(contextPath, 'context.js');
+            }
+        });
+        return path_1;
     }
-    if ((0, exports.checkIsComponentImport)(theImport) && !preserveFileExtensions) {
-        return theImport.path.replace('.lite', getFileExtensionForTarget(target));
+    if (preserveFileExtensions)
+        return theImport.path;
+    if ((0, exports.checkIsComponentImport)(theImport)) {
+        return theImport.path.replace(component_file_extensions_1.INPUT_EXTENSION_REGEX, (0, component_file_extensions_1.getComponentFileExtensionForTarget)({ target: target, type: 'import' }));
     }
     return theImport.path;
 };
+exports.transformImportPath = transformImportPath;
 var getNamedImports = function (_a) {
     var theImport = _a.theImport;
     var namedImports = Object.entries(theImport.imports)
@@ -98,7 +90,7 @@ var getImportValue = function (_a) {
 var renderImport = function (_a) {
     var theImport = _a.theImport, target = _a.target, asyncComponentImports = _a.asyncComponentImports, _b = _a.preserveFileExtensions, preserveFileExtensions = _b === void 0 ? false : _b, _c = _a.component, component = _c === void 0 ? undefined : _c, _d = _a.componentsUsed, componentsUsed = _d === void 0 ? [] : _d, importMapper = _a.importMapper;
     var importedValues = getImportedValues({ theImport: theImport });
-    var path = transformImportPath(theImport, target, preserveFileExtensions);
+    var path = (0, exports.transformImportPath)({ theImport: theImport, target: target, preserveFileExtensions: preserveFileExtensions });
     var importValue = getImportValue(importedValues);
     var isComponentImport = (0, exports.checkIsComponentImport)(theImport);
     var shouldBeAsyncImport = asyncComponentImports && isComponentImport;

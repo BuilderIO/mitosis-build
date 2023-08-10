@@ -1,6 +1,11 @@
 import { Target } from '../types/config';
 import { MitosisComponent, MitosisImport } from '../types/mitosis-component';
 export declare const checkIsComponentImport: (theImport: MitosisImport) => boolean;
+export declare const transformImportPath: ({ theImport, target, preserveFileExtensions, }: {
+    theImport: MitosisImport;
+    target: Target;
+    preserveFileExtensions: boolean;
+}) => string;
 export declare const renderImport: ({ theImport, target, asyncComponentImports, preserveFileExtensions, component, componentsUsed, importMapper, }: {
     theImport: MitosisImport;
     target: Target;
