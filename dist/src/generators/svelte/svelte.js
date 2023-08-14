@@ -247,7 +247,7 @@ var componentToSvelte = function (userProvidedOptions) {
             ? ''
             : "import { ".concat(svelteStoreImports.sort().join(', '), " } from 'svelte/store'"), (0, render_imports_1.renderPreComponent)({ component: json, target: 'svelte' }), !hasData || options.stateType === 'variables' ? '' : "import onChange from 'on-change'", props
             .map(function (name) {
-            var _a;
+            var _a, _b, _c;
             if (name === 'children') {
                 return '';
             }
@@ -255,8 +255,11 @@ var componentToSvelte = function (userProvidedOptions) {
             if (options.typescript && json.propsTypeRef && json.propsTypeRef !== 'any') {
                 propDeclaration += ": ".concat(json.propsTypeRef.split(' |')[0], "['").concat(name, "']");
             }
+            if ((_b = (_a = json.props) === null || _a === void 0 ? void 0 : _a[name]) === null || _b === void 0 ? void 0 : _b.optional) {
+                propDeclaration += "= undefined";
+            }
             if (json.defaultProps && json.defaultProps.hasOwnProperty(name)) {
-                propDeclaration += "=".concat((_a = json.defaultProps[name]) === null || _a === void 0 ? void 0 : _a.code);
+                propDeclaration += "=".concat((_c = json.defaultProps[name]) === null || _c === void 0 ? void 0 : _c.code);
             }
             propDeclaration += ';';
             return propDeclaration;

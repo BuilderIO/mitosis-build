@@ -15,18 +15,19 @@ var removeMitosisImport = function (code) {
 exports.removeMitosisImport = removeMitosisImport;
 var getPropsSymbol = function (ast) {
     var propsSymbol = undefined;
-    ast.forEachChild(function (node) {
+    return ast.forEachChild(function (node) {
         var _a;
         if (propsSymbol !== undefined)
-            return;
+            return undefined;
         if (ts_morph_1.Node.isArrowFunction(node) || ts_morph_1.Node.isFunctionDeclaration(node)) {
             if (node.hasModifier(ts_morph_1.SyntaxKind.ExportKeyword) &&
                 node.hasModifier(ts_morph_1.SyntaxKind.DefaultKeyword)) {
                 propsSymbol = (_a = node.getParameters()[0]) === null || _a === void 0 ? void 0 : _a.getSymbol();
+                return propsSymbol;
             }
         }
+        return undefined;
     });
-    return propsSymbol;
 };
 exports.getPropsSymbol = getPropsSymbol;
 var getContextSymbols = function (ast) {

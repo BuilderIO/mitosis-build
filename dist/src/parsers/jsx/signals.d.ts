@@ -2,8 +2,7 @@ import { Project, Symbol } from 'ts-morph';
 export declare const findSignals: (args: {
     project: Project;
     signalSymbol: Symbol;
-    code?: string | undefined;
-    filePath?: string | undefined;
+    filePath: string;
 }) => {
     props: Set<string>;
     state: Set<string>;

@@ -99,6 +99,7 @@ export declare type MitosisComponent = {
     props?: {
         [name: string]: {
             propertyType: ReactivityType;
+            optional: boolean;
         };
     };
     refs: {

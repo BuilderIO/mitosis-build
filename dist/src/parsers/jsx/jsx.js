@@ -59,6 +59,7 @@ var hooks_2 = require("./hooks");
 var use_target_1 = require("./hooks/use-target");
 var imports_1 = require("./imports");
 var props_1 = require("./props");
+var props_types_1 = require("./props-types");
 var signals_2 = require("./signals");
 var state_1 = require("./state");
 var types = babel.types;
@@ -203,6 +204,16 @@ function parseJsx(jsx, _options) {
         mitosisComponent.signals = { signalTypeImportName: signalTypeImportName };
     }
     if (options.tsProject && options.filePath) {
+        // identify optional props.
+        var optionalProps = (0, props_types_1.findOptionalProps)({
+            project: options.tsProject.project,
+            filePath: options.filePath,
+        });
+        optionalProps.forEach(function (prop) {
+            var _a;
+            var _b;
+            mitosisComponent.props = __assign(__assign({}, mitosisComponent.props), (_a = {}, _a[prop] = __assign(__assign({}, (_b = mitosisComponent.props) === null || _b === void 0 ? void 0 : _b[prop]), { optional: true }), _a));
+        });
         var reactiveValues = (0, signals_2.findSignals)({
             filePath: options.filePath,
             project: options.tsProject.project,
@@ -210,7 +221,8 @@ function parseJsx(jsx, _options) {
         });
         reactiveValues.props.forEach(function (prop) {
             var _a;
-            mitosisComponent.props = __assign(__assign({}, mitosisComponent.props), (_a = {}, _a[prop] = { propertyType: 'reactive' }, _a));
+            var _b;
+            mitosisComponent.props = __assign(__assign({}, mitosisComponent.props), (_a = {}, _a[prop] = __assign(__assign({}, (_b = mitosisComponent.props) === null || _b === void 0 ? void 0 : _b[prop]), { propertyType: 'reactive' }), _a));
         });
         reactiveValues.state.forEach(function (state) {
             if (!mitosisComponent.state[state])

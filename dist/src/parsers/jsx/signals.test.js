@@ -22,8 +22,9 @@ describe('Signals type parsing', function () {
      * This avoids the need to create a mock TS project just for testing.
      */
     var tsProject = (0, typescript_project_1.createTypescriptProject)(__dirname + '/../../../tsconfig.json');
+    tsProject.project.createSourceFile('src/testing.tsx', code, { overwrite: true });
     test(signals_2.findSignals.name, function () {
-        var result = (0, signals_2.findSignals)(__assign({ code: code }, tsProject));
+        var result = (0, signals_2.findSignals)(__assign(__assign({}, tsProject), { filePath: 'src/testing.tsx' }));
         expect(result).toMatchSnapshot();
     });
     describe(signals_1.mapSignalType.name, function () {
