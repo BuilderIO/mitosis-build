@@ -38,7 +38,8 @@ exports.DIRECTIVES = {
                 var forArgs = (0, for_1.getForArguments)(node);
                 var forName = forArgs[0];
                 _this.emit('(', expr, '||[]).map(');
-                _this.isBuilder && _this.emit('(('), _this.emit('function(', forArgs, '){');
+                _this.isBuilder && _this.emit('((');
+                _this.emit('(', forArgs, ') => {');
                 if (_this.isBuilder) {
                     _this.emit('const l={...this,', (0, src_generator_1.iteratorProperty)(expr), ':', forName, '==null?{}:', forName, ',', function () {
                         return forArgs.forEach(function (arg) {
