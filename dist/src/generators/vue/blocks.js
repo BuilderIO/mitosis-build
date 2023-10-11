@@ -227,9 +227,6 @@ var stringifyBinding = function (node) {
                 // handle html native on[event] props
                 var _b = value.arguments, cusArgs = _b === void 0 ? ['event'] : _b;
                 var event_1 = key.replace('on', '').toLowerCase();
-                if (event_1 === 'change' && node.name === 'input') {
-                    event_1 = 'input';
-                }
                 var isAssignmentExpression = useValue.includes('=');
                 var eventHandlerValue = (0, function_1.pipe)((0, replace_identifiers_1.replaceIdentifiers)({
                     code: useValue,
