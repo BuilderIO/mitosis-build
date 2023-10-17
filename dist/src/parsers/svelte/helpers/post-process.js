@@ -50,65 +50,51 @@ exports.postProcess = exports.preventNameCollissions = void 0;
 var generator_1 = __importDefault(require("@babel/generator"));
 var parser = __importStar(require("@babel/parser"));
 var types = __importStar(require("@babel/types"));
+var replace_identifiers_1 = require("../../../helpers/replace-identifiers");
 var bindings_1 = require("./bindings");
-function preventNameCollissions(json, item, prepend, append) {
-    if (prepend === void 0) { prepend = ''; }
-    if (append === void 0) { append = '_'; }
-    var output = item.code;
-    var argumentsOutput = [];
+var getArgs = function (code) {
     try {
-        var parsed = parser.parse(item.code);
+        var parsed = parser.parse(code);
         var body = parsed.program.body[0];
         if (types.isFunctionDeclaration(body)) {
-            argumentsOutput = body.params.map(function (p) { return (0, generator_1.default)(p).code; });
+            return body.params.map(function (p) { return (0, generator_1.default)(p).code; });
         }
     }
     catch (e) { }
-    var keys = __spreadArray(__spreadArray(__spreadArray([], Object.keys(json.props), true), Object.keys(json.state), true), Object.keys(json.refs), true);
-    var _loop_1 = function (key) {
-        var regex = function () { return new RegExp("(?<!=(?:\\s))".concat(key, "\\b"), 'g'); };
-        var isInArguments = false;
-        argumentsOutput.forEach(function (argument, index) {
-            if (regex().test(argument)) {
-                isInArguments = true;
-                argumentsOutput.splice(index, 1, argument.replace(regex(), "".concat(prepend).concat(key).concat(append)));
-            }
-        });
-        var outputRegex = function () { return new RegExp("\\b".concat(key, "\\b"), 'g'); };
-        var isInOutput = outputRegex().test(output);
-        if (isInArguments && isInOutput) {
-            output = output.replace(outputRegex(), "".concat(prepend).concat(key).concat(append));
-        }
-    };
-    for (var _i = 0, keys_1 = keys; _i < keys_1.length; _i++) {
-        var key = keys_1[_i];
-        _loop_1(key);
-    }
+    return [];
+};
+function preventNameCollissions(json, item) {
+    var output = item.code;
+    var argumentsOutput = getArgs(output);
+    output = (0, replace_identifiers_1.replaceNodes)({
+        code: output,
+        nodeMaps: argumentsOutput.map(function (arg) { return ({
+            from: types.identifier(arg),
+            to: types.identifier("".concat(arg, "_")),
+        }); }),
+    });
     return (argumentsOutput === null || argumentsOutput === void 0 ? void 0 : argumentsOutput.length)
-        ? __assign(__assign({}, item), { code: output, arguments: argumentsOutput }) : __assign(__assign({}, item), { code: output });
+        ? __assign(__assign({}, item), { code: output, arguments: getArgs(output) }) : __assign(__assign({}, item), { code: output });
 }
 exports.preventNameCollissions = preventNameCollissions;
-function prependProperties(json, input) {
-    var output = input;
-    var propertyKeys = Object.keys(json.props);
-    for (var _i = 0, propertyKeys_1 = propertyKeys; _i < propertyKeys_1.length; _i++) {
-        var property = propertyKeys_1[_i];
-        var regex = new RegExp("(?<!(\\.|'|\"|`))\\b(props\\.)?".concat(property, "\\b"), 'g');
-        if (regex.test(output)) {
-            output = output.replace(regex, "props.".concat(property));
-        }
-    }
-    return output;
+function prependProperties(json, code) {
+    return (0, replace_identifiers_1.replaceNodes)({
+        code: code,
+        nodeMaps: Object.keys(json.props).map(function (property) { return ({
+            from: types.identifier(property),
+            to: types.memberExpression(types.identifier('props'), types.identifier(property)),
+        }); }),
+    });
 }
 function prependState(json, input) {
     var output = input;
-    var stateKeys = Object.keys(json.state);
-    for (var _i = 0, stateKeys_1 = stateKeys; _i < stateKeys_1.length; _i++) {
-        var state = stateKeys_1[_i];
-        var regex = new RegExp("(?<!(\\.|'|\"|`|function |get ))\\b(state\\.)?".concat(state, "\\b"), 'g');
-        if (regex.test(output)) {
-            output = output.replace(regex, "state.".concat(state));
-        }
+    for (var _i = 0, _a = Object.keys(json.state); _i < _a.length; _i++) {
+        var stateKey = _a[_i];
+        output = (0, replace_identifiers_1.replaceIdentifiers)({
+            code: output,
+            from: stateKey,
+            to: "state.".concat(stateKey),
+        });
     }
     return output;
 }
@@ -167,7 +153,7 @@ function addPropertiesAndStateToHook(json, hook) {
 }
 function postProcessHooks(json) {
     var hookKeys = Object.keys(json.hooks);
-    var _loop_2 = function (key) {
+    var _loop_1 = function (key) {
         var hook = json.hooks[key];
         if (!hook) {
             return "continue";
@@ -183,7 +169,7 @@ function postProcessHooks(json) {
     };
     for (var _i = 0, hookKeys_1 = hookKeys; _i < hookKeys_1.length; _i++) {
         var key = hookKeys_1[_i];
-        _loop_2(key);
+        _loop_1(key);
     }
 }
 function postProcessContext(json) {

@@ -1,6 +1,10 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.iteratorProperty = exports.lastProperty = exports.isStatement = exports.iif = exports.arrowFnValue = exports.arrowFnBlock = exports.invoke = exports.quote = exports.Imports = exports.Symbol = exports.SrcBuilder = exports.File = void 0;
+var parser_typescript_1 = __importDefault(require("prettier/parser-typescript"));
 var standalone_1 = require("prettier/standalone");
 var html_tags_1 = require("../../constants/html_tags");
 var builder_1 = require("../../parsers/builder");
@@ -81,12 +85,9 @@ var File = /** @class */ (function () {
                 source = (0, standalone_1.format)(source, {
                     parser: 'typescript',
                     plugins: [
-                        // To support running in browsers
-                        require('prettier/parser-typescript'),
-                        require('prettier/parser-postcss'),
-                        require('prettier/parser-html'),
-                        require('prettier/parser-babel'),
-                        require('prettier-plugin-organize-imports'),
+                        'prettier/parser-postcss',
+                        parser_typescript_1.default,
+                        'prettier-plugin-organize-imports',
                     ],
                     htmlWhitespaceSensitivity: 'ignore',
                 });

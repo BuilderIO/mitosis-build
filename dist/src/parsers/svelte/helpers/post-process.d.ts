@@ -4,7 +4,7 @@ declare type SveltosisStateValue = StateValue & {
     arguments?: string[];
     type: string;
 };
-export declare function preventNameCollissions(json: SveltosisComponent, item: SveltosisStateValue, prepend?: string, append?: string): {
+export declare function preventNameCollissions(json: SveltosisComponent, item: SveltosisStateValue): {
     code: string;
     typeParameter?: string | undefined;
     type: "function" | "getter" | "method" | "property";

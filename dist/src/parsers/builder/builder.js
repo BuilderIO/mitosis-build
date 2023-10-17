@@ -659,12 +659,16 @@ function extractSymbols(json) {
         var elContent = symbolValue === null || symbolValue === void 0 ? void 0 : symbolValue.content;
         if (!elContent) {
             console.warn('Symbol missing content', el.id);
-            (_c = el.component) === null || _c === void 0 ? true : delete _c.options.symbol.content;
+            if ((_c = el.component) === null || _c === void 0 ? void 0 : _c.options.symbol.content) {
+                delete el.component.options.symbol.content;
+            }
             continue;
         }
         var componentName = 'Symbol' + ++symbolsFound;
         el.component.name = componentName;
-        (_d = el.component) === null || _d === void 0 ? true : delete _d.options.symbol.content;
+        if ((_d = el.component) === null || _d === void 0 ? void 0 : _d.options.symbol.content) {
+            delete el.component.options.symbol.content;
+        }
         subComponents.push({
             content: elContent,
             name: componentName,
