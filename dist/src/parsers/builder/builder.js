@@ -33,6 +33,15 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
+var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
+    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
+        if (ar || !(i in from)) {
+            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+            ar[i] = from[i];
+        }
+    }
+    return to.concat(ar || Array.prototype.slice.call(from));
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -287,8 +296,9 @@ var componentMappers = __assign(__assign({ Symbol: function (block, options) {
         delete node.properties.columns;
         node.children =
             ((_b = (_a = block.component) === null || _a === void 0 ? void 0 : _a.options.columns) === null || _b === void 0 ? void 0 : _b.map(function (col, index) {
+                var _a;
                 return (0, create_mitosis_node_1.createMitosisNode)(__assign(__assign({ name: 'Column', bindings: {
-                        width: { code: col.width },
+                        width: { code: (_a = col.width) === null || _a === void 0 ? void 0 : _a.toString() },
                     } }, (col.link && {
                     properties: {
                         link: col.link,
@@ -331,7 +341,7 @@ var componentMappers = __assign(__assign({ Symbol: function (block, options) {
             css: { code: JSON.stringify(css) },
         }));
         var properties = __assign({}, block.properties);
-        if (block.id)
+        if (options.includeBuilderExtras && block.id)
             properties['builder-id'] = block.id;
         if (block.class)
             properties['class'] = block.class;
@@ -345,8 +355,9 @@ var componentMappers = __assign(__assign({ Symbol: function (block, options) {
                 code: wrapBindingIfNeeded(componentOptionsText.code, options),
             });
         }
+        var text = block.component.options.text;
         var innerProperties = (_a = {},
-            _a[options.preserveTextBlocks ? 'innerHTML' : '_text'] = block.component.options.text,
+            _a[options.preserveTextBlocks ? 'innerHTML' : '_text'] = text,
             _a);
         if (options.preserveTextBlocks) {
             return (0, create_mitosis_node_1.createMitosisNode)({
@@ -361,11 +372,19 @@ var componentMappers = __assign(__assign({ Symbol: function (block, options) {
                 ],
             });
         }
+        // Disabling for now
+        var assumeLink = false;
+        var finalProperties = __assign(__assign({}, (assumeLink
+            ? {
+                href: '...',
+            }
+            : {})), properties);
+        var finalTagname = block.tagName || (assumeLink ? 'a' : 'div');
         if ((block.tagName && block.tagName !== 'div') || hasStyles(block)) {
             return (0, create_mitosis_node_1.createMitosisNode)({
-                name: block.tagName || 'div',
+                name: finalTagname,
                 bindings: bindings,
-                properties: properties,
+                properties: finalProperties,
                 children: [
                     (0, create_mitosis_node_1.createMitosisNode)({
                         bindings: innerBindings,
@@ -375,14 +394,14 @@ var componentMappers = __assign(__assign({ Symbol: function (block, options) {
             });
         }
         return (0, create_mitosis_node_1.createMitosisNode)({
-            name: block.tagName || 'div',
-            properties: __assign(__assign({}, properties), innerProperties),
+            name: finalTagname,
+            properties: __assign(__assign(__assign({}, finalProperties), properties), innerProperties),
             bindings: __assign(__assign({}, bindings), innerBindings),
         });
     } });
 var builderElementToMitosisNode = function (block, options, _internalOptions) {
     var _a;
-    var _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v;
+    var _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w;
     if (_internalOptions === void 0) { _internalOptions = {}; }
     if (((_b = block.component) === null || _b === void 0 ? void 0 : _b.name) === 'Core:Fragment') {
         block.component.name = 'Fragment';
@@ -525,16 +544,29 @@ var builderElementToMitosisNode = function (block, options, _internalOptions) {
         })),
     });
     // Has single text node child
-    if (((_s = block.children) === null || _s === void 0 ? void 0 : _s.length) === 1 &&
-        ((_t = block.children[0].component) === null || _t === void 0 ? void 0 : _t.name) === 'Text' &&
+    var firstChild = (_s = block.children) === null || _s === void 0 ? void 0 : _s[0];
+    if (((_t = block.children) === null || _t === void 0 ? void 0 : _t.length) === 1 &&
+        ((_u = firstChild === null || firstChild === void 0 ? void 0 : firstChild.component) === null || _u === void 0 ? void 0 : _u.name) === 'Text' &&
         !options.preserveTextBlocks) {
-        var textProperties = (0, exports.builderElementToMitosisNode)(block.children[0], options);
-        var mergedCss = (0, lodash_1.merge)(json5_1.default.parse(((_u = node.bindings.css) === null || _u === void 0 ? void 0 : _u.code) || '{}'), json5_1.default.parse(((_v = textProperties.bindings.css) === null || _v === void 0 ? void 0 : _v.code) || '{}'));
-        return (0, lodash_1.merge)({}, textProperties, node, {
-            bindings: __assign({}, (Object.keys(mergedCss).length && {
-                css: { code: json5_1.default.stringify(mergedCss) },
-            })),
-        });
+        var textProperties = (0, exports.builderElementToMitosisNode)(firstChild, options);
+        var parsedNodeCss = json5_1.default.parse(((_v = node.bindings.css) === null || _v === void 0 ? void 0 : _v.code) || '{}');
+        var parsedTextCss = json5_1.default.parse(((_w = textProperties.bindings.css) === null || _w === void 0 ? void 0 : _w.code) || '{}');
+        var mergedCss = combineStyles(parsedNodeCss, parsedTextCss);
+        // Don't merge if text has styling that matters
+        var doNotMerge = 
+        // Text has flex alignment
+        ['end', 'right', 'center'].includes(parsedTextCss.alignSelf) ||
+            // Text has specific styling
+            parsedTextCss.backgroundColor ||
+            parsedTextCss.opacity ||
+            parsedTextCss.background;
+        if (!doNotMerge) {
+            return (0, lodash_1.merge)({}, textProperties, node, {
+                bindings: __assign({}, (Object.keys(mergedCss).length && {
+                    css: { code: json5_1.default.stringify(mergedCss) },
+                })),
+            });
+        }
     }
     node.children = (block.children || []).map(function (item) { return (0, exports.builderElementToMitosisNode)(item, options); });
     return node;
@@ -770,4 +802,34 @@ function mapBuilderBindingsToMitosisBindingWithCode(bindings) {
             }
         });
     return result;
+}
+function removeFalsey(obj) {
+    return (0, lodash_1.omitBy)(obj, function (value) { return !value || value === '0' || value === '0px' || value === 'none' || value === '0%'; });
+}
+function combineStyles(parent, child) {
+    var marginStyles = ['marginTop', 'marginBottom', 'marginLeft', 'marginRight'];
+    var paddingStyles = ['paddingTop', 'paddingBottom', 'paddingLeft', 'paddingRight'];
+    var distanceStylesToCombine = __spreadArray(__spreadArray([], paddingStyles, true), marginStyles, true);
+    var merged = __assign(__assign({}, (0, lodash_1.omit)(removeFalsey(child), distanceStylesToCombine)), removeFalsey(parent));
+    for (var _i = 0, distanceStylesToCombine_1 = distanceStylesToCombine; _i < distanceStylesToCombine_1.length; _i++) {
+        var key = distanceStylesToCombine_1[_i];
+        // Funky things happen if different alignment
+        if (parent.alignSelf !== child.alignSelf && (key === 'marginLeft' || key === 'marginRight')) {
+            merged[key] = parent[key];
+            continue;
+        }
+        var childNum = parseFloat(child[key]) || 0;
+        var parentKeyToUse = key.replace(/margin/, 'padding');
+        var parentNum = parseFloat(parent[parentKeyToUse]) || 0;
+        if (childNum || parentNum) {
+            merged[parentKeyToUse] = "".concat(childNum + parentNum, "px");
+        }
+    }
+    for (var _a = 0, _b = Object.entries(merged); _a < _b.length; _a++) {
+        var _c = _b[_a], key = _c[0], value = _c[1];
+        if (value && typeof value === 'object') {
+            merged[key] = combineStyles(parent[key] || {}, child[key] || {});
+        }
+    }
+    return merged;
 }

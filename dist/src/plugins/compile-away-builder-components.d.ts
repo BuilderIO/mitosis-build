@@ -1,5 +1,5 @@
+import { type Plugin } from '@builder.io/mitosis';
 import { TraverseContext } from 'traverse';
-import { Plugin } from '..';
 import { MitosisComponent } from '../types/mitosis-component';
 import { MitosisNode } from '../types/mitosis-node';
 declare type CompileAwayComponentsMap = {

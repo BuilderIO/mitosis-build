@@ -14,7 +14,7 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.checkShouldOutputTypeScript = exports.renameImport = exports.renameComponentFile = exports.getComponentFileExtensionForTarget = exports.checkIsSvelteComponentFilePath = exports.checkIsMitosisComponentFilePath = exports.checkIsLiteComponentFilePath = void 0;
+exports.checkShouldOutputTypeScript = exports.createMitosisNode = exports.renameImport = exports.renameComponentFile = exports.getComponentFileExtensionForTarget = exports.checkIsSvelteComponentFilePath = exports.checkIsMitosisComponentFilePath = exports.checkIsLiteComponentFilePath = void 0;
 __exportStar(require("./flow"), exports);
 __exportStar(require("./generators/alpine"), exports);
 __exportStar(require("./generators/angular"), exports);
@@ -48,6 +48,8 @@ Object.defineProperty(exports, "checkIsSvelteComponentFilePath", { enumerable: t
 Object.defineProperty(exports, "getComponentFileExtensionForTarget", { enumerable: true, get: function () { return component_file_extensions_1.getComponentFileExtensionForTarget; } });
 Object.defineProperty(exports, "renameComponentFile", { enumerable: true, get: function () { return component_file_extensions_1.renameComponentFile; } });
 Object.defineProperty(exports, "renameImport", { enumerable: true, get: function () { return component_file_extensions_1.renameImport; } });
+var create_mitosis_node_1 = require("./helpers/create-mitosis-node");
+Object.defineProperty(exports, "createMitosisNode", { enumerable: true, get: function () { return create_mitosis_node_1.createMitosisNode; } });
 __exportStar(require("./helpers/is-mitosis-node"), exports);
 var output_1 = require("./helpers/output");
 Object.defineProperty(exports, "checkShouldOutputTypeScript", { enumerable: true, get: function () { return output_1.checkShouldOutputTypeScript; } });

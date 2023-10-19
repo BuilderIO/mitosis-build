@@ -5,17 +5,12 @@ declare type InternalOptions = {
     skipMapper?: boolean;
 };
 export declare const symbolBlocksAsChildren = false;
-export declare type BuilderToMitosisOptions = {
+declare type BuilderToMitosisOptions = {
     context?: {
         [key: string]: any;
     };
     includeBuilderExtras?: boolean;
     preserveTextBlocks?: boolean;
-};
-export declare type InternalBuilderToMitosisOptions = BuilderToMitosisOptions & {
-    context: {
-        [key: string]: any;
-    };
 };
 export declare const builderElementToMitosisNode: (block: BuilderElement, options: BuilderToMitosisOptions, _internalOptions?: InternalOptions) => MitosisNode;
 /**

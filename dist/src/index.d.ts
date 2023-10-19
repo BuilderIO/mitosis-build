@@ -29,6 +29,7 @@ export * from './generators/taro';
 export * from './generators/template';
 export * from './generators/vue';
 export { checkIsLiteComponentFilePath, checkIsMitosisComponentFilePath, checkIsSvelteComponentFilePath, getComponentFileExtensionForTarget, renameComponentFile, renameImport, } from './helpers/component-file-extensions';
+export { createMitosisNode } from './helpers/create-mitosis-node';
 export * from './helpers/is-mitosis-node';
 export { checkShouldOutputTypeScript } from './helpers/output';
 export * from './helpers/signals';
