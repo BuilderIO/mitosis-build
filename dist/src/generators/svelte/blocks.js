@@ -5,7 +5,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.blockToSvelte = void 0;
 var html_tags_1 = require("../../constants/html_tags");
-var html_tags_2 = require("../../constants/html_tags");
 var bindings_1 = require("../../helpers/bindings");
 var is_children_1 = __importDefault(require("../../helpers/is-children"));
 var is_upper_case_1 = require("../../helpers/is-upper-case");
@@ -20,6 +19,26 @@ var helpers_1 = require("./helpers");
  */
 var SLOT_PREFIX = '$$slots.';
 var mappers = {
+    style: function (_a) {
+        var _b;
+        var json = _a.json, options = _a.options, parentComponent = _a.parentComponent;
+        var props = '';
+        for (var key in json.properties) {
+            var value = json.properties[key];
+            props += " ".concat(key, "=\"").concat(value, "\" ");
+        }
+        var bindings = '';
+        for (var key in json.bindings) {
+            var value = json.bindings[key];
+            if (value && key !== 'innerHTML') {
+                bindings += " ".concat(key, "=${").concat(value.code, "} ");
+            }
+        }
+        var innerText = ((_b = json.bindings.innerHTML) === null || _b === void 0 ? void 0 : _b.code) || '';
+        // We have to obfuscate `"style"` due to a limitation in the svelte-preprocessor plugin.
+        // https://github.com/sveltejs/vite-plugin-svelte/issues/315#issuecomment-1109000027
+        return "{@html `<${'style'} ".concat(bindings, " ").concat(props, ">${").concat(innerText, "}<${'/style'}>`}");
+    },
     Fragment: function (_a) {
         var _b;
         var json = _a.json, options = _a.options, parentComponent = _a.parentComponent;
@@ -96,18 +115,14 @@ var getTagName = function (_a) {
     /**
      * These are special HTML tags that svelte requires `<svelte:element this={TAG}>`
      */
-    var SPECIAL_HTML_TAGS = ['style', 'script', 'template'];
+    var SPECIAL_HTML_TAGS = ['script', 'template'];
     if (SPECIAL_HTML_TAGS.includes(json.name)) {
         json.bindings.this = (0, bindings_1.createSingleBinding)({
-            code: json.name === 'style'
-                ? // We have to obfuscate `"style"` due to a limitation in the svelte-preprocessor plugin.
-                    // https://github.com/sveltejs/vite-plugin-svelte/issues/315#issuecomment-1109000027
-                    "\"sty\" + \"le\""
-                : "\"".concat(json.name, "\""),
+            code: "\"".concat(json.name, "\""),
         });
         return SVELTE_SPECIAL_TAGS.ELEMENT;
     }
-    var isValidHtmlTag = html_tags_2.VALID_HTML_TAGS.includes(json.name);
+    var isValidHtmlTag = html_tags_1.VALID_HTML_TAGS.includes(json.name);
     var isSpecialSvelteTag = json.name.startsWith('svelte:');
     // Check if any import matches `json.name`
     var hasMatchingImport = parentComponent.imports.some(function (_a) {
@@ -132,7 +147,7 @@ var stringifyBinding = function (node, options) {
             return '';
         }
         var code = binding.code, _b = binding.arguments, cusArgs = _b === void 0 ? ['event'] : _b, type = binding.type;
-        var isValidHtmlTag = html_tags_2.VALID_HTML_TAGS.includes(node.name);
+        var isValidHtmlTag = html_tags_1.VALID_HTML_TAGS.includes(node.name);
         if (type === 'spread') {
             var spreadValue = key === 'props' ? '$$props' : code;
             return " {...".concat(spreadValue, "} ");
