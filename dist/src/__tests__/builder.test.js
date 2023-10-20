@@ -189,6 +189,38 @@ describe('Builder', function () {
         });
         expect(mitosis.trim()).toMatchSnapshot();
     });
+    test('No srcset for SVG', function () { return __awaiter(void 0, void 0, void 0, function () {
+        var builderJson, component, html;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    builderJson = {
+                        data: {
+                            blocks: [
+                                {
+                                    '@type': '@builder.io/sdk:Element',
+                                    component: {
+                                        name: 'Image',
+                                        options: {
+                                            image: 'https://cdn.builder.io/api/v1/image/dummy.svg',
+                                            noWebp: true,
+                                        },
+                                    },
+                                },
+                            ],
+                        },
+                    };
+                    component = (0, builder_2.builderContentToMitosisComponent)(builderJson);
+                    return [4 /*yield*/, (0, html_1.componentToHtml)({
+                            plugins: [(0, compile_away_builder_components_1.compileAwayBuilderComponents)()],
+                        })({ component: component })];
+                case 1:
+                    html = _a.sent();
+                    expect(html).toMatchSnapshot();
+                    return [2 /*return*/];
+            }
+        });
+    }); });
     test('Regenerate custom Hero', function () {
         var code = (0, dedent_1.dedent)(templateObject_4 || (templateObject_4 = __makeTemplateObject(["\n      import { Hero } from \"@components\";\n\n      export default function MyComponent(props) {\n        return (\n          <Hero\n            title=\"Your Title Here\"\n            image=\"https://cdn.builder.io/api/v1/image/assets%2FYJIGb4i01jvw0SRdL5Bt%2F52dcecf48f9c48cc8ddd8f81fec63236\"\n            buttonLink=\"https://example.com\"\n            buttonText=\"Click\"\n            height={400}\n            css={{\n              display: \"flex\",\n              flexDirection: \"column\",\n              alignItems: \"stretch\",\n              position: \"relative\",\n              flexShrink: \"0\",\n              boxSizing: \"border-box\",\n              marginTop: \"200px\",\n            }}\n          />\n        );\n      }\n    "], ["\n      import { Hero } from \"@components\";\n\n      export default function MyComponent(props) {\n        return (\n          <Hero\n            title=\"Your Title Here\"\n            image=\"https://cdn.builder.io/api/v1/image/assets%2FYJIGb4i01jvw0SRdL5Bt%2F52dcecf48f9c48cc8ddd8f81fec63236\"\n            buttonLink=\"https://example.com\"\n            buttonText=\"Click\"\n            height={400}\n            css={{\n              display: \"flex\",\n              flexDirection: \"column\",\n              alignItems: \"stretch\",\n              position: \"relative\",\n              flexShrink: \"0\",\n              boxSizing: \"border-box\",\n              marginTop: \"200px\",\n            }}\n          />\n        );\n      }\n    "])));
         var component = (0, jsx_1.parseJsx)(code);

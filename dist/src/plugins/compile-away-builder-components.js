@@ -256,8 +256,8 @@ exports.components = {
         }), components);
     },
     Image: function (node, context, components) {
-        var _a, _b, _c, _d, _e, _f;
-        var _g = node.properties, backgroundSize = _g.backgroundSize, backgroundPosition = _g.backgroundPosition;
+        var _a, _b, _c, _d, _e, _f, _g;
+        var _h = node.properties, backgroundSize = _h.backgroundSize, backgroundPosition = _h.backgroundPosition;
         var srcset = node.properties.srcset;
         var aspectRatio = ((_a = node.bindings.aspectRatio) === null || _a === void 0 ? void 0 : _a.code)
             ? parseFloat(node.bindings.aspectRatio.code)
@@ -268,23 +268,25 @@ exports.components = {
         var image = node.properties.image;
         var srcSet = srcset || generateBuilderIoSrcSet(image);
         var css = getCssFromNode(node);
+        var noWebp = ((_b = node.bindings.noWebp) === null || _b === void 0 ? void 0 : _b.code) === 'true';
         var img = (0, create_mitosis_node_1.createMitosisNode)({
             name: 'img',
-            properties: noUndefined({
-                loading: 'lazy',
-                sizes: node.properties.sizes,
-                srcSet: srcSet || null,
-                alt: node.properties.altText,
-            }),
+            properties: noUndefined(__assign({ loading: 'lazy', sizes: node.properties.sizes, alt: node.properties.altText }, (noWebp
+                ? {
+                    src: image,
+                }
+                : {
+                    srcSet: srcSet || null,
+                }))),
             bindings: noUndefined({
-                src: ((_b = node.bindings.image) === null || _b === void 0 ? void 0 : _b.code) && { code: (_c = node.bindings.image) === null || _c === void 0 ? void 0 : _c.code },
-                sizes: ((_d = node.bindings.sizes) === null || _d === void 0 ? void 0 : _d.code) && { code: (_e = node.bindings.sizes) === null || _e === void 0 ? void 0 : _e.code },
+                src: ((_c = node.bindings.image) === null || _c === void 0 ? void 0 : _c.code) && { code: (_d = node.bindings.image) === null || _d === void 0 ? void 0 : _d.code },
+                sizes: ((_e = node.bindings.sizes) === null || _e === void 0 ? void 0 : _e.code) && { code: (_f = node.bindings.sizes) === null || _f === void 0 ? void 0 : _f.code },
                 css: (0, bindings_1.createSingleBinding)({
                     code: JSON.stringify(__assign(__assign({ aspectRatio: aspectRatio ? String((0, lodash_1.round)(1 / aspectRatio, 2)) : undefined, objectFit: backgroundSize || 'cover', objectPosition: backgroundPosition || 'center', width: '100%' }, css), { display: undefined, flexDirection: undefined, position: css.position === 'relative' ? undefined : css.position })),
                 }),
             }),
         });
-        if (!((_f = node.children) === null || _f === void 0 ? void 0 : _f.length)) {
+        if (!((_g = node.children) === null || _g === void 0 ? void 0 : _g.length)) {
             return img;
         }
         // TODO: deal with links: anchor tag and href
