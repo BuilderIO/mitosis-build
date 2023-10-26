@@ -48,6 +48,7 @@ var helpers_1 = require("../../helpers/styles/helpers");
 var plugins_1 = require("../../modules/plugins");
 var context_1 = require("../helpers/context");
 var react_native_1 = require("../react-native");
+var rsc_1 = require("../rsc");
 var blocks_1 = require("./blocks");
 var helpers_2 = require("./helpers");
 var state_2 = require("./state");
@@ -379,7 +380,13 @@ var _componentToReact = function (json, options, isSubComponent) {
         ? "<style>{`".concat(css, "`}</style>")
         : '', shouldInjectCustomStyles ? "<style>{`".concat(json.style, "`}</style>") : '', wrap ? (0, helpers_2.closeFrag)(options) : '');
     var isRsc = options.rsc && ((_q = (_p = json.meta.useMetadata) === null || _p === void 0 ? void 0 : _p.rsc) === null || _q === void 0 ? void 0 : _q.componentType) === 'server';
-    var shouldAddUseClientDirective = options.addUseClientDirectiveIfNeeded && !isRsc;
+    var isNative = options.type === 'native';
+    var isPreact = options.preact;
+    var shouldAddUseClientDirective = options.addUseClientDirectiveIfNeeded &&
+        !isRsc &&
+        !isNative &&
+        !isPreact &&
+        (0, rsc_1.checkIfIsClientComponent)(json);
     var str = (0, dedent_1.dedent)(templateObject_2 || (templateObject_2 = __makeTemplateObject(["\n  ", "\n  ", "\n  ", "\n  ", "\n  ", "\n    ", "\n    ", "\n    ", "\n    ", "function ", "(", ") {\n    ", "\n  }", "\n\n    ", "\n\n    ", "\n\n    ", "\n    ", "\n\n  "], ["\n  ", "\n  ", "\n  ", "\n  ", "\n  ", "\n    ", "\n    ", "\n    ", "\n    ", "function ", "(", ") {\n    ", "\n  }", "\n\n    ", "\n\n    ", "\n\n    ", "\n    ", "\n\n  "])), shouldAddUseClientDirective ? "'use client';" : '', getDefaultImport(json, options), styledComponentsCode ? "import styled from 'styled-components';\n" : '', reactLibImports.size
         ? "import { ".concat(Array.from(reactLibImports).join(', '), " } from '").concat(options.preact ? 'preact/hooks' : 'react', "'")
         : '', componentHasStyles && options.stylesType === 'emotion' && options.format !== 'lite'
