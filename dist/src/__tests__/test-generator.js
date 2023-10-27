@@ -132,6 +132,7 @@ var inputParentBlock = getRawFile('./data/blocks/input-parent.raw.tsx');
 var multipleOnUpdate = getRawFile('./data/blocks/multiple-onUpdate.raw.tsx');
 var multipleOnUpdateWithDeps = getRawFile('./data/blocks/multiple-onUpdateWithDeps.raw.tsx');
 var onInit = getRawFile('./data/blocks/onInit.raw.tsx');
+var onEvent = getRawFile('./data/blocks/onEvent.raw.tsx');
 var onInitonMount = getRawFile('./data/blocks/onInit-onMount.raw.tsx');
 var onMount = getRawFile('./data/blocks/onMount.raw.tsx');
 var onUpdate = getRawFile('./data/blocks/onUpdate.raw.tsx');
@@ -207,6 +208,7 @@ var BASIC_TESTS = {
     Columns: columns,
     onUpdate: onUpdate,
     onInit: onInit,
+    onEvent: onEvent,
     onUpdateWithDeps: onUpdateWithDeps,
     onMount: onMount,
     propsType: propsType,

@@ -1,0 +1,54 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.processOnEventHooksPlugin = exports.getOnEventHooksForNode = exports.getOnEventHandlerName = void 0;
+var capitalize_1 = require("./capitalize");
+var traverse_nodes_1 = require("./traverse-nodes");
+var checkIsEventHandlerNode = function (node, hook) {
+    var _a;
+    return hook.refName === ((_a = node.bindings.ref) === null || _a === void 0 ? void 0 : _a.code);
+};
+var getBindingName = function (hook) {
+    return "on".concat((0, capitalize_1.capitalize)(hook.eventName));
+};
+var getOnEventHandlerName = function (hook) {
+    return "".concat(hook.refName, "_").concat(getBindingName(hook));
+};
+exports.getOnEventHandlerName = getOnEventHandlerName;
+var getOnEventHooksForNode = function (_a) {
+    var _b;
+    var node = _a.node, component = _a.component;
+    return (_b = component.hooks.onEvent) === null || _b === void 0 ? void 0 : _b.filter(function (hook) { return checkIsEventHandlerNode(node, hook); });
+};
+exports.getOnEventHooksForNode = getOnEventHooksForNode;
+/**
+ * Adds event handlers from `onEvent` hooks to the appropriate node's bindings.
+ * Only works with frameworks that support custom events in their templates.
+ */
+var processOnEventHooksPlugin = function (args) {
+    if (args === void 0) { args = {}; }
+    return function () { return ({
+        json: {
+            pre: function (component) {
+                var _a = args.setBindings, setBindings = _a === void 0 ? true : _a;
+                (0, traverse_nodes_1.traverseNodes)(component, function (node) {
+                    var _a;
+                    (_a = (0, exports.getOnEventHooksForNode)({ node: node, component: component })) === null || _a === void 0 ? void 0 : _a.forEach(function (hook) {
+                        var handlerName = getBindingName(hook);
+                        var fnName = (0, exports.getOnEventHandlerName)(hook);
+                        component.state[fnName] = {
+                            code: "".concat(fnName, "() { ").concat(hook.code, " }"),
+                            type: 'method',
+                        };
+                        if (setBindings) {
+                            node.bindings[handlerName] = {
+                                code: "state.".concat(fnName, "()"),
+                                type: 'single',
+                            };
+                        }
+                    });
+                });
+            },
+        },
+    }); };
+};
+exports.processOnEventHooksPlugin = processOnEventHooksPlugin;

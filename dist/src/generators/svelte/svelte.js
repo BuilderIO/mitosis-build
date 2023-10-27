@@ -57,6 +57,7 @@ var get_state_object_string_1 = require("../../helpers/get-state-object-string")
 var getters_to_functions_1 = require("../../helpers/getters-to-functions");
 var is_mitosis_node_1 = require("../../helpers/is-mitosis-node");
 var merge_options_1 = require("../../helpers/merge-options");
+var on_event_1 = require("../../helpers/on-event");
 var patterns_1 = require("../../helpers/patterns");
 var process_code_1 = require("../../helpers/plugins/process-code");
 var render_imports_1 = require("../../helpers/render-imports");
@@ -143,7 +144,6 @@ var useBindValue = function (json, options) {
 var DEFAULT_OPTIONS = {
     stateType: 'variables',
     prettier: true,
-    plugins: [functions_1.FUNCTION_HACK_PLUGIN],
 };
 var componentToSvelte = function (userProvidedOptions) {
     return function (_a) {
@@ -156,6 +156,8 @@ var componentToSvelte = function (userProvidedOptions) {
             userOptions: userProvidedOptions,
         });
         options.plugins = __spreadArray(__spreadArray([], (options.plugins || []), true), [
+            (0, on_event_1.processOnEventHooksPlugin)(),
+            functions_1.FUNCTION_HACK_PLUGIN,
             // Strip types from any JS code that ends up in the template, because Svelte does not support TS code in templates.
             (0, process_code_1.CODE_PROCESSOR_PLUGIN)(function (codeType) {
                 switch (codeType) {

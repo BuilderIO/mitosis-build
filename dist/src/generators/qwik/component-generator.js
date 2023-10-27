@@ -5,6 +5,7 @@ var standalone_1 = require("prettier/standalone");
 var babel_transform_1 = require("../../helpers/babel-transform");
 var fast_clone_1 = require("../../helpers/fast-clone");
 var merge_options_1 = require("../../helpers/merge-options");
+var on_event_1 = require("../../helpers/on-event");
 var process_code_1 = require("../../helpers/plugins/process-code");
 var render_imports_1 = require("../../helpers/render-imports");
 var replace_identifiers_1 = require("../../helpers/replace-identifiers");
@@ -27,6 +28,7 @@ var PLUGINS = [
             },
         },
     }); },
+    (0, on_event_1.processOnEventHooksPlugin)({ setBindings: false }),
     (0, process_code_1.CODE_PROCESSOR_PLUGIN)(function (codeType, json) {
         switch (codeType) {
             case 'types':
@@ -118,6 +120,7 @@ var componentToQwik = function (userOptions) {
                     emitUseRef(file, component);
                     if (!((_b = metadata_1 === null || metadata_1 === void 0 ? void 0 : metadata_1.qwik) === null || _b === void 0 ? void 0 : _b.setUseStoreFirst))
                         emitStore_1();
+                    emitUseOn(file, component);
                     emitUseContextProvider(file, component);
                     emitUseClientEffect(file, component);
                     emitUseMount(file, component);
@@ -235,6 +238,19 @@ function emitUseContext(file, component) {
     Object.keys(component.context.get).forEach(function (ctxKey) {
         var context = component.context.get[ctxKey];
         file.src.emit('const ', ctxKey, '=', file.import(file.qwikModule, 'useContext').localName, '(', context.name, ');');
+    });
+}
+function emitUseOn(file, component) {
+    var _a;
+    (_a = component.hooks.onEvent) === null || _a === void 0 ? void 0 : _a.forEach(function (hook) {
+        var handlerName = (0, on_event_1.getOnEventHandlerName)(hook);
+        var eventName = "\"".concat(hook.eventName, "\"");
+        if (hook.isRoot) {
+            file.src.emit(file.import(file.qwikModule, 'useOn').localName, "(".concat(eventName, ", ").concat(handlerName, ");"));
+        }
+        else {
+            file.src.emit(file.import(file.qwikModule, 'useVisibleTask$').localName, "(() => {\n          ".concat(hook.refName, ".value?.addEventListener(").concat(eventName, ", ").concat(handlerName, ");\n          return () => ").concat(hook.refName, ".value?.removeEventListener(").concat(eventName, ", ").concat(handlerName, ");\n        })  \n        "));
+        }
     });
 }
 function emitUseRef(file, component) {

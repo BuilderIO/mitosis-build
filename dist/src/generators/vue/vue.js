@@ -14,6 +14,15 @@ var __assign = (this && this.__assign) || function () {
     };
     return __assign.apply(this, arguments);
 };
+var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
+    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
+        if (ar || !(i in from)) {
+            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+            ar[i] = from[i];
+        }
+    }
+    return to.concat(ar || Array.prototype.slice.call(from));
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -31,6 +40,7 @@ var get_props_1 = require("../../helpers/get-props");
 var is_mitosis_node_1 = require("../../helpers/is-mitosis-node");
 var map_refs_1 = require("../../helpers/map-refs");
 var merge_options_1 = require("../../helpers/merge-options");
+var on_event_1 = require("../../helpers/on-event");
 var process_code_1 = require("../../helpers/plugins/process-code");
 var process_http_requests_1 = require("../../helpers/process-http-requests");
 var render_imports_1 = require("../../helpers/render-imports");
@@ -96,14 +106,14 @@ var onUpdatePlugin = function (options) { return ({
     },
 }); };
 var BASE_OPTIONS = {
-    plugins: [],
     vueVersion: 2,
     api: 'options',
     defineComponent: true,
 };
 var componentToVue = function (userOptions) {
     return function (_a) {
-        var _b, _c, _d, _e, _f, _g, _h;
+        var _b;
+        var _c, _d, _e, _f, _g, _h, _j;
         var _component = _a.component, path = _a.path;
         // Make a copy we can safely mutate, similar to babel's toolchain can be used
         var component = (0, fast_clone_1.fastClone)(_component);
@@ -113,64 +123,60 @@ var componentToVue = function (userOptions) {
             defaults: BASE_OPTIONS,
             userOptions: userOptions,
         });
-        options.plugins.unshift((0, process_code_1.CODE_PROCESSOR_PLUGIN)(function (codeType) {
-            if (options.api === 'composition') {
-                switch (codeType) {
-                    case 'hooks':
-                        return function (code) { return (0, helpers_1.processBinding)({ code: code, options: options, json: component }); };
-                    case 'state':
-                        return function (code) { return (0, helpers_1.processBinding)({ code: code, options: options, json: component }); };
-                    case 'bindings':
-                        return (0, function_1.flow)(
-                        // Strip types from any JS code that ends up in the template, because Vue does not support TS code in templates.
-                        babel_transform_1.convertTypeScriptToJS, function (code) { return (0, helpers_1.processBinding)({ code: code, options: options, json: component, codeType: codeType }); });
-                    case 'context-set':
-                        return function (code) {
-                            return (0, helpers_1.processBinding)({ code: code, options: options, json: component, preserveGetter: true });
-                        };
-                    case 'hooks-deps':
-                        return (0, replace_identifiers_1.replaceStateIdentifier)(null);
-                    case 'properties':
-                    case 'dynamic-jsx-elements':
-                    case 'types':
-                        return function (c) { return c; };
-                }
-            }
-            else {
-                switch (codeType) {
-                    case 'hooks':
-                        return function (code) { return (0, helpers_1.processBinding)({ code: code, options: options, json: component }); };
-                    case 'bindings':
-                        return (0, function_1.flow)(
-                        // Strip types from any JS code that ends up in the template, because Vue does not support TS code in templates.
-                        babel_transform_1.convertTypeScriptToJS, function (code) { return (0, helpers_1.processBinding)({ code: code, options: options, json: component, codeType: codeType }); });
-                    case 'properties':
-                    case 'dynamic-jsx-elements':
-                    case 'hooks-deps':
-                    case 'types':
-                        return function (c) { return c; };
-                    case 'state':
-                        return function (c) { return (0, helpers_1.processBinding)({ code: c, options: options, json: component }); };
-                    case 'context-set':
-                        return function (code) {
-                            return (0, helpers_1.processBinding)({
-                                code: code,
-                                options: options,
-                                json: component,
-                                thisPrefix: '_this',
-                                preserveGetter: true,
-                            });
-                        };
-                }
-            }
-        }));
-        if (options.api === 'options') {
-            options.plugins.unshift(onUpdatePlugin);
-        }
-        else if (options.api === 'composition') {
-            options.plugins.unshift(functions_1.FUNCTION_HACK_PLUGIN);
+        if (options.api === 'composition') {
             options.asyncComponentImports = false;
         }
+        (_b = options.plugins).unshift.apply(_b, __spreadArray(__spreadArray(__spreadArray([(0, on_event_1.processOnEventHooksPlugin)()], (options.api === 'options' ? [onUpdatePlugin] : []), false), (options.api === 'composition' ? [functions_1.FUNCTION_HACK_PLUGIN] : []), false), [(0, process_code_1.CODE_PROCESSOR_PLUGIN)(function (codeType) {
+                if (options.api === 'composition') {
+                    switch (codeType) {
+                        case 'hooks':
+                            return function (code) { return (0, helpers_1.processBinding)({ code: code, options: options, json: component }); };
+                        case 'state':
+                            return function (code) { return (0, helpers_1.processBinding)({ code: code, options: options, json: component }); };
+                        case 'bindings':
+                            return (0, function_1.flow)(
+                            // Strip types from any JS code that ends up in the template, because Vue does not support TS code in templates.
+                            babel_transform_1.convertTypeScriptToJS, function (code) { return (0, helpers_1.processBinding)({ code: code, options: options, json: component, codeType: codeType }); });
+                        case 'context-set':
+                            return function (code) {
+                                return (0, helpers_1.processBinding)({ code: code, options: options, json: component, preserveGetter: true });
+                            };
+                        case 'hooks-deps':
+                            return (0, replace_identifiers_1.replaceStateIdentifier)(null);
+                        case 'properties':
+                        case 'dynamic-jsx-elements':
+                        case 'types':
+                            return function (c) { return c; };
+                    }
+                }
+                else {
+                    switch (codeType) {
+                        case 'hooks':
+                            return function (code) { return (0, helpers_1.processBinding)({ code: code, options: options, json: component }); };
+                        case 'bindings':
+                            return (0, function_1.flow)(
+                            // Strip types from any JS code that ends up in the template, because Vue does not support TS code in templates.
+                            babel_transform_1.convertTypeScriptToJS, function (code) { return (0, helpers_1.processBinding)({ code: code, options: options, json: component, codeType: codeType }); });
+                        case 'properties':
+                        case 'dynamic-jsx-elements':
+                        case 'hooks-deps':
+                        case 'types':
+                            return function (c) { return c; };
+                        case 'state':
+                            return function (c) { return (0, helpers_1.processBinding)({ code: c, options: options, json: component }); };
+                        case 'context-set':
+                            return function (code) {
+                                return (0, helpers_1.processBinding)({
+                                    code: code,
+                                    options: options,
+                                    json: component,
+                                    thisPrefix: '_this',
+                                    preserveGetter: true,
+                                });
+                            };
+                    }
+                }
+            })], false));
         (0, process_http_requests_1.processHttpRequests)(component);
         processDynamicComponents(component, options);
         processForKeys(component, options);
@@ -184,12 +190,12 @@ var componentToVue = function (userOptions) {
         var slotsProps = props.filter(function (prop) { return (0, slots_1.isSlotProperty)(prop); });
         component = (0, plugins_1.runPostJsonPlugins)({ json: component, plugins: options.plugins });
         var css = (0, collect_css_1.collectCss)(component, {
-            prefix: (_c = (_b = options.cssNamespace) === null || _b === void 0 ? void 0 : _b.call(options)) !== null && _c !== void 0 ? _c : undefined,
+            prefix: (_d = (_c = options.cssNamespace) === null || _c === void 0 ? void 0 : _c.call(options)) !== null && _d !== void 0 ? _d : undefined,
         });
         (0, strip_meta_properties_1.stripMetaProperties)(component);
         var template = (0, function_1.pipe)(component.children.map(function (item) { return (0, blocks_1.blockToVue)(item, options, { isRootNode: true }); }).join('\n'), helpers_1.renameMitosisComponentsToKebabCase);
-        var onUpdateWithDeps = ((_d = component.hooks.onUpdate) === null || _d === void 0 ? void 0 : _d.filter(function (hook) { var _a; return (_a = hook.deps) === null || _a === void 0 ? void 0 : _a.length; })) || [];
-        var onUpdateWithoutDeps = ((_e = component.hooks.onUpdate) === null || _e === void 0 ? void 0 : _e.filter(function (hook) { var _a; return !((_a = hook.deps) === null || _a === void 0 ? void 0 : _a.length); })) || [];
+        var onUpdateWithDeps = ((_e = component.hooks.onUpdate) === null || _e === void 0 ? void 0 : _e.filter(function (hook) { var _a; return (_a = hook.deps) === null || _a === void 0 ? void 0 : _a.length; })) || [];
+        var onUpdateWithoutDeps = ((_f = component.hooks.onUpdate) === null || _f === void 0 ? void 0 : _f.filter(function (hook) { var _a; return !((_a = hook.deps) === null || _a === void 0 ? void 0 : _a.length); })) || [];
         var getterKeys = Object.keys((0, lodash_1.pickBy)(component.state, function (i) { return (i === null || i === void 0 ? void 0 : i.type) === 'getter'; }));
         // import from vue
         var vueImports = [];
@@ -201,8 +207,8 @@ var componentToVue = function (userOptions) {
         }
         if (options.api === 'composition') {
             onUpdateWithDeps.length && vueImports.push('watch');
-            ((_f = component.hooks.onMount) === null || _f === void 0 ? void 0 : _f.code) && vueImports.push('onMounted');
-            ((_g = component.hooks.onUnMount) === null || _g === void 0 ? void 0 : _g.code) && vueImports.push('onUnmounted');
+            ((_g = component.hooks.onMount) === null || _g === void 0 ? void 0 : _g.code) && vueImports.push('onMounted');
+            ((_h = component.hooks.onUnMount) === null || _h === void 0 ? void 0 : _h.code) && vueImports.push('onUnmounted');
             onUpdateWithoutDeps.length && vueImports.push('onUpdated');
             (0, lodash_1.size)(getterKeys) && vueImports.push('computed');
             (0, lodash_1.size)(component.context.set) && vueImports.push('provide');
@@ -217,7 +223,7 @@ var componentToVue = function (userOptions) {
             component: component,
             target: 'vue',
             asyncComponentImports: options.asyncComponentImports,
-        }), (options.typescript && ((_h = component.types) === null || _h === void 0 ? void 0 : _h.join('\n'))) || '', options.api === 'composition'
+        }), (options.typescript && ((_j = component.types) === null || _j === void 0 ? void 0 : _j.join('\n'))) || '', options.api === 'composition'
             ? (0, compositionApi_1.generateCompositionApiScript)(component, options, template, elementProps, onUpdateWithDeps, onUpdateWithoutDeps)
             : (0, optionsApi_1.generateOptionsApiScript)(component, options, path, template, elementProps, onUpdateWithDeps, onUpdateWithoutDeps), !css.trim().length
             ? ''

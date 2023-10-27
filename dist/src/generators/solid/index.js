@@ -68,6 +68,7 @@ var is_mitosis_node_1 = require("../../helpers/is-mitosis-node");
 var is_root_text_node_1 = require("../../helpers/is-root-text-node");
 var merge_options_1 = require("../../helpers/merge-options");
 var nullable_1 = require("../../helpers/nullable");
+var on_event_1 = require("../../helpers/on-event");
 var process_code_1 = require("../../helpers/plugins/process-code");
 var render_imports_1 = require("../../helpers/render-imports");
 var strip_meta_properties_1 = require("../../helpers/strip-meta-properties");
@@ -124,7 +125,6 @@ function addProviderComponents(json, options) {
 var DEFAULT_OPTIONS = {
     state: 'signals',
     stylesType: 'styled-components',
-    plugins: [],
 };
 var componentToSolid = function (passedOptions) {
     return function (_a) {
@@ -138,6 +138,7 @@ var componentToSolid = function (passedOptions) {
             userOptions: passedOptions,
         });
         options.plugins = __spreadArray(__spreadArray([], (options.plugins || []), true), [
+            (0, on_event_1.processOnEventHooksPlugin)(),
             (0, process_code_1.CODE_PROCESSOR_PLUGIN)(function (codeType) {
                 switch (codeType) {
                     case 'state':

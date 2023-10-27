@@ -117,6 +117,34 @@ var componentFunctionToJson = function (node, context) {
                         }
                         break;
                     }
+                    case hooks_1.HOOKS.EVENT: {
+                        var firstArg = expression.arguments[0];
+                        var secondArg = expression.arguments[1];
+                        var thirdArg = expression.arguments[2];
+                        var fourthArg = expression.arguments[3];
+                        if (!types.isStringLiteral(firstArg)) {
+                            console.warn('`onEvent` hook skipped. Event name must be a string literal: ', (0, generator_1.default)(expression).code);
+                            break;
+                        }
+                        if (!types.isFunctionExpression(secondArg) &&
+                            !types.isArrowFunctionExpression(secondArg)) {
+                            console.warn('`onEvent` hook skipped. Event handler must be a function: ', (0, generator_1.default)(expression).code);
+                            break;
+                        }
+                        if (!types.isIdentifier(thirdArg)) {
+                            console.warn('`onEvent` hook skipped. Element ref must be a value: ', (0, generator_1.default)(expression).code);
+                            break;
+                        }
+                        var isRoot = types.isBooleanLiteral(fourthArg) ? fourthArg.value : false;
+                        hooks.onEvent = __spreadArray(__spreadArray([], (hooks.onEvent || []), true), [
+                            {
+                                eventName: firstArg.value,
+                                code: (0, helpers_2.processHookCode)(secondArg),
+                                refName: thirdArg.name,
+                                isRoot: isRoot,
+                            },
+                        ], false);
+                    }
                     case hooks_1.HOOKS.UPDATE: {
                         var firstArg = expression.arguments[0];
                         var secondArg = expression.arguments[1];

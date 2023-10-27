@@ -69,7 +69,9 @@ var replaceInputRefs = (0, lodash_1.curry)(function (json, str) {
 });
 var replaceStateWithThis = function (str) { return str.replaceAll('state.', 'this.'); };
 var getStateObjectString = function (json) {
-    return (0, lodash_1.flow)(get_state_object_string_1.getStateObjectStringFromComponent, trim, replaceInputRefs(json), (0, render_mount_hook_1.renderMountHook)(json), (0, render_update_hooks_1.renderUpdateHooks)(json), replaceStateWithThis)(json);
+    return (0, lodash_1.flow)(get_state_object_string_1.getStateObjectStringFromComponent, trim, replaceInputRefs(json), (0, render_mount_hook_1.renderMountHook)(json), (0, render_update_hooks_1.renderUpdateHooks)(json), replaceStateWithThis, 
+    // cleanup bad regexes that result in malformed JSON strings that start with `{,`
+    function (x) { return (x.startsWith('{,') ? x.replace('{,', '{') : x); })(json);
 };
 var bindEventHandlerKey = (0, lodash_1.flowRight)(dash_case_1.dashCase, removeOnFromEventName);
 var bindEventHandlerValue = (0, lodash_1.flowRight)(function (x) {

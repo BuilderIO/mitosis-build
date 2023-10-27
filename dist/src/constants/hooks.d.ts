@@ -8,6 +8,7 @@ export declare const HOOKS: {
     readonly TARGET: "useTarget";
     readonly METADATA: "useMetadata";
     readonly MOUNT: "onMount";
+    readonly EVENT: "onEvent";
     readonly UNMOUNT: "onUnMount";
     readonly UPDATE: "onUpdate";
     readonly INIT: "onInit";

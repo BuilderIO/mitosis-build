@@ -79,6 +79,13 @@ export declare type TargetBlockDefinition = TargetBlockCode & {
         requiresDefault: boolean;
     };
 };
+export declare type OnEventHook = {
+    code: string;
+    refName: string;
+    eventName: string;
+    isRoot: boolean;
+    deps?: never;
+};
 export declare type MitosisComponent = {
     '@type': '@builder.io/mitosis/component';
     name: string;
@@ -116,6 +123,7 @@ export declare type MitosisComponent = {
         preComponent?: extendedHook;
         postComponent?: extendedHook;
         onUpdate?: extendedHook[];
+        onEvent?: OnEventHook[];
     };
     targetBlocks?: Dictionary<TargetBlockDefinition>;
     children: MitosisNode[];
