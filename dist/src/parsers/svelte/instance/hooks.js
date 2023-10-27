@@ -12,9 +12,9 @@ function parseHookBody(node, stripCurlyBraces) {
     return code;
 }
 function parseOnMount(json, node) {
-    json.hooks.onMount = {
+    json.hooks.onMount.push({
         code: parseHookBody(node),
-    };
+    });
 }
 exports.parseOnMount = parseOnMount;
 function parseOnDestroy(json, node) {

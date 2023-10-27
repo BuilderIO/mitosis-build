@@ -44,7 +44,7 @@ export interface ContextSetInfo extends ContextOptions {
     value?: MitosisState;
     ref?: string;
 }
-export declare type extendedHook = {
+export declare type BaseHook = {
     code: string;
     deps?: string;
 };
@@ -79,12 +79,14 @@ export declare type TargetBlockDefinition = TargetBlockCode & {
         requiresDefault: boolean;
     };
 };
-export declare type OnEventHook = {
-    code: string;
+export declare type OnEventHook = BaseHook & {
     refName: string;
     eventName: string;
     isRoot: boolean;
     deps?: never;
+};
+export declare type OnMountHook = BaseHook & {
+    onSSR?: boolean;
 };
 export declare type MitosisComponent = {
     '@type': '@builder.io/mitosis/component';
@@ -116,13 +118,13 @@ export declare type MitosisComponent = {
         };
     };
     hooks: {
-        init?: extendedHook;
-        onInit?: extendedHook;
-        onMount?: extendedHook;
-        onUnMount?: extendedHook;
-        preComponent?: extendedHook;
-        postComponent?: extendedHook;
-        onUpdate?: extendedHook[];
+        init?: BaseHook;
+        onInit?: BaseHook;
+        onMount: OnMountHook[];
+        onUnMount?: BaseHook;
+        preComponent?: BaseHook;
+        postComponent?: BaseHook;
+        onUpdate?: BaseHook[];
         onEvent?: OnEventHook[];
     };
     targetBlocks?: Dictionary<TargetBlockDefinition>;

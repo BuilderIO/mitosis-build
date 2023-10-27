@@ -22,7 +22,6 @@ var handleMemberExpression = function (json, node, parent) {
     (0, expressions_1.parseMemberExpression)(json, node, parent);
 };
 var handleExpressionStatement = function (json, node, parent) {
-    var _a;
     if (node.expression.type === 'CallExpression') {
         if (node.expression.callee.type === 'MemberExpression') {
             handleMemberExpression(json, node, parent);
@@ -50,10 +49,9 @@ var handleExpressionStatement = function (json, node, parent) {
         // No default
     }
     else if ((parent === null || parent === void 0 ? void 0 : parent.type) === 'Program') {
-        var onMountCode = ((_a = json.hooks.onMount) === null || _a === void 0 ? void 0 : _a.code) || '';
-        json.hooks.onMount = {
-            code: "".concat(onMountCode, "\n").concat((0, astring_1.generate)(node), ";\n"),
-        };
+        json.hooks.onMount.push({
+            code: (0, astring_1.generate)(node),
+        });
     }
 };
 var handleFunctionDeclaration = function (json, node) {

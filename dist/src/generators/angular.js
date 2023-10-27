@@ -56,6 +56,7 @@ var plugins_1 = require("../modules/plugins");
 var mitosis_node_1 = require("../types/mitosis-node");
 var merge_options_1 = require("../helpers/merge-options");
 var process_code_1 = require("../helpers/plugins/process-code");
+var on_mount_1 = require("./helpers/on-mount");
 var BUILT_IN_COMPONENTS = new Set(['Show', 'For', 'Fragment', 'Slot']);
 var mappers = {
     Fragment: function (json, options) {
@@ -221,7 +222,7 @@ var DEFAULT_OPTIONS = {
 var componentToAngular = function (userOptions) {
     if (userOptions === void 0) { userOptions = {}; }
     return function (_a) {
-        var _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m;
+        var _b, _c, _d, _e, _f, _g, _h, _j;
         var _component = _a.component;
         // Make a copy we can safely mutate, similar to babel's toolchain
         var json = (0, fast_clone_1.fastClone)(_component);
@@ -283,7 +284,7 @@ var componentToAngular = function (userOptions) {
         if (options.plugins) {
             json = (0, plugins_1.runPreJsonPlugins)({ json: json, plugins: options.plugins });
         }
-        var _o = (0, get_props_ref_1.getPropsRef)(json, true), forwardProp = _o[0], hasPropRef = _o[1];
+        var _k = (0, get_props_ref_1.getPropsRef)(json, true), forwardProp = _k[0], hasPropRef = _k[1];
         var childComponents = [];
         var propsTypeRef = json.propsTypeRef !== 'any' ? json.propsTypeRef : undefined;
         json.imports.forEach(function (_a) {
@@ -295,7 +296,7 @@ var componentToAngular = function (userOptions) {
             });
         });
         var customImports = (0, get_custom_imports_1.getCustomImports)(json);
-        var _p = json.exports, localExports = _p === void 0 ? {} : _p;
+        var _l = json.exports, localExports = _l === void 0 ? {} : _l;
         var localExportVars = Object.keys(localExports)
             .filter(function (key) { return localExports[key].usedInLocal; })
             .map(function (key) { return "".concat(key, " = ").concat(key, ";"); });
@@ -328,7 +329,6 @@ var componentToAngular = function (userOptions) {
             }
             return "@Output() ".concat(variableName, " = new EventEmitter()");
         });
-        var hasOnMount = Boolean((_f = json.hooks) === null || _f === void 0 ? void 0 : _f.onMount);
         var domRefs = (0, get_refs_1.getRefs)(json);
         var jsRefs = Object.keys(json.refs).filter(function (ref) { return !domRefs.has(ref); });
         var componentsUsed = Array.from((0, get_components_used_1.getComponentsUsed)(json)).filter(function (item) {
@@ -394,7 +394,7 @@ var componentToAngular = function (userOptions) {
                 .join(',');
             return "const defaultProps = {".concat(defalutPropsString, "};\n");
         };
-        var str = (0, dedent_1.dedent)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    import { ", " ", " Component ", "", " } from '@angular/core';\n    ", "\n\n    ", "\n    ", "\n    ", "\n\n    @Component({\n      ", "\n    })\n    export class ", " {\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n    }\n  "], ["\n    import { ", " ", " Component ", "", " } from '@angular/core';\n    ", "\n\n    ", "\n    ", "\n    ", "\n\n    @Component({\n      ", "\n    })\n    export class ", " {\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n    }\n  "])), outputs.length ? 'Output, EventEmitter, \n' : '', ((_g = options === null || options === void 0 ? void 0 : options.experimental) === null || _g === void 0 ? void 0 : _g.inject) ? 'Inject, forwardRef,' : '', domRefs.size ? ', ViewChild, ElementRef' : '', props.size ? ', Input' : '', options.standalone ? "import { CommonModule } from '@angular/common';" : '', json.types ? json.types.join('\n') : '', getPropsDefinition({ json: json }), (0, render_imports_1.renderPreComponent)({
+        var str = (0, dedent_1.dedent)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    import { ", " ", " Component ", "", " } from '@angular/core';\n    ", "\n\n    ", "\n    ", "\n    ", "\n\n    @Component({\n      ", "\n    })\n    export class ", " {\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n    }\n  "], ["\n    import { ", " ", " Component ", "", " } from '@angular/core';\n    ", "\n\n    ", "\n    ", "\n    ", "\n\n    @Component({\n      ", "\n    })\n    export class ", " {\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n    }\n  "])), outputs.length ? 'Output, EventEmitter, \n' : '', ((_f = options === null || options === void 0 ? void 0 : options.experimental) === null || _f === void 0 ? void 0 : _f.inject) ? 'Inject, forwardRef,' : '', domRefs.size ? ', ViewChild, ElementRef' : '', props.size ? ', Input' : '', options.standalone ? "import { CommonModule } from '@angular/common';" : '', json.types ? json.types.join('\n') : '', getPropsDefinition({ json: json }), (0, render_imports_1.renderPreComponent)({
             component: json,
             target: 'angular',
             excludeMitosisComponents: !options.standalone && !options.preserveImports,
@@ -434,13 +434,11 @@ var componentToAngular = function (userOptions) {
         })
             .join('\n'), !hasConstructor
             ? ''
-            : "constructor(\n".concat(injectables.join(',\n'), ") {\n            ").concat(!((_h = json.hooks) === null || _h === void 0 ? void 0 : _h.onInit)
+            : "constructor(\n".concat(injectables.join(',\n'), ") {\n            ").concat(!((_g = json.hooks) === null || _g === void 0 ? void 0 : _g.onInit)
                 ? ''
-                : "\n              ".concat((_j = json.hooks.onInit) === null || _j === void 0 ? void 0 : _j.code, "\n              "), "\n          }\n          "), !hasOnMount
+                : "\n              ".concat((_h = json.hooks.onInit) === null || _h === void 0 ? void 0 : _h.code, "\n              "), "\n          }\n          "), !json.hooks.onMount.length
             ? ''
-            : "ngOnInit() {\n\n              ".concat(!((_k = json.hooks) === null || _k === void 0 ? void 0 : _k.onMount)
-                ? ''
-                : "\n                ".concat((_l = json.hooks.onMount) === null || _l === void 0 ? void 0 : _l.code, "\n                "), "\n            }"), !((_m = json.hooks.onUpdate) === null || _m === void 0 ? void 0 : _m.length)
+            : "ngOnInit() {\n              ".concat((0, on_mount_1.stringifySingleScopeOnMount)(json), "\n            }"), !((_j = json.hooks.onUpdate) === null || _j === void 0 ? void 0 : _j.length)
             ? ''
             : "ngAfterContentChecked() {\n              ".concat(json.hooks.onUpdate.reduce(function (code, hook) {
                 code += hook.code;

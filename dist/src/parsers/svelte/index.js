@@ -58,7 +58,9 @@ function mapAstToMitosisJson(ast, name, string_, usesTypescript) {
         state: {},
         props: {},
         refs: {},
-        hooks: {},
+        hooks: {
+            onMount: [],
+        },
         imports: [],
         children: [],
         context: { get: {}, set: {} },

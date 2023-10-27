@@ -20,6 +20,7 @@ var get_custom_imports_1 = require("../../helpers/get-custom-imports");
 var get_state_object_string_1 = require("../../helpers/get-state-object-string");
 var nullable_1 = require("../../helpers/nullable");
 var render_imports_1 = require("../../helpers/render-imports");
+var on_mount_1 = require("../helpers/on-mount");
 var helpers_1 = require("./helpers");
 var getContextProvideString = function (json, options) {
     return "{\n    ".concat(Object.values(json.context.set)
@@ -65,7 +66,7 @@ var appendToDataString = function (_a) {
     return dataString.replace(/}$/, "".concat(newContent, "}"));
 };
 function generateOptionsApiScript(component, options, path, template, props, onUpdateWithDeps, onUpdateWithoutDeps) {
-    var _a, _b, _c, _d;
+    var _a, _b, _c;
     var localExports = component.exports;
     var localVarAsData = [];
     var localVarAsFunc = [];
@@ -157,8 +158,8 @@ function generateOptionsApiScript(component, options, path, template, props, onU
         ? "inject: ".concat(getContextInjectString(component, options), ",")
         : '', "\n        ").concat(((_c = component.hooks.onInit) === null || _c === void 0 ? void 0 : _c.code)
         ? "created() {\n                ".concat(component.hooks.onInit.code, "\n              },")
-        : '', "\n        ").concat(((_d = component.hooks.onMount) === null || _d === void 0 ? void 0 : _d.code)
-        ? "mounted() {\n                ".concat(component.hooks.onMount.code, "\n              },")
+        : '', "\n        ").concat(component.hooks.onMount.length
+        ? "mounted() {\n                ".concat((0, on_mount_1.stringifySingleScopeOnMount)(component), "\n              },")
         : '', "\n        ").concat(onUpdateWithoutDeps.length
         ? "updated() {\n            ".concat(onUpdateWithoutDeps.map(function (hook) { return hook.code; }).join('\n'), "\n          },")
         : '', "\n        ").concat(onUpdateWithDeps.length

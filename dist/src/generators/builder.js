@@ -35,6 +35,7 @@ var remove_surrounding_block_1 = require("../helpers/remove-surrounding-block");
 var state_1 = require("../helpers/state");
 var builder_1 = require("../parsers/builder");
 var symbol_processor_1 = require("../symbols/symbol-processor");
+var on_mount_1 = require("./helpers/on-mount");
 var omitMetaProperties = function (obj) {
     return (0, lodash_1.omitBy)(obj, function (_value, key) { return key.startsWith('$'); });
 };
@@ -235,24 +236,24 @@ exports.blockToBuilder = blockToBuilder;
 var componentToBuilder = function (options) {
     if (options === void 0) { options = {}; }
     return function (_a) {
-        var _b, _c, _d, _e;
+        var _b, _c;
         var component = _a.component;
         var hasState = (0, state_1.checkHasState)(component);
         var result = (0, fast_clone_1.fastClone)({
             data: {
                 httpRequests: (_c = (_b = component === null || component === void 0 ? void 0 : component.meta) === null || _b === void 0 ? void 0 : _b.useMetadata) === null || _c === void 0 ? void 0 : _c.httpRequests,
-                jsCode: tryFormat((0, dedent_1.dedent)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n        ", "\n\n        ", "\n        \n        ", "\n      "], ["\n        ", "\n\n        ", "\n        \n        ", "\n      "])), !(0, has_props_1.hasProps)(component) ? '' : "var props = state;", !hasState ? '' : "Object.assign(state, ".concat((0, get_state_object_string_1.getStateObjectStringFromComponent)(component), ");"), !((_d = component.hooks.onMount) === null || _d === void 0 ? void 0 : _d.code) ? '' : component.hooks.onMount.code)),
-                tsCode: tryFormat((0, dedent_1.dedent)(templateObject_2 || (templateObject_2 = __makeTemplateObject(["\n        ", "\n\n        ", "\n\n        ", "\n      "], ["\n        ", "\n\n        ", "\n\n        ", "\n      "])), !(0, has_props_1.hasProps)(component) ? '' : "var props = state;", !hasState ? '' : "useState(".concat((0, get_state_object_string_1.getStateObjectStringFromComponent)(component), ");"), !((_e = component.hooks.onMount) === null || _e === void 0 ? void 0 : _e.code)
+                jsCode: tryFormat((0, dedent_1.dedent)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n        ", "\n\n        ", "\n        \n        ", "\n      "], ["\n        ", "\n\n        ", "\n        \n        ", "\n      "])), !(0, has_props_1.hasProps)(component) ? '' : "var props = state;", !hasState ? '' : "Object.assign(state, ".concat((0, get_state_object_string_1.getStateObjectStringFromComponent)(component), ");"), (0, on_mount_1.stringifySingleScopeOnMount)(component))),
+                tsCode: tryFormat((0, dedent_1.dedent)(templateObject_2 || (templateObject_2 = __makeTemplateObject(["\n        ", "\n\n        ", "\n\n        ", "\n      "], ["\n        ", "\n\n        ", "\n\n        ", "\n      "])), !(0, has_props_1.hasProps)(component) ? '' : "var props = state;", !hasState ? '' : "useState(".concat((0, get_state_object_string_1.getStateObjectStringFromComponent)(component), ");"), !component.hooks.onMount.length
                     ? ''
-                    : "onMount(() => {\n                ".concat(component.hooks.onMount.code, "\n              })"))),
+                    : "onMount(() => {\n                ".concat((0, on_mount_1.stringifySingleScopeOnMount)(component), "\n              })"))),
                 blocks: component.children
                     .filter(filter_empty_text_nodes_1.filterEmptyTextNodes)
                     .map(function (child) { return (0, exports.blockToBuilder)(child, options); }),
             },
         });
         var subComponentMap = {};
-        for (var _i = 0, _f = component.subComponents; _i < _f.length; _i++) {
-            var subComponent = _f[_i];
+        for (var _i = 0, _d = component.subComponents; _i < _d.length; _i++) {
+            var subComponent = _d[_i];
             var name_1 = subComponent.name;
             subComponentMap[name_1] = (0, exports.componentToBuilder)(options)({
                 component: subComponent,

@@ -77,7 +77,9 @@ export declare function createContext<T = Dictionary<any>>(value: T, args?: {
 export declare function setContext<T = Dictionary<any>>(key: Context<T>, value: Partial<T>, options?: {
     type?: ReactivityType;
 }): void;
-export declare function onMount(fn: () => any): void;
+export declare function onMount(fn: () => any, args?: {
+    onSSR?: boolean;
+}): void;
 export declare function onUpdate(fn: () => any, deps?: any[]): void;
 export declare function onInit(fn: () => any): void;
 export declare function onUnMount(fn: () => any): void;

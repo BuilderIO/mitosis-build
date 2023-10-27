@@ -65,7 +65,9 @@ var types = babel.types;
  */
 var componentFunctionToJson = function (node, context) {
     var _a;
-    var hooks = {};
+    var hooks = {
+        onMount: [],
+    };
     var state = {};
     var accessedContext = {};
     var setContext = {};
@@ -111,9 +113,24 @@ var componentFunctionToJson = function (node, context) {
                     }
                     case hooks_1.HOOKS.MOUNT: {
                         var firstArg = expression.arguments[0];
+                        var hookOptions = expression.arguments[1];
                         if (types.isFunctionExpression(firstArg) || types.isArrowFunctionExpression(firstArg)) {
                             var code = (0, helpers_2.processHookCode)(firstArg);
-                            hooks.onMount = { code: code };
+                            var onSSR = false;
+                            if (types.isObjectExpression(hookOptions)) {
+                                var onSSRProp = hookOptions.properties.find(function (property) {
+                                    return types.isProperty(property) &&
+                                        types.isIdentifier(property.key) &&
+                                        property.key.name === 'onSSR';
+                                });
+                                if (types.isObjectProperty(onSSRProp) && types.isBooleanLiteral(onSSRProp.value)) {
+                                    onSSR = onSSRProp.value.value;
+                                }
+                            }
+                            hooks.onMount.push({
+                                code: code,
+                                onSSR: onSSR,
+                            });
                         }
                         break;
                     }

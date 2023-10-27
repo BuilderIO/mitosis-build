@@ -147,7 +147,7 @@ var DEFAULT_OPTIONS = {
 };
 var componentToSvelte = function (userProvidedOptions) {
     return function (_a) {
-        var _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o;
+        var _b, _c, _d, _e, _f, _g, _h, _j, _k;
         var component = _a.component;
         var options = (0, merge_options_1.initializeOptions)({
             target: 'svelte',
@@ -251,13 +251,13 @@ var componentToSvelte = function (userProvidedOptions) {
         // prepare svelte imports
         var svelteImports = [];
         var svelteStoreImports = [];
-        if ((_d = (_c = json.hooks.onMount) === null || _c === void 0 ? void 0 : _c.code) === null || _d === void 0 ? void 0 : _d.length) {
+        if (json.hooks.onMount.length) {
             svelteImports.push('onMount');
         }
-        if ((_f = (_e = json.hooks.onUpdate) === null || _e === void 0 ? void 0 : _e.filter(function (x) { return !x.deps; })) === null || _f === void 0 ? void 0 : _f.length) {
+        if ((_d = (_c = json.hooks.onUpdate) === null || _c === void 0 ? void 0 : _c.filter(function (x) { return !x.deps; })) === null || _d === void 0 ? void 0 : _d.length) {
             svelteImports.push('afterUpdate');
         }
-        if ((_h = (_g = json.hooks.onUnMount) === null || _g === void 0 ? void 0 : _g.code) === null || _h === void 0 ? void 0 : _h.length) {
+        if ((_f = (_e = json.hooks.onUnMount) === null || _e === void 0 ? void 0 : _e.code) === null || _f === void 0 ? void 0 : _f.length) {
             svelteImports.push('onDestroy');
         }
         if ((0, context_1.hasGetContext)(component)) {
@@ -302,7 +302,7 @@ var componentToSvelte = function (userProvidedOptions) {
             ? dataString.length < 4
                 ? ''
                 : "let state = onChange(".concat(dataString, ", () => state = state)")
-            : dataString, (_k = (_j = json.hooks.onInit) === null || _j === void 0 ? void 0 : _j.code) !== null && _k !== void 0 ? _k : '', !((_l = json.hooks.onMount) === null || _l === void 0 ? void 0 : _l.code) ? '' : "onMount(() => { ".concat(json.hooks.onMount.code, " });"), ((_m = json.hooks.onUpdate) === null || _m === void 0 ? void 0 : _m.map(function (_a, index) {
+            : dataString, (_h = (_g = json.hooks.onInit) === null || _g === void 0 ? void 0 : _g.code) !== null && _h !== void 0 ? _h : '', json.hooks.onMount.map(function (hook) { return "onMount(() => { ".concat(hook.code, " });"); }), ((_j = json.hooks.onUpdate) === null || _j === void 0 ? void 0 : _j.map(function (_a, index) {
             var code = _a.code, deps = _a.deps;
             if (!deps) {
                 return "afterUpdate(() => { ".concat(code, " });");
@@ -311,7 +311,7 @@ var componentToSvelte = function (userProvidedOptions) {
             return "\n              function ".concat(fnName, "(..._args").concat(options.typescript ? ': any[]' : '', ") {\n                ").concat(code, "\n              }\n              $: ").concat(fnName, "(...").concat(deps, ")\n            ");
         }).join(';')) || '', 
         // make sure this is after all other state/code is initialized
-        setContextCode({ json: json, options: options }), !((_o = json.hooks.onUnMount) === null || _o === void 0 ? void 0 : _o.code) ? '' : "onDestroy(() => { ".concat(json.hooks.onUnMount.code, " });"), json.children
+        setContextCode({ json: json, options: options }), !((_k = json.hooks.onUnMount) === null || _k === void 0 ? void 0 : _k.code) ? '' : "onDestroy(() => { ".concat(json.hooks.onUnMount.code, " });"), json.children
             .map(function (item) {
             return (0, blocks_1.blockToSvelte)({
                 json: item,

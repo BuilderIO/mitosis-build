@@ -26,6 +26,7 @@ var strip_state_and_props_refs_1 = require("../../helpers/strip-state-and-props-
 var collect_css_1 = require("../../helpers/styles/collect-css");
 var plugins_1 = require("../../modules/plugins");
 var mitosis_node_1 = require("../../types/mitosis-node");
+var on_mount_1 = require("../helpers/on-mount");
 var collect_class_string_1 = require("./collect-class-string");
 var getCustomTagName = function (name, options) {
     if (!name || !(0, is_upper_case_1.isUpperCase)(name[0])) {
@@ -114,7 +115,7 @@ function processBinding(code) {
 var componentToLit = function (_options) {
     if (_options === void 0) { _options = {}; }
     return function (_a) {
-        var _b, _c, _d, _e;
+        var _b, _c, _d;
         var component = _a.component;
         var options = (0, merge_options_1.initializeOptions)({ target: 'lit', component: component, defaults: _options });
         var json = (0, fast_clone_1.fastClone)(component);
@@ -189,11 +190,11 @@ var componentToLit = function (_options) {
             .map(function (refName) { return "\n          @query('[ref=\"".concat(refName, "\"]')\n          ").concat((0, lodash_1.camelCase)(refName), "!: HTMLElement;\n          "); })
             .join('\n'), Array.from(props)
             .map(function (item) { return "@property() ".concat(item, ": any"); })
-            .join('\n'), dataString, methodsString, !((_c = json.hooks.onMount) === null || _c === void 0 ? void 0 : _c.code)
+            .join('\n'), dataString, methodsString, json.hooks.onMount.length === 0
             ? ''
-            : "connectedCallback() { ".concat(processBinding(json.hooks.onMount.code), " }"), !((_d = json.hooks.onUnMount) === null || _d === void 0 ? void 0 : _d.code)
+            : "connectedCallback() { ".concat(processBinding((0, on_mount_1.stringifySingleScopeOnMount)(json)), " }"), !((_c = json.hooks.onUnMount) === null || _c === void 0 ? void 0 : _c.code)
             ? ''
-            : "disconnectedCallback() { ".concat(processBinding(json.hooks.onUnMount.code), " }"), !((_e = json.hooks.onUpdate) === null || _e === void 0 ? void 0 : _e.length)
+            : "disconnectedCallback() { ".concat(processBinding(json.hooks.onUnMount.code), " }"), !((_d = json.hooks.onUpdate) === null || _d === void 0 ? void 0 : _d.length)
             ? ''
             : "updated() { \n              ".concat(json.hooks.onUpdate.map(function (hook) { return processBinding(hook.code); }).join('\n\n'), " \n            }"), options.useShadowDom || !css.length ? '' : "<style>".concat(css, "</style>"), (0, indent_1.indent)(html, 8));
         if (options.plugins) {

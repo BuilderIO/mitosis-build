@@ -718,7 +718,7 @@ var isBuilderElement = function (el) {
 };
 exports.isBuilderElement = isBuilderElement;
 var builderContentPartToMitosisComponent = function (builderContent, options) {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _j;
+    var _a, _b, _c, _d, _e, _f, _g, _h;
     if (options === void 0) { options = {}; }
     builderContent = (0, fast_clone_1.fastClone)(builderContent);
     (0, traverse_1.default)(builderContent).forEach(function (elem) {
@@ -747,7 +747,7 @@ var builderContentPartToMitosisComponent = function (builderContent, options) {
             }
         }
     });
-    var _k = extractStateHook(((_a = builderContent === null || builderContent === void 0 ? void 0 : builderContent.data) === null || _a === void 0 ? void 0 : _a.tsCode) || ((_b = builderContent === null || builderContent === void 0 ? void 0 : builderContent.data) === null || _b === void 0 ? void 0 : _b.jsCode) || ''), state = _k.state, code = _k.code;
+    var _j = extractStateHook(((_a = builderContent === null || builderContent === void 0 ? void 0 : builderContent.data) === null || _a === void 0 ? void 0 : _a.tsCode) || ((_b = builderContent === null || builderContent === void 0 ? void 0 : builderContent.data) === null || _b === void 0 ? void 0 : _b.jsCode) || ''), state = _j.state, code = _j.code;
     var customCode = convertExportDefaultToReturn(code);
     var parsed = getHooks(builderContent);
     var parsedState = (parsed === null || parsed === void 0 ? void 0 : parsed.state) || {};
@@ -763,10 +763,14 @@ var builderContentPartToMitosisComponent = function (builderContent, options) {
             defaultValue: input.defaultValue,
         }); }),
         state: mitosisState,
-        hooks: __assign({}, ((((_h = parsed === null || parsed === void 0 ? void 0 : parsed.hooks.onMount) === null || _h === void 0 ? void 0 : _h.code) || (customCode && { code: customCode })) && {
-            onMount: (parsed === null || parsed === void 0 ? void 0 : parsed.hooks.onMount) || { code: customCode },
-        })),
-        children: (((_j = builderContent.data) === null || _j === void 0 ? void 0 : _j.blocks) || [])
+        hooks: {
+            onMount: __spreadArray([], ((parsed === null || parsed === void 0 ? void 0 : parsed.hooks.onMount.length)
+                ? parsed === null || parsed === void 0 ? void 0 : parsed.hooks.onMount
+                : customCode
+                    ? [{ code: customCode }]
+                    : []), true),
+        },
+        children: (((_h = builderContent.data) === null || _h === void 0 ? void 0 : _h.blocks) || [])
             .filter(function (item) {
             var _a, _b;
             if ((_b = (_a = item.properties) === null || _a === void 0 ? void 0 : _a.src) === null || _b === void 0 ? void 0 : _b.includes('/api/v1/pixel')) {

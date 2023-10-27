@@ -162,12 +162,11 @@ function emitExports(file, component) {
     });
 }
 function emitUseClientEffect(file, component) {
-    if (component.hooks.onMount) {
-        // This is called useMount, but in practice it is used as
-        // useClientEffect. Not sure if this is correct, but for now.
-        var code = component.hooks.onMount.code;
-        file.src.emit(file.import(file.qwikModule, 'useVisibleTask$').localName, '(()=>{', code, '});');
-    }
+    component.hooks.onMount.forEach(function (onMount) {
+        var code = onMount.code;
+        var hookToUse = onMount.onSSR ? 'useTask$' : 'useVisibleTask$';
+        file.src.emit(file.import(file.qwikModule, hookToUse).localName, '(()=>{', code, '});');
+    });
 }
 function emitUseMount(file, component) {
     if (component.hooks.onInit) {
@@ -243,13 +242,13 @@ function emitUseContext(file, component) {
 function emitUseOn(file, component) {
     var _a;
     (_a = component.hooks.onEvent) === null || _a === void 0 ? void 0 : _a.forEach(function (hook) {
-        var handlerName = (0, on_event_1.getOnEventHandlerName)(hook);
+        var wrappedHandlerFn = "".concat(file.import(file.qwikModule, '$').localName, "(").concat((0, on_event_1.getOnEventHandlerName)(hook), ")");
         var eventName = "\"".concat(hook.eventName, "\"");
         if (hook.isRoot) {
-            file.src.emit(file.import(file.qwikModule, 'useOn').localName, "(".concat(eventName, ", ").concat(handlerName, ");"));
+            file.src.emit(file.import(file.qwikModule, 'useOn').localName, "(".concat(eventName, ", ").concat(wrappedHandlerFn, ");"));
         }
         else {
-            file.src.emit(file.import(file.qwikModule, 'useVisibleTask$').localName, "(() => {\n          ".concat(hook.refName, ".value?.addEventListener(").concat(eventName, ", ").concat(handlerName, ");\n          return () => ").concat(hook.refName, ".value?.removeEventListener(").concat(eventName, ", ").concat(handlerName, ");\n        })  \n        "));
+            file.src.emit(file.import(file.qwikModule, 'useVisibleTask$').localName, "(() => {\n          ".concat(hook.refName, ".value?.addEventListener(").concat(eventName, ", ").concat(wrappedHandlerFn, ");\n          return () => ").concat(hook.refName, ".value?.removeEventListener(").concat(eventName, ", ").concat(wrappedHandlerFn, ");\n        })  \n        "));
         }
     });
 }

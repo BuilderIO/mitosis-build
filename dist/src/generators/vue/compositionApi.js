@@ -40,7 +40,7 @@ var getCompositionPropDefinition = function (_a) {
     return str;
 };
 function generateCompositionApiScript(component, options, template, props, onUpdateWithDeps, onUpdateWithoutDeps) {
-    var _a, _b, _c, _d, _e, _f, _g;
+    var _a, _b, _c, _d, _e, _f;
     var isTs = options.typescript;
     var refs = (0, get_state_object_string_1.getStateObjectStringFromComponent)(component, {
         data: true,
@@ -76,7 +76,7 @@ function generateCompositionApiScript(component, options, template, props, onUpd
         else {
             return "const ".concat(key, " = ref(null)");
         }
-    }).join('\n'), (_e = (_d = component.hooks.onInit) === null || _d === void 0 ? void 0 : _d.code) !== null && _e !== void 0 ? _e : '', !((_f = component.hooks.onMount) === null || _f === void 0 ? void 0 : _f.code) ? '' : "onMounted(() => { ".concat(component.hooks.onMount.code, "})"), !((_g = component.hooks.onUnMount) === null || _g === void 0 ? void 0 : _g.code)
+    }).join('\n'), (_e = (_d = component.hooks.onInit) === null || _d === void 0 ? void 0 : _d.code) !== null && _e !== void 0 ? _e : '', component.hooks.onMount.map(function (hook) { return "onMounted(() => { ".concat(hook.code, " })"); }), !((_f = component.hooks.onUnMount) === null || _f === void 0 ? void 0 : _f.code)
         ? ''
         : "onUnmounted(() => { ".concat(component.hooks.onUnMount.code, "})"), (getterKeys === null || getterKeys === void 0 ? void 0 : getterKeys.map(function (key) {
         var _a, _b;

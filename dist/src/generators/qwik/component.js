@@ -22,6 +22,7 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.addCommonStyles = exports.renderUseLexicalScope = exports.addComponent = exports.createFileSet = void 0;
 var compile_away_builder_components_1 = require("../../plugins/compile-away-builder-components");
+var on_mount_1 = require("../helpers/on-mount");
 var directives_1 = require("./directives");
 var handlers_1 = require("./helpers/handlers");
 var stable_serialize_1 = require("./helpers/stable-serialize");
@@ -162,12 +163,11 @@ function addComponentOnMount(componentFile, onRenderEmit, componentName, compone
     componentFile.exportConst(componentName + 'OnMount', function () {
         var _this = this;
         this.emit((0, src_generator_1.arrowFnValue)(['p'], function () {
-            var _a;
             return _this.emit.apply(_this, __spreadArray(__spreadArray(['{',
                 'const s=',
                 componentFile.import(componentFile.qwikModule, 'useStore').localName,
                 '(()=>{',
-                'const state=Object.assign({},structuredClone(typeof __STATE__==="object"&&__STATE__[p.serverStateId]),p);'], inputInitializer, false), [inlineCode((_a = component.hooks.onMount) === null || _a === void 0 ? void 0 : _a.code),
+                'const state=Object.assign({},structuredClone(typeof __STATE__==="object"&&__STATE__[p.serverStateId]),p);'], inputInitializer, false), [inlineCode((0, on_mount_1.stringifySingleScopeOnMount)(component)),
                 'return state;',
                 '},{deep:true});',
                 'const l={};',

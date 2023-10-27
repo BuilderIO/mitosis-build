@@ -56,6 +56,7 @@ var strip_state_and_props_refs_1 = require("../helpers/strip-state-and-props-ref
 var collect_css_1 = require("../helpers/styles/collect-css");
 var plugins_1 = require("../modules/plugins");
 var mitosis_node_1 = require("../types/mitosis-node");
+var on_mount_1 = require("./helpers/on-mount");
 var isAttribute = function (key) {
     return /-/.test(key);
 };
@@ -417,7 +418,7 @@ var htmlDecode = function (html) { return html.replace(/&quot;/gi, '"'); };
 var componentToHtml = function (_options) {
     if (_options === void 0) { _options = {}; }
     return function (_a) {
-        var _b, _c, _d, _e, _f, _g, _h, _j, _k;
+        var _b, _c, _d, _e, _f, _g, _h;
         var component = _a.component;
         var options = (0, merge_options_1.initializeOptions)({
             target: 'html',
@@ -445,13 +446,13 @@ var componentToHtml = function (_options) {
         }
         var hasChangeListeners = Boolean(Object.keys(options.onChangeJsById).length);
         var hasGeneratedJs = Boolean(options.js.trim().length);
-        if (hasChangeListeners || hasGeneratedJs || ((_b = json.hooks.onMount) === null || _b === void 0 ? void 0 : _b.code) || hasLoop) {
+        if (hasChangeListeners || hasGeneratedJs || json.hooks.onMount.length || hasLoop) {
             // TODO: collectJs helper for here and liquid
             str += "\n      <script>\n      (() => {\n        const state = ".concat((0, get_state_object_string_1.getStateObjectStringFromComponent)(json, {
                 valueMapper: function (value) {
                     return addUpdateAfterSetInCode(updateReferencesInCode(value, options), options);
                 },
-            }), ";\n        ").concat(componentHasProps ? "let props = {};" : '', "\n        let context = null;\n        let nodesToDestroy = [];\n        let pendingUpdate = false;\n        ").concat(!((_d = (_c = json.hooks) === null || _c === void 0 ? void 0 : _c.onInit) === null || _d === void 0 ? void 0 : _d.code) ? '' : 'let onInitOnce = false;', "\n\n        function destroyAnyNodes() {\n          // destroy current view template refs before rendering again\n          nodesToDestroy.forEach(el => el.remove());\n          nodesToDestroy = [];\n        }\n        ").concat(!hasChangeListeners
+            }), ";\n        ").concat(componentHasProps ? "let props = {};" : '', "\n        let context = null;\n        let nodesToDestroy = [];\n        let pendingUpdate = false;\n        ").concat(!((_c = (_b = json.hooks) === null || _b === void 0 ? void 0 : _b.onInit) === null || _c === void 0 ? void 0 : _c.code) ? '' : 'let onInitOnce = false;', "\n\n        function destroyAnyNodes() {\n          // destroy current view template refs before rendering again\n          nodesToDestroy.forEach(el => el.remove());\n          nodesToDestroy = [];\n        }\n        ").concat(!hasChangeListeners
                 ? ''
                 : "\n        \n        // Function to update data bindings and loops\n        // call update() when you mutate state and need the updates to reflect\n        // in the dom\n        function update() {\n          if (pendingUpdate === true) {\n            return;\n          }\n          pendingUpdate = true;\n          ".concat(Object.keys(options.onChangeJsById)
                     .map(function (key) {
@@ -461,17 +462,17 @@ var componentToHtml = function (_options) {
                     }
                     return "\n              document.querySelectorAll(\"[data-el='".concat(key, "']\").forEach((el) => {\n                ").concat(value, "\n              });\n            ");
                 })
-                    .join('\n\n'), "\n\n          destroyAnyNodes();\n\n          ").concat(!((_e = json.hooks.onUpdate) === null || _e === void 0 ? void 0 : _e.length)
+                    .join('\n\n'), "\n\n          destroyAnyNodes();\n\n          ").concat(!((_d = json.hooks.onUpdate) === null || _d === void 0 ? void 0 : _d.length)
                     ? ''
                     : "\n                ".concat(json.hooks.onUpdate.reduce(function (code, hook) {
                         code += addUpdateAfterSetInCode(updateReferencesInCode(hook.code, options), options);
                         return code + '\n';
-                    }, ''), " \n                "), "\n\n          pendingUpdate = false;\n        }\n\n        ").concat(options.js, "\n\n        // Update with initial state on first load\n        update();\n        "), "\n\n        ").concat(!((_g = (_f = json.hooks) === null || _f === void 0 ? void 0 : _f.onInit) === null || _g === void 0 ? void 0 : _g.code)
+                    }, ''), " \n                "), "\n\n          pendingUpdate = false;\n        }\n\n        ").concat(options.js, "\n\n        // Update with initial state on first load\n        update();\n        "), "\n\n        ").concat(!((_f = (_e = json.hooks) === null || _e === void 0 ? void 0 : _e.onInit) === null || _f === void 0 ? void 0 : _f.code)
                 ? ''
-                : "\n            if (!onInitOnce) {\n              ".concat(updateReferencesInCode(addUpdateAfterSetInCode((_j = (_h = json.hooks) === null || _h === void 0 ? void 0 : _h.onInit) === null || _j === void 0 ? void 0 : _j.code, options), options), "\n              onInitOnce = true;\n            }\n            "), "\n\n        ").concat(!((_k = json.hooks.onMount) === null || _k === void 0 ? void 0 : _k.code)
+                : "\n            if (!onInitOnce) {\n              ".concat(updateReferencesInCode(addUpdateAfterSetInCode((_h = (_g = json.hooks) === null || _g === void 0 ? void 0 : _g.onInit) === null || _h === void 0 ? void 0 : _h.code, options), options), "\n              onInitOnce = true;\n            }\n            "), "\n\n        ").concat(!json.hooks.onMount.length
                 ? ''
                 : // TODO: make prettier by grabbing only the function body
-                    "\n              // onMount\n              ".concat(updateReferencesInCode(addUpdateAfterSetInCode(json.hooks.onMount.code, options), options), " \n              "), "\n\n        ").concat(!hasShow
+                    "\n              // onMount\n              ".concat(updateReferencesInCode(addUpdateAfterSetInCode((0, on_mount_1.stringifySingleScopeOnMount)(json), options), options), " \n              "), "\n\n        ").concat(!hasShow
                 ? ''
                 : "\n          function showContent(el) {\n            // https://developer.mozilla.org/en-US/docs/Web/API/HTMLTemplateElement/content\n            // grabs the content of a node that is between <template> tags\n            // iterates through child nodes to register all content including text elements\n            // attaches the content after the template\n  \n  \n            const elementFragment = el.content.cloneNode(true);\n            const children = Array.from(elementFragment.childNodes)\n            children.forEach(child => {\n              if (el?.scope) {\n                child.scope = el.scope;\n              }\n              if (el?.context) {\n                child.context = el.context;\n              }\n              nodesToDestroy.push(child);\n            });\n            el.after(elementFragment);\n          }\n  \n        ", "\n        ").concat(!hasTextBinding
                 ? ''
@@ -510,7 +511,7 @@ exports.componentToHtml = componentToHtml;
 var componentToCustomElement = function (_options) {
     if (_options === void 0) { _options = {}; }
     return function (_a) {
-        var _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14;
+        var _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13;
         var component = _a.component;
         var ComponentName = component.name;
         var kebabName = (0, lodash_1.kebabCase)(ComponentName);
@@ -523,7 +524,7 @@ var componentToCustomElement = function (_options) {
         if (options.plugins) {
             json = (0, plugins_1.runPreJsonPlugins)({ json: json, plugins: options.plugins });
         }
-        var _15 = (0, get_props_ref_1.getPropsRef)(json, true), forwardProp = _15[0], hasPropRef = _15[1];
+        var _14 = (0, get_props_ref_1.getPropsRef)(json, true), forwardProp = _14[0], hasPropRef = _14[1];
         var contextVars = Object.keys(((_b = json === null || json === void 0 ? void 0 : json.context) === null || _b === void 0 ? void 0 : _b.get) || {});
         var childComponents = getChildComponents(json, options);
         var componentHasProps = (0, has_props_1.hasProps)(json);
@@ -547,7 +548,7 @@ var componentToCustomElement = function (_options) {
         });
         var setContext = [];
         for (var key in json.context.set) {
-            var _16 = json.context.set[key], name_1 = _16.name, value = _16.value, ref = _16.ref;
+            var _15 = json.context.set[key], name_1 = _15.name, value = _15.value, ref = _15.ref;
             setContext.push({ name: name_1, value: value, ref: ref });
         }
         addUpdateAfterSet(json, options);
@@ -678,12 +679,12 @@ var componentToCustomElement = function (_options) {
             ? ''
             : "\n          showContent(el) {\n            // https://developer.mozilla.org/en-US/docs/Web/API/HTMLTemplateElement/content\n            // grabs the content of a node that is between <template> tags\n            // iterates through child nodes to register all content including text elements\n            // attaches the content after the template\n  \n  \n            const elementFragment = el.content.cloneNode(true);\n            const children = Array.from(elementFragment.childNodes)\n            children.forEach(child => {\n              if (el?.scope) {\n                child.scope = el.scope;\n              }\n              if (el?.context) {\n                child.context = el.context;\n              }\n              this.nodesToDestroy.push(child);\n            });\n            el.after(elementFragment);\n          }", "\n        ").concat(!((_9 = options === null || options === void 0 ? void 0 : options.experimental) === null || _9 === void 0 ? void 0 : _9.attributeChangedCallback)
             ? ''
-            : "\n          attributeChangedCallback(name, oldValue, newValue) {\n            ".concat((_10 = options === null || options === void 0 ? void 0 : options.experimental) === null || _10 === void 0 ? void 0 : _10.attributeChangedCallback(['name', 'oldValue', 'newValue'], json, options), "\n          }\n          "), "\n\n        onMount() {\n          ").concat(!((_11 = json.hooks.onMount) === null || _11 === void 0 ? void 0 : _11.code)
+            : "\n          attributeChangedCallback(name, oldValue, newValue) {\n            ".concat((_10 = options === null || options === void 0 ? void 0 : options.experimental) === null || _10 === void 0 ? void 0 : _10.attributeChangedCallback(['name', 'oldValue', 'newValue'], json, options), "\n          }\n          "), "\n\n        onMount() {\n          ").concat(!json.hooks.onMount.length
             ? ''
             : // TODO: make prettier by grabbing only the function body
-                "\n                // onMount\n                ".concat(updateReferencesInCode(addUpdateAfterSetInCode(json.hooks.onMount.code, options), options, {
+                "\n                // onMount\n                ".concat(updateReferencesInCode(addUpdateAfterSetInCode((0, on_mount_1.stringifySingleScopeOnMount)(json), options), options, {
                     contextVars: contextVars,
-                }), "\n                "), "\n        }\n\n        onUpdate() {\n          ").concat(!((_12 = json.hooks.onUpdate) === null || _12 === void 0 ? void 0 : _12.length)
+                }), "\n                "), "\n        }\n\n        onUpdate() {\n          ").concat(!((_11 = json.hooks.onUpdate) === null || _11 === void 0 ? void 0 : _11.length)
             ? ''
             : "\n              const self = this;\n            ".concat(json.hooks.onUpdate.reduce(function (code, hook, index) {
                 // create check update
@@ -736,8 +737,8 @@ var componentToCustomElement = function (_options) {
             ? ''
             : "\n            // scope helper\n            getScope(el, name) {\n              do {\n                let value = el?.scope?.[name]\n                if (value !== undefined) {\n                  return value\n                }\n              } while ((el = el.parentNode));\n            }\n            ", "\n\n        ").concat(!hasLoop
             ? ''
-            : "\n\n          // Helper to render loops\n          renderLoop(template, array, itemName, itemIndex, collectionName) {\n            const collection = [];\n            for (let [index, value] of array.entries()) {\n              const elementFragment = template.content.cloneNode(true);\n              const children = Array.from(elementFragment.childNodes)\n              const localScope = {};\n              let scope = localScope;\n              if (template?.scope) {\n                const getParent = {\n                  get(target, prop, receiver) {\n                    if (prop in target) {\n                      return target[prop];\n                    }\n                    if (prop in template.scope) {\n                      return template.scope[prop];\n                    }\n                    return target[prop];\n                  }\n                };\n                scope = new Proxy(localScope, getParent);\n              }\n              children.forEach((child) => {\n                if (itemName !== undefined) {\n                  scope[itemName] = value;\n                }\n                if (itemIndex !== undefined) {\n                  scope[itemIndex] = index;\n                }\n                if (collectionName !== undefined) {\n                  scope[collectionName] = array;\n                }\n                child.scope = scope;\n                if (template.context) {\n                  child.context = context;\n                }\n                this.nodesToDestroy.push(child);\n                collection.unshift(child)\n              });\n            }\n            collection.forEach(child => template.after(child));\n          }\n        ", "\n      }\n\n      ").concat(((_13 = options === null || options === void 0 ? void 0 : options.experimental) === null || _13 === void 0 ? void 0 : _13.customElementsDefine)
-            ? (_14 = options === null || options === void 0 ? void 0 : options.experimental) === null || _14 === void 0 ? void 0 : _14.customElementsDefine(kebabName, component, options)
+            : "\n\n          // Helper to render loops\n          renderLoop(template, array, itemName, itemIndex, collectionName) {\n            const collection = [];\n            for (let [index, value] of array.entries()) {\n              const elementFragment = template.content.cloneNode(true);\n              const children = Array.from(elementFragment.childNodes)\n              const localScope = {};\n              let scope = localScope;\n              if (template?.scope) {\n                const getParent = {\n                  get(target, prop, receiver) {\n                    if (prop in target) {\n                      return target[prop];\n                    }\n                    if (prop in template.scope) {\n                      return template.scope[prop];\n                    }\n                    return target[prop];\n                  }\n                };\n                scope = new Proxy(localScope, getParent);\n              }\n              children.forEach((child) => {\n                if (itemName !== undefined) {\n                  scope[itemName] = value;\n                }\n                if (itemIndex !== undefined) {\n                  scope[itemIndex] = index;\n                }\n                if (collectionName !== undefined) {\n                  scope[collectionName] = array;\n                }\n                child.scope = scope;\n                if (template.context) {\n                  child.context = context;\n                }\n                this.nodesToDestroy.push(child);\n                collection.unshift(child)\n              });\n            }\n            collection.forEach(child => template.after(child));\n          }\n        ", "\n      }\n\n      ").concat(((_12 = options === null || options === void 0 ? void 0 : options.experimental) === null || _12 === void 0 ? void 0 : _12.customElementsDefine)
+            ? (_13 = options === null || options === void 0 ? void 0 : options.experimental) === null || _13 === void 0 ? void 0 : _13.customElementsDefine(kebabName, component, options)
             : "customElements.define('".concat(kebabName, "', ").concat(ComponentName, ");"), "\n    ");
         if (options.plugins) {
             str = (0, plugins_1.runPreCodePlugins)({ json: json, code: str, plugins: options.plugins });

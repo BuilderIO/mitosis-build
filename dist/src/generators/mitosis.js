@@ -131,7 +131,7 @@ var mitosisCoreComponents = ['Show', 'For'];
 var componentToMitosis = function (toMitosisOptions) {
     if (toMitosisOptions === void 0) { toMitosisOptions = {}; }
     return function (_a) {
-        var _b, _c;
+        var _b;
         var component = _a.component;
         var options = __assign({ format: exports.DEFAULT_FORMAT }, toMitosisOptions);
         if (options.format === 'react') {
@@ -162,7 +162,7 @@ var componentToMitosis = function (toMitosisOptions) {
             ? ''
             : "import { ".concat(!hasState ? '' : 'useStore, ', " ").concat(!refs.length ? '' : 'useRef, ', " ").concat(mitosisComponents.join(', '), " } from '@builder.io/mitosis';"), !otherComponents.length ? '' : "import { ".concat(otherComponents.join(','), " } from '@components';"), json.types ? json.types.join('\n') : '', (0, render_imports_1.renderPreComponent)({ component: json, target: 'mitosis' }), stringifiedUseMetadata && stringifiedUseMetadata !== '{}'
             ? "".concat(hooks_1.HOOKS.METADATA, "(").concat(stringifiedUseMetadata, ")")
-            : '', component.name, !hasState ? '' : "const state = useStore(".concat((0, get_state_object_string_1.getStateObjectStringFromComponent)(json), ");"), getRefsString(json, refs), !((_b = json.hooks.onMount) === null || _b === void 0 ? void 0 : _b.code) ? '' : "onMount(() => { ".concat(json.hooks.onMount.code, " })"), !((_c = json.hooks.onUnMount) === null || _c === void 0 ? void 0 : _c.code) ? '' : "onUnMount(() => { ".concat(json.hooks.onUnMount.code, " })"), addWrapper ? '<>' : '', json.children.map(function (item) { return (0, exports.blockToMitosis)(item, options, component); }).join('\n'), addWrapper ? '</>' : '');
+            : '', component.name, !hasState ? '' : "const state = useStore(".concat((0, get_state_object_string_1.getStateObjectStringFromComponent)(json), ");"), getRefsString(json, refs), json.hooks.onMount.map(function (hook) { return "onMount(() => { ".concat(hook.code, " })"); }), !((_b = json.hooks.onUnMount) === null || _b === void 0 ? void 0 : _b.code) ? '' : "onUnMount(() => { ".concat(json.hooks.onUnMount.code, " })"), addWrapper ? '<>' : '', json.children.map(function (item) { return (0, exports.blockToMitosis)(item, options, component); }).join('\n'), addWrapper ? '</>' : '');
         if (options.prettier !== false) {
             try {
                 str = (0, standalone_1.format)(str, {

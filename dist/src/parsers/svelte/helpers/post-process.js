@@ -152,14 +152,15 @@ function addPropertiesAndStateToHook(json, hook) {
     };
 }
 function postProcessHooks(json) {
+    var _a;
     var hookKeys = Object.keys(json.hooks);
     var _loop_1 = function (key) {
         var hook = json.hooks[key];
         if (!hook) {
             return "continue";
         }
-        if (key === 'onUpdate' && Array.isArray(hook)) {
-            hook.forEach(function (item, index) {
+        if (key === 'onUpdate' || key === 'onMount') {
+            (_a = json.hooks[key]) === null || _a === void 0 ? void 0 : _a.forEach(function (item, index) {
                 var _a;
                 (_a = json.hooks[key]) === null || _a === void 0 ? void 0 : _a.splice(index, 1, addPropertiesAndStateToHook(json, item));
             });

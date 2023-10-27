@@ -113,7 +113,7 @@ var BASE_OPTIONS = {
 var componentToVue = function (userOptions) {
     return function (_a) {
         var _b;
-        var _c, _d, _e, _f, _g, _h, _j;
+        var _c, _d, _e, _f, _g, _h;
         var _component = _a.component, path = _a.path;
         // Make a copy we can safely mutate, similar to babel's toolchain can be used
         var component = (0, fast_clone_1.fastClone)(_component);
@@ -207,8 +207,8 @@ var componentToVue = function (userOptions) {
         }
         if (options.api === 'composition') {
             onUpdateWithDeps.length && vueImports.push('watch');
-            ((_g = component.hooks.onMount) === null || _g === void 0 ? void 0 : _g.code) && vueImports.push('onMounted');
-            ((_h = component.hooks.onUnMount) === null || _h === void 0 ? void 0 : _h.code) && vueImports.push('onUnmounted');
+            component.hooks.onMount.length && vueImports.push('onMounted');
+            ((_g = component.hooks.onUnMount) === null || _g === void 0 ? void 0 : _g.code) && vueImports.push('onUnmounted');
             onUpdateWithoutDeps.length && vueImports.push('onUpdated');
             (0, lodash_1.size)(getterKeys) && vueImports.push('computed');
             (0, lodash_1.size)(component.context.set) && vueImports.push('provide');
@@ -223,7 +223,7 @@ var componentToVue = function (userOptions) {
             component: component,
             target: 'vue',
             asyncComponentImports: options.asyncComponentImports,
-        }), (options.typescript && ((_j = component.types) === null || _j === void 0 ? void 0 : _j.join('\n'))) || '', options.api === 'composition'
+        }), (options.typescript && ((_h = component.types) === null || _h === void 0 ? void 0 : _h.join('\n'))) || '', options.api === 'composition'
             ? (0, compositionApi_1.generateCompositionApiScript)(component, options, template, elementProps, onUpdateWithDeps, onUpdateWithoutDeps)
             : (0, optionsApi_1.generateOptionsApiScript)(component, options, path, template, elementProps, onUpdateWithDeps, onUpdateWithoutDeps), !css.trim().length
             ? ''

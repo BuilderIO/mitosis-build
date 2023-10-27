@@ -30,7 +30,7 @@ var react_1 = require("./react");
 var RSC_TRANSFORM_PLUGIN = function () { return ({
     json: {
         pre: function (json) {
-            delete json.hooks.onMount;
+            json.hooks.onMount = [];
             delete json.hooks.onUnMount;
             delete json.hooks.onUpdate;
             json.refs = {};
@@ -62,12 +62,12 @@ var RSC_TRANSFORM_PLUGIN = function () { return ({
     },
 }); };
 var checkIfIsClientComponent = function (json) {
-    var _a, _b, _c;
-    if ((_a = json.hooks.onMount) === null || _a === void 0 ? void 0 : _a.code)
+    var _a, _b;
+    if (json.hooks.onMount.length)
         return true;
-    if ((_b = json.hooks.onUnMount) === null || _b === void 0 ? void 0 : _b.code)
+    if ((_a = json.hooks.onUnMount) === null || _a === void 0 ? void 0 : _a.code)
         return true;
-    if ((_c = json.hooks.onUpdate) === null || _c === void 0 ? void 0 : _c.length)
+    if ((_b = json.hooks.onUpdate) === null || _b === void 0 ? void 0 : _b.length)
         return true;
     if (Object.keys(json.refs).length)
         return true;

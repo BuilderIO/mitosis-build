@@ -40,6 +40,7 @@ var strip_state_and_props_refs_1 = require("../../helpers/strip-state-and-props-
 var collect_css_1 = require("../../helpers/styles/collect-css");
 var plugins_1 = require("../../modules/plugins");
 var mitosis_node_1 = require("../../types/mitosis-node");
+var on_mount_1 = require("../helpers/on-mount");
 // Having issues with this, so off for now
 var USE_MARKO_PRETTIER = false;
 /**
@@ -134,7 +135,7 @@ function processBinding(json, code, type) {
 var componentToMarko = function (userOptions) {
     if (userOptions === void 0) { userOptions = {}; }
     return function (_a) {
-        var _b, _c, _d;
+        var _b, _c;
         var component = _a.component;
         var json = (0, fast_clone_1.fastClone)(component);
         var options = (0, merge_options_1.initializeOptions)({
@@ -185,11 +186,11 @@ var componentToMarko = function (userOptions) {
             ? ''
             : "onCreate(".concat(thisHasProps ? 'input' : '', ") {\n          this.state = ").concat(dataString, "\n        }"), Array.from(domRefs)
             .map(function (refName) { return "get ".concat((0, lodash_1.camelCase)(refName), "() { \n            return this.getEl('").concat((0, lodash_1.camelCase)(refName), "')\n          }"); })
-            .join('\n'), !((_b = json.hooks.onMount) === null || _b === void 0 ? void 0 : _b.code)
+            .join('\n'), !json.hooks.onMount.length
             ? ''
-            : "onMount() { ".concat(processBinding(json, json.hooks.onMount.code, 'class'), " }"), !((_c = json.hooks.onUnMount) === null || _c === void 0 ? void 0 : _c.code)
+            : "onMount() { ".concat(processBinding(json, (0, on_mount_1.stringifySingleScopeOnMount)(json), 'class'), " }"), !((_b = json.hooks.onUnMount) === null || _b === void 0 ? void 0 : _b.code)
             ? ''
-            : "onDestroy() { ".concat(processBinding(json, json.hooks.onUnMount.code, 'class'), " }"), !((_d = json.hooks.onUpdate) === null || _d === void 0 ? void 0 : _d.length)
+            : "onDestroy() { ".concat(processBinding(json, json.hooks.onUnMount.code, 'class'), " }"), !((_c = json.hooks.onUpdate) === null || _c === void 0 ? void 0 : _c.length)
             ? ''
             : "onRender() { ".concat(json.hooks.onUpdate
                 .map(function (hook) { return processBinding(json, hook.code, 'class'); })
