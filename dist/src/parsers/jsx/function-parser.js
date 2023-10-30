@@ -67,6 +67,7 @@ var componentFunctionToJson = function (node, context) {
     var _a;
     var hooks = {
         onMount: [],
+        onEvent: [],
     };
     var state = {};
     var accessedContext = {};
@@ -153,14 +154,17 @@ var componentFunctionToJson = function (node, context) {
                             break;
                         }
                         var isRoot = types.isBooleanLiteral(fourthArg) ? fourthArg.value : false;
-                        hooks.onEvent = __spreadArray(__spreadArray([], (hooks.onEvent || []), true), [
-                            {
-                                eventName: firstArg.value,
-                                code: (0, helpers_2.processHookCode)(secondArg),
-                                refName: thirdArg.name,
-                                isRoot: isRoot,
-                            },
-                        ], false);
+                        var eventArgName = types.isIdentifier(secondArg.params[0])
+                            ? secondArg.params[0].name
+                            : 'event';
+                        hooks.onEvent.push({
+                            eventName: firstArg.value,
+                            code: (0, helpers_2.processHookCode)(secondArg),
+                            refName: thirdArg.name,
+                            isRoot: isRoot,
+                            eventArgName: eventArgName,
+                        });
+                        break;
                     }
                     case hooks_1.HOOKS.UPDATE: {
                         var firstArg = expression.arguments[0];
@@ -206,6 +210,7 @@ var componentFunctionToJson = function (node, context) {
                     }
                     case hooks_1.HOOKS.METADATA: {
                         context.builder.component.meta[hooks_1.HOOKS.METADATA] = __assign(__assign({}, context.builder.component.meta[hooks_1.HOOKS.METADATA]), (0, helpers_1.parseCodeJson)(expression.arguments[0]));
+                        break;
                     }
                 }
             }

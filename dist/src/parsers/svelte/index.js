@@ -60,6 +60,7 @@ function mapAstToMitosisJson(ast, name, string_, usesTypescript) {
         refs: {},
         hooks: {
             onMount: [],
+            onEvent: [],
         },
         imports: [],
         children: [],

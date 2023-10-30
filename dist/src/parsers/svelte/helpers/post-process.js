@@ -152,21 +152,20 @@ function addPropertiesAndStateToHook(json, hook) {
     };
 }
 function postProcessHooks(json) {
-    var _a;
     var hookKeys = Object.keys(json.hooks);
     var _loop_1 = function (key) {
         var hook = json.hooks[key];
         if (!hook) {
             return "continue";
         }
-        if (key === 'onUpdate' || key === 'onMount') {
-            (_a = json.hooks[key]) === null || _a === void 0 ? void 0 : _a.forEach(function (item, index) {
-                var _a;
-                (_a = json.hooks[key]) === null || _a === void 0 ? void 0 : _a.splice(index, 1, addPropertiesAndStateToHook(json, item));
+        if (Array.isArray(hook)) {
+            hook.forEach(function (item, index) {
+                hook.splice(index, 1, addPropertiesAndStateToHook(json, item));
             });
-            return "continue";
         }
-        json.hooks[key] = addPropertiesAndStateToHook(json, hook);
+        else {
+            hook = addPropertiesAndStateToHook(json, hook);
+        }
     };
     for (var _i = 0, hookKeys_1 = hookKeys; _i < hookKeys_1.length; _i++) {
         var key = hookKeys_1[_i];

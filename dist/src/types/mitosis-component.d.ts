@@ -84,6 +84,7 @@ export declare type OnEventHook = BaseHook & {
     eventName: string;
     isRoot: boolean;
     deps?: never;
+    eventArgName: string;
 };
 export declare type OnMountHook = BaseHook & {
     onSSR?: boolean;
@@ -125,7 +126,7 @@ export declare type MitosisComponent = {
         preComponent?: BaseHook;
         postComponent?: BaseHook;
         onUpdate?: BaseHook[];
-        onEvent?: OnEventHook[];
+        onEvent: OnEventHook[];
     };
     targetBlocks?: Dictionary<TargetBlockDefinition>;
     children: MitosisNode[];

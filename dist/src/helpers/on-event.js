@@ -15,9 +15,8 @@ var getOnEventHandlerName = function (hook) {
 };
 exports.getOnEventHandlerName = getOnEventHandlerName;
 var getOnEventHooksForNode = function (_a) {
-    var _b;
     var node = _a.node, component = _a.component;
-    return (_b = component.hooks.onEvent) === null || _b === void 0 ? void 0 : _b.filter(function (hook) { return checkIsEventHandlerNode(node, hook); });
+    return component.hooks.onEvent.filter(function (hook) { return checkIsEventHandlerNode(node, hook); });
 };
 exports.getOnEventHooksForNode = getOnEventHooksForNode;
 /**
@@ -31,17 +30,17 @@ var processOnEventHooksPlugin = function (args) {
             pre: function (component) {
                 var _a = args.setBindings, setBindings = _a === void 0 ? true : _a;
                 (0, traverse_nodes_1.traverseNodes)(component, function (node) {
-                    var _a;
-                    (_a = (0, exports.getOnEventHooksForNode)({ node: node, component: component })) === null || _a === void 0 ? void 0 : _a.forEach(function (hook) {
+                    (0, exports.getOnEventHooksForNode)({ node: node, component: component }).forEach(function (hook) {
                         var handlerName = getBindingName(hook);
                         var fnName = (0, exports.getOnEventHandlerName)(hook);
                         component.state[fnName] = {
-                            code: "".concat(fnName, "() { ").concat(hook.code, " }"),
+                            code: "".concat(fnName, "(").concat(hook.eventArgName, ") { ").concat(hook.code, " }"),
                             type: 'method',
                         };
                         if (setBindings) {
                             node.bindings[handlerName] = {
-                                code: "state.".concat(fnName, "()"),
+                                code: "state.".concat(fnName, "(").concat(hook.eventArgName, ")"),
+                                arguments: [hook.eventArgName],
                                 type: 'single',
                             };
                         }

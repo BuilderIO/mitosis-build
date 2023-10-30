@@ -240,15 +240,14 @@ function emitUseContext(file, component) {
     });
 }
 function emitUseOn(file, component) {
-    var _a;
-    (_a = component.hooks.onEvent) === null || _a === void 0 ? void 0 : _a.forEach(function (hook) {
-        var wrappedHandlerFn = "".concat(file.import(file.qwikModule, '$').localName, "(").concat((0, on_event_1.getOnEventHandlerName)(hook), ")");
+    component.hooks.onEvent.forEach(function (hook) {
         var eventName = "\"".concat(hook.eventName, "\"");
         if (hook.isRoot) {
+            var wrappedHandlerFn = "".concat(file.import(file.qwikModule, '$').localName, "(").concat(hook.eventArgName, " => {\n        ").concat(hook.code, "\n      })");
             file.src.emit(file.import(file.qwikModule, 'useOn').localName, "(".concat(eventName, ", ").concat(wrappedHandlerFn, ");"));
         }
         else {
-            file.src.emit(file.import(file.qwikModule, 'useVisibleTask$').localName, "(() => {\n          ".concat(hook.refName, ".value?.addEventListener(").concat(eventName, ", ").concat(wrappedHandlerFn, ");\n          return () => ").concat(hook.refName, ".value?.removeEventListener(").concat(eventName, ", ").concat(wrappedHandlerFn, ");\n        })  \n        "));
+            file.src.emit(file.import(file.qwikModule, 'useVisibleTask$').localName, "(() => {\n          ".concat(hook.refName, ".value?.addEventListener(").concat(eventName, ", ").concat((0, on_event_1.getOnEventHandlerName)(hook), ");\n          return () => ").concat(hook.refName, ".value?.removeEventListener(").concat(eventName, ", ").concat((0, on_event_1.getOnEventHandlerName)(hook), ");\n        })  \n        "));
         }
     });
 }
