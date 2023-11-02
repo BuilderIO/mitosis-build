@@ -40,6 +40,7 @@ var handle_missing_state_1 = require("../../helpers/handle-missing-state");
 var is_root_text_node_1 = require("../../helpers/is-root-text-node");
 var map_refs_1 = require("../../helpers/map-refs");
 var merge_options_1 = require("../../helpers/merge-options");
+var nullable_1 = require("../../helpers/nullable");
 var on_event_1 = require("../../helpers/on-event");
 var process_code_1 = require("../../helpers/plugins/process-code");
 var process_http_requests_1 = require("../../helpers/process-http-requests");
@@ -262,8 +263,23 @@ var getPropsDefinition = function (_a) {
         .join(',');
     return "".concat(json.name, ".defaultProps = {").concat(defaultPropsString, "};");
 };
+var checkShouldAddUseClientDirective = function (json, options) {
+    var _a, _b;
+    if (!options.addUseClientDirectiveIfNeeded)
+        return false;
+    if (options.type === 'native')
+        return false;
+    if (options.preact)
+        return false;
+    // When using RSC generator, we check `componentType` field in metadata to determine if it's a server component
+    var componentType = (_b = (_a = json.meta.useMetadata) === null || _a === void 0 ? void 0 : _a.rsc) === null || _b === void 0 ? void 0 : _b.componentType;
+    if (options.rsc && (0, nullable_1.checkIsDefined)(componentType)) {
+        return componentType === 'client';
+    }
+    return (0, rsc_1.checkIfIsClientComponent)(json);
+};
 var _componentToReact = function (json, options, isSubComponent) {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o;
+    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l;
     if (isSubComponent === void 0) { isSubComponent = false; }
     (0, process_http_requests_1.processHttpRequests)(json);
     (0, handle_missing_state_1.handleMissingState)(json);
@@ -282,7 +298,7 @@ var _componentToReact = function (json, options, isSubComponent) {
     (0, map_refs_1.mapRefs)(json, function (refName) { return "".concat(refName, ".current"); });
     // Always use state if we are generate Builder react code
     var hasState = options.stateType === 'builder' || (0, state_1.checkHasState)(json);
-    var _p = (0, get_props_ref_1.getPropsRef)(json), forwardRef = _p[0], hasPropRef = _p[1];
+    var _m = (0, get_props_ref_1.getPropsRef)(json), forwardRef = _m[0], hasPropRef = _m[1];
     var isForwardRef = !options.preact && Boolean(((_a = json.meta.useMetadata) === null || _a === void 0 ? void 0 : _a.forwardRef) || hasPropRef);
     if (isForwardRef) {
         var meta = (_b = json.meta.useMetadata) === null || _b === void 0 ? void 0 : _b.forwardRef;
@@ -337,7 +353,7 @@ var _componentToReact = function (json, options, isSubComponent) {
             (options.stylesType === 'styled-jsx' || options.stylesType === 'style-tag')) ||
         shouldInjectCustomStyles ||
         isRootSpecialNode(json);
-    var _q = getRefsString(json, allRefs, options), hasStateArgument = _q[0], refsString = _q[1];
+    var _o = getRefsString(json, allRefs, options), hasStateArgument = _o[0], refsString = _o[1];
     // NOTE: `collectReactNativeStyles` must run before style generation in the component generation body, as it has
     // side effects that delete styles bindings from the JSON.
     var reactNativeStyles = options.stylesType === 'react-native' && componentHasStyles
@@ -397,14 +413,7 @@ var _componentToReact = function (json, options, isSubComponent) {
         : '', componentHasStyles && options.stylesType === 'style-tag'
         ? "<style>{`".concat(css, "`}</style>")
         : '', shouldInjectCustomStyles ? "<style>{`".concat(json.style, "`}</style>") : '', wrap ? (0, helpers_2.closeFrag)(options) : '');
-    var isRsc = options.rsc && ((_o = (_m = json.meta.useMetadata) === null || _m === void 0 ? void 0 : _m.rsc) === null || _o === void 0 ? void 0 : _o.componentType) === 'server';
-    var isNative = options.type === 'native';
-    var isPreact = options.preact;
-    var shouldAddUseClientDirective = options.addUseClientDirectiveIfNeeded &&
-        !isRsc &&
-        !isNative &&
-        !isPreact &&
-        (0, rsc_1.checkIfIsClientComponent)(json);
+    var shouldAddUseClientDirective = checkShouldAddUseClientDirective(json, options);
     var str = (0, dedent_1.dedent)(templateObject_2 || (templateObject_2 = __makeTemplateObject(["\n  ", "\n  ", "\n  ", "\n  ", "\n  ", "\n    ", "\n    ", "\n    ", "\n    ", "function ", "(", ") {\n    ", "\n  }", "\n\n    ", "\n\n    ", "\n\n    ", "\n    ", "\n\n  "], ["\n  ", "\n  ", "\n  ", "\n  ", "\n  ", "\n    ", "\n    ", "\n    ", "\n    ", "function ", "(", ") {\n    ", "\n  }", "\n\n    ", "\n\n    ", "\n\n    ", "\n    ", "\n\n  "])), shouldAddUseClientDirective ? "'use client';" : '', getDefaultImport(json, options), styledComponentsCode ? "import styled from 'styled-components';\n" : '', reactLibImports.size
         ? "import { ".concat(Array.from(reactLibImports).join(', '), " } from '").concat(options.preact ? 'preact/hooks' : 'react', "'")
         : '', componentHasStyles && options.stylesType === 'emotion' && options.format !== 'lite'
