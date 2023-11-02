@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getComponentFileExtensionForTarget = exports.renameImport = exports.renameComponentFile = exports.INPUT_EXTENSION_REGEX = exports.checkIsMitosisComponentFilePath = exports.checkIsLiteComponentFilePath = exports.checkIsSvelteComponentFilePath = exports.COMPONENT_IMPORT_EXTENSIONS = void 0;
-var mitosis_1 = require("@builder.io/mitosis");
+var mitosis_1 = require("..");
 var COMPONENT_EXTENSIONS = {
     jsx: ['.lite.tsx', '.lite.jsx'],
     svelte: ['.svelte'],

@@ -1,8 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.contextToRsc = void 0;
-var standalone_1 = require("prettier/standalone");
 var get_state_object_string_1 = require("../../helpers/get-state-object-string");
+var standalone_1 = require("prettier/standalone");
 /**
  * React Server Components currently do not support context, so we use
  * plain objects and prop drilling instead.

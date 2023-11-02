@@ -12,9 +12,6 @@ var __assign = (this && this.__assign) || function () {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.componentToAlpine = exports.isValidAlpineBinding = exports.checkIsComponentNode = void 0;
-var lodash_1 = require("lodash");
-var standalone_1 = require("prettier/standalone");
-var html_tags_1 = require("../../constants/html_tags");
 var babel_transform_1 = require("../../helpers/babel-transform");
 var dash_case_1 = require("../../helpers/dash-case");
 var fast_clone_1 = require("../../helpers/fast-clone");
@@ -26,8 +23,11 @@ var replace_identifiers_1 = require("../../helpers/replace-identifiers");
 var strip_meta_properties_1 = require("../../helpers/strip-meta-properties");
 var strip_state_and_props_refs_1 = require("../../helpers/strip-state-and-props-refs");
 var collect_css_1 = require("../../helpers/styles/collect-css");
-var plugins_1 = require("../../modules/plugins");
 var mitosis_node_1 = require("../../types/mitosis-node");
+var lodash_1 = require("lodash");
+var standalone_1 = require("prettier/standalone");
+var html_tags_1 = require("../../constants/html_tags");
+var plugins_1 = require("../../modules/plugins");
 var render_mount_hook_1 = require("./render-mount-hook");
 var render_update_hooks_1 = require("./render-update-hooks");
 var checkIsComponentNode = function (node) {

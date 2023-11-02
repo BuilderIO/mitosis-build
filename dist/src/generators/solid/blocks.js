@@ -1,13 +1,13 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.blockToSolid = void 0;
-var core_1 = require("@babel/core");
-var lodash_1 = require("lodash");
-var html_tags_1 = require("../../constants/html_tags");
 var babel_transform_1 = require("../../helpers/babel-transform");
 var filter_empty_text_nodes_1 = require("../../helpers/filter-empty-text-nodes");
 var typescript_1 = require("../../helpers/typescript");
 var mitosis_node_1 = require("../../types/mitosis-node");
+var core_1 = require("@babel/core");
+var lodash_1 = require("lodash");
+var html_tags_1 = require("../../constants/html_tags");
 var styles_1 = require("./helpers/styles");
 var ATTTRIBUTE_MAPPERS = {
     for: 'htmlFor',

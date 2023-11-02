@@ -13,13 +13,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.generateOptionsApiScript = void 0;
-var json5_1 = __importDefault(require("json5"));
-var lodash_1 = require("lodash");
 var get_components_used_1 = require("../../helpers/get-components-used");
 var get_custom_imports_1 = require("../../helpers/get-custom-imports");
 var get_state_object_string_1 = require("../../helpers/get-state-object-string");
 var nullable_1 = require("../../helpers/nullable");
 var render_imports_1 = require("../../helpers/render-imports");
+var json5_1 = __importDefault(require("json5"));
+var lodash_1 = require("lodash");
 var on_mount_1 = require("../helpers/on-mount");
 var helpers_1 = require("./helpers");
 var getContextProvideString = function (json, options) {

@@ -5,7 +5,7 @@ import { ComponentMetadata } from './metadata';
 import { MitosisNode } from './mitosis-node';
 /**
  * @example
- *  // import core, { useState, someThing as someAlias } from '@builder.io/mitosis'
+ *  // import core, { useState, someThing as someAlias } from '..'
  *  {
  *    path: '@builder.io/mitosis',
  *    imports: {
@@ -16,7 +16,7 @@ import { MitosisNode } from './mitosis-node';
  *  }
  *
  * @example
- *  // import * as core from '@builder.io/mitosis'
+ *  // import * as core from '..'
  *  {
  *    path: '@builder.io/mitosis',
  *    imports: {

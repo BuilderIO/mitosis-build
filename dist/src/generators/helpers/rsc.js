@@ -4,8 +4,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.checkIfIsClientComponent = void 0;
-var traverse_1 = __importDefault(require("traverse"));
 var is_mitosis_node_1 = require("../../helpers/is-mitosis-node");
+var traverse_1 = __importDefault(require("traverse"));
 var checkIsNodeAMitosisComponent = function (node) {
     return node.name[0] === node.name[0].toUpperCase();
 };

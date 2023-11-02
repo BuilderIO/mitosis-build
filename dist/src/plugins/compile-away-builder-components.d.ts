@@ -1,4 +1,4 @@
-import { type Plugin } from '@builder.io/mitosis';
+import { type Plugin } from '..';
 import { TraverseContext } from 'traverse';
 import { MitosisComponent } from '../types/mitosis-component';
 import { MitosisNode } from '../types/mitosis-node';

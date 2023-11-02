@@ -3,9 +3,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.findSignals = void 0;
 var ts_morph_1 = require("ts-morph");
 var typescript_project_1 = require("../../helpers/typescript-project");
-var findSignals = function (args) {
-    var project = args.project, signalSymbol = args.signalSymbol;
-    var ast = args.project.getSourceFileOrThrow(args.filePath);
+var findSignals = function (_a) {
+    var filePath = _a.filePath, signalSymbol = _a.signalSymbol, project = _a.project;
+    var ast = project.getSourceFileOrThrow(filePath);
     if (ast === undefined) {
         throw new Error('Could not find AST. Please provide a correct `filePath`.');
     }

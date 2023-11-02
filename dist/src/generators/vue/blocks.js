@@ -15,8 +15,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.blockToVue = void 0;
-var function_1 = require("fp-ts/lib/function");
-var html_tags_1 = require("../../constants/html_tags");
 var filter_empty_text_nodes_1 = require("../../helpers/filter-empty-text-nodes");
 var is_children_1 = __importDefault(require("../../helpers/is-children"));
 var is_mitosis_node_1 = require("../../helpers/is-mitosis-node");
@@ -24,6 +22,8 @@ var nullable_1 = require("../../helpers/nullable");
 var remove_surrounding_block_1 = require("../../helpers/remove-surrounding-block");
 var replace_identifiers_1 = require("../../helpers/replace-identifiers");
 var slots_1 = require("../../helpers/slots");
+var function_1 = require("fp-ts/lib/function");
+var html_tags_1 = require("../../constants/html_tags");
 var helpers_1 = require("./helpers");
 var SPECIAL_PROPERTIES = {
     V_IF: 'v-if',

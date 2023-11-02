@@ -15,8 +15,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.blockToReact = void 0;
-var lodash_1 = require("lodash");
-var html_tags_1 = require("../../constants/html_tags");
 var filter_empty_text_nodes_1 = require("../../helpers/filter-empty-text-nodes");
 var is_children_1 = __importDefault(require("../../helpers/is-children"));
 var is_root_text_node_1 = require("../../helpers/is-root-text-node");
@@ -24,6 +22,8 @@ var is_valid_attribute_name_1 = require("../../helpers/is-valid-attribute-name")
 var for_1 = require("../../helpers/nodes/for");
 var slots_1 = require("../../helpers/slots");
 var mitosis_node_1 = require("../../types/mitosis-node");
+var lodash_1 = require("lodash");
+var html_tags_1 = require("../../constants/html_tags");
 var helpers_1 = require("./helpers");
 var state_1 = require("./state");
 var NODE_MAPPERS = {

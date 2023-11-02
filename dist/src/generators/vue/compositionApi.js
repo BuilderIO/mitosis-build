@@ -8,11 +8,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.generateCompositionApiScript = void 0;
-var json5_1 = __importDefault(require("json5"));
-var lodash_1 = require("lodash");
 var dedent_1 = require("../../helpers/dedent");
 var get_state_object_string_1 = require("../../helpers/get-state-object-string");
 var strip_state_and_props_refs_1 = require("../../helpers/strip-state-and-props-refs");
+var json5_1 = __importDefault(require("json5"));
+var lodash_1 = require("lodash");
 var helpers_1 = require("./helpers");
 var getCompositionPropDefinition = function (_a) {
     var options = _a.options, component = _a.component, props = _a.props;

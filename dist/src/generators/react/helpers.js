@@ -15,10 +15,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.processTagReferences = exports.getCode = exports.wrapInFragment = exports.getFragment = exports.closeFrag = exports.openFrag = exports.processBinding = void 0;
-var lodash_1 = require("lodash");
-var traverse_1 = __importDefault(require("traverse"));
 var is_mitosis_node_1 = require("../../helpers/is-mitosis-node");
 var strip_state_and_props_refs_1 = require("../../helpers/strip-state-and-props-refs");
+var lodash_1 = require("lodash");
+var traverse_1 = __importDefault(require("traverse"));
 var processBinding = function (str, options) {
     if (options.stateType !== 'useState') {
         return str;

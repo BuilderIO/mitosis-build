@@ -5,8 +5,6 @@ var __makeTemplateObject = (this && this.__makeTemplateObject) || function (cook
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.componentToStencil = void 0;
-var standalone_1 = require("prettier/standalone");
-var html_tags_1 = require("../../constants/html_tags");
 var dash_case_1 = require("../../helpers/dash-case");
 var dedent_1 = require("../../helpers/dedent");
 var fast_clone_1 = require("../../helpers/fast-clone");
@@ -21,8 +19,10 @@ var render_imports_1 = require("../../helpers/render-imports");
 var strip_meta_properties_1 = require("../../helpers/strip-meta-properties");
 var strip_state_and_props_refs_1 = require("../../helpers/strip-state-and-props-refs");
 var collect_css_1 = require("../../helpers/styles/collect-css");
-var plugins_1 = require("../../modules/plugins");
 var mitosis_node_1 = require("../../types/mitosis-node");
+var standalone_1 = require("prettier/standalone");
+var html_tags_1 = require("../../constants/html_tags");
+var plugins_1 = require("../../modules/plugins");
 var on_mount_1 = require("../helpers/on-mount");
 var collect_class_string_1 = require("./collect-class-string");
 var blockToStencil = function (json, options) {

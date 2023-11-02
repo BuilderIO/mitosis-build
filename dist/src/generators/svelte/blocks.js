@@ -4,13 +4,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.blockToSvelte = void 0;
-var html_tags_1 = require("../../constants/html_tags");
 var bindings_1 = require("../../helpers/bindings");
 var is_children_1 = __importDefault(require("../../helpers/is-children"));
 var is_upper_case_1 = require("../../helpers/is-upper-case");
 var for_1 = require("../../helpers/nodes/for");
 var remove_surrounding_block_1 = require("../../helpers/remove-surrounding-block");
 var slots_1 = require("../../helpers/slots");
+var html_tags_1 = require("../../constants/html_tags");
 var helpers_1 = require("./helpers");
 /**
  * blockToSvelte executed after stripStateAndProps,

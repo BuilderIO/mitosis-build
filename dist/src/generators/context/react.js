@@ -1,8 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.contextToReact = void 0;
-var standalone_1 = require("prettier/standalone");
 var get_state_object_string_1 = require("../../helpers/get-state-object-string");
+var standalone_1 = require("prettier/standalone");
 var contextToReact = function (options) {
     if (options === void 0) { options = { typescript: false, preact: false }; }
     return function (_a) {

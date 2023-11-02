@@ -49,15 +49,13 @@ var getContextSymbols = function (ast) {
 };
 exports.getContextSymbols = getContextSymbols;
 var getSignalSymbol = function (project) {
-    var symbolExport = project.createSourceFile('homepage3.lite.tsx', "import { Signal } from '@builder.io/mitosis';");
-    // Find the original Signal symbol
-    var signalSymbol = undefined;
-    symbolExport.forEachDescendant(function (node) {
-        var _a;
-        if (ts_morph_1.Node.isImportSpecifier(node)) {
-            signalSymbol = (_a = node.getSymbol()) === null || _a === void 0 ? void 0 : _a.getAliasedSymbol();
-        }
+    var mitosisRootExportFile = project.getSourceFiles().find(function (file) {
+        var filePath = file.getFilePath();
+        return (filePath.includes('mitosis/packages/core/dist/src/index') ||
+            // should only be needed for tests to work.
+            filePath.includes('mitosis/packages/core/src/index'));
     });
+    var signalSymbol = mitosisRootExportFile === null || mitosisRootExportFile === void 0 ? void 0 : mitosisRootExportFile.getExportSymbols().find(function (Symbol) { return Symbol.getName() === 'Signal'; });
     if (signalSymbol === undefined) {
         throw new Error('Could not find the Mitosis Signal symbol in your TS project. Is `@builder.io/mitosis` installed correctly?');
     }

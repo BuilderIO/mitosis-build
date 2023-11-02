@@ -1,4 +1,4 @@
-import { MitosisConfig, Target } from '@builder.io/mitosis';
+import { MitosisConfig, Target } from '..';
 export declare const COMPONENT_IMPORT_EXTENSIONS: string[];
 export declare const checkIsSvelteComponentFilePath: (filePath: string) => boolean;
 export declare const checkIsLiteComponentFilePath: (filePath: string) => boolean;

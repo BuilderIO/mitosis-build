@@ -19,10 +19,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.markoFormatHtml = exports.postprocessHtml = exports.preprocessHtml = exports.componentToMarko = void 0;
-var hash_sum_1 = __importDefault(require("hash-sum"));
-var lodash_1 = require("lodash");
-var standalone_1 = require("prettier/standalone");
-var html_tags_1 = require("../../constants/html_tags");
 var dash_case_1 = require("../../helpers/dash-case");
 var dedent_1 = require("../../helpers/dedent");
 var fast_clone_1 = require("../../helpers/fast-clone");
@@ -38,8 +34,12 @@ var render_imports_1 = require("../../helpers/render-imports");
 var strip_meta_properties_1 = require("../../helpers/strip-meta-properties");
 var strip_state_and_props_refs_1 = require("../../helpers/strip-state-and-props-refs");
 var collect_css_1 = require("../../helpers/styles/collect-css");
-var plugins_1 = require("../../modules/plugins");
 var mitosis_node_1 = require("../../types/mitosis-node");
+var hash_sum_1 = __importDefault(require("hash-sum"));
+var lodash_1 = require("lodash");
+var standalone_1 = require("prettier/standalone");
+var html_tags_1 = require("../../constants/html_tags");
+var plugins_1 = require("../../modules/plugins");
 var on_mount_1 = require("../helpers/on-mount");
 // Having issues with this, so off for now
 var USE_MARKO_PRETTIER = false;

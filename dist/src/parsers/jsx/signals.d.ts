@@ -1,5 +1,5 @@
 import { Project, Symbol } from 'ts-morph';
-export declare const findSignals: (args: {
+export declare const findSignals: ({ filePath, signalSymbol, project, }: {
     project: Project;
     signalSymbol: Symbol;
     filePath: string;

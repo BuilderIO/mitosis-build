@@ -39,7 +39,7 @@ var getSignalImportName = function (code) {
                     path.parentPath.node.source.value === '@builder.io/mitosis') {
                     /**
                      * in case the import is aliased, we need to use the local name,
-                     * e.g. `import { Signal as MySignal } from '@builder.io/mitosis'`
+                     * e.g. `import { Signal as MySignal } from '../..'`
                      */
                     signalImportName = path.node.local.name;
                     path.stop();
