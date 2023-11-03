@@ -396,7 +396,7 @@ var _componentToReact = function (json, options, isSubComponent) {
         .map(function (hook) {
         var eventName = "\"".concat(hook.eventName, "\"");
         var handlerName = (0, on_event_1.getOnEventHandlerName)(hook);
-        return "\n      useEffect(() => {\n        ".concat(hook.refName, ".addEventListener(").concat(eventName, ", ").concat(handlerName, ");\n        return () => ").concat(hook.refName, ".removeEventListener(").concat(eventName, ", ").concat(handlerName, ");\n      }, []);\n      ");
+        return "\n      useEffect(() => {\n        ".concat(hook.refName, ".current.addEventListener(").concat(eventName, ", ").concat(handlerName, ");\n        return () => ").concat(hook.refName, ".current.removeEventListener(").concat(eventName, ", ").concat(handlerName, ");\n      }, []);\n      ");
     })
         .join('\n'), json.hooks.onMount
         .map(function (hook) {
