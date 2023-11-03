@@ -217,7 +217,6 @@ function parseJsx(jsx, _options) {
         var reactiveValues = (0, signals_2.findSignals)({
             filePath: options.filePath,
             project: options.tsProject.project,
-            signalSymbol: options.tsProject.signalSymbol,
         });
         reactiveValues.props.forEach(function (prop) {
             var _a;

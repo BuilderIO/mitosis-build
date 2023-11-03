@@ -48,19 +48,6 @@ var getContextSymbols = function (ast) {
     return contextSymbols;
 };
 exports.getContextSymbols = getContextSymbols;
-var getSignalSymbol = function (project) {
-    var mitosisRootExportFile = project.getSourceFiles().find(function (file) {
-        var filePath = file.getFilePath();
-        return (filePath.includes('mitosis/packages/core/dist/src/index') ||
-            // should only be needed for tests to work.
-            filePath.includes('mitosis/packages/core/src/index'));
-    });
-    var signalSymbol = mitosisRootExportFile === null || mitosisRootExportFile === void 0 ? void 0 : mitosisRootExportFile.getExportSymbols().find(function (Symbol) { return Symbol.getName() === 'Signal'; });
-    if (signalSymbol === undefined) {
-        throw new Error('Could not find the Mitosis Signal symbol in your TS project. Is `@builder.io/mitosis` installed correctly?');
-    }
-    return signalSymbol;
-};
 var getProject = function (tsConfigFilePath) {
     try {
         return new ts_morph_1.Project({ tsConfigFilePath: tsConfigFilePath });
@@ -71,7 +58,6 @@ var getProject = function (tsConfigFilePath) {
 };
 var createTypescriptProject = function (tsConfigFilePath) {
     var project = getProject(tsConfigFilePath);
-    var signalSymbol = getSignalSymbol(project);
-    return { project: project, signalSymbol: signalSymbol };
+    return { project: project };
 };
 exports.createTypescriptProject = createTypescriptProject;
