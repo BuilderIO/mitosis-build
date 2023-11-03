@@ -76,7 +76,7 @@ function generateCompositionApiScript(component, options, template, props, onUpd
         else {
             return "const ".concat(key, " = ref(null)");
         }
-    }).join('\n'), (_e = (_d = component.hooks.onInit) === null || _d === void 0 ? void 0 : _d.code) !== null && _e !== void 0 ? _e : '', component.hooks.onMount.map(function (hook) { return "onMounted(() => { ".concat(hook.code, " })"); }), !((_f = component.hooks.onUnMount) === null || _f === void 0 ? void 0 : _f.code)
+    }).join('\n'), (_e = (_d = component.hooks.onInit) === null || _d === void 0 ? void 0 : _d.code) !== null && _e !== void 0 ? _e : '', component.hooks.onMount.map(function (hook) { return "onMounted(() => { ".concat(hook.code, " })"); }).join('\n'), !((_f = component.hooks.onUnMount) === null || _f === void 0 ? void 0 : _f.code)
         ? ''
         : "onUnmounted(() => { ".concat(component.hooks.onUnMount.code, "})"), (getterKeys === null || getterKeys === void 0 ? void 0 : getterKeys.map(function (key) {
         var _a, _b;

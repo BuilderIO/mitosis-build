@@ -302,7 +302,7 @@ var componentToSvelte = function (userProvidedOptions) {
             ? dataString.length < 4
                 ? ''
                 : "let state = onChange(".concat(dataString, ", () => state = state)")
-            : dataString, (_h = (_g = json.hooks.onInit) === null || _g === void 0 ? void 0 : _g.code) !== null && _h !== void 0 ? _h : '', json.hooks.onMount.map(function (hook) { return "onMount(() => { ".concat(hook.code, " });"); }), ((_j = json.hooks.onUpdate) === null || _j === void 0 ? void 0 : _j.map(function (_a, index) {
+            : dataString, (_h = (_g = json.hooks.onInit) === null || _g === void 0 ? void 0 : _g.code) !== null && _h !== void 0 ? _h : '', json.hooks.onMount.map(function (hook) { return "onMount(() => { ".concat(hook.code, " });"); }).join('\n'), ((_j = json.hooks.onUpdate) === null || _j === void 0 ? void 0 : _j.map(function (_a, index) {
             var code = _a.code, deps = _a.deps;
             if (!deps) {
                 return "afterUpdate(() => { ".concat(code, " });");

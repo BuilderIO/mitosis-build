@@ -398,12 +398,14 @@ var _componentToReact = function (json, options, isSubComponent) {
         var handlerName = (0, on_event_1.getOnEventHandlerName)(hook);
         return "\n      useEffect(() => {\n        ".concat(hook.refName, ".addEventListener(").concat(eventName, ", ").concat(handlerName, ");\n        return () => ").concat(hook.refName, ".removeEventListener(").concat(eventName, ", ").concat(handlerName, ");\n      }, []);\n      ");
     })
-        .join('\n'), json.hooks.onMount.map(function (hook) {
+        .join('\n'), json.hooks.onMount
+        .map(function (hook) {
         return "useEffect(() => {\n          ".concat((0, state_2.processHookCode)({
             str: hook.code,
             options: options,
         }), "\n        }, [])");
-    }), (_k = (_j = json.hooks.onUpdate) === null || _j === void 0 ? void 0 : _j.map(function (hook) { return "useEffect(() => {\n          ".concat((0, state_2.processHookCode)({ str: hook.code, options: options }), "\n        },\n        ").concat(hook.deps ? (0, state_2.processHookCode)({ str: hook.deps, options: options }) : '', ")"); }).join(';')) !== null && _k !== void 0 ? _k : '', ((_l = json.hooks.onUnMount) === null || _l === void 0 ? void 0 : _l.code)
+    })
+        .join('\n'), (_k = (_j = json.hooks.onUpdate) === null || _j === void 0 ? void 0 : _j.map(function (hook) { return "useEffect(() => {\n          ".concat((0, state_2.processHookCode)({ str: hook.code, options: options }), "\n        },\n        ").concat(hook.deps ? (0, state_2.processHookCode)({ str: hook.deps, options: options }) : '', ")"); }).join(';')) !== null && _k !== void 0 ? _k : '', ((_l = json.hooks.onUnMount) === null || _l === void 0 ? void 0 : _l.code)
         ? "useEffect(() => {\n          return () => {\n            ".concat((0, state_2.processHookCode)({
             str: json.hooks.onUnMount.code,
             options: options,
