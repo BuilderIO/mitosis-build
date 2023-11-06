@@ -28,9 +28,11 @@ var processOnEventHooksPlugin = function (args) {
     return function () { return ({
         json: {
             pre: function (component) {
-                var _a = args.setBindings, setBindings = _a === void 0 ? true : _a;
+                var _a = args.setBindings, setBindings = _a === void 0 ? true : _a, _b = args.includeRootEvents, includeRootEvents = _b === void 0 ? true : _b;
                 (0, traverse_nodes_1.traverseNodes)(component, function (node) {
                     (0, exports.getOnEventHooksForNode)({ node: node, component: component }).forEach(function (hook) {
+                        if (!includeRootEvents && hook.isRoot)
+                            return;
                         var handlerName = getBindingName(hook);
                         var fnName = (0, exports.getOnEventHandlerName)(hook);
                         component.state[fnName] = {

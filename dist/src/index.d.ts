@@ -91,5 +91,5 @@ export declare function useStyle(value: string): void;
 /**
  * Adds an event listener to a given element ref.
  */
-export declare function onEvent(eventName: string, fn: (event: any) => any, elementRef: Element, isRoot?: boolean): void;
+export declare function onEvent<E extends Event, T extends Element>(eventName: string, fn: (event: E, element: T) => any, elementRef: T, isRoot?: boolean): void;
 export declare function useTarget<Return>(dict: TargetBlock<Return>): Return;

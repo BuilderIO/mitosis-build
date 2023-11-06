@@ -14,7 +14,7 @@ var stringifySingleScopeOnMount = function (json) {
     return hooks
         .map(function (hook, i) {
         var hookFnName = "onMountHook_".concat(i);
-        return "\n    function ".concat(hookFnName, "() {\n      ").concat(hook.code, "\n    }\n    ").concat(hookFnName, "();");
+        return "\n    const ".concat(hookFnName, " = () => {\n      ").concat(hook.code, "\n    }\n    ").concat(hookFnName, "();");
     })
         .join('');
 };

@@ -85,6 +85,7 @@ export declare type OnEventHook = BaseHook & {
     isRoot: boolean;
     deps?: never;
     eventArgName: string;
+    elementArgName?: string;
 };
 export declare type OnMountHook = BaseHook & {
     onSSR?: boolean;

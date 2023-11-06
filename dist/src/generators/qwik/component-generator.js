@@ -28,7 +28,7 @@ var PLUGINS = [
             },
         },
     }); },
-    (0, on_event_1.processOnEventHooksPlugin)({ setBindings: false }),
+    (0, on_event_1.processOnEventHooksPlugin)({ setBindings: false, includeRootEvents: false }),
     (0, process_code_1.CODE_PROCESSOR_PLUGIN)(function (codeType, json) {
         switch (codeType) {
             case 'types':
@@ -243,7 +243,7 @@ function emitUseOn(file, component) {
     component.hooks.onEvent.forEach(function (hook) {
         var eventName = "\"".concat(hook.eventName, "\"");
         if (hook.isRoot) {
-            var wrappedHandlerFn = "".concat(file.import(file.qwikModule, '$').localName, "(").concat(hook.eventArgName, " => {\n        ").concat(hook.code, "\n      })");
+            var wrappedHandlerFn = "".concat(file.import(file.qwikModule, '$').localName, "((").concat(hook.eventArgName, ", ").concat(hook.elementArgName, ") => {\n        ").concat(hook.code, "\n      }) as Parameters<typeof useOn>[1]"); // this type hack is needed until https://github.com/BuilderIO/qwik/issues/5398 is fixed
             file.src.emit(file.import(file.qwikModule, 'useOn').localName, "(".concat(eventName, ", ").concat(wrappedHandlerFn, ");"));
         }
         else {

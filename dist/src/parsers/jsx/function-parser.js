@@ -157,12 +157,16 @@ var componentFunctionToJson = function (node, context) {
                         var eventArgName = types.isIdentifier(secondArg.params[0])
                             ? secondArg.params[0].name
                             : 'event';
+                        var elementArgName = types.isIdentifier(secondArg.params[1])
+                            ? secondArg.params[1].name
+                            : 'element';
                         hooks.onEvent.push({
                             eventName: firstArg.value,
                             code: (0, helpers_2.processHookCode)(secondArg),
                             refName: thirdArg.name,
                             isRoot: isRoot,
                             eventArgName: eventArgName,
+                            elementArgName: elementArgName,
                         });
                         break;
                     }

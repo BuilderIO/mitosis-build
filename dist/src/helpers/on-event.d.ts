@@ -10,4 +10,5 @@ export declare const getOnEventHooksForNode: ({ node, component, }: {
  */
 export declare const processOnEventHooksPlugin: (args?: {
     setBindings?: boolean;
+    includeRootEvents?: boolean;
 }) => Plugin;
