@@ -9,6 +9,7 @@ var lodash_1 = require("lodash");
 var traverse_1 = __importDefault(require("traverse"));
 var dash_case_1 = require("../dash-case");
 var is_mitosis_node_1 = require("../is-mitosis-node");
+var is_upper_case_1 = require("../is-upper-case");
 var nodeHasCss = function (node) {
     var _a;
     return Boolean(typeof ((_a = node.bindings.css) === null || _a === void 0 ? void 0 : _a.code) === 'string' && node.bindings.css.code.trim().length > 6);
@@ -68,12 +69,17 @@ var parseCssObject = function (css) {
     }
 };
 exports.parseCssObject = parseCssObject;
-var parseCSSKey = function (key) {
+var getCssPropertyName = function (cssObjectKey) {
     // Allow custom CSS properties
-    if (key.startsWith('--')) {
-        return key;
+    if (cssObjectKey.startsWith('--')) {
+        return cssObjectKey;
     }
-    return (0, dash_case_1.dashCase)(key);
+    var str = (0, dash_case_1.dashCase)(cssObjectKey);
+    // Convert vendor prefixes like 'WebkitFoo' to '-webkit-foo'
+    if ((0, is_upper_case_1.isUpperCase)(cssObjectKey[0])) {
+        str = "-".concat(str);
+    }
+    return str;
 };
 var styleMapToCss = function (map) {
     return Object.entries(map)
@@ -83,7 +89,7 @@ var styleMapToCss = function (map) {
     })
         .map(function (_a) {
         var key = _a[0], value = _a[1];
-        return "  ".concat(parseCSSKey(key), ": ").concat(value, ";");
+        return "  ".concat(getCssPropertyName(key), ": ").concat(value, ";");
     })
         .join('\n');
 };
