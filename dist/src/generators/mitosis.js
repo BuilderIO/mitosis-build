@@ -28,6 +28,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.componentToMitosis = exports.blockToMitosis = exports.DEFAULT_FORMAT = void 0;
+var plugins_1 = require("../modules/plugins");
 var json5_1 = __importDefault(require("json5"));
 var standalone_1 = require("prettier/standalone");
 var hooks_1 = require("../constants/hooks");
@@ -143,6 +144,9 @@ var componentToMitosis = function (toMitosisOptions) {
             })({ component: component });
         }
         var json = (0, fast_clone_1.fastClone)(component);
+        if (options.plugins) {
+            json = (0, plugins_1.runPreJsonPlugins)({ json: json, plugins: options.plugins });
+        }
         var domRefs = (0, get_refs_1.getRefs)(component);
         // grab refs not used for bindings
         var jsRefs = Object.keys(component.refs).filter(function (ref) { return domRefs.has(ref); });
@@ -154,6 +158,9 @@ var componentToMitosis = function (toMitosisOptions) {
         var components = Array.from((0, get_components_1.getComponents)(json));
         var mitosisComponents = components.filter(function (item) { return mitosisCoreComponents.includes(item); });
         var otherComponents = components.filter(function (item) { return !mitosisCoreComponents.includes(item); });
+        if (options.plugins) {
+            json = (0, plugins_1.runPostJsonPlugins)({ json: json, plugins: options.plugins });
+        }
         var hasState = (0, state_1.checkHasState)(component);
         var needsMitosisCoreImport = Boolean(hasState || refs.length || mitosisComponents.length);
         var stringifiedUseMetadata = json5_1.default.stringify(component.meta.useMetadata);
@@ -163,6 +170,9 @@ var componentToMitosis = function (toMitosisOptions) {
             : "import { ".concat(!hasState ? '' : 'useStore, ', " ").concat(!refs.length ? '' : 'useRef, ', " ").concat(mitosisComponents.join(', '), " } from '..';"), !otherComponents.length ? '' : "import { ".concat(otherComponents.join(','), " } from '@components';"), json.types ? json.types.join('\n') : '', (0, render_imports_1.renderPreComponent)({ component: json, target: 'mitosis' }), stringifiedUseMetadata && stringifiedUseMetadata !== '{}'
             ? "".concat(hooks_1.HOOKS.METADATA, "(").concat(stringifiedUseMetadata, ")")
             : '', component.name, !hasState ? '' : "const state = useStore(".concat((0, get_state_object_string_1.getStateObjectStringFromComponent)(json), ");"), getRefsString(json, refs), json.hooks.onMount.map(function (hook) { return "onMount(() => { ".concat(hook.code, " })"); }), !((_b = json.hooks.onUnMount) === null || _b === void 0 ? void 0 : _b.code) ? '' : "onUnMount(() => { ".concat(json.hooks.onUnMount.code, " })"), addWrapper ? '<>' : '', json.children.map(function (item) { return (0, exports.blockToMitosis)(item, options, component); }).join('\n'), addWrapper ? '</>' : '');
+        if (options.plugins) {
+            str = (0, plugins_1.runPreCodePlugins)({ json: json, code: str, plugins: options.plugins });
+        }
         if (options.prettier !== false) {
             try {
                 str = (0, standalone_1.format)(str, {
@@ -176,6 +186,9 @@ var componentToMitosis = function (toMitosisOptions) {
                 console.error('Format error for file:', str, JSON.stringify(json, null, 2));
                 throw err;
             }
+        }
+        if (options.plugins) {
+            str = (0, plugins_1.runPostCodePlugins)({ json: json, code: str, plugins: options.plugins });
         }
         return str;
     };
