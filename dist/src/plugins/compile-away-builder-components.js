@@ -301,8 +301,7 @@ exports.components = {
                 __assign(__assign({}, img), { bindings: __assign(__assign({}, img.bindings), { css: (0, bindings_1.createSingleBinding)({
                             code: JSON.stringify({
                                 position: 'absolute',
-                                inset: 0,
-                                zIndex: -1,
+                                inset: '0',
                                 height: '100%',
                                 width: '100%',
                                 objectFit: backgroundSize || 'cover',
