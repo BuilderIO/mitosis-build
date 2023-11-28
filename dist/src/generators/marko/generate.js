@@ -182,7 +182,11 @@ var componentToMarko = function (userOptions) {
                 console.warn('Could not format css', err);
             }
         }
-        var jsString = (0, dedent_1.dedent)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    ", "\n\n    class {\n        ", "\n\n        ", "\n\n        ", "\n      \n        ", "\n        ", "\n        ", "\n    }\n  "], ["\n    ", "\n\n    class {\n        ", "\n\n        ", "\n\n        ", "\n      \n        ", "\n        ", "\n        ", "\n    }\n  "])), (0, render_imports_1.renderPreComponent)({ component: json, target: 'marko' }), methodsString, !hasState
+        var jsString = (0, dedent_1.dedent)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    ", "\n\n    class {\n        ", "\n\n        ", "\n\n        ", "\n      \n        ", "\n        ", "\n        ", "\n    }\n  "], ["\n    ", "\n\n    class {\n        ", "\n\n        ", "\n\n        ", "\n      \n        ", "\n        ", "\n        ", "\n    }\n  "])), (0, render_imports_1.renderPreComponent)({
+            explicitImportFileExtension: options.explicitImportFileExtension,
+            component: json,
+            target: 'marko',
+        }), methodsString, !hasState
             ? ''
             : "onCreate(".concat(thisHasProps ? 'input' : '', ") {\n          this.state = ").concat(dataString, "\n        }"), Array.from(domRefs)
             .map(function (refName) { return "get ".concat((0, lodash_1.camelCase)(refName), "() { \n            return this.getEl('").concat((0, lodash_1.camelCase)(refName), "')\n          }"); })

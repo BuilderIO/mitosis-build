@@ -2,11 +2,11 @@ import { type Plugin } from '..';
 import { TraverseContext } from 'traverse';
 import { MitosisComponent } from '../types/mitosis-component';
 import { MitosisNode } from '../types/mitosis-node';
-declare type CompileAwayComponentsMap = {
+type CompileAwayComponentsMap = {
     [key: string]: (node: MitosisNode, context: TraverseContext, components: CompileAwayComponentsMap) => MitosisNode | void;
 };
 export declare const components: CompileAwayComponentsMap;
-declare type CompileAwayBuilderComponentsOptions = {
+type CompileAwayBuilderComponentsOptions = {
     only?: string[];
     omit?: string[];
 };

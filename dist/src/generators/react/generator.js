@@ -215,7 +215,7 @@ var componentToReact = function (reactOptions) {
                 str = (0, standalone_1.format)(str, {
                     parser: 'typescript',
                     plugins: [
-                        require('prettier/parser-typescript'),
+                        require('prettier/parser-typescript'), // To support running in browsers
                         require('prettier/parser-postcss'),
                     ],
                 })
@@ -429,6 +429,7 @@ var _componentToReact = function (json, options, isSubComponent) {
                 : options.stateType === 'mobx'
                     ? "import { useLocalObservable, observer } from 'mobx-react-lite';"
                     : '', json.types && options.typescript ? json.types.join('\n') : '', (0, render_imports_1.renderPreComponent)({
+        explicitImportFileExtension: options.explicitImportFileExtension,
         component: json,
         target: options.type === 'native' ? 'reactNative' : 'react',
     }), isForwardRef ? "const ".concat(json.name, " = forwardRef").concat(forwardRefType, "(") : '', json.name, componentArgs, componentBody, isForwardRef ? ')' : '', getPropsDefinition({ json: json }), reactNativeStyles

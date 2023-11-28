@@ -220,6 +220,7 @@ var componentToVue = function (userOptions) {
         var str = (0, dedent_1.dedent)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    ", "\n\n\n    <script ", " ", ">\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n    </script>\n\n    ", "\n  "], ["\n    ", "\n\n\n    <script ", " ", ">\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n    </script>\n\n    ", "\n  "])), template.trim().length > 0
             ? "<template>\n      ".concat(template, "\n    </template>")
             : '', options.api === 'composition' ? 'setup' : '', tsLangAttribute, vueImports.length ? "import { ".concat((0, lodash_1.uniq)(vueImports).sort().join(', '), " } from \"vue\"") : '', (0, render_imports_1.renderPreComponent)({
+            explicitImportFileExtension: options.explicitImportFileExtension,
             component: component,
             target: 'vue',
             asyncComponentImports: options.asyncComponentImports,

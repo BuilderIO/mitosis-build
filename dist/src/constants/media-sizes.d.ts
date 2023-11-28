@@ -1,4 +1,4 @@
-export declare type Size = 'large' | 'medium' | 'small';
+export type Size = 'large' | 'medium' | 'small';
 export declare const sizeNames: Size[];
 export declare const sizes: {
     small: {

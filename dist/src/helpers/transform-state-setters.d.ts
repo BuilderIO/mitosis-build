@@ -1,5 +1,5 @@
 import { types } from '@babel/core';
-declare type StateSetterTransformer = ({ path, propertyName, }: {
+type StateSetterTransformer = ({ path, propertyName, }: {
     path: babel.NodePath<types.AssignmentExpression>;
     propertyName: string;
 }) => types.CallExpression;

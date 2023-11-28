@@ -1,4 +1,4 @@
-export declare type StripStateAndPropsRefsOptions = {
+export type StripStateAndPropsRefsOptions = {
     replaceWith?: string | ((name: string) => string);
     includeProps?: boolean;
     includeState?: boolean;
@@ -14,7 +14,7 @@ export declare const DO_NOT_USE_CONTEXT_VARS_TRANSFORMS: ({ code, contextVars, c
     contextVars?: string[] | undefined;
     context: string;
 }) => string;
-export declare type DO_NOT_USE_ARGS = {
+export type DO_NOT_USE_ARGS = {
     outputVars?: string[];
     domRefs?: string[];
     stateVars?: string[];

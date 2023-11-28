@@ -275,7 +275,11 @@ var componentToSvelte = function (userProvidedOptions) {
             // make sure this is after all other state/code is initialized
             , "\n\n      ", "\n    </script>\n\n    ", "\n\n    ", "\n  "])), tsLangAttribute, !svelteImports.length ? '' : "import { ".concat(svelteImports.sort().join(', '), " } from 'svelte'"), !svelteStoreImports.length
             ? ''
-            : "import { ".concat(svelteStoreImports.sort().join(', '), " } from 'svelte/store'"), (0, render_imports_1.renderPreComponent)({ component: json, target: 'svelte' }), !hasData || options.stateType === 'variables' ? '' : "import onChange from 'on-change'", props
+            : "import { ".concat(svelteStoreImports.sort().join(', '), " } from 'svelte/store'"), (0, render_imports_1.renderPreComponent)({
+            explicitImportFileExtension: options.explicitImportFileExtension,
+            component: json,
+            target: 'svelte',
+        }), !hasData || options.stateType === 'variables' ? '' : "import onChange from 'on-change'", props
             .map(function (name) {
             var _a, _b, _c;
             if (name === 'children') {

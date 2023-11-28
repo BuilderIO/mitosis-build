@@ -5,7 +5,7 @@ export interface SrcBuilderOptions {
     isJSX: boolean;
     isBuilder: boolean;
 }
-export declare type EmitFn = (this: SrcBuilder) => void;
+export type EmitFn = (this: SrcBuilder) => void;
 export declare class File {
     filename: string;
     imports: Imports;

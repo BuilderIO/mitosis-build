@@ -1,5 +1,5 @@
 import { MitosisContext } from '../../types/mitosis-context';
-declare type ContextToReactOptions = {
+type ContextToReactOptions = {
     format?: boolean;
     preact?: boolean;
     typescript?: boolean;

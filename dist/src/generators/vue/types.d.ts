@@ -1,7 +1,7 @@
 import { OmitObj } from '../../helpers/typescript';
 import { BaseTranspilerOptions } from '../../types/transpiler';
-export declare type VueVersion = 2 | 3;
-export declare type Api = 'options' | 'composition';
+export type VueVersion = 2 | 3;
+export type Api = 'options' | 'composition';
 interface VueVersionOpt {
     vueVersion: VueVersion;
 }
@@ -12,5 +12,5 @@ export interface ToVueOptions extends BaseTranspilerOptions, VueVersionOpt {
     defineComponent?: boolean;
     api: Api;
 }
-export declare type VueOptsWithoutVersion = OmitObj<ToVueOptions, VueVersionOpt>;
+export type VueOptsWithoutVersion = OmitObj<ToVueOptions, VueVersionOpt>;
 export {};

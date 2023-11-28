@@ -31,8 +31,8 @@ export interface MitosisImport {
     };
     importKind?: 'type' | 'typeof' | 'value' | null;
 }
-export declare type ReactivityType = 'normal' | 'reactive';
-export declare type ContextOptions = {
+export type ReactivityType = 'normal' | 'reactive';
+export type ContextOptions = {
     type?: ReactivityType;
 };
 export interface ContextGetInfo extends ContextOptions {
@@ -44,15 +44,15 @@ export interface ContextSetInfo extends ContextOptions {
     value?: MitosisState;
     ref?: string;
 }
-export declare type BaseHook = {
+export type BaseHook = {
     code: string;
     deps?: string;
 };
-export declare type MitosisComponentInput = {
+export type MitosisComponentInput = {
     name: string;
     defaultValue: any;
 };
-export declare type MitosisExports = {
+export type MitosisExports = {
     [name: string]: MitosisExport;
 };
 export interface MitosisExport {
@@ -60,26 +60,26 @@ export interface MitosisExport {
     usedInLocal?: boolean;
     isFunction?: boolean;
 }
-export declare type StateValueType = 'function' | 'getter' | 'method' | 'property';
-export declare type StateValue = {
+export type StateValueType = 'function' | 'getter' | 'method' | 'property';
+export type StateValue = {
     code: string;
     typeParameter?: string;
     type: StateValueType;
     propertyType?: ReactivityType;
 };
-export declare type MitosisState = Dictionary<StateValue | undefined>;
-export declare type TargetBlock<Return, Targets extends Target = Target> = Partial<{
+export type MitosisState = Dictionary<StateValue | undefined>;
+export type TargetBlock<Return, Targets extends Target = Target> = Partial<{
     [T in Targets | 'default']?: Return;
 }>;
-export declare type TargetBlockCode = TargetBlock<{
+export type TargetBlockCode = TargetBlock<{
     code: string;
 }>;
-export declare type TargetBlockDefinition = TargetBlockCode & {
+export type TargetBlockDefinition = TargetBlockCode & {
     settings: {
         requiresDefault: boolean;
     };
 };
-export declare type OnEventHook = BaseHook & {
+export type OnEventHook = BaseHook & {
     refName: string;
     eventName: string;
     isRoot: boolean;
@@ -87,10 +87,10 @@ export declare type OnEventHook = BaseHook & {
     eventArgName: string;
     elementArgName?: string;
 };
-export declare type OnMountHook = BaseHook & {
+export type OnMountHook = BaseHook & {
     onSSR?: boolean;
 };
-export declare type MitosisComponent = {
+export type MitosisComponent = {
     '@type': '@builder.io/mitosis/component';
     name: string;
     imports: MitosisImport[];

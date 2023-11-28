@@ -1,3 +1,3 @@
-declare type ParsedJson = any;
+type ParsedJson = any;
 export declare const tryParseJson: (jsonStr: string) => ParsedJson;
 export {};

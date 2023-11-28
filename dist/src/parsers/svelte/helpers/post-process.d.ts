@@ -1,6 +1,6 @@
 import type { StateValue } from '../../../types/mitosis-component';
 import type { SveltosisComponent } from '../types';
-declare type SveltosisStateValue = StateValue & {
+type SveltosisStateValue = StateValue & {
     arguments?: string[];
     type: string;
 };

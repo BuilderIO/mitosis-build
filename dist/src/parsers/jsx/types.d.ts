@@ -1,6 +1,6 @@
 import { Project } from 'ts-morph';
 import { MitosisComponent } from '../../types/mitosis-component';
-export declare type ParseMitosisOptions = {
+export type ParseMitosisOptions = {
     jsonHookNames?: string[];
     compileAwayPackages?: string[];
     typescript: boolean;
@@ -9,7 +9,7 @@ export declare type ParseMitosisOptions = {
     };
     filePath?: string;
 };
-export declare type Context = {
+export type Context = {
     builder: {
         component: MitosisComponent;
     };

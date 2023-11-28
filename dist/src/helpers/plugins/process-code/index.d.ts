@@ -7,6 +7,6 @@ export declare const createCodeProcessorPlugin: (codeProcessor: CodeProcessor, {
 /**
  * Given a `codeProcessor` function, processes all code expressions within a Mitosis component.
  */
-export declare const CODE_PROCESSOR_PLUGIN: (a_0: (codeType: import("./types").CodeType, json: MitosisComponent, node?: import("../../..").MitosisNode | undefined) => (code: string, hookType: string) => string | (() => void), a_1?: {
+export declare const CODE_PROCESSOR_PLUGIN: (codeProcessor: (codeType: import("./types").CodeType, json: MitosisComponent, node?: import("../../..").MitosisNode | undefined) => (code: string, hookType: string) => string | (() => void), a_1?: {
     processProperties?: boolean | undefined;
 } | undefined) => Plugin;

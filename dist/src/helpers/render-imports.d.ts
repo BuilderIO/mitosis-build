@@ -1,37 +1,36 @@
 import { Target } from '../types/config';
 import { MitosisComponent, MitosisImport } from '../types/mitosis-component';
 export declare const checkIsComponentImport: (theImport: MitosisImport) => boolean;
-export declare const transformImportPath: ({ theImport, target, preserveFileExtensions, }: {
+export declare const transformImportPath: ({ theImport, target, preserveFileExtensions, explicitImportFileExtension, }: {
     theImport: MitosisImport;
     target: Target;
     preserveFileExtensions: boolean;
+    explicitImportFileExtension: boolean;
 }) => string;
-export declare const renderImport: ({ theImport, target, asyncComponentImports, preserveFileExtensions, component, componentsUsed, importMapper, }: {
-    theImport: MitosisImport;
+type ImportArgs = {
     target: Target;
     asyncComponentImports: boolean;
-    preserveFileExtensions?: boolean | undefined;
+    preserveFileExtensions?: boolean;
     component?: MitosisComponent | null | undefined;
-    componentsUsed?: string[] | undefined;
+    /**
+     * This is only used by Angular generator, and will be deprecated in the future.
+     */
     importMapper?: Function | null | undefined;
+    /**
+     * This is only used by Angular generator, and will be deprecated in the future.
+     */
+    explicitImportFileExtension?: boolean;
+    /**
+     * This is only used by Angular generator, and will be deprecated in the future.
+     */
+    componentsUsed?: string[];
+};
+export declare const renderImport: ({ theImport, target, asyncComponentImports, preserveFileExtensions, component, componentsUsed, importMapper, explicitImportFileExtension, }: ImportArgs & {
+    theImport: MitosisImport;
 }) => string;
-export declare const renderImports: ({ imports, target, asyncComponentImports, excludeMitosisComponents, preserveFileExtensions, component, componentsUsed, importMapper, }: {
-    imports: MitosisImport[];
-    target: Target;
-    asyncComponentImports: boolean;
-    excludeMitosisComponents?: boolean | undefined;
-    preserveFileExtensions?: boolean | undefined;
+export declare const renderPreComponent: ({ component, target, excludeMitosisComponents, asyncComponentImports, preserveFileExtensions, componentsUsed, importMapper, explicitImportFileExtension, }: Omit<ImportArgs, "asyncComponentImports" | "explicitImportFileExtension"> & Partial<Pick<ImportArgs, "asyncComponentImports" | "explicitImportFileExtension">> & {
     component: MitosisComponent;
-    componentsUsed?: string[] | undefined;
-    importMapper?: Function | null | undefined;
-}) => string;
-export declare const renderPreComponent: ({ component, target, excludeMitosisComponents, asyncComponentImports, preserveFileExtensions, componentsUsed, importMapper, }: {
-    component: MitosisComponent;
     target: Target;
-    asyncComponentImports?: boolean | undefined;
     excludeMitosisComponents?: boolean | undefined;
-    preserveFileExtensions?: boolean | undefined;
-    componentsUsed?: string[] | undefined;
-    importMapper?: Function | null | undefined;
 }) => string;
-export declare const renderExportAndLocal: (component: MitosisComponent) => string;
+export {};

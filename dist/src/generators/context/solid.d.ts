@@ -1,5 +1,5 @@
 import { MitosisContext } from '../../types/mitosis-context';
-declare type ContextToSolidOptions = {
+type ContextToSolidOptions = {
     format?: boolean;
 };
 export declare const contextToSolid: (options?: ContextToSolidOptions) => ({ context }: {

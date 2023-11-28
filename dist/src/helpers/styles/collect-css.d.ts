@@ -1,5 +1,5 @@
 import { MitosisComponent } from '../../types/mitosis-component';
-declare type CollectStyleOptions = {
+type CollectStyleOptions = {
     prefix?: string;
 };
 export declare const collectCss: (json: MitosisComponent, options?: CollectStyleOptions) => string;

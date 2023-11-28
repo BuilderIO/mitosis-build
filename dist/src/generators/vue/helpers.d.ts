@@ -10,7 +10,7 @@ export declare function encodeQuotes(string: string): string;
 export declare const mapMitosisComponentToKebabCase: (componentName: string) => string;
 export declare const renameMitosisComponentsToKebabCase: (str: string) => string;
 export declare function getContextNames(json: MitosisComponent): string[];
-declare type ProcessBinding = {
+type ProcessBinding = {
     code: string;
     options: ToVueOptions;
     json: MitosisComponent;

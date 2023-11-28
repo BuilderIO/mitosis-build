@@ -4,7 +4,7 @@ import { MitosisNode } from '../types/mitosis-node';
 export declare const getRenderOptions: (node: MitosisNode) => {
     [x: string]: string;
 };
-declare type CompileAwayComponentsOptions = {
+type CompileAwayComponentsOptions = {
     components: {
         [key: string]: (node: MitosisNode, context: TraverseContext) => MitosisNode | void;
     };

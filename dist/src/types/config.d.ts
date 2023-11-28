@@ -1,21 +1,20 @@
 import type { ParseMitosisOptions } from '../parsers/jsx/types';
 import type { MitosisComponent } from './mitosis-component';
-export declare type Format = 'esm' | 'cjs';
-export declare type Language = 'js' | 'ts';
+import { BaseTranspilerOptions } from './transpiler';
+export type Format = 'esm' | 'cjs';
+export type Language = 'js' | 'ts';
 interface TranspilerOptions {
     format?: Format;
 }
-declare type Targets = typeof import('../targets').targets;
-export declare type Target = keyof Targets;
-export declare type GeneratorOptions = {
+type Targets = typeof import('../targets').targets;
+export type Target = keyof Targets;
+export type GeneratorOptions = {
     [K in Target]: NonNullable<Parameters<Targets[K]>[0]> & {
         transpiler?: TranspilerOptions;
     };
 };
-export declare type MitosisConfig = {
-    commonOptions?: {
-        typescript?: boolean;
-    };
+export type MitosisConfig = {
+    commonOptions?: Omit<BaseTranspilerOptions, 'experimental'>;
     /**
      * List of targets to compile to.
      */

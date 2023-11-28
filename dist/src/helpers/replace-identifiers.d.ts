@@ -1,6 +1,6 @@
 import { types } from '@babel/core';
-export declare type ReplaceTo = string | ((accessedProperty: string, matchedIdentifier: string) => string) | null;
-declare type ReplaceArgs = {
+export type ReplaceTo = string | ((accessedProperty: string, matchedIdentifier: string) => string) | null;
+type ReplaceArgs = {
     code: string;
     from: string | string[];
     to: ReplaceTo;

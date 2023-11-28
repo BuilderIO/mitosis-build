@@ -611,7 +611,11 @@ var componentToCustomElement = function (_options) {
                 console.warn('Could not prettify', { string: html }, err);
             }
         }
-        var str = "\n      ".concat(json.types ? json.types.join('\n') : '', "\n      ").concat((0, render_imports_1.renderPreComponent)({ component: json, target: 'customElement' }), "\n      /**\n       * Usage:\n       * \n       *  <").concat(kebabName, "></").concat(kebabName, ">\n       * \n       */\n      class ").concat(ComponentName, " extends ").concat(((_j = options === null || options === void 0 ? void 0 : options.experimental) === null || _j === void 0 ? void 0 : _j.classExtends)
+        var str = "\n      ".concat(json.types ? json.types.join('\n') : '', "\n      ").concat((0, render_imports_1.renderPreComponent)({
+            explicitImportFileExtension: options.explicitImportFileExtension,
+            component: json,
+            target: 'customElement',
+        }), "\n      /**\n       * Usage:\n       * \n       *  <").concat(kebabName, "></").concat(kebabName, ">\n       * \n       */\n      class ").concat(ComponentName, " extends ").concat(((_j = options === null || options === void 0 ? void 0 : options.experimental) === null || _j === void 0 ? void 0 : _j.classExtends)
             ? (_k = options === null || options === void 0 ? void 0 : options.experimental) === null || _k === void 0 ? void 0 : _k.classExtends(json, options)
             : 'HTMLElement', " {\n        ").concat(Array.from(domRefs)
             .map(function (ref) {

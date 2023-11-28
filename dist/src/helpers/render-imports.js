@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.renderExportAndLocal = exports.renderPreComponent = exports.renderImports = exports.renderImport = exports.transformImportPath = exports.checkIsComponentImport = void 0;
+exports.renderPreComponent = exports.renderImport = exports.transformImportPath = exports.checkIsComponentImport = void 0;
 var component_file_extensions_1 = require("./component-file-extensions");
 var DEFAULT_IMPORT = 'default';
 var STAR_IMPORT = '*';
@@ -34,7 +34,7 @@ var checkIsComponentImport = function (theImport) {
 };
 exports.checkIsComponentImport = checkIsComponentImport;
 var transformImportPath = function (_a) {
-    var theImport = _a.theImport, target = _a.target, preserveFileExtensions = _a.preserveFileExtensions;
+    var theImport = _a.theImport, target = _a.target, preserveFileExtensions = _a.preserveFileExtensions, explicitImportFileExtension = _a.explicitImportFileExtension;
     // We need to drop the `.lite` from context files, because the context generator does so as well.
     if (checkIsContextImport(theImport)) {
         var path_1 = theImport.path;
@@ -48,7 +48,7 @@ var transformImportPath = function (_a) {
     if (preserveFileExtensions)
         return theImport.path;
     if ((0, exports.checkIsComponentImport)(theImport)) {
-        return theImport.path.replace(component_file_extensions_1.INPUT_EXTENSION_REGEX, (0, component_file_extensions_1.getComponentFileExtensionForTarget)({ target: target, type: 'import' }));
+        return theImport.path.replace(component_file_extensions_1.INPUT_EXTENSION_REGEX, (0, component_file_extensions_1.getComponentFileExtensionForTarget)({ target: target, type: 'import', explicitImportFileExtension: explicitImportFileExtension }));
     }
     return theImport.path;
 };
@@ -88,9 +88,14 @@ var getImportValue = function (_a) {
     }
 };
 var renderImport = function (_a) {
-    var theImport = _a.theImport, target = _a.target, asyncComponentImports = _a.asyncComponentImports, _b = _a.preserveFileExtensions, preserveFileExtensions = _b === void 0 ? false : _b, _c = _a.component, component = _c === void 0 ? undefined : _c, _d = _a.componentsUsed, componentsUsed = _d === void 0 ? [] : _d, importMapper = _a.importMapper;
+    var theImport = _a.theImport, target = _a.target, asyncComponentImports = _a.asyncComponentImports, _b = _a.preserveFileExtensions, preserveFileExtensions = _b === void 0 ? false : _b, _c = _a.component, component = _c === void 0 ? undefined : _c, _d = _a.componentsUsed, componentsUsed = _d === void 0 ? [] : _d, importMapper = _a.importMapper, _e = _a.explicitImportFileExtension, explicitImportFileExtension = _e === void 0 ? false : _e;
     var importedValues = getImportedValues({ theImport: theImport });
-    var path = (0, exports.transformImportPath)({ theImport: theImport, target: target, preserveFileExtensions: preserveFileExtensions });
+    var path = (0, exports.transformImportPath)({
+        theImport: theImport,
+        target: target,
+        preserveFileExtensions: preserveFileExtensions,
+        explicitImportFileExtension: explicitImportFileExtension,
+    });
     var importValue = getImportValue(importedValues);
     var isComponentImport = (0, exports.checkIsComponentImport)(theImport);
     var shouldBeAsyncImport = asyncComponentImports && isComponentImport;
@@ -118,7 +123,7 @@ var renderImport = function (_a) {
 };
 exports.renderImport = renderImport;
 var renderImports = function (_a) {
-    var imports = _a.imports, target = _a.target, asyncComponentImports = _a.asyncComponentImports, excludeMitosisComponents = _a.excludeMitosisComponents, _b = _a.preserveFileExtensions, preserveFileExtensions = _b === void 0 ? false : _b, component = _a.component, componentsUsed = _a.componentsUsed, importMapper = _a.importMapper;
+    var imports = _a.imports, target = _a.target, asyncComponentImports = _a.asyncComponentImports, excludeMitosisComponents = _a.excludeMitosisComponents, _b = _a.preserveFileExtensions, preserveFileExtensions = _b === void 0 ? false : _b, component = _a.component, componentsUsed = _a.componentsUsed, importMapper = _a.importMapper, explicitImportFileExtension = _a.explicitImportFileExtension;
     return imports
         .filter(function (theImport) {
         if (
@@ -144,15 +149,15 @@ var renderImports = function (_a) {
             component: component,
             componentsUsed: componentsUsed,
             importMapper: importMapper,
+            explicitImportFileExtension: explicitImportFileExtension,
         });
     })
         .join('\n');
 };
-exports.renderImports = renderImports;
 var renderPreComponent = function (_a) {
     var _b;
-    var component = _a.component, target = _a.target, excludeMitosisComponents = _a.excludeMitosisComponents, _c = _a.asyncComponentImports, asyncComponentImports = _c === void 0 ? false : _c, _d = _a.preserveFileExtensions, preserveFileExtensions = _d === void 0 ? false : _d, _e = _a.componentsUsed, componentsUsed = _e === void 0 ? [] : _e, importMapper = _a.importMapper;
-    return "\n    ".concat((0, exports.renderImports)({
+    var component = _a.component, target = _a.target, excludeMitosisComponents = _a.excludeMitosisComponents, _c = _a.asyncComponentImports, asyncComponentImports = _c === void 0 ? false : _c, _d = _a.preserveFileExtensions, preserveFileExtensions = _d === void 0 ? false : _d, _e = _a.componentsUsed, componentsUsed = _e === void 0 ? [] : _e, importMapper = _a.importMapper, _f = _a.explicitImportFileExtension, explicitImportFileExtension = _f === void 0 ? false : _f;
+    return "\n    ".concat(renderImports({
         imports: component.imports,
         target: target,
         asyncComponentImports: asyncComponentImports,
@@ -161,7 +166,8 @@ var renderPreComponent = function (_a) {
         component: component,
         componentsUsed: componentsUsed,
         importMapper: importMapper,
-    }), "\n    ").concat((0, exports.renderExportAndLocal)(component), "\n    ").concat(((_b = component.hooks.preComponent) === null || _b === void 0 ? void 0 : _b.code) || '', "\n  ");
+        explicitImportFileExtension: explicitImportFileExtension,
+    }), "\n    ").concat(renderExportAndLocal(component), "\n    ").concat(((_b = component.hooks.preComponent) === null || _b === void 0 ? void 0 : _b.code) || '', "\n  ");
 };
 exports.renderPreComponent = renderPreComponent;
 var renderExportAndLocal = function (component) {
@@ -169,4 +175,3 @@ var renderExportAndLocal = function (component) {
         .map(function (key) { return component.exports[key].code; })
         .join('\n');
 };
-exports.renderExportAndLocal = renderExportAndLocal;

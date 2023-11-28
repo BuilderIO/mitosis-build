@@ -1,6 +1,6 @@
 import { BuilderContent, BuilderElement } from '@builder.io/sdk';
 import { MitosisComponent } from '../types/mitosis-component';
-export declare type SymbolHierarchy = {
+export type SymbolHierarchy = {
     depthFirstSymbols: BuilderElement[];
 } & {
     [id: string]: string[];

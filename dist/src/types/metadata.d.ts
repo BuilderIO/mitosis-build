@@ -1,11 +1,11 @@
 import { Target } from '..';
 import { SolidState } from '../generators/solid/types';
 import { Dictionary } from '../helpers/typescript';
-declare type Targets = typeof import('../targets').targets;
-declare type TargetOptions = {
+type Targets = typeof import('../targets').targets;
+type TargetOptions = {
     [K in Target]?: Partial<NonNullable<Parameters<Targets[K]>[0]>>;
 };
-export declare type ComponentMetadata = {
+export type ComponentMetadata = {
     [index: string]: any;
     httpRequests?: Record<string, string>;
     options?: TargetOptions;

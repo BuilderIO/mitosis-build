@@ -12,17 +12,19 @@ export declare const renameComponentFile: ({ path, target, options, }: {
     target: Target;
     options: MitosisConfig;
 }) => string;
-export declare const renameImport: ({ importPath, target }: {
+export declare const renameImport: ({ importPath, target, explicitImportFileExtension, }: {
     importPath: string;
     target: Target;
+    explicitImportFileExtension: boolean;
 }) => string;
-declare type Args = {
+type Args = {
     target: Target;
 } & ({
     /**
      * Whether we are rendering an import statement or a filename.
      */
     type: 'import';
+    explicitImportFileExtension: boolean;
 } | {
     /**
      * Whether we are rendering an import statement or a filename.

@@ -1,5 +1,5 @@
 import { MitosisContext } from '../../types/mitosis-context';
-declare type ContextToRscOptions = {
+type ContextToRscOptions = {
     format?: boolean;
 };
 /**

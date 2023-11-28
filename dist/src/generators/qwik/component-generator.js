@@ -306,6 +306,7 @@ function emitImports(file, component) {
             target: 'qwik',
             theImport: i,
             preserveFileExtensions: false,
+            explicitImportFileExtension: false,
         });
         Object.keys(i.imports).forEach(function (key) {
             var keyValue = i.imports[key];

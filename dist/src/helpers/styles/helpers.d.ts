@@ -16,7 +16,7 @@ export declare const hasStyle: (component: MitosisComponent) => boolean;
  *  }
  * }
  */
-export declare type StyleMap = {
+export type StyleMap = {
     [className: string]: CSS.Properties | StyleMap;
 };
 export declare const getNestedSelectors: (map: StyleMap) => import("lodash").Dictionary<CSS.Properties<0 | (string & {}), string & {}> | StyleMap>;
@@ -24,7 +24,7 @@ export declare const getStylesOnly: (map: StyleMap) => import("lodash").Dictiona
 /**
  * { 'my-class': { display: 'block', '&.foo': { display: 'none' } }}
  */
-export declare type ClassStyleMap = {
+export type ClassStyleMap = {
     [key: string]: StyleMap;
 };
 export declare const parseCssObject: (css: string) => any;

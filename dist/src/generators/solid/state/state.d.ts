@@ -1,6 +1,6 @@
 import { MitosisComponent } from '../../../types/mitosis-component';
 import { ToSolidOptions } from '../types';
-declare type State = {
+type State = {
     str: string;
     import: {
         store?: string[];

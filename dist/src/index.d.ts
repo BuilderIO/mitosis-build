@@ -53,10 +53,10 @@ declare function Provider<T>(props: {
     value: T;
     children: JSX.Element;
 }): any;
-export declare type Context<T> = {
+export type Context<T> = {
     Provider: typeof Provider<T>;
 };
-export declare type Signal<T> = {
+export type Signal<T> = {
     value: T;
 };
 export declare function useStore<T>(obj: T): T;

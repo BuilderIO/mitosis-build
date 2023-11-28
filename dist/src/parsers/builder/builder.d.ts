@@ -1,11 +1,11 @@
 import { BuilderContent, BuilderElement } from '@builder.io/sdk';
 import { MitosisComponent, MitosisState } from '../..';
 import { MitosisNode } from '../../types/mitosis-node';
-declare type InternalOptions = {
+type InternalOptions = {
     skipMapper?: boolean;
 };
 export declare const symbolBlocksAsChildren = false;
-declare type BuilderToMitosisOptions = {
+type BuilderToMitosisOptions = {
     context?: {
         [key: string]: any;
     };

@@ -1,3 +1,3 @@
-declare type Styles = Record<string, string | number>;
+type Styles = Record<string, string | number>;
 export declare const sanitizeReactNativeBlockStyles: (styles: Styles) => Styles;
 export {};

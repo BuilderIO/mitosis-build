@@ -1,6 +1,6 @@
 import { MitosisComponent } from '../../types/mitosis-component';
 import { File, SrcBuilder } from './src-generator';
-export declare type QwikOptions = {
+export type QwikOptions = {
     qwikLib?: string;
     qrlPrefix?: string;
     output?: 'ts' | 'cjs' | 'mjs';

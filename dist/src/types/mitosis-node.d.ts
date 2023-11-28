@@ -1,16 +1,16 @@
 import { JSONObject } from './json';
-export declare type SpreadType = 'normal' | 'event-handlers';
-declare type BindingProperties = {
+export type SpreadType = 'normal' | 'event-handlers';
+type BindingProperties = {
     type: 'spread';
     spreadType: SpreadType;
 } | {
     type: 'single';
 };
-export declare type Binding = {
+export type Binding = {
     code: string;
     arguments?: string[];
 } & BindingProperties;
-export declare type BaseNode = {
+export type BaseNode = {
     '@type': '@builder.io/mitosis/node';
     meta: JSONObject;
     name: string;
@@ -44,8 +44,8 @@ export declare type BaseNode = {
     };
     children: MitosisNode[];
 };
-export declare type SpecialNodesNames = 'For' | 'Fragment' | 'Show' | 'Slot';
-export declare type ForNode = BaseNode & {
+export type SpecialNodesNames = 'For' | 'Fragment' | 'Show' | 'Slot';
+export type ForNode = BaseNode & {
     name: 'For';
     scope: {
         forName: string | undefined;
@@ -53,6 +53,6 @@ export declare type ForNode = BaseNode & {
         collectionName: string | undefined;
     };
 };
-export declare type MitosisNode = BaseNode | ForNode;
+export type MitosisNode = BaseNode | ForNode;
 export declare const checkIsForNode: (node: MitosisNode) => node is ForNode;
 export {};

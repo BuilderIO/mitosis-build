@@ -1,5 +1,5 @@
 import { MitosisContext } from '../../types/mitosis-context';
-declare type ContextToQwikOptions = {
+type ContextToQwikOptions = {
     format?: boolean;
 };
 export declare const contextToQwik: (options?: ContextToQwikOptions) => ({ context }: {
