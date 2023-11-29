@@ -103,6 +103,8 @@ var getSignalMapperForTarget = function (target) {
             return {
                 getter: function (name) { return core_1.types.identifier('$' + name); },
             };
+        case 'preact':
+        case 'reactNative':
         case 'react':
         case 'solid':
             return {
