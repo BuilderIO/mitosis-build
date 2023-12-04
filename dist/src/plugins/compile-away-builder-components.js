@@ -24,7 +24,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.compileAwayBuilderComponents = exports.compileAwayBuilderComponentsFromTree = exports.components = void 0;
-var react_1 = require("@builder.io/react");
+var sdk_1 = require("@builder.io/sdk");
 var json5_1 = __importDefault(require("json5"));
 var lodash_1 = require("lodash");
 var traverse_1 = __importDefault(require("traverse"));
@@ -43,7 +43,7 @@ var getCssFromNode = function (node) {
 };
 function getComponentInputNames(componentName) {
     var _a;
-    var componentInfo = react_1.Builder.components.find(function (item) { return item.name === componentName; });
+    var componentInfo = sdk_1.Builder.components.find(function (item) { return item.name === componentName; });
     return ((_a = componentInfo === null || componentInfo === void 0 ? void 0 : componentInfo.inputs) === null || _a === void 0 ? void 0 : _a.map(function (item) { return item.name; })) || [];
 }
 var wrapOutput = function (node, child, components) {
