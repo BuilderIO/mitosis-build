@@ -51,7 +51,7 @@ var collectStyledComponents = function (json) {
                     ? "styled(".concat(item.name, ")`")
                     : "styled.".concat(item.name, "`");
                 item.name = className;
-                styledComponentsCode += "\n          const ".concat(className, " = ").concat(prefix).concat(str, "`\n        ");
+                styledComponentsCode += "\n          const ".concat(className, " = ").concat(prefix).concat(str, "`;\n        ");
             }
             delete item.bindings.css;
         }
