@@ -54,6 +54,9 @@ var strip_state_and_props_refs_1 = require("../helpers/strip-state-and-props-ref
 var collect_css_1 = require("../helpers/styles/collect-css");
 var plugins_1 = require("../modules/plugins");
 var mitosis_node_1 = require("../types/mitosis-node");
+var helpers_1 = require("../helpers/styles/helpers");
+var traverse_1 = __importDefault(require("traverse"));
+var __1 = require("..");
 var merge_options_1 = require("../helpers/merge-options");
 var process_code_1 = require("../helpers/plugins/process-code");
 var on_mount_1 = require("./helpers/on-mount");
@@ -83,6 +86,18 @@ var mappers = {
         })
             .join('\n')).concat(renderChildren(), "</ng-content>");
     },
+};
+var preprocessCssAsJson = function (json) {
+    (0, traverse_1.default)(json).forEach(function (item) {
+        var _a, _b;
+        if ((0, __1.isMitosisNode)(item)) {
+            if ((0, helpers_1.nodeHasCss)(item)) {
+                if ((_b = (_a = item.bindings.css) === null || _a === void 0 ? void 0 : _a.code) === null || _b === void 0 ? void 0 : _b.includes('&quot;')) {
+                    item.bindings.css.code = item.bindings.css.code.replace(/&quot;/g, '"');
+                }
+            }
+        }
+    });
 };
 var generateNgModule = function (content, name, componentsUsed, component, bootstrapMapper) {
     return "import { NgModule } from \"@angular/core\";\nimport { CommonModule } from \"@angular/common\";\n\n".concat(content, "\n\n@NgModule({\n  declarations: [").concat(name, "],\n  imports: [CommonModule").concat(componentsUsed.length ? ', ' + componentsUsed.map(function (comp) { return "".concat(comp, "Module"); }).join(', ') : '', "],\n  exports: [").concat(name, "],\n  ").concat(bootstrapMapper ? bootstrapMapper(name, componentsUsed, component) : '', "\n})\nexport class ").concat(name, "Module {}");
@@ -341,6 +356,7 @@ var componentToAngular = function (userOptions) {
         if (options.plugins) {
             json = (0, plugins_1.runPostJsonPlugins)({ json: json, plugins: options.plugins });
         }
+        preprocessCssAsJson(json);
         var css = (0, collect_css_1.collectCss)(json);
         if (options.prettier !== false) {
             css = tryFormat(css, 'css');
