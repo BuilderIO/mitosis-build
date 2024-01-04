@@ -20,7 +20,8 @@ var strip_state_and_props_refs_1 = require("../../helpers/strip-state-and-props-
 var lodash_1 = require("lodash");
 var traverse_1 = __importDefault(require("traverse"));
 var processBinding = function (str, options) {
-    if (options.stateType !== 'useState') {
+    // fix web-component tag transform issue with dashes by not transforming it
+    if (options.stateType !== 'useState' || str.includes('-')) {
         return str;
     }
     return (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(str, {
