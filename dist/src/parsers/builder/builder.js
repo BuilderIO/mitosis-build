@@ -151,6 +151,16 @@ var getStyleStringFromBlock = function (block, options) {
     }
     return styleString;
 };
+var hasComponent = function (block) {
+    var _a;
+    return Boolean((_a = block.component) === null || _a === void 0 ? void 0 : _a.name);
+};
+var hasProperties = function (block) {
+    return Boolean(block.properties && Object.keys(block.properties).length);
+};
+var hasBindings = function (block) {
+    return Boolean(block.bindings && Object.keys(block.bindings).length);
+};
 var hasStyles = function (block) {
     if (block.responsiveStyles) {
         for (var key in block.responsiveStyles) {
@@ -380,7 +390,11 @@ var componentMappers = __assign(__assign({ Symbol: function (block, options) {
             }
             : {})), properties);
         var finalTagname = block.tagName || (assumeLink ? 'a' : 'div');
-        if ((block.tagName && block.tagName !== 'div') || hasStyles(block)) {
+        if ((block.tagName && block.tagName !== 'div') ||
+            hasStyles(block) ||
+            hasComponent(block) ||
+            hasBindings(block) ||
+            hasProperties(block)) {
             return (0, create_mitosis_node_1.createMitosisNode)({
                 name: finalTagname,
                 bindings: bindings,
