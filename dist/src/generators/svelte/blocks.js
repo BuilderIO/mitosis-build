@@ -39,6 +39,24 @@ var mappers = {
         // https://github.com/sveltejs/vite-plugin-svelte/issues/315#issuecomment-1109000027
         return "{@html `<${'style'} ".concat(bindings, " ").concat(props, ">${").concat(innerText, "}<${'/style'}>`}");
     },
+    script: function (_a) {
+        var _b;
+        var json = _a.json, options = _a.options, parentComponent = _a.parentComponent;
+        var props = '';
+        for (var key in json.properties) {
+            var value = json.properties[key];
+            props += " ".concat(key, "=\"").concat(value, "\" ");
+        }
+        var bindings = '';
+        for (var key in json.bindings) {
+            var value = json.bindings[key];
+            if (value && key !== 'innerHTML') {
+                bindings += " ".concat(key, "=${").concat(value.code, "} ");
+            }
+        }
+        var innerText = ((_b = json.bindings.innerHTML) === null || _b === void 0 ? void 0 : _b.code) || '';
+        return "{@html `<script ".concat(bindings, " ").concat(props, ">${").concat(innerText, "}</script>`}");
+    },
     Fragment: function (_a) {
         var _b;
         var json = _a.json, options = _a.options, parentComponent = _a.parentComponent;
