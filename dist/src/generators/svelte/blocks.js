@@ -165,7 +165,7 @@ var stringifyBinding = function (node, options) {
             return '';
         }
         var code = binding.code, _b = binding.arguments, cusArgs = _b === void 0 ? ['event'] : _b, type = binding.type;
-        var isValidHtmlTag = html_tags_1.VALID_HTML_TAGS.includes(node.name);
+        var isValidHtmlTag = html_tags_1.VALID_HTML_TAGS.includes(node.name) || node.name === 'svelte:element';
         if (type === 'spread') {
             var spreadValue = key === 'props' ? '$$props' : code;
             return " {...".concat(spreadValue, "} ");

@@ -14,14 +14,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.processTagReferences = exports.getCode = exports.wrapInFragment = exports.getFragment = exports.closeFrag = exports.openFrag = exports.processBinding = void 0;
+exports.processTagReferences = exports.wrapInFragment = exports.getFragment = exports.closeFrag = exports.openFrag = exports.processBinding = void 0;
 var is_mitosis_node_1 = require("../../helpers/is-mitosis-node");
 var strip_state_and_props_refs_1 = require("../../helpers/strip-state-and-props-refs");
 var lodash_1 = require("lodash");
 var traverse_1 = __importDefault(require("traverse"));
 var processBinding = function (str, options) {
     // fix web-component tag transform issue with dashes by not transforming it
-    if (options.stateType !== 'useState' || str.includes('-')) {
+    if (options.stateType !== 'useState') {
         return str;
     }
     return (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(str, {
@@ -44,11 +44,6 @@ exports.wrapInFragment = wrapInFragment;
 function getRefName(path) {
     return (0, lodash_1.upperFirst)(path) + 'Ref';
 }
-function getCode(str, options) {
-    if (str === void 0) { str = ''; }
-    return (0, exports.processBinding)(str, options);
-}
-exports.getCode = getCode;
 function processTagReferences(json, options) {
     var namesFound = new Set();
     (0, traverse_1.default)(json).forEach(function (el) {
@@ -56,7 +51,7 @@ function processTagReferences(json, options) {
         if (!(0, is_mitosis_node_1.isMitosisNode)(el)) {
             return;
         }
-        var processedRefName = (0, exports.processBinding)(el.name, options);
+        var processedRefName = el.name.includes('-') ? el.name : (0, exports.processBinding)(el.name, options);
         if (el.name.includes('state.')) {
             switch ((_a = json.state[processedRefName]) === null || _a === void 0 ? void 0 : _a.type) {
                 case 'getter':
