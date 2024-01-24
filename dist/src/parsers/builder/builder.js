@@ -524,8 +524,25 @@ var builderElementToMitosisNode = function (block, options, _internalOptions) {
     if ((_p = block.component) === null || _p === void 0 ? void 0 : _p.options) {
         for (var key in block.component.options) {
             var value = block.component.options[key];
+            var valueIsArrayOfBuilderElements = Array.isArray(value) && value.every(exports.isBuilderElement);
+            console.log('mitosis bindings: ', {
+                valueIsArrayOfBuilderElements: valueIsArrayOfBuilderElements,
+                value: value,
+            });
             if (typeof value === 'string') {
                 properties[key] = value;
+            }
+            else if (valueIsArrayOfBuilderElements) {
+                var bindingValue = value
+                    .filter(function (item) {
+                    var _a, _b;
+                    if ((_b = (_a = item.properties) === null || _a === void 0 ? void 0 : _a.src) === null || _b === void 0 ? void 0 : _b.includes('/api/v1/pixel')) {
+                        return false;
+                    }
+                    return true;
+                })
+                    .map(function (item) { return (0, exports.builderElementToMitosisNode)(item, options); });
+                bindings[key] = { code: json5_1.default.stringify(bindingValue), type: 'slot' };
             }
             else {
                 bindings[key] = { code: json5_1.default.stringify(value) };

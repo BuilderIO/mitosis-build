@@ -5,6 +5,8 @@ type BindingProperties = {
     spreadType: SpreadType;
 } | {
     type: 'single';
+} | {
+    type: 'slot';
 };
 export type Binding = {
     code: string;

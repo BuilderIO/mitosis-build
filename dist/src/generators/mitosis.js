@@ -50,7 +50,7 @@ var isValidAttributeName = function (str) {
     return Boolean(str && /^[$a-z0-9\-_:]+$/i.test(str));
 };
 var blockToMitosis = function (json, toMitosisOptions, component) {
-    var _a, _b, _c, _d, _e, _f;
+    var _a, _b, _c, _d, _e, _f, _g;
     if (toMitosisOptions === void 0) { toMitosisOptions = {}; }
     var options = __assign({ format: exports.DEFAULT_FORMAT }, toMitosisOptions);
     if (options.format === 'react') {
@@ -87,6 +87,21 @@ var blockToMitosis = function (json, toMitosisOptions, component) {
         var value = (_d = json.bindings[key]) === null || _d === void 0 ? void 0 : _d.code;
         if (((_e = json.bindings[key]) === null || _e === void 0 ? void 0 : _e.type) === 'spread') {
             str += " {...(".concat((_f = json.bindings[key]) === null || _f === void 0 ? void 0 : _f.code, ")} ");
+        }
+        else if (((_g = json.bindings[key]) === null || _g === void 0 ? void 0 : _g.type) === 'slot') {
+            var parsedValue = json5_1.default.parse(value || '');
+            if (!parsedValue || !Array.isArray(parsedValue)) {
+                continue;
+            }
+            var codifiedValue = parsedValue
+                .map(function (item) { return (0, exports.blockToMitosis)(item, options, component); })
+                .join('\n') || '';
+            if (parsedValue.length > 1) {
+                str += " ".concat(key, "={<>").concat(codifiedValue, "</>} ");
+            }
+            else {
+                str += " ".concat(key, "={").concat(codifiedValue, "} ");
+            }
         }
         else if (key.startsWith('on')) {
             str += " ".concat(key, "={event => ").concat(value.replace(/\s*;$/, ''), "} ");
