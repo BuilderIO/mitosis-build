@@ -22,7 +22,6 @@ var is_valid_attribute_name_1 = require("../../helpers/is-valid-attribute-name")
 var for_1 = require("../../helpers/nodes/for");
 var slots_1 = require("../../helpers/slots");
 var mitosis_node_1 = require("../../types/mitosis-node");
-var lodash_1 = require("lodash");
 var html_tags_1 = require("../../constants/html_tags");
 var helpers_1 = require("./helpers");
 var state_1 = require("./state");
@@ -56,16 +55,15 @@ var NODE_MAPPERS = {
             // TODO: update MitosisNode for simple code
             var key = Object.keys(json.bindings).find(Boolean);
             if (key && parentSlots) {
-                var propKey = (0, lodash_1.camelCase)('Slot' + key[0].toUpperCase() + key.substring(1));
-                parentSlots.push({ key: propKey, value: (_b = json.bindings[key]) === null || _b === void 0 ? void 0 : _b.code });
+                parentSlots.push({ key: key, value: (_b = json.bindings[key]) === null || _b === void 0 ? void 0 : _b.code });
                 return '';
             }
             var children = (0, helpers_1.processBinding)('props.children', options);
             return "{".concat(children, " ").concat(hasChildren ? "|| (".concat(renderChildren(), ")") : '', "}");
         }
         var slotProp = (0, helpers_1.processBinding)(slotName, options).replace('name=', '');
-        if (!slotProp.startsWith('props.slot')) {
-            slotProp = "props.slot".concat((0, lodash_1.upperFirst)((0, lodash_1.camelCase)(slotProp)));
+        if (!slotProp.startsWith('props.')) {
+            slotProp = "props.".concat(slotProp);
         }
         return "{".concat(slotProp, " ").concat(hasChildren ? "|| (".concat(renderChildren(), ")") : '', "}");
     },
