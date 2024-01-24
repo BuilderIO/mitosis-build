@@ -218,15 +218,13 @@ exports.components = {
             name: 'div',
             bindings: {
                 css: (0, bindings_1.createSingleBinding)({
-                    code: JSON.stringify(__assign({ gap: "".concat(gutterSize, "px"), display: 'flex' }, (properties.stackColumnsAt === 'never'
+                    code: JSON.stringify(__assign({ gap: "".concat(gutterSize, "px"), alignItems: 'stretch', display: 'flex' }, (properties.stackColumnsAt === 'never'
                         ? {}
                         : (_a = {},
                             _a["@media (max-width: ".concat(properties.stackColumnsAt === 'mobile' ? 640 : 991, "px)")] = {
                                 flexDirection: properties.reverseColumnsWhenStacked === 'true'
                                     ? 'column-reverse'
                                     : 'column',
-                                alignItems: 'stretch',
-                                gap: "0px",
                             },
                             _a)))),
                 }),
@@ -240,12 +238,11 @@ exports.components = {
                     },
                     bindings: {
                         css: (0, bindings_1.createSingleBinding)({
-                            code: JSON.stringify(__assign({ display: 'flex', flexDirection: 'column', alignItems: 'stretch', lineHeight: 'normal', width: "".concat(getColumnWidth(index)), marginLeft: "".concat(index === 0 ? 0 : gutterSize, "px") }, (properties.stackColumnsAt === 'never'
+                            code: JSON.stringify(__assign({ display: 'flex', flexDirection: 'column', alignItems: 'stretch', width: "".concat(getColumnWidth(index)) }, (properties.stackColumnsAt === 'never'
                                 ? {}
                                 : (_a = {},
                                     _a["@media (max-width: ".concat(properties.stackColumnsAt === 'mobile' ? 640 : 991, "px)")] = {
                                         width: '100%',
-                                        marginLeft: 0,
                                     },
                                     _a)))),
                         }),
