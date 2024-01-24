@@ -493,6 +493,7 @@ var builderElementToMitosisNode = function (block, options, _internalOptions) {
         return mapper(block, options);
     }
     var bindings = {};
+    var children = [];
     if (blockBindings) {
         for (var key in blockBindings) {
             if (key === 'css') {
@@ -533,7 +534,7 @@ var builderElementToMitosisNode = function (block, options, _internalOptions) {
                 properties[key] = value;
             }
             else if (valueIsArrayOfBuilderElements) {
-                var bindingValue = value
+                var childrenElements = value
                     .filter(function (item) {
                     var _a, _b;
                     if ((_b = (_a = item.properties) === null || _a === void 0 ? void 0 : _a.src) === null || _b === void 0 ? void 0 : _b.includes('/api/v1/pixel')) {
@@ -542,7 +543,15 @@ var builderElementToMitosisNode = function (block, options, _internalOptions) {
                     return true;
                 })
                     .map(function (item) { return (0, exports.builderElementToMitosisNode)(item, options); });
-                bindings[key] = { code: json5_1.default.stringify(bindingValue), type: 'slot' };
+                children.push({
+                    '@type': '@builder.io/mitosis/node',
+                    name: 'Slot',
+                    meta: {},
+                    scope: {},
+                    bindings: {},
+                    properties: { name: key },
+                    children: childrenElements,
+                });
             }
             else {
                 bindings[key] = { code: json5_1.default.stringify(value) };
@@ -599,7 +608,7 @@ var builderElementToMitosisNode = function (block, options, _internalOptions) {
             });
         }
     }
-    node.children = (block.children || []).map(function (item) { return (0, exports.builderElementToMitosisNode)(item, options); });
+    node.children = children.concat((block.children || []).map(function (item) { return (0, exports.builderElementToMitosisNode)(item, options); }));
     return node;
 };
 exports.builderElementToMitosisNode = builderElementToMitosisNode;

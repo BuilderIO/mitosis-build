@@ -56,7 +56,7 @@ var NODE_MAPPERS = {
             // TODO: update MitosisNode for simple code
             var key = Object.keys(json.bindings).find(Boolean);
             if (key && parentSlots) {
-                var propKey = (0, lodash_1.camelCase)('Slot' + key[0].toUpperCase() + key.substring(1));
+                var propKey = options.noPrefixSlots ? key : "slot".concat((0, lodash_1.upperFirst)((0, lodash_1.camelCase)(key)));
                 parentSlots.push({ key: propKey, value: (_b = json.bindings[key]) === null || _b === void 0 ? void 0 : _b.code });
                 return '';
             }
@@ -65,7 +65,7 @@ var NODE_MAPPERS = {
         }
         var slotProp = (0, helpers_1.processBinding)(slotName, options).replace('name=', '');
         if (!slotProp.startsWith('props.slot')) {
-            slotProp = "props.slot".concat((0, lodash_1.upperFirst)((0, lodash_1.camelCase)(slotProp)));
+            slotProp = "props.".concat(options.noPrefixSlots ? slotProp : "slot".concat((0, lodash_1.upperFirst)((0, lodash_1.camelCase)(slotProp))));
         }
         return "{".concat(slotProp, " ").concat(hasChildren ? "|| (".concat(renderChildren(), ")") : '', "}");
     },
