@@ -526,10 +526,6 @@ var builderElementToMitosisNode = function (block, options, _internalOptions) {
         for (var key in block.component.options) {
             var value = block.component.options[key];
             var valueIsArrayOfBuilderElements = Array.isArray(value) && value.every(exports.isBuilderElement);
-            console.log('mitosis bindings: ', {
-                valueIsArrayOfBuilderElements: valueIsArrayOfBuilderElements,
-                value: value,
-            });
             if (typeof value === 'string') {
                 properties[key] = value;
             }
