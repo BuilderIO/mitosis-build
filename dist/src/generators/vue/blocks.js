@@ -208,14 +208,14 @@ var NODE_MAPPERS = {
     },
 };
 var SPECIAL_HTML_TAGS = ['style', 'script'];
-var stringifyBinding = function (node) {
+var stringifyBinding = function (node, options) {
     return function (_a) {
         var key = _a[0], value = _a[1];
         var isValidHtmlTag = html_tags_1.VALID_HTML_TAGS.includes(node.name);
         if (value.type === 'spread') {
             return ''; // we handle this after
         }
-        else if (key === 'class') {
+        else if (key === 'class' && options.convertClassStringToObject) {
             return ":class=\"_classStringToObject(".concat(value === null || value === void 0 ? void 0 : value.code, ")\"");
             // TODO: support dynamic classes as objects somehow like Vue requires
             // https://vuejs.org/v2/guide/class-and-style.html
@@ -266,7 +266,7 @@ var stringifySpreads = function (_a) {
     var key = spreadType === 'normal' ? SPECIAL_PROPERTIES.V_BIND : SPECIAL_PROPERTIES.V_ON;
     return " ".concat(key, "=\"").concat((0, helpers_1.encodeQuotes)(stringifiedValue), "\" ");
 };
-var getBlockBindings = function (node) {
+var getBlockBindings = function (node, options) {
     var stringifiedProperties = Object.entries(node.properties)
         .map(function (_a) {
         var key = _a[0], value = _a[1];
@@ -282,7 +282,7 @@ var getBlockBindings = function (node) {
     })
         .join(' ');
     var stringifiedBindings = Object.entries(node.bindings)
-        .map(stringifyBinding(node))
+        .map(stringifyBinding(node, options))
         .join(' ');
     return [
         stringifiedProperties,
@@ -319,7 +319,7 @@ var blockToVue = function (node, options, scope) {
         return "{{".concat(textCode, "}}");
     }
     var str = "<".concat(node.name, " ");
-    str += getBlockBindings(node);
+    str += getBlockBindings(node, options);
     if (html_tags_1.SELF_CLOSING_HTML_TAGS.has(node.name)) {
         return str + ' />';
     }
