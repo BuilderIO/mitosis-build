@@ -22,6 +22,7 @@ function addPreventDefault(json) {
                         if ((_a = node.bindings[key]) === null || _a === void 0 ? void 0 : _a.code.includes('.preventDefault()')) {
                             var event_1 = key.slice(2).toLowerCase();
                             node.properties['preventdefault:' + event_1] = '';
+                            node.bindings[key].code = node.bindings[key].code.replace(/.*?\.preventDefault\(\);?/, '').trim();
                         }
                     }
                 }
