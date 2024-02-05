@@ -53,7 +53,7 @@ var getProject = function (tsConfigFilePath) {
         return new ts_morph_1.Project({ tsConfigFilePath: tsConfigFilePath });
     }
     catch (err) {
-        throw new Error('Error creating Typescript Project. Make sure `tsConfigFilePath` points to a valid tsconfig.json file');
+        throw new Error("Error creating Typescript Project. Make sure `tsConfigFilePath` points to a valid tsconfig.json file.\n      Path received: \"".concat(tsConfigFilePath, "\"\n      "));
     }
 };
 var createTypescriptProject = function (tsConfigFilePath) {
