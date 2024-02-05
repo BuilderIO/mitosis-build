@@ -312,7 +312,29 @@ var componentToSvelte = function (userProvidedOptions) {
                 return "afterUpdate(() => { ".concat(code, " });");
             }
             var fnName = "onUpdateFn_".concat(index);
-            return "\n              function ".concat(fnName, "(..._args").concat(options.typescript ? ': any[]' : '', ") {\n                ").concat(code, "\n              }\n              $: ").concat(fnName, "(...").concat(deps, ")\n            ");
+            var depsArray = deps
+                .slice(1, deps.length - 1)
+                .split(',')
+                .map(function (x) { return x.trim(); });
+            var getReactiveDepName = function (dep) {
+                return "".concat(fnName, "_").concat(dep.slice(1).replace(/(\.|\?)/g, '_'));
+            };
+            var isStoreAccessDep = function (dep) { return dep.startsWith('$'); };
+            var reactiveDepsWorkaround = depsArray
+                .filter(isStoreAccessDep)
+                .map(function (dep) { return "$: ".concat(getReactiveDepName(dep), " = ").concat(dep, ";"); })
+                .join('\n');
+            var depsArrayStr = depsArray
+                .map(function (x) { return (isStoreAccessDep(x) ? getReactiveDepName(x) : x); })
+                .join(', ');
+            /**
+             * We create a reactive value for each `onUpdate`'s dependency that
+             * accesses a store so that Svelte has accurate dependency tracking.
+             *
+             * Otherwise, if the dependency is a value within a store, Svelte will
+             * rerun the effect every time the parent store is changed in any way.
+             */
+            return "\n              function ".concat(fnName, "(..._args").concat(options.typescript ? ': any[]' : '', ") {\n                ").concat(code, "\n              }\n              ").concat(reactiveDepsWorkaround, "\n              $: ").concat(fnName, "(...[").concat(depsArrayStr, "]);\n            ");
         }).join(';')) || '', 
         // make sure this is after all other state/code is initialized
         setContextCode({ json: json, options: options }), !((_k = json.hooks.onUnMount) === null || _k === void 0 ? void 0 : _k.code) ? '' : "onDestroy(() => { ".concat(json.hooks.onUnMount.code, " });"), json.children
