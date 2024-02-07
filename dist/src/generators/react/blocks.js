@@ -59,13 +59,13 @@ var NODE_MAPPERS = {
                 return '';
             }
             var children = (0, helpers_1.processBinding)('props.children', options);
-            return "<>{".concat(children, " ").concat(hasChildren ? "|| (".concat(renderChildren(), ")") : '', "}</>");
+            return "{".concat(children, " ").concat(hasChildren ? "|| (".concat(renderChildren(), ")") : '', "}");
         }
         var slotProp = (0, helpers_1.processBinding)(slotName, options).replace('name=', '');
         if (!slotProp.startsWith('props.')) {
             slotProp = "props.".concat(slotProp);
         }
-        return "<>{".concat(slotProp, " ").concat(hasChildren ? "|| (".concat(renderChildren(), ")") : '', "}</>");
+        return "{".concat(slotProp, " ").concat(hasChildren ? "|| (".concat(renderChildren(), ")") : '', "}");
     },
     Fragment: function (json, options, component) {
         var wrap = (0, helpers_1.wrapInFragment)(json);
@@ -85,12 +85,7 @@ var NODE_MAPPERS = {
     },
     Show: function (json, options, component) {
         var _a;
-        var wrap = (0, helpers_1.wrapInFragment)(json) ||
-            (0, is_root_text_node_1.isRootTextNode)(json) ||
-            component.children[0] === json ||
-            // when `<Show><For>...</For></Show>`, we need to wrap the For generated code in a fragment
-            // since it's a `.map()` call
-            (json.children.length === 1 && ['For', 'Show'].includes(json.children[0].name));
+        var wrap = (0, helpers_1.wrapInFragment)(json) || (0, is_root_text_node_1.isRootTextNode)(json);
         var wrapElse = json.meta.else &&
             ((0, helpers_1.wrapInFragment)(json.meta.else) || (0, mitosis_node_1.checkIsForNode)(json.meta.else));
         return "{".concat((0, helpers_1.processBinding)((_a = json.bindings.when) === null || _a === void 0 ? void 0 : _a.code, options), " ? (\n      ").concat(wrap ? (0, helpers_1.openFrag)(options) : '').concat(json.children
@@ -224,7 +219,7 @@ var blockToReact = function (json, options, component, parentSlots) {
     if (json.children) {
         childrenNodes = json.children
             .map(function (item) { return (0, exports.blockToReact)(item, options, component, needsToRenderSlots); })
-            .join('');
+            .join('\n');
     }
     if (needsToRenderSlots.length) {
         needsToRenderSlots.forEach(function (_a) {

@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.isTextNode = exports.isRootTextNode = void 0;
 function isRootTextNode(json) {
     var firstChild = json.children[0];
-    return Boolean(json.children.length === 1 && firstChild && isTextNode(firstChild));
+    return Boolean(firstChild && isTextNode(firstChild));
 }
 exports.isRootTextNode = isRootTextNode;
 function isTextNode(node) {
