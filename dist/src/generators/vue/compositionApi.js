@@ -10,7 +10,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.generateCompositionApiScript = void 0;
 var dedent_1 = require("../../helpers/dedent");
 var get_state_object_string_1 = require("../../helpers/get-state-object-string");
-var strip_state_and_props_refs_1 = require("../../helpers/strip-state-and-props-refs");
 var json5_1 = __importDefault(require("json5"));
 var lodash_1 = require("lodash");
 var helpers_1 = require("./helpers");
@@ -93,7 +92,7 @@ function generateCompositionApiScript(component, options, template, props, onUpd
             code: hook.deps || '',
             options: options,
             json: component,
-        }), ", (").concat((0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(hook.deps), ") => { ").concat(hook.code, " }, {immediate: true})");
+        }), ", () => { ").concat(hook.code, " }, {immediate: true})");
     }).join('\n')) || '', methods !== null && methods !== void 0 ? methods : '');
     return str;
 }
