@@ -1,5 +1,12 @@
 # Change Log
 
+## 0.0.146
+
+### Patch Changes
+
+- 97063d5: Fix: remove all empty text nodes in JSX parser
+- 97063d5: fix: remove redundant {' '} in React generator
+
 ## 0.0.145
 
 ### Patch Changes
