@@ -38,8 +38,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.parseJsx = void 0;
-var filter_empty_text_nodes_1 = require("../../helpers/filter-empty-text-nodes");
-var traverse_nodes_1 = require("../../helpers/traverse-nodes");
 var babel = __importStar(require("@babel/core"));
 var generator_1 = __importDefault(require("@babel/generator"));
 var plugin_syntax_typescript_1 = __importDefault(require("@babel/plugin-syntax-typescript"));
@@ -236,9 +234,6 @@ function parseJsx(jsx, _options) {
             mitosisComponent.context.get[context].type = 'reactive';
         });
     }
-    (0, traverse_nodes_1.traverseNodes)(mitosisComponent, function (node) {
-        node.children = node.children.filter(filter_empty_text_nodes_1.filterEmptyTextNodes);
-    });
     return mitosisComponent;
 }
 exports.parseJsx = parseJsx;
