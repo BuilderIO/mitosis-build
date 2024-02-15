@@ -417,6 +417,7 @@ var builderElementToMitosisNode = function (block, options, _internalOptions) {
     var _a;
     var _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w;
     if (_internalOptions === void 0) { _internalOptions = {}; }
+    var _x = options.includeSpecialBindings, includeSpecialBindings = _x === void 0 ? true : _x;
     if (((_b = block.component) === null || _b === void 0 ? void 0 : _b.name) === 'Core:Fragment') {
         block.component.name = 'Fragment';
     }
@@ -501,9 +502,9 @@ var builderElementToMitosisNode = function (block, options, _internalOptions) {
             }
             var useKey = key.replace(/^(component\.)?options\./, '');
             if (!useKey.includes('.')) {
-                bindings[useKey] = {
+                bindings[useKey] = (0, bindings_1.createSingleBinding)({
                     code: blockBindings[key].code || blockBindings[key],
-                };
+                });
             }
             else if (useKey.includes('style') && useKey.includes('.')) {
                 var styleProperty = useKey.split('.')[1];
@@ -538,19 +539,18 @@ var builderElementToMitosisNode = function (block, options, _internalOptions) {
                     }
                     return true;
                 })
-                    .map(function (item) { return (0, exports.builderElementToMitosisNode)(item, options); });
-                children.push({
-                    '@type': '@builder.io/mitosis/node',
-                    name: 'Slot',
-                    meta: {},
-                    scope: {},
-                    bindings: {},
-                    properties: { name: key },
-                    children: childrenElements,
+                    .map(function (item) {
+                    var node = (0, exports.builderElementToMitosisNode)(item, __assign(__assign({}, options), { includeSpecialBindings: false }));
+                    // For now, stringify to Mitosis nodes even though that only really works in React, due to syntax overlap.
+                    // the correct long term solution is to hold on to the Mitosis Node, and have a plugin for each framework
+                    // which processes any Mitosis nodes set into the attribute and moves them as slots when relevant (Svelte/Vue)
+                    return (0, __1.blockToMitosis)(node, {}, null);
                 });
+                var strVal = childrenElements.length === 1 ? childrenElements[0] : "<>".concat(childrenElements.join(''), "</>");
+                bindings[key] = (0, bindings_1.createSingleBinding)({ code: strVal });
             }
             else {
-                bindings[key] = { code: json5_1.default.stringify(value) };
+                bindings[key] = (0, bindings_1.createSingleBinding)({ code: json5_1.default.stringify(value) });
             }
         }
     }
@@ -564,19 +564,19 @@ var builderElementToMitosisNode = function (block, options, _internalOptions) {
         if (binding.startsWith('component.options') || binding.startsWith('options')) {
             var value = blockBindings[binding];
             var useKey = binding.replace(/^(component\.options\.|options\.)/, '');
-            bindings[useKey] = { code: value };
+            bindings[useKey] = (0, bindings_1.createSingleBinding)({ code: value });
         }
     }
     var node = (0, create_mitosis_node_1.createMitosisNode)({
         name: ((_r = (_q = block.component) === null || _q === void 0 ? void 0 : _q.name) === null || _r === void 0 ? void 0 : _r.replace(/[^a-z0-9]/gi, '')) ||
             block.tagName ||
             (block.linkUrl ? 'a' : 'div'),
-        properties: __assign(__assign(__assign({}, (block.component && { $tagName: block.tagName })), (block.class && { class: block.class })), properties),
+        properties: __assign(__assign(__assign({}, (block.component && includeSpecialBindings && { $tagName: block.tagName })), (block.class && { class: block.class })), properties),
         bindings: __assign(__assign(__assign(__assign({}, bindings), actionBindings), (styleString && {
-            style: { code: styleString },
+            style: (0, bindings_1.createSingleBinding)({ code: styleString }),
         })), (css &&
             Object.keys(css).length && {
-            css: { code: JSON.stringify(css) },
+            css: (0, bindings_1.createSingleBinding)({ code: JSON.stringify(css) }),
         })),
     });
     // Has single text node child
