@@ -11,6 +11,7 @@ type BuilderToMitosisOptions = {
     };
     includeBuilderExtras?: boolean;
     preserveTextBlocks?: boolean;
+    includeSpecialBindings?: boolean;
 };
 export declare const builderElementToMitosisNode: (block: BuilderElement, options: BuilderToMitosisOptions, _internalOptions?: InternalOptions) => MitosisNode;
 /**

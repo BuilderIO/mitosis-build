@@ -128,6 +128,7 @@ var BINDING_MAPPERS = __assign({ ref: function (ref, value, options) {
     } }, ATTTRIBUTE_MAPPERS);
 var blockToReact = function (json, options, component, parentSlots) {
     var _a, _b, _c;
+    if (parentSlots === void 0) { parentSlots = []; }
     if (NODE_MAPPERS[json.name]) {
         return NODE_MAPPERS[json.name](json, options, component, parentSlots);
     }

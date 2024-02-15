@@ -223,7 +223,7 @@ var componentToReact = function (reactOptions) {
                     .replace(/;\n\nimport\s/g, ';\nimport ');
             }
             catch (err) {
-                console.error('Format error for file:');
+                console.error('Format error for file:', str);
                 throw err;
             }
         }
