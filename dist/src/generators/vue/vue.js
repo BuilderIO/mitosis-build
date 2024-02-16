@@ -3,17 +3,6 @@ var __makeTemplateObject = (this && this.__makeTemplateObject) || function (cook
     if (Object.defineProperty) { Object.defineProperty(cooked, "raw", { value: raw }); } else { cooked.raw = raw; }
     return cooked;
 };
-var __assign = (this && this.__assign) || function () {
-    __assign = Object.assign || function(t) {
-        for (var s, i = 1, n = arguments.length; i < n; i++) {
-            s = arguments[i];
-            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-                t[p] = s[p];
-        }
-        return t;
-    };
-    return __assign.apply(this, arguments);
-};
 var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
     if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
         if (ar || !(i in from)) {
@@ -27,7 +16,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.componentToVue3 = exports.componentToVue2 = void 0;
+exports.componentToVue = void 0;
 var babel_transform_1 = require("../../helpers/babel-transform");
 var bindings_1 = require("../../helpers/bindings");
 var dedent_1 = require("../../helpers/dedent");
@@ -106,7 +95,6 @@ var onUpdatePlugin = function (options) { return ({
     },
 }); };
 var BASE_OPTIONS = {
-    vueVersion: 2,
     api: 'options',
     defineComponent: true,
 };
@@ -118,7 +106,7 @@ var componentToVue = function (userOptions) {
         // Make a copy we can safely mutate, similar to babel's toolchain can be used
         var component = (0, fast_clone_1.fastClone)(_component);
         var options = (0, merge_options_1.initializeOptions)({
-            target: (userOptions === null || userOptions === void 0 ? void 0 : userOptions.vueVersion) === 2 ? 'vue2' : 'vue3',
+            target: 'vue',
             component: component,
             defaults: BASE_OPTIONS,
             userOptions: userOptions,
@@ -199,7 +187,7 @@ var componentToVue = function (userOptions) {
         var getterKeys = Object.keys((0, lodash_1.pickBy)(component.state, function (i) { return (i === null || i === void 0 ? void 0 : i.type) === 'getter'; }));
         // import from vue
         var vueImports = [];
-        if (options.vueVersion >= 3 && options.asyncComponentImports) {
+        if (options.asyncComponentImports) {
             vueImports.push('defineAsyncComponent');
         }
         if (options.api === 'options' && options.defineComponent) {
@@ -261,14 +249,7 @@ var componentToVue = function (userOptions) {
         return str;
     };
 };
-var componentToVue2 = function (vueOptions) {
-    return componentToVue(__assign(__assign({}, vueOptions), { vueVersion: 2 }));
-};
-exports.componentToVue2 = componentToVue2;
-var componentToVue3 = function (vueOptions) {
-    return componentToVue(__assign(__assign({}, vueOptions), { vueVersion: 3 }));
-};
-exports.componentToVue3 = componentToVue3;
+exports.componentToVue = componentToVue;
 // Remove unused artifacts like empty script or style tags
 var removePatterns = [
     "<script>\nexport default {};\n</script>",

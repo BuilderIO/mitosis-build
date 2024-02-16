@@ -28,7 +28,7 @@ type ImportArgs = {
 export declare const renderImport: ({ theImport, target, asyncComponentImports, preserveFileExtensions, component, componentsUsed, importMapper, explicitImportFileExtension, }: ImportArgs & {
     theImport: MitosisImport;
 }) => string;
-export declare const renderPreComponent: ({ component, target, excludeMitosisComponents, asyncComponentImports, preserveFileExtensions, componentsUsed, importMapper, explicitImportFileExtension, }: Omit<ImportArgs, "asyncComponentImports" | "explicitImportFileExtension"> & Partial<Pick<ImportArgs, "asyncComponentImports" | "explicitImportFileExtension">> & {
+export declare const renderPreComponent: ({ component, target, excludeMitosisComponents, asyncComponentImports, preserveFileExtensions, componentsUsed, importMapper, explicitImportFileExtension, }: Omit<ImportArgs, "explicitImportFileExtension" | "asyncComponentImports"> & Partial<Pick<ImportArgs, "explicitImportFileExtension" | "asyncComponentImports">> & {
     component: MitosisComponent;
     target: Target;
     excludeMitosisComponents?: boolean | undefined;

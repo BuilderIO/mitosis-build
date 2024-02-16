@@ -42,11 +42,8 @@ function getContextInjectString(component, options) {
 }
 var generateComponentImport = function (options) {
     return function (componentName) {
-        if (options.vueVersion >= 3 && options.asyncComponentImports) {
+        if (options.asyncComponentImports) {
             return "'".concat(componentName, "': defineAsyncComponent(").concat(componentName, ")");
-        }
-        else if (options.vueVersion === 2) {
-            return "'".concat((0, helpers_1.mapMitosisComponentToKebabCase)(componentName), "': ").concat(componentName);
         }
         else {
             return "'".concat(componentName, "': ").concat(componentName);
