@@ -6,9 +6,6 @@ var process_code_1 = require("./process-code");
 var getBlockForTarget = function (_a) {
     var target = _a.target, targetBlock = _a.targetBlock;
     switch (target) {
-        case 'vue3':
-        case 'vue':
-            return targetBlock['vue3'] || targetBlock['vue'] || targetBlock['default'];
         default:
             return targetBlock[target] || targetBlock['default'];
     }

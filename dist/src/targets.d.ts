@@ -13,9 +13,7 @@ export declare const targets: {
     readonly swift: import(".").TranspilerGenerator<import(".").BaseTranspilerOptions>;
     readonly template: import(".").TranspilerGenerator<import("./generators/template").ToTemplateOptions>;
     readonly webcomponent: import(".").TranspilerGenerator<import("./generators/html").ToHtmlOptions>;
-    readonly vue: (vueOptions?: Omit<import("./generators/vue").ToVueOptions, "vueVersion"> | undefined) => import(".").Transpiler<string>;
-    readonly vue2: (vueOptions?: Omit<import("./generators/vue").ToVueOptions, "vueVersion"> | undefined) => import(".").Transpiler<string>;
-    readonly vue3: (vueOptions?: Omit<import("./generators/vue").ToVueOptions, "vueVersion"> | undefined) => import(".").Transpiler<string>;
+    readonly vue: import(".").TranspilerGenerator<Partial<import("./generators/vue").ToVueOptions>>;
     readonly stencil: import(".").TranspilerGenerator<import("./generators/stencil").ToStencilOptions>;
     readonly qwik: import(".").TranspilerGenerator<import("./generators/qwik/component-generator").ToQwikOptions>;
     readonly marko: import(".").TranspilerGenerator<import("./generators/marko").ToMarkoOptions>;
