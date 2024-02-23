@@ -198,7 +198,12 @@ var blockToReact = function (json, options, component, parentSlots) {
                 str += " ".concat(newKey, "={").concat(newValue, "} ");
             }
             else {
-                str += " ".concat(BINDING_MAPPERS[key], "={").concat(useBindingValue, "} ");
+                if (useBindingValue === 'true') {
+                    str += " ".concat(BINDING_MAPPERS[key], " ");
+                }
+                else {
+                    str += " ".concat(BINDING_MAPPERS[key], "={").concat(useBindingValue, "} ");
+                }
             }
         }
         else if (key === 'style' && options.type === 'native' && json.name === 'ScrollView') {
