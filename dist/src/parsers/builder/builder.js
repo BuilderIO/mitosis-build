@@ -527,7 +527,17 @@ var builderElementToMitosisNode = function (block, options, _internalOptions) {
         for (var key in block.component.options) {
             var value = block.component.options[key];
             var valueIsArrayOfBuilderElements = Array.isArray(value) && value.every(exports.isBuilderElement);
-            if (typeof value === 'string') {
+            var transformBldrElementToBinding = function (item) {
+                var node = (0, exports.builderElementToMitosisNode)(item, __assign(__assign({}, options), { includeSpecialBindings: false }));
+                // For now, stringify to Mitosis nodes even though that only really works in React, due to syntax overlap.
+                // the correct long term solution is to hold on to the Mitosis Node, and have a plugin for each framework
+                // which processes any Mitosis nodes set into the attribute and moves them as slots when relevant (Svelte/Vue)
+                return (0, __1.blockToMitosis)(node, {}, null);
+            };
+            if ((0, exports.isBuilderElement)(value)) {
+                bindings[key] = (0, bindings_1.createSingleBinding)({ code: transformBldrElementToBinding(value) });
+            }
+            else if (typeof value === 'string') {
                 properties[key] = value;
             }
             else if (valueIsArrayOfBuilderElements) {
@@ -539,13 +549,7 @@ var builderElementToMitosisNode = function (block, options, _internalOptions) {
                     }
                     return true;
                 })
-                    .map(function (item) {
-                    var node = (0, exports.builderElementToMitosisNode)(item, __assign(__assign({}, options), { includeSpecialBindings: false }));
-                    // For now, stringify to Mitosis nodes even though that only really works in React, due to syntax overlap.
-                    // the correct long term solution is to hold on to the Mitosis Node, and have a plugin for each framework
-                    // which processes any Mitosis nodes set into the attribute and moves them as slots when relevant (Svelte/Vue)
-                    return (0, __1.blockToMitosis)(node, {}, null);
-                });
+                    .map(transformBldrElementToBinding);
                 var strVal = childrenElements.length === 1 ? childrenElements[0] : "<>".concat(childrenElements.join(''), "</>");
                 bindings[key] = (0, bindings_1.createSingleBinding)({ code: strVal });
             }
