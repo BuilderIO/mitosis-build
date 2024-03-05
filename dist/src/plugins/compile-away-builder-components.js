@@ -256,8 +256,8 @@ exports.components = {
         }), components);
     },
     Image: function (node, context, components) {
-        var _a, _b, _c, _d, _e, _f, _g;
-        var _h = node.properties, backgroundSize = _h.backgroundSize, backgroundPosition = _h.backgroundPosition;
+        var _a, _b, _c, _d, _e, _f, _g, _h, _j;
+        var _k = node.properties, backgroundSize = _k.backgroundSize, backgroundPosition = _k.backgroundPosition;
         var srcset = node.properties.srcset;
         var aspectRatio = ((_a = node.bindings.aspectRatio) === null || _a === void 0 ? void 0 : _a.code)
             ? parseFloat(node.bindings.aspectRatio.code)
@@ -281,12 +281,13 @@ exports.components = {
             bindings: noUndefined({
                 src: ((_c = node.bindings.image) === null || _c === void 0 ? void 0 : _c.code) && { code: (_d = node.bindings.image) === null || _d === void 0 ? void 0 : _d.code },
                 sizes: ((_e = node.bindings.sizes) === null || _e === void 0 ? void 0 : _e.code) && { code: (_f = node.bindings.sizes) === null || _f === void 0 ? void 0 : _f.code },
+                style: ((_g = node.bindings.style) === null || _g === void 0 ? void 0 : _g.code) && { code: (_h = node.bindings.style) === null || _h === void 0 ? void 0 : _h.code },
                 css: (0, bindings_1.createSingleBinding)({
                     code: JSON.stringify(__assign(__assign({ aspectRatio: aspectRatio ? String((0, lodash_1.round)(1 / aspectRatio, 2)) : undefined, objectFit: backgroundSize || 'cover', objectPosition: backgroundPosition || 'center', width: '100%' }, css), { display: undefined, flexDirection: undefined, position: css.position === 'relative' ? undefined : css.position })),
                 }),
             }),
         });
-        if (!((_g = node.children) === null || _g === void 0 ? void 0 : _g.length)) {
+        if (!((_j = node.children) === null || _j === void 0 ? void 0 : _j.length)) {
             return img;
         }
         // TODO: deal with links: anchor tag and href
