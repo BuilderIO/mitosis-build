@@ -29,7 +29,29 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getUseTargetStatements = exports.getIdFromMatch = exports.USE_TARGET_MAGIC_REGEX = exports.USE_TARGET_MAGIC_STRING = exports.getMagicString = exports.getTargetId = void 0;
 var babel = __importStar(require("@babel/core"));
 var generator_1 = __importDefault(require("@babel/generator"));
-var targets_1 = require("../../../targets");
+var TARGETS = {
+    alpine: null,
+    angular: null,
+    customElement: null,
+    html: null,
+    mitosis: null,
+    liquid: null,
+    react: null,
+    reactNative: null,
+    solid: null,
+    svelte: null,
+    swift: null,
+    template: null,
+    webcomponent: null,
+    vue: null,
+    stencil: null,
+    qwik: null,
+    marko: null,
+    preact: null,
+    lit: null,
+    rsc: null,
+    taro: null,
+};
 var types = babel.types;
 var getTargetId = function (component) {
     var latestId = Object.keys(component.targetBlocks || {}).length;
@@ -76,7 +98,7 @@ var getUseTargetStatements = function (path) {
         if (!types.isIdentifier(prop.key)) {
             throw new Error('ERROR Parsing `useTarget()`: Expected an identifier, instead got: ' + prop.key);
         }
-        if (!Object.keys(targets_1.targets).concat('default').includes(prop.key.name)) {
+        if (!Object.keys(TARGETS).concat('default').includes(prop.key.name)) {
             throw new Error('ERROR Parsing `useTarget()`: Invalid target: ' + prop.key.name);
         }
         var keyName = prop.key.name;

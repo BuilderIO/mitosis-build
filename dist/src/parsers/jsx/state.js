@@ -39,7 +39,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.parseStateObjectToMitosisState = exports.mapStateIdentifiers = void 0;
 var babel = __importStar(require("@babel/core"));
-var generator_1 = __importDefault(require("@babel/generator"));
 var function_1 = require("fp-ts/lib/function");
 var traverse_1 = __importDefault(require("traverse"));
 var babel_transform_1 = require("../../helpers/babel-transform");
@@ -79,12 +78,13 @@ function mapStateIdentifiersInExpression(expression, stateProperties) {
                         path.replaceWith(newExpression);
                     }
                     catch (err) {
-                        console.log('err: ', {
-                            from: (0, generator_1.default)(path.parent).code,
-                            fromChild: (0, generator_1.default)(path.node).code,
-                            to: newExpression,
-                            // err,
-                        });
+                        console.error(err);
+                        // console.log('err: ', {
+                        //   from: generate(path.parent).code,
+                        //   fromChild: generate(path.node).code,
+                        //   to: newExpression,
+                        //   // err,
+                        // });
                     }
                 }
             }
