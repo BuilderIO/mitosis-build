@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getComponentFileExtensionForTarget = exports.renameImport = exports.renameComponentFile = exports.INPUT_EXTENSION_REGEX = exports.checkIsMitosisComponentFilePath = exports.checkIsLiteComponentFilePath = exports.checkIsSvelteComponentFilePath = exports.COMPONENT_IMPORT_EXTENSIONS = void 0;
-var mitosis_1 = require("..");
+var output_1 = require("./output");
 var COMPONENT_EXTENSIONS = {
     jsx: ['.lite.tsx', '.lite.jsx'],
     svelte: ['.svelte'],
@@ -30,7 +30,7 @@ var renameComponentFile = function (_a) {
     return path.replace(exports.INPUT_EXTENSION_REGEX, (0, exports.getComponentFileExtensionForTarget)({
         type: 'filename',
         target: target,
-        isTypescript: (0, mitosis_1.checkShouldOutputTypeScript)({ options: options, target: target }),
+        isTypescript: (0, output_1.checkShouldOutputTypeScript)({ options: options, target: target }),
     }));
 };
 exports.renameComponentFile = renameComponentFile;

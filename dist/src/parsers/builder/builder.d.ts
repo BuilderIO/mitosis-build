@@ -1,5 +1,5 @@
+import { MitosisComponent, MitosisState } from '../../types/mitosis-component';
 import { BuilderContent, BuilderElement } from '@builder.io/sdk';
-import { MitosisComponent, MitosisState } from '../..';
 import { MitosisNode } from '../../types/mitosis-node';
 type InternalOptions = {
     skipMapper?: boolean;

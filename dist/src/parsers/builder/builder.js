@@ -47,12 +47,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.builderContentToMitosisComponent = exports.isBuilderElement = exports.createBuilderElement = exports.convertExportDefaultToReturn = exports.extractStateHook = exports.builderElementToMitosisNode = exports.symbolBlocksAsChildren = void 0;
+var mitosis_1 = require("../../generators/mitosis");
+var symbol_processor_1 = require("../../symbols/symbol-processor");
 var babel = __importStar(require("@babel/core"));
 var generator_1 = __importDefault(require("@babel/generator"));
 var json5_1 = __importDefault(require("json5"));
 var lodash_1 = require("lodash");
 var traverse_1 = __importDefault(require("traverse"));
-var __1 = require("../..");
 var media_sizes_1 = require("../../constants/media-sizes");
 var bindings_1 = require("../../helpers/bindings");
 var capitalize_1 = require("../../helpers/capitalize");
@@ -532,7 +533,7 @@ var builderElementToMitosisNode = function (block, options, _internalOptions) {
                 // For now, stringify to Mitosis nodes even though that only really works in React, due to syntax overlap.
                 // the correct long term solution is to hold on to the Mitosis Node, and have a plugin for each framework
                 // which processes any Mitosis nodes set into the attribute and moves them as slots when relevant (Svelte/Vue)
-                return (0, __1.blockToMitosis)(node, {}, null);
+                return (0, mitosis_1.blockToMitosis)(node, {}, null);
             };
             if ((0, exports.isBuilderElement)(value)) {
                 bindings[key] = (0, bindings_1.createSingleBinding)({ code: transformBldrElementToBinding(value) });
@@ -751,7 +752,7 @@ function extractSymbols(json) {
         subComponents: subComponents,
     };
 }
-var createBuilderElement = function (options) { return (__assign({ '@type': '@builder.io/sdk:Element', id: 'builder-' + (0, __1.hashCodeAsString)(options) }, options)); };
+var createBuilderElement = function (options) { return (__assign({ '@type': '@builder.io/sdk:Element', id: 'builder-' + (0, symbol_processor_1.hashCodeAsString)(options) }, options)); };
 exports.createBuilderElement = createBuilderElement;
 var isBuilderElement = function (el) {
     return (el === null || el === void 0 ? void 0 : el['@type']) === '@builder.io/sdk:Element';
