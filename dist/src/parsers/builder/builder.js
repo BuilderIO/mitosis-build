@@ -47,7 +47,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.builderContentToMitosisComponent = exports.isBuilderElement = exports.createBuilderElement = exports.convertExportDefaultToReturn = exports.extractStateHook = exports.builderElementToMitosisNode = exports.symbolBlocksAsChildren = void 0;
-var mitosis_1 = require("../../generators/mitosis");
 var symbol_processor_1 = require("../../symbols/symbol-processor");
 var babel = __importStar(require("@babel/core"));
 var generator_1 = __importDefault(require("@babel/generator"));
@@ -496,6 +495,7 @@ var builderElementToMitosisNode = function (block, options, _internalOptions) {
     }
     var bindings = {};
     var children = [];
+    var slots = {};
     if (blockBindings) {
         for (var key in blockBindings) {
             if (key === 'css') {
@@ -528,15 +528,12 @@ var builderElementToMitosisNode = function (block, options, _internalOptions) {
         for (var key in block.component.options) {
             var value = block.component.options[key];
             var valueIsArrayOfBuilderElements = Array.isArray(value) && value.every(exports.isBuilderElement);
-            var transformBldrElementToBinding = function (item) {
+            var transformBldrElementToMitosisNode = function (item) {
                 var node = (0, exports.builderElementToMitosisNode)(item, __assign(__assign({}, options), { includeSpecialBindings: false }));
-                // For now, stringify to Mitosis nodes even though that only really works in React, due to syntax overlap.
-                // the correct long term solution is to hold on to the Mitosis Node, and have a plugin for each framework
-                // which processes any Mitosis nodes set into the attribute and moves them as slots when relevant (Svelte/Vue)
-                return (0, mitosis_1.blockToMitosis)(node, {}, null);
+                return node;
             };
             if ((0, exports.isBuilderElement)(value)) {
-                bindings[key] = (0, bindings_1.createSingleBinding)({ code: transformBldrElementToBinding(value) });
+                slots[key] = [transformBldrElementToMitosisNode(value)];
             }
             else if (typeof value === 'string') {
                 properties[key] = value;
@@ -550,9 +547,8 @@ var builderElementToMitosisNode = function (block, options, _internalOptions) {
                     }
                     return true;
                 })
-                    .map(transformBldrElementToBinding);
-                var strVal = childrenElements.length === 1 ? childrenElements[0] : "<>".concat(childrenElements.join(''), "</>");
-                bindings[key] = (0, bindings_1.createSingleBinding)({ code: strVal });
+                    .map(transformBldrElementToMitosisNode);
+                slots[key] = childrenElements;
             }
             else {
                 bindings[key] = (0, bindings_1.createSingleBinding)({ code: json5_1.default.stringify(value) });
@@ -583,6 +579,7 @@ var builderElementToMitosisNode = function (block, options, _internalOptions) {
             Object.keys(css).length && {
             css: (0, bindings_1.createSingleBinding)({ code: JSON.stringify(css) }),
         })),
+        slots: __assign({}, slots),
     });
     // Has single text node child
     var firstChild = (_s = block.children) === null || _s === void 0 ? void 0 : _s[0];
