@@ -11,6 +11,9 @@ export declare function parseText(node: TemplateNode): {
         [key: string]: import("../../..").Binding | undefined;
     };
     children: import("../../..").MitosisNode[];
+    slots?: {
+        [key: string]: import("../../..").MitosisNode[];
+    } | undefined;
 } | {
     name: string;
     properties: {
@@ -27,4 +30,7 @@ export declare function parseText(node: TemplateNode): {
         [key: string]: import("../../..").Binding | undefined;
     };
     children: import("../../..").MitosisNode[];
+    slots?: {
+        [key: string]: import("../../..").MitosisNode[];
+    } | undefined;
 };

@@ -216,6 +216,17 @@ var blockToReact = function (json, options, component, parentSlots) {
             }
         }
     }
+    if (json.slots) {
+        for (var key in json.slots) {
+            var value = json.slots[key];
+            if (!(value === null || value === void 0 ? void 0 : value.length)) {
+                continue;
+            }
+            var reactComponents = value.map(function (node) { return (0, exports.blockToReact)(node, options, component); });
+            var slotStringValue = reactComponents.length === 1 ? reactComponents[0] : "<>".concat(reactComponents.join('\n'), "</>");
+            str += " ".concat(key, "={").concat(slotStringValue, "} ");
+        }
+    }
     if (html_tags_1.SELF_CLOSING_HTML_TAGS.has(json.name)) {
         return str + ' />';
     }
