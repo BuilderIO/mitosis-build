@@ -212,7 +212,12 @@ var blockToReact = function (json, options, component, parentSlots) {
         }
         else {
             if ((0, is_valid_attribute_name_1.isValidAttributeName)(key)) {
-                str += " ".concat(key, "={").concat(useBindingValue, "} ");
+                if (useBindingValue === 'true') {
+                    str += " ".concat(key, " ");
+                }
+                else {
+                    str += " ".concat(key, "={").concat(useBindingValue, "} ");
+                }
             }
         }
     }
