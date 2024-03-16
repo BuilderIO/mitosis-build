@@ -20,7 +20,7 @@ var processSignalStateValue = function (_a) {
         if (typeof value === 'string') {
             switch (type) {
                 case 'getter':
-                    return (0, function_1.pipe)(value, patterns_1.replaceGetterWithFunction, mapValue);
+                    return (0, function_1.pipe)(value, mapValue, patterns_1.extractGetterCodeBlock, function (x) { return "const ".concat(key, " = createMemo(() => {").concat(x, "})"); });
                 case 'function':
                     return mapValue(value);
                 case 'method':

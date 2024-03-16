@@ -58,7 +58,7 @@ var getState = function (_a) {
     var stateStr = "\n  ".concat(mutableStateStr, "\n  ").concat(signalStateStr, "\n  ").concat(storeStateStr, "\n  ");
     var importObj = {
         store: __spreadArray(__spreadArray([], (hasMutableState ? ['createMutable'] : []), true), (hasStoreState ? ['createStore', 'reconcile'] : []), true),
-        solidjs: __spreadArray(__spreadArray([], (hasSignalState ? ['createSignal'] : []), true), (hasStoreState ? ['createEffect', 'on'] : []), true),
+        solidjs: __spreadArray(__spreadArray([], (hasSignalState ? ['createSignal', 'createMemo'] : []), true), (hasStoreState ? ['createEffect', 'on'] : []), true),
     };
     return {
         str: stateStr,
