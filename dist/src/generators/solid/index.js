@@ -185,7 +185,7 @@ var componentToSolid = function (passedOptions) {
             hasShowComponent ? 'Show' : undefined,
             hasForComponent ? 'For' : undefined,
             json.hooks.onMount.length ? 'onMount' : undefined
-        ], (((_c = json.hooks.onUpdate) === null || _c === void 0 ? void 0 : _c.length) ? ['on', 'createEffect'] : []), true), ((_d = state === null || state === void 0 ? void 0 : state.import.solidjs) !== null && _d !== void 0 ? _d : []), true).filter(nullable_1.checkIsDefined));
+        ], (((_c = json.hooks.onUpdate) === null || _c === void 0 ? void 0 : _c.length) ? ['on', 'createEffect', 'createMemo'] : []), true), ((_d = state === null || state === void 0 ? void 0 : state.import.solidjs) !== null && _d !== void 0 ? _d : []), true).filter(nullable_1.checkIsDefined));
         var storeImports = (_e = state === null || state === void 0 ? void 0 : state.import.store) !== null && _e !== void 0 ? _e : [];
         var propType = json.propsTypeRef || 'any';
         var propsArgs = "props".concat(options.typescript ? ":".concat(propType) : '');
@@ -198,14 +198,23 @@ var componentToSolid = function (passedOptions) {
         }), json.name, propsArgs, (_f = state === null || state === void 0 ? void 0 : state.str) !== null && _f !== void 0 ? _f : '', getRefsString(json, options), getContextString(json, options), json.hooks.onMount.map(function (hook) { return "onMount(() => { ".concat(hook.code, " })"); }).join('\n'), json.hooks.onUpdate
             ? json.hooks.onUpdate
                 .map(function (hook, index) {
-                if (hook.deps) {
-                    var hookName = "onUpdateFn_".concat(index);
-                    return "\n                    function ".concat(hookName, "() { ").concat(hook.code, " };\n                    createEffect(on(() => ").concat(hook.deps, ", ").concat(hookName, "));\n                  ");
-                }
-                else {
-                    // TO-DO: support `onUpdate` without `deps`
+                // TO-DO: support `onUpdate` without `deps`
+                if (!hook.deps)
                     return '';
-                }
+                var hookName = "onUpdateFn_".concat(index);
+                var depsArray = hook.deps
+                    .slice(1, hook.deps.length - 1)
+                    .split(',')
+                    .map(function (x) { return x.trim(); });
+                var getReactiveDepName = function (dep) {
+                    var newLocal = dep.replace(/(\.|\?|\(|\)|\[|\])/g, '_');
+                    return "".concat(hookName, "_").concat(newLocal);
+                };
+                var reactiveDepsWorkaround = depsArray
+                    .map(function (dep) { return "const ".concat(getReactiveDepName(dep), " = createMemo(() => ").concat(dep, ");"); })
+                    .join('\n');
+                var depsArrayStr = depsArray.map(getReactiveDepName).join(', ');
+                return "\n                    ".concat(reactiveDepsWorkaround, "\n                    function ").concat(hookName, "() { ").concat(hook.code, " };\n                    createEffect(on(() => [").concat(depsArrayStr, "], ").concat(hookName, "));\n                  ");
             })
                 .join('\n')
             : '', addWrapper ? '<>' : '', json.children

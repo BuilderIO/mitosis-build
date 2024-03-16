@@ -335,7 +335,7 @@ var componentToSvelte = function (userProvidedOptions) {
              * rerun the effect every time the parent store is changed in any way.
              */
             return "\n              function ".concat(fnName, "(..._args").concat(options.typescript ? ': any[]' : '', ") {\n                ").concat(code, "\n              }\n              ").concat(reactiveDepsWorkaround, "\n              $: ").concat(fnName, "(...[").concat(depsArrayStr, "]);\n            ");
-        }).join(';')) || '', 
+        }).join('\n')) || '', 
         // make sure this is after all other state/code is initialized
         setContextCode({ json: json, options: options }), !((_k = json.hooks.onUnMount) === null || _k === void 0 ? void 0 : _k.code) ? '' : "onDestroy(() => { ".concat(json.hooks.onUnMount.code, " });"), json.children
             .map(function (item) {
