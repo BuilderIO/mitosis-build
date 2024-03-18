@@ -210,10 +210,14 @@ var componentToSolid = function (passedOptions) {
                     var newLocal = dep.replace(/(\.|\?|\(|\)|\[|\])/g, '_');
                     return "".concat(hookName, "_").concat(newLocal);
                 };
+                var needsMemo = function (dep) { return true; };
                 var reactiveDepsWorkaround = depsArray
+                    .filter(needsMemo)
                     .map(function (dep) { return "const ".concat(getReactiveDepName(dep), " = createMemo(() => ").concat(dep, ");"); })
                     .join('\n');
-                var depsArrayStr = depsArray.map(getReactiveDepName).join(', ');
+                var depsArrayStr = depsArray
+                    .map(function (x) { return (needsMemo(x) ? "".concat(getReactiveDepName(x), "()") : x); })
+                    .join(', ');
                 return "\n                    ".concat(reactiveDepsWorkaround, "\n                    function ").concat(hookName, "() { ").concat(hook.code, " };\n                    createEffect(on(() => [").concat(depsArrayStr, "], ").concat(hookName, "));\n                  ");
             })
                 .join('\n')
