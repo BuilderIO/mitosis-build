@@ -28,39 +28,39 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.componentToAngular = exports.blockToAngular = void 0;
+var html_tags_1 = require("../../constants/html_tags");
+var dedent_1 = require("../../helpers/dedent");
+var fast_clone_1 = require("../../helpers/fast-clone");
+var get_components_used_1 = require("../../helpers/get-components-used");
+var get_custom_imports_1 = require("../../helpers/get-custom-imports");
+var get_prop_functions_1 = require("../../helpers/get-prop-functions");
+var get_props_1 = require("../../helpers/get-props");
+var get_props_ref_1 = require("../../helpers/get-props-ref");
+var get_refs_1 = require("../../helpers/get-refs");
+var get_state_object_string_1 = require("../../helpers/get-state-object-string");
+var indent_1 = require("../../helpers/indent");
+var is_upper_case_1 = require("../../helpers/is-upper-case");
+var map_refs_1 = require("../../helpers/map-refs");
+var remove_surrounding_block_1 = require("../../helpers/remove-surrounding-block");
+var render_imports_1 = require("../../helpers/render-imports");
+var replace_identifiers_1 = require("../../helpers/replace-identifiers");
+var slots_1 = require("../../helpers/slots");
+var strip_meta_properties_1 = require("../../helpers/strip-meta-properties");
+var strip_state_and_props_refs_1 = require("../../helpers/strip-state-and-props-refs");
+var collect_css_1 = require("../../helpers/styles/collect-css");
+var plugins_1 = require("../../modules/plugins");
+var mitosis_node_1 = require("../../types/mitosis-node");
 var function_1 = require("fp-ts/lib/function");
 var lodash_1 = require("lodash");
 var standalone_1 = require("prettier/standalone");
-var html_tags_1 = require("../constants/html_tags");
-var dedent_1 = require("../helpers/dedent");
-var fast_clone_1 = require("../helpers/fast-clone");
-var get_components_used_1 = require("../helpers/get-components-used");
-var get_custom_imports_1 = require("../helpers/get-custom-imports");
-var get_prop_functions_1 = require("../helpers/get-prop-functions");
-var get_props_1 = require("../helpers/get-props");
-var get_props_ref_1 = require("../helpers/get-props-ref");
-var get_refs_1 = require("../helpers/get-refs");
-var get_state_object_string_1 = require("../helpers/get-state-object-string");
-var indent_1 = require("../helpers/indent");
-var is_children_1 = __importDefault(require("../helpers/is-children"));
-var is_upper_case_1 = require("../helpers/is-upper-case");
-var map_refs_1 = require("../helpers/map-refs");
-var remove_surrounding_block_1 = require("../helpers/remove-surrounding-block");
-var render_imports_1 = require("../helpers/render-imports");
-var replace_identifiers_1 = require("../helpers/replace-identifiers");
-var slots_1 = require("../helpers/slots");
-var strip_meta_properties_1 = require("../helpers/strip-meta-properties");
-var strip_state_and_props_refs_1 = require("../helpers/strip-state-and-props-refs");
-var collect_css_1 = require("../helpers/styles/collect-css");
-var plugins_1 = require("../modules/plugins");
-var mitosis_node_1 = require("../types/mitosis-node");
-var helpers_1 = require("../helpers/styles/helpers");
+var is_children_1 = __importDefault(require("../../helpers/is-children"));
+var is_mitosis_node_1 = require("../../helpers/is-mitosis-node");
+var merge_options_1 = require("../../helpers/merge-options");
+var process_code_1 = require("../../helpers/plugins/process-code");
+var helpers_1 = require("../../helpers/styles/helpers");
 var traverse_1 = __importDefault(require("traverse"));
-var __1 = require("..");
-var merge_options_1 = require("../helpers/merge-options");
-var process_code_1 = require("../helpers/plugins/process-code");
-var on_mount_1 = require("./helpers/on-mount");
-var BUILT_IN_COMPONENTS = new Set(['Show', 'For', 'Fragment', 'Slot']);
+var on_mount_1 = require("../helpers/on-mount");
+var types_1 = require("./types");
 var mappers = {
     Fragment: function (json, options) {
         return "<ng-container>".concat(json.children
@@ -90,7 +90,7 @@ var mappers = {
 var preprocessCssAsJson = function (json) {
     (0, traverse_1.default)(json).forEach(function (item) {
         var _a, _b;
-        if ((0, __1.isMitosisNode)(item)) {
+        if ((0, is_mitosis_node_1.isMitosisNode)(item)) {
             if ((0, helpers_1.nodeHasCss)(item)) {
                 if ((_b = (_a = item.bindings.css) === null || _a === void 0 ? void 0 : _a.code) === null || _b === void 0 ? void 0 : _b.includes('&quot;')) {
                     item.bindings.css.code = item.bindings.css.code.replace(/&quot;/g, '"');
@@ -110,7 +110,9 @@ var BINDINGS_MAPPER = {
 var blockToAngular = function (json, options, blockOptions) {
     var _a, _b, _c, _d;
     if (options === void 0) { options = {}; }
-    if (blockOptions === void 0) { blockOptions = {}; }
+    if (blockOptions === void 0) { blockOptions = {
+        nativeAttributes: [],
+    }; }
     var childComponents = (blockOptions === null || blockOptions === void 0 ? void 0 : blockOptions.childComponents) || [];
     var isValidHtmlTag = html_tags_1.VALID_HTML_TAGS.includes(json.name.trim());
     if (mappers[json.name]) {
@@ -196,7 +198,8 @@ var blockToAngular = function (json, options, blockOptions) {
             else if (BINDINGS_MAPPER[key]) {
                 str += " [".concat(BINDINGS_MAPPER[key], "]=\"").concat(code, "\"  ");
             }
-            else if (isValidHtmlTag || key.includes('-')) {
+            else if ((isValidHtmlTag || key.includes('-')) &&
+                !blockOptions.nativeAttributes.includes(key)) {
                 // standard html elements need the attr to satisfy the compiler in many cases: eg: svg elements and [fill]
                 str += " [attr.".concat(key, "]=\"").concat(code, "\" ");
             }
@@ -230,25 +233,23 @@ var processAngularCode = function (_a) {
         }), function (newCode) { return (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(newCode, { replaceWith: replaceWith }); });
     };
 };
-var DEFAULT_OPTIONS = {
-    preserveImports: false,
-    preserveFileExtensions: false,
-};
 var componentToAngular = function (userOptions) {
     if (userOptions === void 0) { userOptions = {}; }
     return function (_a) {
-        var _b, _c, _d, _e, _f, _g, _h, _j;
+        var _b, _c, _d, _e, _f, _g, _h;
         var _component = _a.component;
         // Make a copy we can safely mutate, similar to babel's toolchain
         var json = (0, fast_clone_1.fastClone)(_component);
-        var contextVars = Object.keys(((_b = json === null || json === void 0 ? void 0 : json.context) === null || _b === void 0 ? void 0 : _b.get) || {});
-        var metaOutputVars = ((_d = (_c = json.meta) === null || _c === void 0 ? void 0 : _c.useMetadata) === null || _d === void 0 ? void 0 : _d.outputs) || [];
+        var useMetadata = (_b = json.meta) === null || _b === void 0 ? void 0 : _b.useMetadata;
+        var contextVars = Object.keys(((_c = json === null || json === void 0 ? void 0 : json.context) === null || _c === void 0 ? void 0 : _c.get) || {});
+        // TODO: Why is 'outputs' used here and shouldn't it be typed in packages/core/src/types/metadata.ts
+        var metaOutputVars = (useMetadata === null || useMetadata === void 0 ? void 0 : useMetadata.outputs) || [];
         var outputVars = (0, lodash_1.uniq)(__spreadArray(__spreadArray([], metaOutputVars, true), (0, get_prop_functions_1.getPropFunctions)(json), true));
         var stateVars = Object.keys((json === null || json === void 0 ? void 0 : json.state) || {});
         var options = (0, merge_options_1.initializeOptions)({
             target: 'angular',
             component: _component,
-            defaults: DEFAULT_OPTIONS,
+            defaults: types_1.DEFAULT_ANGULAR_OPTIONS,
             userOptions: userOptions,
         });
         options.plugins = __spreadArray(__spreadArray([], (options.plugins || []), true), [
@@ -299,7 +300,7 @@ var componentToAngular = function (userOptions) {
         if (options.plugins) {
             json = (0, plugins_1.runPreJsonPlugins)({ json: json, plugins: options.plugins });
         }
-        var _k = (0, get_props_ref_1.getPropsRef)(json, true), forwardProp = _k[0], hasPropRef = _k[1];
+        var _j = (0, get_props_ref_1.getPropsRef)(json, true), forwardProp = _j[0], hasPropRef = _j[1];
         var childComponents = [];
         var propsTypeRef = json.propsTypeRef !== 'any' ? json.propsTypeRef : undefined;
         json.imports.forEach(function (_a) {
@@ -311,7 +312,7 @@ var componentToAngular = function (userOptions) {
             });
         });
         var customImports = (0, get_custom_imports_1.getCustomImports)(json);
-        var _l = json.exports, localExports = _l === void 0 ? {} : _l;
+        var _k = json.exports, localExports = _k === void 0 ? {} : _k;
         var localExportVars = Object.keys(localExports)
             .filter(function (key) { return localExports[key].usedInLocal; })
             .map(function (key) { return "".concat(key, " = ").concat(key, ";"); });
@@ -326,7 +327,7 @@ var componentToAngular = function (userOptions) {
             }
             return "public ".concat(variableName, " : ").concat(variableType);
         });
-        var hasConstructor = Boolean(injectables.length || ((_e = json.hooks) === null || _e === void 0 ? void 0 : _e.onInit));
+        var hasConstructor = Boolean(injectables.length || ((_d = json.hooks) === null || _d === void 0 ? void 0 : _d.onInit));
         var props = (0, get_props_1.getProps)(json);
         // prevent jsx props from showing up as @Input
         if (hasPropRef) {
@@ -347,7 +348,7 @@ var componentToAngular = function (userOptions) {
         var domRefs = (0, get_refs_1.getRefs)(json);
         var jsRefs = Object.keys(json.refs).filter(function (ref) { return !domRefs.has(ref); });
         var componentsUsed = Array.from((0, get_components_used_1.getComponentsUsed)(json)).filter(function (item) {
-            return item.length && (0, is_upper_case_1.isUpperCase)(item[0]) && !BUILT_IN_COMPONENTS.has(item);
+            return item.length && (0, is_upper_case_1.isUpperCase)(item[0]) && !types_1.BUILT_IN_COMPONENTS.has(item);
         });
         (0, map_refs_1.mapRefs)(json, function (refName) {
             var isDomRef = domRefs.has(refName);
@@ -362,7 +363,13 @@ var componentToAngular = function (userOptions) {
             css = tryFormat(css, 'css');
         }
         var template = json.children
-            .map(function (item) { return (0, exports.blockToAngular)(item, options, { childComponents: childComponents }); })
+            .map(function (item) {
+            var _a, _b;
+            return (0, exports.blockToAngular)(item, options, {
+                childComponents: childComponents,
+                nativeAttributes: (_b = (_a = useMetadata === null || useMetadata === void 0 ? void 0 : useMetadata.angular) === null || _a === void 0 ? void 0 : _a.nativeAttributes) !== null && _b !== void 0 ? _b : [],
+            });
+        })
             .join('\n');
         if (options.prettier !== false) {
             template = tryFormat(template, 'html');
@@ -410,7 +417,7 @@ var componentToAngular = function (userOptions) {
                 .join(',');
             return "const defaultProps = {".concat(defalutPropsString, "};\n");
         };
-        var str = (0, dedent_1.dedent)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    import { ", " ", " Component ", "", " } from '@angular/core';\n    ", "\n\n    ", "\n    ", "\n    ", "\n\n    @Component({\n      ", "\n    })\n    export class ", " {\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n    }\n  "], ["\n    import { ", " ", " Component ", "", " } from '@angular/core';\n    ", "\n\n    ", "\n    ", "\n    ", "\n\n    @Component({\n      ", "\n    })\n    export class ", " {\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n    }\n  "])), outputs.length ? 'Output, EventEmitter, \n' : '', ((_f = options === null || options === void 0 ? void 0 : options.experimental) === null || _f === void 0 ? void 0 : _f.inject) ? 'Inject, forwardRef,' : '', domRefs.size ? ', ViewChild, ElementRef' : '', props.size ? ', Input' : '', options.standalone ? "import { CommonModule } from '@angular/common';" : '', json.types ? json.types.join('\n') : '', getPropsDefinition({ json: json }), (0, render_imports_1.renderPreComponent)({
+        var str = (0, dedent_1.dedent)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    import { ", " ", " Component ", "", " } from '@angular/core';\n    ", "\n\n    ", "\n    ", "\n    ", "\n\n    @Component({\n      ", "\n    })\n    export class ", " {\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n    }\n  "], ["\n    import { ", " ", " Component ", "", " } from '@angular/core';\n    ", "\n\n    ", "\n    ", "\n    ", "\n\n    @Component({\n      ", "\n    })\n    export class ", " {\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n    }\n  "])), outputs.length ? 'Output, EventEmitter, \n' : '', ((_e = options === null || options === void 0 ? void 0 : options.experimental) === null || _e === void 0 ? void 0 : _e.inject) ? 'Inject, forwardRef,' : '', domRefs.size ? ', ViewChild, ElementRef' : '', props.size ? ', Input' : '', options.standalone ? "import { CommonModule } from '@angular/common';" : '', json.types ? json.types.join('\n') : '', getPropsDefinition({ json: json }), (0, render_imports_1.renderPreComponent)({
             explicitImportFileExtension: options.explicitImportFileExtension,
             component: json,
             target: 'angular',
@@ -451,11 +458,11 @@ var componentToAngular = function (userOptions) {
         })
             .join('\n'), !hasConstructor
             ? ''
-            : "constructor(\n".concat(injectables.join(',\n'), ") {\n            ").concat(!((_g = json.hooks) === null || _g === void 0 ? void 0 : _g.onInit)
+            : "constructor(\n".concat(injectables.join(',\n'), ") {\n            ").concat(!((_f = json.hooks) === null || _f === void 0 ? void 0 : _f.onInit)
                 ? ''
-                : "\n              ".concat((_h = json.hooks.onInit) === null || _h === void 0 ? void 0 : _h.code, "\n              "), "\n          }\n          "), !json.hooks.onMount.length
+                : "\n              ".concat((_g = json.hooks.onInit) === null || _g === void 0 ? void 0 : _g.code, "\n              "), "\n          }\n          "), !json.hooks.onMount.length
             ? ''
-            : "ngOnInit() {\n              ".concat((0, on_mount_1.stringifySingleScopeOnMount)(json), "\n            }"), !((_j = json.hooks.onUpdate) === null || _j === void 0 ? void 0 : _j.length)
+            : "ngOnInit() {\n              ".concat((0, on_mount_1.stringifySingleScopeOnMount)(json), "\n            }"), !((_h = json.hooks.onUpdate) === null || _h === void 0 ? void 0 : _h.length)
             ? ''
             : "ngAfterContentChecked() {\n              ".concat(json.hooks.onUpdate.reduce(function (code, hook) {
                 code += hook.code;

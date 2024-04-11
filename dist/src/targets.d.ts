@@ -1,7 +1,7 @@
 export declare const builder: (options?: import("./generators/builder").ToBuilderOptions) => ({ component }: import(".").TranspilerArgs) => import("@builder.io/sdk").BuilderContent;
 export declare const targets: {
     readonly alpine: import(".").TranspilerGenerator<import("./generators/alpine").ToAlpineOptions>;
-    readonly angular: import(".").TranspilerGenerator<import("./generators/angular").ToAngularOptions>;
+    readonly angular: import(".").TranspilerGenerator<import("./generators/angular/types").ToAngularOptions>;
     readonly customElement: import(".").TranspilerGenerator<import("./generators/html").ToHtmlOptions>;
     readonly html: import(".").TranspilerGenerator<import("./generators/html").ToHtmlOptions>;
     readonly mitosis: import(".").TranspilerGenerator<Partial<import("./generators/mitosis").ToMitosisOptions>>;

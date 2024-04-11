@@ -9,6 +9,9 @@ export type ComponentMetadata = {
     [index: string]: any;
     httpRequests?: Record<string, string>;
     options?: TargetOptions;
+    angular?: {
+        nativeAttributes: string[];
+    };
     qwik?: {
         component?: {
             isLight?: boolean;
