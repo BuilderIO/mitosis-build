@@ -12,6 +12,11 @@ export declare const renameComponentFile: ({ path, target, options, }: {
     target: Target;
     options: MitosisConfig;
 }) => string;
+export declare const renameComponentImport: ({ importPath, target, explicitImportFileExtension, }: {
+    importPath: string;
+    target: Target;
+    explicitImportFileExtension: boolean;
+}) => string;
 export declare const renameImport: ({ importPath, target, explicitImportFileExtension, }: {
     importPath: string;
     target: Target;
@@ -38,4 +43,8 @@ type Args = {
  *  - in `cli` to render filenames for generated components, and import statements within plain `.js`/`.ts` files.
  */
 export declare const getComponentFileExtensionForTarget: (args: Args) => string;
+export declare const getFileExtensionForTarget: ({ target, explicitImportFileExtension, }: {
+    target: Target;
+    explicitImportFileExtension: boolean;
+}) => string;
 export {};
