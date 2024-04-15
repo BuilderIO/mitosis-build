@@ -229,7 +229,7 @@ var blockToSvelte = function (_a) {
     var isComponent = Boolean(tagName[0] && (0, is_upper_case_1.isUpperCase)(tagName[0]));
     if ((((_c = json.bindings.style) === null || _c === void 0 ? void 0 : _c.code) || json.properties.style) && !isComponent) {
         var useValue = ((_d = json.bindings.style) === null || _d === void 0 ? void 0 : _d.code) || json.properties.style;
-        str += "use:mitosis_styling={".concat(useValue, "}");
+        str += "style={stringifyStyles(".concat(useValue, ")}");
         delete json.bindings.style;
         delete json.properties.style;
     }
