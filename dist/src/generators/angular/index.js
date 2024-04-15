@@ -28,39 +28,40 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.componentToAngular = exports.blockToAngular = void 0;
+var html_tags_1 = require("../../constants/html_tags");
+var dedent_1 = require("../../helpers/dedent");
+var fast_clone_1 = require("../../helpers/fast-clone");
+var get_components_used_1 = require("../../helpers/get-components-used");
+var get_custom_imports_1 = require("../../helpers/get-custom-imports");
+var get_prop_functions_1 = require("../../helpers/get-prop-functions");
+var get_props_1 = require("../../helpers/get-props");
+var get_props_ref_1 = require("../../helpers/get-props-ref");
+var get_refs_1 = require("../../helpers/get-refs");
+var get_state_object_string_1 = require("../../helpers/get-state-object-string");
+var indent_1 = require("../../helpers/indent");
+var is_mitosis_node_1 = require("../../helpers/is-mitosis-node");
+var is_upper_case_1 = require("../../helpers/is-upper-case");
+var map_refs_1 = require("../../helpers/map-refs");
+var merge_options_1 = require("../../helpers/merge-options");
+var process_code_1 = require("../../helpers/plugins/process-code");
+var remove_surrounding_block_1 = require("../../helpers/remove-surrounding-block");
+var render_imports_1 = require("../../helpers/render-imports");
+var replace_identifiers_1 = require("../../helpers/replace-identifiers");
+var slots_1 = require("../../helpers/slots");
+var strip_meta_properties_1 = require("../../helpers/strip-meta-properties");
+var strip_state_and_props_refs_1 = require("../../helpers/strip-state-and-props-refs");
+var collect_css_1 = require("../../helpers/styles/collect-css");
+var helpers_1 = require("../../helpers/styles/helpers");
+var plugins_1 = require("../../modules/plugins");
+var mitosis_node_1 = require("../../types/mitosis-node");
 var function_1 = require("fp-ts/lib/function");
 var lodash_1 = require("lodash");
 var standalone_1 = require("prettier/standalone");
-var html_tags_1 = require("../constants/html_tags");
-var dedent_1 = require("../helpers/dedent");
-var fast_clone_1 = require("../helpers/fast-clone");
-var get_components_used_1 = require("../helpers/get-components-used");
-var get_custom_imports_1 = require("../helpers/get-custom-imports");
-var get_prop_functions_1 = require("../helpers/get-prop-functions");
-var get_props_1 = require("../helpers/get-props");
-var get_props_ref_1 = require("../helpers/get-props-ref");
-var get_refs_1 = require("../helpers/get-refs");
-var get_state_object_string_1 = require("../helpers/get-state-object-string");
-var indent_1 = require("../helpers/indent");
-var is_children_1 = __importDefault(require("../helpers/is-children"));
-var is_upper_case_1 = require("../helpers/is-upper-case");
-var map_refs_1 = require("../helpers/map-refs");
-var remove_surrounding_block_1 = require("../helpers/remove-surrounding-block");
-var render_imports_1 = require("../helpers/render-imports");
-var replace_identifiers_1 = require("../helpers/replace-identifiers");
-var slots_1 = require("../helpers/slots");
-var strip_meta_properties_1 = require("../helpers/strip-meta-properties");
-var strip_state_and_props_refs_1 = require("../helpers/strip-state-and-props-refs");
-var collect_css_1 = require("../helpers/styles/collect-css");
-var plugins_1 = require("../modules/plugins");
-var mitosis_node_1 = require("../types/mitosis-node");
-var helpers_1 = require("../helpers/styles/helpers");
 var traverse_1 = __importDefault(require("traverse"));
-var __1 = require("..");
-var merge_options_1 = require("../helpers/merge-options");
-var process_code_1 = require("../helpers/plugins/process-code");
-var on_mount_1 = require("./helpers/on-mount");
-var BUILT_IN_COMPONENTS = new Set(['Show', 'For', 'Fragment', 'Slot']);
+var is_children_1 = __importDefault(require("../../helpers/is-children"));
+var on_mount_1 = require("../helpers/on-mount");
+var helpers_2 = require("./helpers");
+var types_1 = require("./types");
 var mappers = {
     Fragment: function (json, options) {
         return "<ng-container>".concat(json.children
@@ -90,7 +91,7 @@ var mappers = {
 var preprocessCssAsJson = function (json) {
     (0, traverse_1.default)(json).forEach(function (item) {
         var _a, _b;
-        if ((0, __1.isMitosisNode)(item)) {
+        if ((0, is_mitosis_node_1.isMitosisNode)(item)) {
             if ((0, helpers_1.nodeHasCss)(item)) {
                 if ((_b = (_a = item.bindings.css) === null || _a === void 0 ? void 0 : _a.code) === null || _b === void 0 ? void 0 : _b.includes('&quot;')) {
                     item.bindings.css.code = item.bindings.css.code.replace(/&quot;/g, '"');
@@ -107,12 +108,160 @@ var BINDINGS_MAPPER = {
     innerHTML: 'innerHTML',
     style: 'ngStyle',
 };
+var handleObjectBindings = function (code) {
+    var objectCode = code.replace(/^{/, '').replace(/}$/, '');
+    objectCode = objectCode.replace(/\/\/.*\n/g, '');
+    var spreadOutObjects = objectCode
+        .split(',')
+        .filter(function (item) { return item.includes('...'); })
+        .map(function (item) { return item.replace('...', '').trim(); });
+    var objectKeys = objectCode
+        .split(',')
+        .filter(function (item) { return !item.includes('...'); })
+        .map(function (item) { return item.trim(); });
+    var otherObjs = objectKeys.map(function (item) {
+        return "{ ".concat(item, " }");
+    });
+    var temp = "".concat(spreadOutObjects.join(', '), ", ").concat(otherObjs.join(', '));
+    if (temp.endsWith(', ')) {
+        temp = temp.slice(0, -2);
+    }
+    if (temp.startsWith(', ')) {
+        temp = temp.slice(2);
+    }
+    // handle template strings
+    if (temp.includes('`')) {
+        // template str
+        var str = temp.match(/`[^`]*`/g);
+        var values = str && str[0].match(/\${[^}]*}/g);
+        var forValues = values === null || values === void 0 ? void 0 : values.map(function (val) { return val.slice(2, -1); }).join(' + ');
+        if (str && forValues) {
+            temp = temp.replace(str[0], forValues);
+        }
+    }
+    return temp;
+};
+var processCodeBlockInTemplate = function (code) {
+    // contains helper calls as Angular doesn't support JS expressions in templates
+    if (code.startsWith('{')) {
+        // Objects cannot be spread out directly in Angular so we need to use `useObjectWrapper`
+        return "\"useObjectWrapper(".concat(handleObjectBindings(code), ")\" ");
+    }
+    else if (code.startsWith('Object.values')) {
+        var stripped = code.replace('Object.values', '');
+        return "\"useObjectDotValues".concat(stripped, "\" ");
+    }
+    else if (code.includes('JSON.stringify')) {
+        var obj = code.match(/JSON.stringify\([^)]*\)/g);
+        return "\"useJsonStringify(".concat(obj, ")\" ");
+    }
+    else if (code.includes(' as ')) {
+        var asIndex = code.indexOf('as');
+        var asCode = code.slice(0, asIndex - 1);
+        return "\"$any".concat(asCode, ")\"");
+    }
+    else {
+        return "\"".concat(code, "\" ");
+    }
+};
+var processEventBinding = function (key, code, nodeName, customArg) {
+    var event = key.replace('on', '');
+    event = event.charAt(0).toLowerCase() + event.slice(1);
+    if (event === 'change' && nodeName === 'input' /* todo: other tags */) {
+        event = 'input';
+    }
+    // TODO: proper babel transform to replace. Util for this
+    var eventName = customArg;
+    var regexp = new RegExp('(^|\\n|\\r| |;|\\(|\\[|!)' + eventName + '(\\?\\.|\\.|\\(| |;|\\)|$)', 'g');
+    var replacer = '$1$event$2';
+    var finalValue = (0, remove_surrounding_block_1.removeSurroundingBlock)(code.replace(regexp, replacer));
+    return " (".concat(event, ")=\"").concat(finalValue, "\" ");
+};
+var stringifyBinding = function (node, options, blockOptions) {
+    return function (_a) {
+        var key = _a[0], binding = _a[1];
+        if ((binding === null || binding === void 0 ? void 0 : binding.type) === 'spread') {
+            return;
+        }
+        if (key.startsWith('$')) {
+            return;
+        }
+        if (key === 'key') {
+            return;
+        }
+        if (key === 'attributes') {
+            // TODO: contains ternary operator which needs to be handled
+            return;
+        }
+        var keyToUse = BINDINGS_MAPPER[key] || key;
+        var _b = binding, code = _b.code, _c = _b.arguments, cusArgs = _c === void 0 ? ['event'] : _c;
+        // TODO: proper babel transform to replace. Util for this
+        if (keyToUse.startsWith('on')) {
+            return processEventBinding(keyToUse, code, node.name, cusArgs[0]);
+        }
+        else if (keyToUse === 'class') {
+            return " [class]=\"".concat(code, "\" ");
+        }
+        else if (keyToUse === 'ref') {
+            return " #".concat(code, " ");
+        }
+        else if ((html_tags_1.VALID_HTML_TAGS.includes(node.name.trim()) || keyToUse.includes('-')) &&
+            !blockOptions.nativeAttributes.includes(keyToUse) &&
+            !Object.values(BINDINGS_MAPPER).includes(keyToUse)) {
+            // standard html elements need the attr to satisfy the compiler in many cases: eg: svg elements and [fill]
+            return " [attr.".concat(keyToUse, "]=\"").concat(code, "\" ");
+        }
+        else {
+            return "[".concat(keyToUse, "]=").concat(processCodeBlockInTemplate(code));
+        }
+    };
+};
+var handleNgOutletBindings = function (node) {
+    var allProps = '';
+    var events = '';
+    for (var key in node.bindings) {
+        if (key.startsWith('"')) {
+            continue;
+        }
+        if (key.startsWith('$')) {
+            continue;
+        }
+        var _a = node.bindings[key], code = _a.code, _b = _a.arguments, cusArgs = _b === void 0 ? ['event'] : _b;
+        if (code.includes('?')) {
+            // TODO handle ternary
+            continue;
+        }
+        else if (key.includes('props.')) {
+            allProps += "".concat(key.replace('props.', ''), ": ").concat(code, ", ");
+        }
+        else if (key.includes('.')) {
+            // TODO: handle arbitrary spread props
+            allProps += "".concat(key.split('.')[1], ": ").concat(code, ",");
+        }
+        else if (key.startsWith('on')) {
+            events += processEventBinding(key, code, node.name, cusArgs[0]);
+        }
+        else {
+            var codeToUse = processCodeBlockInTemplate(code);
+            var keyToUse = key.includes('-') ? "'".concat(key, "'") : key;
+            allProps += "".concat(keyToUse, ": ").concat(codeToUse, ", ");
+        }
+    }
+    if (allProps.endsWith(', ')) {
+        allProps = allProps.slice(0, -2);
+    }
+    if (allProps.startsWith(', ')) {
+        allProps = allProps.slice(2);
+    }
+    return [allProps, events];
+};
 var blockToAngular = function (json, options, blockOptions) {
-    var _a, _b, _c, _d;
+    var _a, _b, _c;
     if (options === void 0) { options = {}; }
-    if (blockOptions === void 0) { blockOptions = {}; }
+    if (blockOptions === void 0) { blockOptions = {
+        nativeAttributes: [],
+    }; }
     var childComponents = (blockOptions === null || blockOptions === void 0 ? void 0 : blockOptions.childComponents) || [];
-    var isValidHtmlTag = html_tags_1.VALID_HTML_TAGS.includes(json.name.trim());
     if (mappers[json.name]) {
         return mappers[json.name](json, options);
     }
@@ -128,10 +277,14 @@ var blockToAngular = function (json, options, blockOptions) {
             var selector = (0, function_1.pipe)(textCode, slots_1.stripSlotPrefix, lodash_1.kebabCase);
             return "<ng-content select=\"[".concat(selector, "]\"></ng-content>");
         }
+        if (textCode.includes('JSON.stringify')) {
+            var obj = textCode.replace('JSON.stringify', '');
+            obj = obj.replace(/\(.*?\)/, '');
+            return "{{useJsonStringify".concat(obj, "}}");
+        }
         return "{{".concat(textCode, "}}");
     }
     var str = '';
-    var needsToRenderSlots = [];
     if ((0, mitosis_node_1.checkIsForNode)(json)) {
         var indexName = json.scope.indexName;
         str += "<ng-container *ngFor=\"let ".concat(json.scope.forName, " of ").concat((_b = json.bindings.each) === null || _b === void 0 ? void 0 : _b.code).concat(indexName ? "; let ".concat(indexName, " = index") : '', "\">");
@@ -139,8 +292,21 @@ var blockToAngular = function (json, options, blockOptions) {
         str += "</ng-container>";
     }
     else if (json.name === 'Show') {
-        str += "<ng-container *ngIf=\"".concat((_c = json.bindings.when) === null || _c === void 0 ? void 0 : _c.code, "\">");
+        var condition = (_c = json.bindings.when) === null || _c === void 0 ? void 0 : _c.code;
+        if (condition === null || condition === void 0 ? void 0 : condition.includes('typeof')) {
+            var wordAfterTypeof = condition.split('typeof')[1].trim();
+            condition = condition.replace("typeof ".concat(wordAfterTypeof), "useTypeOf(".concat(wordAfterTypeof, ")"));
+        }
+        str += "<ng-container *ngIf=\"".concat(condition, "\">");
         str += json.children.map(function (item) { return (0, exports.blockToAngular)(item, options, blockOptions); }).join('\n');
+        str += "</ng-container>";
+    }
+    else if (json.name.includes('.')) {
+        var elSelector = childComponents.find(function (impName) { return impName === json.name; })
+            ? (0, lodash_1.kebabCase)(json.name)
+            : json.name;
+        var _d = handleNgOutletBindings(json), allProps = _d[0], events = _d[1];
+        str += "<ng-container ".concat(events, " *ngComponentOutlet=\"\n      ").concat(elSelector.replace('state.', '').replace('props.', ''), ";\n      inputs: { ").concat(allProps, " };\n      content: myContent;\n      \">  ");
         str += "</ng-container>";
     }
     else {
@@ -161,56 +327,14 @@ var blockToAngular = function (json, options, blockOptions) {
             var value = json.properties[key];
             str += " ".concat(key, "=\"").concat(value, "\" ");
         }
-        for (var key in json.bindings) {
-            if (((_d = json.bindings[key]) === null || _d === void 0 ? void 0 : _d.type) === 'spread') {
-                continue;
-            }
-            if (key.startsWith('$')) {
-                continue;
-            }
-            var _e = json.bindings[key], code = _e.code, _f = _e.arguments, cusArgs = _f === void 0 ? ['event'] : _f;
-            // TODO: proper babel transform to replace. Util for this
-            if (key.startsWith('on')) {
-                var event_1 = key.replace('on', '');
-                event_1 = event_1.charAt(0).toLowerCase() + event_1.slice(1);
-                if (event_1 === 'change' && json.name === 'input' /* todo: other tags */) {
-                    event_1 = 'input';
-                }
-                // TODO: proper babel transform to replace. Util for this
-                var eventName = cusArgs[0];
-                var regexp = new RegExp('(^|\\n|\\r| |;|\\(|\\[|!)' + eventName + '(\\?\\.|\\.|\\(| |;|\\)|$)', 'g');
-                var replacer = '$1$event$2';
-                var finalValue = (0, remove_surrounding_block_1.removeSurroundingBlock)(code.replace(regexp, replacer));
-                str += " (".concat(event_1, ")=\"").concat(finalValue, "\" ");
-            }
-            else if (key === 'class') {
-                str += " [class]=\"".concat(code, "\" ");
-            }
-            else if (key === 'ref') {
-                str += " #".concat(code, " ");
-            }
-            else if ((0, slots_1.isSlotProperty)(key)) {
-                var lowercaseKey = (0, function_1.pipe)(key, slots_1.stripSlotPrefix, function (x) { return x.toLowerCase(); });
-                needsToRenderSlots.push("".concat(code.replace(/(\/\>)|\>/, " ".concat(lowercaseKey, ">"))));
-            }
-            else if (BINDINGS_MAPPER[key]) {
-                str += " [".concat(BINDINGS_MAPPER[key], "]=\"").concat(code, "\"  ");
-            }
-            else if (isValidHtmlTag || key.includes('-')) {
-                // standard html elements need the attr to satisfy the compiler in many cases: eg: svg elements and [fill]
-                str += " [attr.".concat(key, "]=\"").concat(code, "\" ");
-            }
-            else {
-                str += "[".concat(key, "]=\"").concat(code, "\" ");
-            }
-        }
+        var stringifiedBindings = Object.entries(json.bindings)
+            .map(stringifyBinding(json, options, blockOptions))
+            .join('');
+        str += stringifiedBindings;
         if (html_tags_1.SELF_CLOSING_HTML_TAGS.has(json.name)) {
             return str + ' />';
         }
         str += '>';
-        if (needsToRenderSlots.length > 0) {
-            str += needsToRenderSlots.map(function (el) { return el; }).join('');
-        }
         if (json.children) {
             str += json.children.map(function (item) { return (0, exports.blockToAngular)(item, options, blockOptions); }).join('\n');
         }
@@ -219,6 +343,23 @@ var blockToAngular = function (json, options, blockOptions) {
     return str;
 };
 exports.blockToAngular = blockToAngular;
+var traverseToGetAllDynamicComponents = function (json, options, blockOptions) {
+    var components = new Set();
+    var dynamicTemplate = '';
+    (0, traverse_1.default)(json).forEach(function (item) {
+        if ((0, is_mitosis_node_1.isMitosisNode)(item) && item.name.includes('.') && item.name.split('.').length === 2) {
+            var children = item.children
+                .map(function (child) { return (0, exports.blockToAngular)(child, options, blockOptions); })
+                .join('\n');
+            dynamicTemplate = "<ng-template #".concat(item.name.split('.')[1].toLowerCase() + 'Template', ">").concat(children, "</ng-template>");
+            components.add(item.name);
+        }
+    });
+    return {
+        components: components,
+        dynamicTemplate: dynamicTemplate,
+    };
+};
 var processAngularCode = function (_a) {
     var contextVars = _a.contextVars, outputVars = _a.outputVars, domRefs = _a.domRefs, stateVars = _a.stateVars, replaceWith = _a.replaceWith;
     return function (code) {
@@ -230,25 +371,23 @@ var processAngularCode = function (_a) {
         }), function (newCode) { return (0, strip_state_and_props_refs_1.stripStateAndPropsRefs)(newCode, { replaceWith: replaceWith }); });
     };
 };
-var DEFAULT_OPTIONS = {
-    preserveImports: false,
-    preserveFileExtensions: false,
-};
 var componentToAngular = function (userOptions) {
     if (userOptions === void 0) { userOptions = {}; }
     return function (_a) {
-        var _b, _c, _d, _e, _f, _g, _h, _j;
+        var _b, _c, _d, _e, _f, _g, _h, _j, _k;
         var _component = _a.component;
         // Make a copy we can safely mutate, similar to babel's toolchain
         var json = (0, fast_clone_1.fastClone)(_component);
-        var contextVars = Object.keys(((_b = json === null || json === void 0 ? void 0 : json.context) === null || _b === void 0 ? void 0 : _b.get) || {});
-        var metaOutputVars = ((_d = (_c = json.meta) === null || _c === void 0 ? void 0 : _c.useMetadata) === null || _d === void 0 ? void 0 : _d.outputs) || [];
+        var useMetadata = (_b = json.meta) === null || _b === void 0 ? void 0 : _b.useMetadata;
+        var contextVars = Object.keys(((_c = json === null || json === void 0 ? void 0 : json.context) === null || _c === void 0 ? void 0 : _c.get) || {});
+        // TODO: Why is 'outputs' used here and shouldn't it be typed in packages/core/src/types/metadata.ts
+        var metaOutputVars = (useMetadata === null || useMetadata === void 0 ? void 0 : useMetadata.outputs) || [];
         var outputVars = (0, lodash_1.uniq)(__spreadArray(__spreadArray([], metaOutputVars, true), (0, get_prop_functions_1.getPropFunctions)(json), true));
         var stateVars = Object.keys((json === null || json === void 0 ? void 0 : json.state) || {});
         var options = (0, merge_options_1.initializeOptions)({
             target: 'angular',
             component: _component,
-            defaults: DEFAULT_OPTIONS,
+            defaults: types_1.DEFAULT_ANGULAR_OPTIONS,
             userOptions: userOptions,
         });
         options.plugins = __spreadArray(__spreadArray([], (options.plugins || []), true), [
@@ -299,7 +438,7 @@ var componentToAngular = function (userOptions) {
         if (options.plugins) {
             json = (0, plugins_1.runPreJsonPlugins)({ json: json, plugins: options.plugins });
         }
-        var _k = (0, get_props_ref_1.getPropsRef)(json, true), forwardProp = _k[0], hasPropRef = _k[1];
+        var _l = (0, get_props_ref_1.getPropsRef)(json, true), forwardProp = _l[0], hasPropRef = _l[1];
         var childComponents = [];
         var propsTypeRef = json.propsTypeRef !== 'any' ? json.propsTypeRef : undefined;
         json.imports.forEach(function (_a) {
@@ -311,7 +450,7 @@ var componentToAngular = function (userOptions) {
             });
         });
         var customImports = (0, get_custom_imports_1.getCustomImports)(json);
-        var _l = json.exports, localExports = _l === void 0 ? {} : _l;
+        var _m = json.exports, localExports = _m === void 0 ? {} : _m;
         var localExportVars = Object.keys(localExports)
             .filter(function (key) { return localExports[key].usedInLocal; })
             .map(function (key) { return "".concat(key, " = ").concat(key, ";"); });
@@ -326,7 +465,7 @@ var componentToAngular = function (userOptions) {
             }
             return "public ".concat(variableName, " : ").concat(variableType);
         });
-        var hasConstructor = Boolean(injectables.length || ((_e = json.hooks) === null || _e === void 0 ? void 0 : _e.onInit));
+        var hasConstructor = Boolean(injectables.length || ((_d = json.hooks) === null || _d === void 0 ? void 0 : _d.onInit));
         var props = (0, get_props_1.getProps)(json);
         // prevent jsx props from showing up as @Input
         if (hasPropRef) {
@@ -347,7 +486,7 @@ var componentToAngular = function (userOptions) {
         var domRefs = (0, get_refs_1.getRefs)(json);
         var jsRefs = Object.keys(json.refs).filter(function (ref) { return !domRefs.has(ref); });
         var componentsUsed = Array.from((0, get_components_used_1.getComponentsUsed)(json)).filter(function (item) {
-            return item.length && (0, is_upper_case_1.isUpperCase)(item[0]) && !BUILT_IN_COMPONENTS.has(item);
+            return item.length && (0, is_upper_case_1.isUpperCase)(item[0]) && !types_1.BUILT_IN_COMPONENTS.has(item);
         });
         (0, map_refs_1.mapRefs)(json, function (refName) {
             var isDomRef = domRefs.has(refName);
@@ -361,8 +500,19 @@ var componentToAngular = function (userOptions) {
         if (options.prettier !== false) {
             css = tryFormat(css, 'css');
         }
+        var helperFunctions = new Set();
         var template = json.children
-            .map(function (item) { return (0, exports.blockToAngular)(item, options, { childComponents: childComponents }); })
+            .map(function (item) {
+            var _a, _b;
+            var tmpl = (0, exports.blockToAngular)(item, options, {
+                childComponents: childComponents,
+                nativeAttributes: (_b = (_a = useMetadata === null || useMetadata === void 0 ? void 0 : useMetadata.angular) === null || _a === void 0 ? void 0 : _a.nativeAttributes) !== null && _b !== void 0 ? _b : [],
+            });
+            (0, helpers_2.getAppropriateTemplateFunctionKeys)(tmpl).forEach(function (key) {
+                return helperFunctions.add(helpers_2.HELPER_FUNCTIONS[key]);
+            });
+            return tmpl;
+        })
             .join('\n');
         if (options.prettier !== false) {
             template = tryFormat(template, 'html');
@@ -378,8 +528,12 @@ var componentToAngular = function (userOptions) {
                 stateVars: stateVars,
             }),
         });
+        var _o = traverseToGetAllDynamicComponents(json, options, {
+            childComponents: childComponents,
+            nativeAttributes: (_f = (_e = useMetadata === null || useMetadata === void 0 ? void 0 : useMetadata.angular) === null || _e === void 0 ? void 0 : _e.nativeAttributes) !== null && _f !== void 0 ? _f : [],
+        }), dynamicComponents = _o.components, dynamicTemplate = _o.dynamicTemplate;
         // Preparing built in component metadata parameters
-        var componentMetadata = __assign(__assign({ selector: "'".concat((0, lodash_1.kebabCase)(json.name || 'my-component'), ", ").concat(json.name, "'"), template: "`\n        ".concat((0, indent_1.indent)(template, 8).replace(/`/g, '\\`').replace(/\$\{/g, '\\${'), "\n        `") }, (css.length
+        var componentMetadata = __assign(__assign({ selector: "'".concat((0, lodash_1.kebabCase)(json.name || 'my-component'), ", ").concat(json.name, "'"), template: "`\n        ".concat((0, indent_1.indent)(dynamicTemplate, 8).replace(/`/g, '\\`').replace(/\$\{/g, '\\${'), "\n        ").concat((0, indent_1.indent)(template, 8).replace(/`/g, '\\`').replace(/\$\{/g, '\\${'), "\n        `") }, (css.length
             ? {
                 styles: "[`".concat((0, indent_1.indent)(css, 8), "`]"),
             }
@@ -410,7 +564,7 @@ var componentToAngular = function (userOptions) {
                 .join(',');
             return "const defaultProps = {".concat(defalutPropsString, "};\n");
         };
-        var str = (0, dedent_1.dedent)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    import { ", " ", " Component ", "", " } from '@angular/core';\n    ", "\n\n    ", "\n    ", "\n    ", "\n\n    @Component({\n      ", "\n    })\n    export class ", " {\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n    }\n  "], ["\n    import { ", " ", " Component ", "", " } from '@angular/core';\n    ", "\n\n    ", "\n    ", "\n    ", "\n\n    @Component({\n      ", "\n    })\n    export class ", " {\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n    }\n  "])), outputs.length ? 'Output, EventEmitter, \n' : '', ((_f = options === null || options === void 0 ? void 0 : options.experimental) === null || _f === void 0 ? void 0 : _f.inject) ? 'Inject, forwardRef,' : '', domRefs.size ? ', ViewChild, ElementRef' : '', props.size ? ', Input' : '', options.standalone ? "import { CommonModule } from '@angular/common';" : '', json.types ? json.types.join('\n') : '', getPropsDefinition({ json: json }), (0, render_imports_1.renderPreComponent)({
+        var str = (0, dedent_1.dedent)(templateObject_1 || (templateObject_1 = __makeTemplateObject(["\n    import { ", " ", " Component ", "", " ", " } from '@angular/core';\n    ", "\n\n    ", "\n    ", "\n    ", "\n\n    @Component({\n      ", "\n    })\n    export default class ", " {\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n      \n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n    }\n  "], ["\n    import { ", " ", " Component ", "", " ", " } from '@angular/core';\n    ", "\n\n    ", "\n    ", "\n    ", "\n\n    @Component({\n      ", "\n    })\n    export default class ", " {\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n      \n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n    }\n  "])), outputs.length ? 'Output, EventEmitter, \n' : '', ((_g = options === null || options === void 0 ? void 0 : options.experimental) === null || _g === void 0 ? void 0 : _g.inject) ? 'Inject, forwardRef,' : '', domRefs.size || dynamicComponents.size ? ', ViewChild, ElementRef' : '', props.size ? ', Input' : '', dynamicComponents.size ? ', ViewContainerRef, TemplateRef' : '', options.standalone ? "import { CommonModule } from '@angular/common';" : '', json.types ? json.types.join('\n') : '', getPropsDefinition({ json: json }), (0, render_imports_1.renderPreComponent)({
             explicitImportFileExtension: options.explicitImportFileExtension,
             component: json,
             target: 'angular',
@@ -427,15 +581,23 @@ var componentToAngular = function (userOptions) {
             .filter(function (item) { return !(0, slots_1.isSlotProperty)(item) && item !== 'children'; })
             .map(function (item) {
             var propType = propsTypeRef ? "".concat(propsTypeRef, "[\"").concat(item, "\"]") : 'any';
-            var propDeclaration = "@Input() ".concat(item, ": ").concat(propType);
+            var propDeclaration = "@Input() ".concat(item, "!: ").concat(propType);
             if (json.defaultProps && json.defaultProps.hasOwnProperty(item)) {
                 propDeclaration += " = defaultProps[\"".concat(item, "\"]");
             }
             return propDeclaration;
         })
             .join('\n'), outputs.join('\n'), Array.from(domRefs)
-            .map(function (refName) { return "@ViewChild('".concat(refName, "') ").concat(refName, ": ElementRef"); })
-            .join('\n'), dataString, jsRefs
+            .map(function (refName) { return "@ViewChild('".concat(refName, "') ").concat(refName, "!: ElementRef"); })
+            .join('\n'), Array.from(dynamicComponents)
+            .map(function (component) {
+            return "@ViewChild('".concat(component
+                .split('.')[1]
+                .toLowerCase(), "Template', { static: true }) ").concat(component
+                .split('.')[1]
+                .toLowerCase(), "TemplateRef!: TemplateRef<any>");
+        })
+            .join('\n'), dynamicComponents.size ? 'myContent?: any[][];' : '', dataString, helperFunctions.size ? Array.from(helperFunctions).join('\n') : '', jsRefs
             .map(function (ref) {
             var argument = json.refs[ref].argument;
             var typeParameter = json.refs[ref].typeParameter;
@@ -449,13 +611,21 @@ var componentToAngular = function (userOptions) {
                 })(argument))
                 : '', ";");
         })
-            .join('\n'), !hasConstructor
+            .join('\n'), !hasConstructor && !dynamicComponents.size
             ? ''
-            : "constructor(\n".concat(injectables.join(',\n'), ") {\n            ").concat(!((_g = json.hooks) === null || _g === void 0 ? void 0 : _g.onInit)
+            : "constructor(\n".concat(injectables.join(',\n')).concat(dynamicComponents.size ? '\nprivate vcRef: ViewContainerRef,\n' : '', ") {\n            ").concat(!((_h = json.hooks) === null || _h === void 0 ? void 0 : _h.onInit)
                 ? ''
-                : "\n              ".concat((_h = json.hooks.onInit) === null || _h === void 0 ? void 0 : _h.code, "\n              "), "\n          }\n          "), !json.hooks.onMount.length
+                : "\n              ".concat((_j = json.hooks.onInit) === null || _j === void 0 ? void 0 : _j.code, "\n              "), "\n          }\n          "), !json.hooks.onMount.length && !dynamicComponents.size
             ? ''
-            : "ngOnInit() {\n              ".concat((0, on_mount_1.stringifySingleScopeOnMount)(json), "\n            }"), !((_j = json.hooks.onUpdate) === null || _j === void 0 ? void 0 : _j.length)
+            : "ngOnInit() {\n              ".concat((0, on_mount_1.stringifySingleScopeOnMount)(json), "\n              ").concat(dynamicComponents.size
+                ? "\n              this.myContent = [".concat(Array.from(dynamicComponents)
+                    .map(function (component) {
+                    return "this.vcRef.createEmbeddedView(this.".concat(component
+                        .split('.')[1]
+                        .toLowerCase(), "TemplateRef).rootNodes");
+                })
+                    .join(', '), "];\n              ")
+                : '', "\n            }"), !((_k = json.hooks.onUpdate) === null || _k === void 0 ? void 0 : _k.length)
             ? ''
             : "ngAfterContentChecked() {\n              ".concat(json.hooks.onUpdate.reduce(function (code, hook) {
                 code += hook.code;

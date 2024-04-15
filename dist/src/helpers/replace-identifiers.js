@@ -122,10 +122,11 @@ var replaceIdentifiers = function (_a) {
                 !core_1.types.isMemberExpression(path.parent) &&
                     !core_1.types.isOptionalMemberExpression(path.parent) &&
                     // function declaration identifiers shouldn't be transformed
-                    !core_1.types.isFunctionDeclaration(path.parent)
-                // variable declaration identifiers shouldn't be transformed
-                // !(types.isVariableDeclarator(path.parent) && path.parent.id === path.node)
-                ) {
+                    !core_1.types.isFunctionDeclaration(path.parent) &&
+                    // variable declaration identifiers shouldn't be transformed
+                    // !(types.isVariableDeclarator(path.parent) && path.parent.id === path.node)
+                    // object -> { detail: { state: 'something' } } shouldn't be transformed to { detail: { this: 'something' } }
+                    !core_1.types.isObjectProperty(path.parent)) {
                     _replaceIdentifiers(path, { from: from, to: to });
                 }
             },
