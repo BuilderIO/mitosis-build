@@ -269,8 +269,8 @@ var componentToSvelte = function (userProvidedOptions) {
         if (usesWritable) {
             svelteStoreImports.push('writable');
         }
-        str += (0, dedent_1.dedent)(templateObject_2 || (templateObject_2 = __makeTemplateObject(["\n      <script ", ">\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n      ", "\n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n    </script>\n\n    ", "\n\n    ", "\n  "], ["\n      <script ", ">\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n      ", "\n      "
-            // https://svelte.dev/repl/bd9b56891f04414982517bbd10c52c82?version=3.31.0
+        str += (0, dedent_1.dedent)(templateObject_3 || (templateObject_3 = __makeTemplateObject(["\n      <script ", ">\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n      ", "\n      ", "\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n\n      ", "\n    </script>\n\n    ", "\n\n    ", "\n  "], ["\n      <script ", ">\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n      ", "\n      "
+            // https://github.com/sveltejs/svelte/issues/7311
             , "\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n      ", "\n\n      ", "\n\n      ", "\n\n      "
             // make sure this is after all other state/code is initialized
             , "\n\n      ", "\n    </script>\n\n    ", "\n\n    ", "\n  "])), tsLangAttribute, !svelteImports.length ? '' : "import { ".concat(svelteImports.sort().join(', '), " } from 'svelte'"), !svelteStoreImports.length
@@ -299,10 +299,9 @@ var componentToSvelte = function (userProvidedOptions) {
             return propDeclaration;
         })
             .join('\n'), 
-        // https://svelte.dev/repl/bd9b56891f04414982517bbd10c52c82?version=3.31.0
+        // https://github.com/sveltejs/svelte/issues/7311
         (0, helpers_1.hasStyle)(json)
-            ? "\n        function mitosis_styling (node, vars) {\n          Object.entries(vars || {}).forEach(([ p, v ]) => {\n            if (p.startsWith('--')) {\n              node.style.setProperty(p, v);\n            } else {\n              node.style[p] = v;\n            }\n          })\n        }\n      "
-            : '', getContextCode(json), functionsString.length < 4 ? '' : functionsString, getterString.length < 4 ? '' : getterString, refs.map(function (ref) { return "let ".concat(ref); }).join('\n'), options.stateType === 'proxies'
+            ? (0, dedent_1.dedent)(templateObject_2 || (templateObject_2 = __makeTemplateObject(["\n        \tfunction stringifyStyles(stylesObj) {\n            let styles = '';\n            for (let key in stylesObj) {\n              const dashedKey = key.replace(/[A-Z]/g, function(match) {\n                return '-' + match.toLowerCase();\n              });\n              styles += dashedKey + \":\" + stylesObj[key] + \";\";\n            }\n            return styles;\n          }\n      "], ["\n        \tfunction stringifyStyles(stylesObj) {\n            let styles = '';\n            for (let key in stylesObj) {\n              const dashedKey = key.replace(/[A-Z]/g, function(match) {\n                return '-' + match.toLowerCase();\n              });\n              styles += dashedKey + \":\" + stylesObj[key] + \";\";\n            }\n            return styles;\n          }\n      "]))) : '', getContextCode(json), functionsString.length < 4 ? '' : functionsString, getterString.length < 4 ? '' : getterString, refs.map(function (ref) { return "let ".concat(ref); }).join('\n'), options.stateType === 'proxies'
             ? dataString.length < 4
                 ? ''
                 : "let state = onChange(".concat(dataString, ", () => state = state)")
@@ -374,4 +373,4 @@ var componentToSvelte = function (userProvidedOptions) {
     };
 };
 exports.componentToSvelte = componentToSvelte;
-var templateObject_1, templateObject_2;
+var templateObject_1, templateObject_2, templateObject_3;
