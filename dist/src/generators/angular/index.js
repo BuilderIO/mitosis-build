@@ -145,23 +145,23 @@ var processCodeBlockInTemplate = function (code) {
     // contains helper calls as Angular doesn't support JS expressions in templates
     if (code.startsWith('{')) {
         // Objects cannot be spread out directly in Angular so we need to use `useObjectWrapper`
-        return "\"useObjectWrapper(".concat(handleObjectBindings(code), ")\" ");
+        return "useObjectWrapper(".concat(handleObjectBindings(code), ")");
     }
     else if (code.startsWith('Object.values')) {
         var stripped = code.replace('Object.values', '');
-        return "\"useObjectDotValues".concat(stripped, "\" ");
+        return "useObjectDotValues".concat(stripped);
     }
     else if (code.includes('JSON.stringify')) {
         var obj = code.match(/JSON.stringify\([^)]*\)/g);
-        return "\"useJsonStringify(".concat(obj, ")\" ");
+        return "useJsonStringify(".concat(obj, ")");
     }
     else if (code.includes(' as ')) {
         var asIndex = code.indexOf('as');
         var asCode = code.slice(0, asIndex - 1);
-        return "\"$any".concat(asCode, ")\"");
+        return "$any".concat(asCode, ")");
     }
     else {
-        return "\"".concat(code, "\" ");
+        return "".concat(code);
     }
 };
 var processEventBinding = function (key, code, nodeName, customArg) {
@@ -212,7 +212,7 @@ var stringifyBinding = function (node, options, blockOptions) {
             return " [attr.".concat(keyToUse, "]=\"").concat(code, "\" ");
         }
         else {
-            return "[".concat(keyToUse, "]=").concat(processCodeBlockInTemplate(code));
+            return "[".concat(keyToUse, "]=\"").concat(processCodeBlockInTemplate(code), "\"");
         }
     };
 };
